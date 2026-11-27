@@ -521,6 +521,221 @@
         "frontend/src/components/ViralClipStudio.js"
       ],
       "reason": "21 October source audit: document the actual optional Composite replacement and manual style workflow, expose in-product guides, retain model availability/source-specific fringe limits and unchanged readiness."
+    },
+    {
+      "feature_id": "studio.captions",
+      "documentation_impact": [
+        "FEATURE",
+        "READINESS"
+      ],
+      "status_before": "BROKEN",
+      "status_after": "BROKEN",
+      "source_paths": [
+        "docs/VERIFIED-FUNCTIONALITY-AND-RELEASE-STATUS.md",
+        "reports/studio-feature-documentation-20261122/retained-local-proofs.json",
+        "reports/studio-render-throughput-20261122/release-verification.json",
+        "docs/STUDIO-COMPLETION-CONTRACT.md"
+      ],
+      "reason": "Knowledge1.0.65 distinguishes verified working local/deployed scopes from broader family ratings; retained evidence and release state are reconciled without importing feature implementations or promoting readiness."
+    },
+    {
+      "feature_id": "studio.export",
+      "documentation_impact": [
+        "FEATURE",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "docs/VERIFIED-FUNCTIONALITY-AND-RELEASE-STATUS.md",
+        "reports/studio-feature-documentation-20261122/retained-local-proofs.json",
+        "reports/studio-render-throughput-20261122/release-verification.json",
+        "docs/STUDIO-COMPLETION-CONTRACT.md"
+      ],
+      "reason": "Knowledge1.0.65 distinguishes verified working local/deployed scopes from broader family ratings; retained evidence and release state are reconciled without importing feature implementations or promoting readiness."
+    },
+    {
+      "feature_id": "studio.preview",
+      "documentation_impact": [
+        "FEATURE",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "docs/VERIFIED-FUNCTIONALITY-AND-RELEASE-STATUS.md",
+        "reports/studio-feature-documentation-20261122/retained-local-proofs.json",
+        "reports/studio-render-throughput-20261122/release-verification.json",
+        "docs/STUDIO-COMPLETION-CONTRACT.md"
+      ],
+      "reason": "Knowledge1.0.65 distinguishes verified working local/deployed scopes from broader family ratings; retained evidence and release state are reconciled without importing feature implementations or promoting readiness."
+    },
+    {
+      "feature_id": "studio.compositing",
+      "documentation_impact": [
+        "FEATURE",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "docs/VERIFIED-FUNCTIONALITY-AND-RELEASE-STATUS.md",
+        "reports/studio-feature-documentation-20261122/retained-local-proofs.json",
+        "reports/studio-render-throughput-20261122/release-verification.json",
+        "docs/STUDIO-COMPLETION-CONTRACT.md"
+      ],
+      "reason": "Knowledge1.0.65 distinguishes verified working local/deployed scopes from broader family ratings; retained evidence and release state are reconciled without importing feature implementations or promoting readiness."
+    },
+    {
+      "feature_id": "studio.sfx",
+      "documentation_impact": [
+        "FEATURE",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "docs/VERIFIED-FUNCTIONALITY-AND-RELEASE-STATUS.md",
+        "reports/studio-feature-documentation-20261122/retained-local-proofs.json",
+        "reports/studio-render-throughput-20261122/release-verification.json",
+        "docs/STUDIO-COMPLETION-CONTRACT.md"
+      ],
+      "reason": "Knowledge1.0.65 distinguishes verified working local/deployed scopes from broader family ratings; retained evidence and release state are reconciled without importing feature implementations or promoting readiness."
+    },
+    {
+      "feature_id": "creative.audio",
+      "documentation_impact": [
+        "FEATURE",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "docs/VERIFIED-FUNCTIONALITY-AND-RELEASE-STATUS.md",
+        "reports/studio-feature-documentation-20261122/retained-local-proofs.json",
+        "reports/studio-render-throughput-20261122/release-verification.json",
+        "docs/STUDIO-COMPLETION-CONTRACT.md"
+      ],
+      "reason": "Knowledge1.0.65 distinguishes verified working local/deployed scopes from broader family ratings; retained evidence and release state are reconciled without importing feature implementations or promoting readiness."
+    },
+    {
+      "feature_id": "studio.render",
+      "documentation_impact": [
+        "FEATURE",
+        "READINESS"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "docs/VERIFIED-FUNCTIONALITY-AND-RELEASE-STATUS.md",
+        "reports/studio-feature-documentation-20261122/retained-local-proofs.json",
+        "reports/studio-render-throughput-20261122/release-verification.json",
+        "docs/STUDIO-COMPLETION-CONTRACT.md"
+      ],
+      "reason": "Knowledge1.0.65 distinguishes verified working local/deployed scopes from broader family ratings; retained evidence and release state are reconciled without importing feature implementations or promoting readiness."
+    },
+    {
+      "feature_id": "publishing.publish",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/features/publishing/UnifiedPublisher.js",
+        "frontend/src/utils/tiktokDisclosures.js",
+        "src/utils/tiktokDisclosures.js",
+        "src/services/tiktokService.js",
+        "src/routes/tiktokRoutes.js"
+      ],
+      "reason": "Knowledge 1.0.66 documents independent TikTok disclosures, explicit off choices, requested-label review, required-disclosure limits and automatic provider labels. Regression tests use mocked provider transport; no live publishing or readiness promotion."
+    },
+    {
+      "feature_id": "education.it_foundation",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "DEPENDENCIES",
+        "READINESS"
+      ],
+      "status_before": "UNIMPLEMENTED",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/App.js",
+        "frontend/src/UserDashboardTabs/ViralClipStudioPanel.js",
+        "frontend/src/components/public/PublicFooter.js",
+        "frontend/src/education/EducationPage.js",
+        "frontend/src/education/educationStudioPractice.js",
+        "docs/EDUCATION-ARCHITECTURE.md"
+      ],
+      "reason": "Add an IT-first Education section, unreleased five-lesson curriculum, original practice media, device-local progress and fresh owned Studio practice entry. Preserve closed school/minor onboarding, normal account costs, teacher/beginner review gates and all existing Studio readiness limitations. Local implementation and proof production are not production or educational release approval."
+    },
+    {
+      "feature_id": "education.cat_html",
+      "documentation_impact": [
+        "FEATURE",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/education/CatReviewHub.js",
+        "frontend/src/education/CatLearningPath.js",
+        "frontend/src/education/catCatalog.json",
+        "docs/EDUCATION-ARCHITECTURE.md"
+      ],
+      "reason": "Three additional real HTML/browser and native Studio lessons expand the private CAT review hub to six lessons, twelve videos and twelve PDFs. Exact recipes, exercises, technical checks and scoped cold/source/output recovery are retained. Teacher review, independent recreation, broader coverage and production release remain pending; no readiness promotion."
+    },
+    {
+      "feature_id": "publishing.schedule",
+      "documentation_impact": [
+        "DEPENDENCIES",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "src/server.js",
+        "src/services/publishedVideoRetention.js",
+        "src/services/storageCleanupService.js",
+        "src/services/billingService.js"
+      ],
+      "reason": "Independent production release candidate reduces redundant retention/diagnostic work and hardens verified legacy payments without changing public plans, creative tools, scheduling semantics, customer balances or enabling renewable processing. Existing deletion dependencies and readiness limitations remain."
+    },
+    {
+      "feature_id": "director.find_viral_clips",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/UserDashboardTabs/FindViralClipsPanel.js",
+        "frontend/src/components/ViralScanner.js",
+        "frontend/src/utils/clipSelectionSettings.js",
+        "python_media_worker/viral_moment_selection.py",
+        "src/services/videoClippingService.js"
+      ],
+      "reason": "Add destination fitness scoring and sorting for Reels, Shorts and TikTok while preserving editorial score semantics, title/destination metadata and Studio auto-handoff bounds. Broad media, scale and predictive view claims remain unqualified."
+    },
+    {
+      "feature_id": "studio.crop_reframe",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/ViralClipStudio.js",
+        "frontend/src/components/StudioDirectorCreativePanel.js",
+        "frontend/src/components/studioDirectorWorkspaceProposals.js",
+        "frontend/src/components/studioReframeCommand.js",
+        "python_media_worker/studio_face_tracking.py",
+        "python_media_worker/main_media_server.py"
+      ],
+      "reason": "Harden YuNet cut-aware speaker tracking, opening-shot acquisition, intra-shot two-speaker split keyframes, AI Director review-first vertical proposals and destination duration fit controls without expanding existing Studio readiness claims."
     }
   ]
 }

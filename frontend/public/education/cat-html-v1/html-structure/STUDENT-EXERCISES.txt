@@ -1,0 +1,7 @@
+HTML EXERCISE
+Create a Music Club page. Keep a valid document skeleton. Set the tab title to Music Club, the h1 to Friday Sessions, add two paragraphs and use b and i in one paragraph. Predict and verify what changes when you edit only title. Save it as index.html, not index.html.txt.
+
+CREATIVE EDITING EXERCISE
+Use your own page recording. Move the two editable focus outlines to your actual code and browser heading, then replace the four callouts with concise explanations. Keep the whole 16:9 source visible. Add one original label using Graphics → Label; position it in the reserved footer.
+
+Submit your working files, test table, native editable project and complete movie. Explain one different example without relying on the animation. Do not submit learner names or personal information.

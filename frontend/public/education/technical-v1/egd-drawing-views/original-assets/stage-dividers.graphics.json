@@ -1,0 +1,28 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Stage dividers \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Stage dividers",
+      "name": "Stage dividers",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><line x1=\"56\" y1=\"119\" x2=\"1224\" y2=\"119\" stroke=\"#25334b\" stroke-width=\"1\"/><line x1=\"56\" y1=\"610\" x2=\"1224\" y2=\"610\" stroke=\"#25334b\" stroke-width=\"1\"/></svg>",
+      "x": 50.0,
+      "y": 50.0,
+      "width": 100.0,
+      "height": 100.0,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "contain",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

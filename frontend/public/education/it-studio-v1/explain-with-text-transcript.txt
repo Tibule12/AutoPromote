@@ -1,0 +1,11 @@
+Explain a result with readable text
+
+Original teaching script, read using disclosed standard synthetic narration.
+
+An annotation should explain what the audience can already see. We will label the active bit weights without covering the code.
+
+Open the six-second source interval. In Graphics, add a headline and write: eighteen equals sixteen plus two.
+
+Set the label to start at one second and last four seconds. Use a clear lower margin, white text, and the supported Inter font.
+
+Play the moving result, then compare the export. Wording, placement and timing must agree. Keep the label editable for corrections.

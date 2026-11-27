@@ -1,0 +1,192 @@
+{
+  "date": "2026-11-22",
+  "scope": "Local same-project canonical renderer comparison and bounded paused-source preview repair",
+  "readinessPromotion": false,
+  "productionDeployment": false,
+  "additionalProductionExports": 0,
+  "additionalAppCreditsSpent": 0,
+  "baselineCommit": "506de43b30e6838157f2ff3e057fe982455ffa1c",
+  "benchmark": {
+    "programmeSeconds": 45,
+    "canvas": [
+      720,
+      1280
+    ],
+    "fps": 30,
+    "frames": 1350,
+    "visualOverlays": {
+      "image": 71,
+      "video": 25,
+      "text": 12
+    },
+    "encoder": "h264_nvenc",
+    "preset": "p4",
+    "quality": "master",
+    "crf": 16,
+    "localGpu": "Quadro M1200 4096 MiB",
+    "localLogicalCpus": 8,
+    "localLayerParallelism": 2,
+    "productionGpuDeploymentConfiguration": "RTX PRO 6000, 20 vCPU, 80 GiB, concurrency 1, min 0, max 1; unchanged",
+    "baselineSeconds": 757.970194205991,
+    "optimizedSeconds": 441.46774216598715,
+    "elapsedReductionPercent": 41.7565828391913,
+    "speedRatio": 1.7169322281332218,
+    "baselineVideoSourceIngests": 25,
+    "optimizedVideoSourceIngests": 3,
+    "finalPerformanceTelemetry": {
+      "elapsed_seconds": 441.389,
+      "stages_seconds": {
+        "video_source_preparation": 18.176,
+        "video_layer_rasterization": 146.007,
+        "image_layer_rasterization": 143.84,
+        "final_composite_encode": 65.851
+      },
+      "video_source_count": 3,
+      "video_occurrence_count": 25,
+      "video_preparation_count": 18,
+      "video_raster_count": 25,
+      "image_raster_count": 71
+    },
+    "containerSha256Baseline": "ce7bdfe0dbc1055213df5cc46ee8cb1bab23eacadc29758fe8f8fe21171926df",
+    "containerSha256Optimized": "ce7bdfe0dbc1055213df5cc46ee8cb1bab23eacadc29758fe8f8fe21171926df",
+    "byteIdentical": true,
+    "decodedVideoHash": "SHA256=9d59c82c5fbd17aac1efc7758e6e968c29f614114a1029d833b4df2f1a12bc75",
+    "decodedAudioHash": "SHA256=f4ae5d2df39e4d75ceeef3a5460f81fe5e8cf7f8107ed10df2b74c4a76aa6ef9",
+    "decodedHashesMatch": true,
+    "probe": {
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 720,
+          "height": 1280,
+          "r_frame_rate": "30/1",
+          "start_time": "0.000000",
+          "duration": "45.000000",
+          "nb_read_frames": "1350"
+        },
+        {
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "sample_rate": "48000",
+          "channels": 2,
+          "r_frame_rate": "0/0",
+          "start_time": "0.000000",
+          "duration": "45.000000",
+          "nb_read_frames": "2110"
+        }
+      ],
+      "format": {
+        "duration": "45.000000",
+        "size": "39788016"
+      }
+    },
+    "limitations": [
+      "One full export per variant on the same local machine. Short regression/profile checks ran intermittently during both variants; this is not an isolated load or statistical throughput benchmark.",
+      "Owned source adapters use exact retained source/image/music bytes over loopback; this excludes real cloud transfer, queueing, cold starts, billing and production GPU throughput.",
+      "Final completion-order/fail-fast scheduling adjustment is separately covered by the final batch/native worker tests; the retained full-film comparison used ordered future waiting. Both preserve the original graph order.",
+      "Production GPU permits up to four layer preparations; local comparison used the conservative two-layer default. No production speed or dollar saving is established by this local result."
+    ]
+  },
+  "largeSourcePreview": {
+    "sourceBytes": 293713235,
+    "coldSeconds": 1.551292441,
+    "warmSeconds": 0.42815348700000005,
+    "apiInitialRssBytes": 49033216,
+    "apiPeakRssBytes": 80429056,
+    "apiPeakGrowthBytes": 31395840,
+    "heapLimitMiB": 96,
+    "combinedApiAndChildrenPeakRssBytes": 161873920,
+    "sourceSha256": "b14bf07a916e41331f8516d9e00921d9c4fa2a37a492e2998ae9f463df3c280b",
+    "frameSha256": "c4b730c2e63397e7d43a479504617e1cb3b011752eba27c16851f57904bdc749",
+    "sampler": "studio-original-sequence-frame-v1"
+  },
+  "sourcePreviewLimits": {
+    "sourceMiB": 512,
+    "reservedDiskCacheMiB": 640,
+    "legacyDerivativeMiB": 32,
+    "minimumFreeDiskMiB": 64,
+    "ramBackedCacheMiB": 128,
+    "activeOwners": 2,
+    "perOwnerConcurrentRequests": 1,
+    "downloadTimeoutSeconds": 60,
+    "inactiveTtlSeconds": 120
+  },
+  "verification": {
+    "workerTests": 267,
+    "backendSourceAndRouteTests": 47,
+    "frontendChromeTests": 4,
+    "newUnittestCasesAddedToImageGate": 5,
+    "strictPictureThresholdsChanged": false,
+    "originalSamplingClockChanged": false,
+    "finalEncodingOrAudioSettingsChanged": false,
+    "resourceAndOwnershipCases": [
+      "large legal MP4 extraction and repeat hash",
+      "ownership recheck on cache hit",
+      "generation and content mismatch",
+      "oversized/truncated input cleanup and successful retry",
+      "abort cleanup and successful retry",
+      "512 MiB hard cap",
+      "free-disk and pending-reservation admission",
+      "RAM-backed /tmp guard",
+      "shared cache and per-owner concurrency limits"
+    ],
+    "schedulingCases": [
+      "CPU quota and GPU resource limits",
+      "actual overlap with stable result order",
+      "failure joins active encoders",
+      "cancellation joins active encoders",
+      "actual native two-window export, one source ingest/trim, moving pixels and async progress"
+    ],
+    "initialLocalFailure": {
+      "count": 5,
+      "cause": "ModuleNotFoundError: scipy in local diagnostic venv",
+      "resolution": "Installed local scipy1.18.1; final 267 worker checks pass",
+      "productionRequirementsChanged": false
+    }
+  },
+  "nextTaskId": "S02",
+  "blockers": [
+    "PR #554 remains unmerged; owner holds merge/deployment pending further instruction",
+    "One additional 45s production retest was approved (5 credits maximum) but remains on hold and unstarted",
+    "Actual CPU failover, concurrency/load, host loss and notification delivery remain unqualified",
+    "Whole predictive parity, broader S02/S04/S03 and creative approval remain separate"
+  ],
+  "privateEvidenceRoot": "/home/tibule12/.local/share/autopromote-qa/studio-render-speed-20261122",
+  "ciFollowup20261122": {
+    "failedRun": "https://github.com/Tibule12/AutoPromote/actions/runs/45037430598/job/137254182794",
+    "failure": "ModuleNotFoundError: pytest via test_studio_video_reuse importing test_studio_overlay_zero.run",
+    "imageBuild": "passed",
+    "failedImageTests": 1,
+    "imageTestCount": 192,
+    "fix": "Self-contained subprocess FFmpeg helper; explicitly CPU-render cached and independently prepared reference sources, comparing every decoded RGB byte instead of spatial H.264 symmetry",
+    "validationStatus": "Passed: exact17 image-gate module list,192 tests on local CPU with pytest and original pytest fixture imports explicitly refused",
+    "releaseState": "Owner holds merge/deployment and production retest until further instruction",
+    "readinessPromotion": false,
+    "productionRetestStarted": false,
+    "localFirstReplay": {
+      "testCount": 192,
+      "failures": 1,
+      "elapsedSeconds": 98.508,
+      "cause": "CPU lossy H.264 spatial window equality assumption",
+      "resolution": "Compare shared-preparation output against a full independent-source reference; exact array equality, no relaxed thresholds"
+    },
+    "focusedVerification": {
+      "testCount": 5,
+      "elapsedSeconds": 5.533,
+      "status": "passed",
+      "pytestImports": "explicitly refused",
+      "finalFrameComparison": "exact decoded RGB equality across all24 frames and both moving windows"
+    },
+    "localFinalReplay": {
+      "testCount": 192,
+      "elapsedSeconds": 100.115,
+      "status": "passed",
+      "pytestImports": "explicitly refused",
+      "runtime": "Local Python3.12 and FFmpeg6.1; remote Python3.11/FFmpeg7.1 image rerun remains separate",
+      "logSha256": "47a526a28ebc7dec3c088ac5b893dfc2026a71d1269ef2842c89b9856df3a574"
+    },
+    "remoteActionState": "Fix to be pushed to PR#554; automatic new-head checks remain separate from local validation"
+  }
+}

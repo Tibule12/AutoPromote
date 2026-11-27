@@ -1,0 +1,94 @@
+[
+  {
+    "id": "workspace",
+    "text": "Open Viral Clip Studio from the workspace. We will turn the real HTML and browser recording into an explanation."
+  },
+  {
+    "id": "upload",
+    "text": "Click the upload area. Select source dot M P four from this lesson's downloaded kit. The file includes the original teaching voice."
+  },
+  {
+    "id": "open",
+    "text": "Click Open Creator Studio. The recording enters the normal editable timeline."
+  },
+  {
+    "id": "pause",
+    "text": "Pause playback. Select After, so one complete edited frame fills the preview."
+  },
+  {
+    "id": "reframe",
+    "text": "Open Reframe on the left. Choose sixteen by nine and Show Everyone. Open View options, click Fit full and turn Rounded frame off. Both code and browser must stay visible."
+  },
+  {
+    "id": "sound",
+    "text": "Open Sound. Keep original audio stays on. Turn voice repair off: this is already clean narration."
+  },
+  {
+    "id": "captions",
+    "text": "Open Captions. Keep Preview captions switched off. The source code and creative callouts remain part of the picture."
+  },
+  {
+    "id": "graphics",
+    "text": "Open Graphics. The logo images now load properly. Close Logo Workshop to make room for this lesson's controls."
+  },
+  {
+    "id": "import",
+    "text": "Scroll down to Import animated graphics. Open it, click Import graphics composition, and select lesson dot graphics dot J S O N. These become ordinary editable layers and motion keys."
+  },
+  {
+    "id": "preview",
+    "text": "Play briefly, then pause. The title stays above the content, and the callout stays below it. Neither covers the code."
+  },
+  {
+    "id": "callout",
+    "text": "Stay in Graphics. Scroll to Title layers and choose the first explanatory callout. Then scroll to Copy. This is the text you can adapt."
+  },
+  {
+    "id": "copy",
+    "text": "Select the words in Copy and enter the same short explanation shown in your recipe. Keep it concise enough to read during its pause."
+  },
+  {
+    "id": "size",
+    "text": "Scroll to the title controls. Check the text colour and transparent background. The size and timing are listed in the recipe, so another editor can reproduce them."
+  },
+  {
+    "id": "motion",
+    "text": "Now open Motion and choose Transform keyframes. In Target layer, select Code focus one. We are inspecting the real vector outline, not an animation baked into the source."
+  },
+  {
+    "id": "key",
+    "text": "Scroll down to Property keyframe. Choose Stroke end at zero point seven seconds. Its value is one hundred; the arrival easing is Ease In Out. The first key starts at zero."
+  },
+  {
+    "id": "change",
+    "text": "Set the endpoint to eighty and compare it with one hundred. The drawing stops early at eighty. Restore one hundred so the outline closes around the source."
+  },
+  {
+    "id": "original",
+    "text": "Return to Graphics. Scroll to Add title layer and click Label. We will create a separate practice label by hand, then remove it to preserve the lesson result."
+  },
+  {
+    "id": "label",
+    "text": "In Copy, type Predict first. Scroll to the timing fields. Start at twenty-four seconds and use a four-second duration. Set size to fifty-five percent and text box width to sixty percent."
+  },
+  {
+    "id": "place",
+    "text": "Open Motion. The new label is selected. Set X to fifty and Y to eighty-four percent. It sits in the clear space below the panels. Placement must serve the explanation."
+  },
+  {
+    "id": "undo",
+    "text": "Return to Graphics. Scroll down and click Remove for the practice label. The original lesson remains. Save your own variation in a separate project. Now play the complete twenty-eight-second explanation."
+  },
+  {
+    "id": "save",
+    "text": "Show media. Open the project section, give this lesson a clear name, then click Save. The editable timeline and every native key are retained."
+  },
+  {
+    "id": "export",
+    "text": "Open Export. Choose seven twenty p and twenty-four frames per second. Click Render Final Clip. The unattended processing wait is removed from this tutorial."
+  },
+  {
+    "id": "finished",
+    "text": "The actual Studio export is ready. Choose Show Finished Video and play the whole result. Check the code, the focus regions, the narration and the final link or table."
+  }
+]

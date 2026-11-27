@@ -51,6 +51,7 @@ export default function LandingNavbar({ onGetStarted, onSignIn }) {
             {label}
           </button>
         ))}
+        <a href="/#/education">Education</a>
         <a href="/#/pricing">Pricing</a>
       </nav>
       <div className="lp-nav-actions">

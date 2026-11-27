@@ -1,0 +1,3 @@
+A low-voltage DC source supplies potential difference; conductors, a switch and a suitable lamp form a series path. Opening the switch breaks the path and the lamp is off. Closing it completes the path and permits current. Conventional current is shown through the external circuit from positive to negative; this is distinct from electron drift in metal. Moving indicators communicate direction, not measured current or the speed of electrons.
+
+Illustrative low-voltage DC schematic, not an electrical solver or practical wiring plan. 3V is an example source label; component ratings/current are not calculated. No mains activity or unsupervised workshop task. Any real practical must use teacher-approved components and direct supervision.

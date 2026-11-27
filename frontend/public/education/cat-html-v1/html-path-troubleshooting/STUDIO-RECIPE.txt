@@ -1,0 +1,1092 @@
+CAT 6 — Find the fault, fix it, retest
+SUPPLEMENTARY TEACHER REVIEW — NOT CAPS APPROVED
+
+Original source.mp4 is real HTML/browser footage,1280x720,28s,with offline synthetic concept narration. It contains no native teaching outlines. In the source browser the page is magnified150%.
+
+1. Upload the real browser recording
+Workspace → Viral Clip Studio → Choose videos → Open Creator Studio
+html-path-troubleshooting/source.mp4, 28 seconds with concept narration. Pause the comparison.
+This is the original HTML/browser evidence, without the teaching highlights.
+
+2. Keep the whole page visible
+After → Reframe → 16:9 → Show Everyone → View options → Fit full
+16:9; Fit full; Rounded frame off. Keep the entire original code/browser frame visible.
+The code and browser remain readable in the same full-frame composition.
+
+3. Retain the teaching audio
+Captions → Preview captions off; Sound → Keep original audio on → Use voice repair on export off
+No captions; original narration at 100%; no additional music or repair.
+Preserve the precisely timed explanation and the clean screen source.
+
+4. Import the editable teaching design
+Graphics → scroll to Import graphics composition → Import graphics composition…
+lesson.graphics.json from this lesson folder. Fourteen ordinary editable layers; no separate renderer.
+The outlines draw on at the moments described by the voice. Every parameter is listed below.
+
+5. Inspect and adapt a callout
+Graphics → Title layers → callout → Copy, colour, timing and size
+Callout text from the recipe; X50%, Y92%, width94%, scale0.69, colour #b7f4e1.
+The reserved footer keeps the explanation away from code and browser evidence.
+
+6. Follow the motion key
+Motion → Transform keyframes → Target layer → Stroke end → Curve keyframe
+Select Code focus 1. At 0s Stroke end=0; at 0.7s Stroke end=100; arrival easing Ease In Out.
+A native editable outline draws around the actual source region.
+
+7. Add a label manually
+Graphics → scroll to Add title layer → Label → Copy; Motion → Target layer → X/Y
+Use the exercise label text. Set X50%, Y84%; width60%; size0.55; start24s; duration4s.
+This demonstrates original authoring rather than only importing a starter design. Save a separate exercise copy.
+
+8. Review and export the lesson
+Play → Save project → Export → Render Final Clip → Download
+720p; 24fps; H.264/AAC MP4; complete28s. Wait for completion off camera, then show the complete finished playback.
+Download the actual native export and retain the editable owned backup.
+
+ALL NATIVE LAYERS AND KEYS
+Canvas1280x720; x/y/width/height in percent; time in programme seconds. Easing applies at arrival. Text uses native Inter.
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Find the fault, fix it, retest",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Lesson title",
+      "name": "Lesson title",
+      "type": "text",
+      "text": "06  /  Follow the evidence",
+      "x": 50,
+      "y": 7,
+      "width": 94,
+      "scale": 0.95,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 800,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "Teacher review marker",
+      "name": "Teacher review marker",
+      "type": "text",
+      "text": "AUTOPROMOTE EDUCATION  /  CAT",
+      "x": 50,
+      "y": 3,
+      "width": 94,
+      "scale": 0.34,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8ee7d1",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "Callout 1",
+      "name": "Callout 1",
+      "type": "text",
+      "text": "Read the reference exactly",
+      "x": 50,
+      "y": 92,
+      "width": 94,
+      "scale": 0.69,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#b7f4e1",
+      "startTime": 0,
+      "duration": 7,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 0.3,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 0,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 0.45,
+          "value": 92,
+          "easing": "ease_out"
+        }
+      ]
+    },
+    {
+      "id": "Callout 2",
+      "name": "Callout 2",
+      "type": "text",
+      "text": "404: the requested file is missing",
+      "x": 50,
+      "y": 92,
+      "width": 94,
+      "scale": 0.69,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ffbeb9",
+      "startTime": 7,
+      "duration": 7,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 7,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 7.3,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 7,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 7.45,
+          "value": 92,
+          "easing": "ease_out"
+        }
+      ]
+    },
+    {
+      "id": "Callout 3",
+      "name": "Callout 3",
+      "type": "text",
+      "text": "Match the actual filename",
+      "x": 50,
+      "y": 92,
+      "width": 94,
+      "scale": 0.69,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#b7f4e1",
+      "startTime": 14,
+      "duration": 7,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 14,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 14.3,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.45,
+          "value": 92,
+          "easing": "ease_out"
+        }
+      ]
+    },
+    {
+      "id": "Callout 4",
+      "name": "Callout 4",
+      "type": "text",
+      "text": "Retest and check the destination",
+      "x": 50,
+      "y": 92,
+      "width": 94,
+      "scale": 0.69,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#b7f4e1",
+      "startTime": 21,
+      "duration": 7,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 21,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 21.3,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 21,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 21.45,
+          "value": 92,
+          "easing": "ease_out"
+        }
+      ]
+    },
+    {
+      "id": "Code focus 1",
+      "name": "Code focus 1",
+      "type": "artwork",
+      "x": 29.4921875,
+      "y": 48.888888888888886,
+      "width": 48.671875,
+      "height": 8.055555555555555,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 7,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#a8efd4",
+          "width": 0.55
+        }
+      },
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "strokeEnd",
+          "time": 0.7,
+          "value": 100,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Browser focus 1",
+      "name": "Browser focus 1",
+      "type": "artwork",
+      "x": 64.40277099609375,
+      "y": 39.10590277777778,
+      "width": 13.4930419921875,
+      "height": 4.375,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 7,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#77cfff",
+          "width": 0.55
+        }
+      },
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "strokeEnd",
+          "time": 0.7,
+          "value": 100,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Code focus 2",
+      "name": "Code focus 2",
+      "type": "artwork",
+      "x": 29.4921875,
+      "y": 48.888888888888886,
+      "width": 48.671875,
+      "height": 8.055555555555555,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 7,
+      "duration": 7,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#ffbeb9",
+          "width": 0.55
+        }
+      },
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 7,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "strokeEnd",
+          "time": 7.7,
+          "value": 100,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Browser focus 2",
+      "name": "Browser focus 2",
+      "type": "artwork",
+      "x": 77.1875,
+      "y": 45.98090277777778,
+      "width": 39.0625,
+      "height": 3.958333333333333,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 7,
+      "duration": 7,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#ffbeb9",
+          "width": 0.55
+        }
+      },
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 7,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "strokeEnd",
+          "time": 7.7,
+          "value": 100,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Code focus 3",
+      "name": "Code focus 3",
+      "type": "artwork",
+      "x": 29.4921875,
+      "y": 48.888888888888886,
+      "width": 48.671875,
+      "height": 8.055555555555555,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 14,
+      "duration": 7,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#a8efd4",
+          "width": 0.55
+        }
+      },
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 14,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "strokeEnd",
+          "time": 14.7,
+          "value": 100,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Browser focus 3",
+      "name": "Browser focus 3",
+      "type": "artwork",
+      "x": 64.40277099609375,
+      "y": 39.10590277777778,
+      "width": 13.4930419921875,
+      "height": 4.375,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 14,
+      "duration": 7,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#77cfff",
+          "width": 0.55
+        }
+      },
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 14,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "strokeEnd",
+          "time": 14.7,
+          "value": 100,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Code focus 4",
+      "name": "Code focus 4",
+      "type": "artwork",
+      "x": 29.4921875,
+      "y": 48.888888888888886,
+      "width": 48.671875,
+      "height": 8.055555555555555,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 21,
+      "duration": 7,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#a8efd4",
+          "width": 0.55
+        }
+      },
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 21,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "strokeEnd",
+          "time": 21.7,
+          "value": 100,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Browser focus 4",
+      "name": "Browser focus 4",
+      "type": "artwork",
+      "x": 77.1875,
+      "y": 29.014756944444443,
+      "width": 39.0625,
+      "height": 8.541666666666666,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 21,
+      "duration": 7,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#77cfff",
+          "width": 0.55
+        }
+      },
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 21,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "strokeEnd",
+          "time": 21.7,
+          "value": 100,
+          "easing": "ease_in_out"
+        }
+      ]
+    }
+  ],
+  "groups": []
+}
+
+TUTORIAL ACTIONS AND VOICE TIMING
+0.00s — workspace: Open Viral Clip Studio from the workspace. We will turn the real HTML and browser recording into an explanation.
+7.99s — upload: Click the upload area. Select source dot M P four from this lesson's downloaded kit. The file includes the original teaching voice.
+18.85s — open: Click Open Creator Studio. The recording enters the normal editable timeline.
+24.65s — pause: Pause playback. Select After, so one complete edited frame fills the preview.
+31.47s — reframe: Open Reframe on the left. Choose sixteen by nine and Show Everyone. Open View options, click Fit full and turn Rounded frame off. Both code and browser must stay visible.
+44.00s — sound: Open Sound. Keep original audio stays on. Turn voice repair off: this is already clean narration.
+75.39s — captions: Open Captions. Keep Preview captions switched off. The source code and creative callouts remain part of the picture.
+104.02s — graphics: Open Graphics. Close Logo Workshop to make room for this lesson’s controls. Then scroll down through the panel.
+111.61s — import: Scroll down to Import animated graphics. Open it, click Import graphics composition, and select lesson dot graphics dot J S O N. These become ordinary editable layers and motion keys.
+125.33s — preview: Play briefly, then pause. The title stays above the content, and the callout stays below it. Neither covers the code.
+135.17s — callout: Stay in Graphics. Scroll to Title layers and choose the first explanatory callout. Then scroll to Copy. This is the text you can adapt.
+144.69s — copy: Select the words in Copy and enter the same short explanation shown in your recipe. Keep it concise enough to read during its pause.
+153.36s — size: Scroll to the title controls. Check the text colour and transparent background. The size and timing are listed in the recipe, so another editor can reproduce them.
+165.58s — motion: Now open Motion and choose Transform keyframes. In Target layer, select Code focus one. We are inspecting the real vector outline, not an animation baked into the source.
+178.39s — key: Scroll down to Property keyframe. Choose Stroke end at zero point seven seconds. Its value is one hundred; the arrival easing is Ease In Out. The first key starts at zero.
+191.14s — change: Set the endpoint to eighty and compare it with one hundred. The drawing stops early at eighty. Restore one hundred so the outline closes around the source.
+201.83s — original: Return to Graphics. Scroll to Add title layer and click Label. We will create a separate practice label by hand, then remove it to preserve the lesson result.
+212.48s — label: In Copy, type Predict first. Scroll to the timing fields. Start at twenty-four seconds and use a four-second duration. Set size to fifty-five percent and text box width to sixty percent.
+228.67s — place: Open Motion. The new label is selected. Set X to fifty and Y to eighty-four percent. It sits in the clear space below the panels. Placement must serve the explanation.
+250.25s — undo: Return to Graphics. Scroll down and click Remove for the practice label. The original lesson remains. Save your own variation in a separate project. Now play the complete twenty-eight-second explanation.
+303.92s — save: Show media. Open the project section, give this lesson a clear name, then click Save. The editable timeline and every native key are retained.
+314.89s — export: Open Export. Choose seven twenty p and twenty-four frames per second. These are the settings for our complete twenty-eight-second lesson.
+324.33s — render: Now click Render Final Clip. Approve the local render. The unattended processing wait is omitted from this tutorial.
+334.83s — finished: The actual Studio export is ready. Choose Show Finished Video. Then watch the whole result and check the code, the focus regions, the narration and the browser output.

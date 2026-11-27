@@ -29,6 +29,15 @@ jobs:
       - name: Check Studio Director server replay bundle
         run: npm run check:studio-director-replay
 
+      - name: Verify education concepts and presentation release gates
+        run: node --test test/education/byte-lab.test.mjs test/education/bubble-sort.test.mjs test/education/release-build-gate.test.cjs
+
+      - name: Verify education presentations, private technical gates and Studio previews
+        working-directory: frontend
+        env:
+          CI: "true"
+        run: npm test -- --watch=false --runInBand --runTestsByPath src/education/__tests__/catLearningPath.test.js src/education/__tests__/catPresentation.test.js src/education/__tests__/technicalLearningPath.test.js src/education/__tests__/technicalPublicGate.test.js src/utils/__tests__/viralRenderRecovery.test.js src/components/__tests__/studioLogoDesign.test.js
+
       - name: Build frontend
         working-directory: frontend
         run: npm run build

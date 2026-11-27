@@ -161,11 +161,30 @@ test("health checks, status polls, anonymous and refused requests cannot wake ba
     "/api/platform/status",
     "/api/notifications",
     "/api/credits/balance",
+    "/api/usage/stats",
+    "/api/usage/processing",
+    "/api/auth/me",
+    "/api/users/profile",
+    "/api/platform/connections",
   ])
     finish(activity, path, { uid: "owner" });
   finish(activity, "/api/analytics", null);
   finish(activity, "/api/analytics", { uid: "owner" }, 403);
   expect(ref.set).not.toHaveBeenCalled();
+  expect(activity.active("analytics")).toBe(false);
+});
+
+test("an idle account tab cannot renew cross-host demand for a day of status polling", () => {
+  const { activity, ref, advance } = activityFixture();
+  finish(activity, "/api/media/process", { uid: "owner" });
+  const initialWrites = ref.set.mock.calls.length;
+  for (let tick = 0; tick < 5760; tick++) {
+    advance(15000);
+    finish(activity, "/api/usage/stats?refresh=true", { uid: "owner" });
+    finish(activity, "/api/auth/me", { uid: "owner" });
+  }
+  expect(ref.set).toHaveBeenCalledTimes(initialWrites);
+  expect(activity.active("general")).toBe(false);
   expect(activity.active("analytics")).toBe(false);
 });
 

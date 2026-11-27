@@ -1,0 +1,7 @@
+0.15s — The small gear is the driver: twenty teeth. It transfers motion through the meshing teeth.
+
+7.15s — The driven gear has forty teeth. It rotates in the opposite direction. Watch the coloured index dots.
+
+14.15s — Forty divided by twenty is two. One driver turn produces half a driven turn: half the rotational speed.
+
+21.15s — Gears transmit mechanical power. Ideally, lower speed gives higher torque. Real friction causes losses; power is not created.

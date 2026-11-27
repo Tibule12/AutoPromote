@@ -1,0 +1,17 @@
+Animate a loop and its changing variables
+
+Original narration read by a disclosed standard synthetic voice. Native result is a silent teacher-led visual. Studio controls and full matching final playback are actual recordings. Unattended render waiting is abbreviated; original complete capture and timing receipts are retained privately.
+
+A loop changes the state. Predict the values of i and sum as the array two, four, six is read once. The final total is twelve. The array itself is not changed.
+
+In Graphics, import this lesson’s graphics composition. The empty stage contains no animation. The imported file becomes editable text, vector artwork, groups and ordinary motion keys, with the exact parameters supplied in the lesson.
+
+Open Composite, find the named graphic group, then choose the endpoint in Curve keyframe. Edit Selected group key value and confirm the interpolation. The group’s percentage is an offset from its original position. Keep the fixed labels outside this group.
+
+This reading token is a copy. Its Y offset reaches twenty-six percent at five point five seconds, with Ease In Out into the endpoint. The watch panel changes only when the addition or increment occurs.
+
+Play the complete moving preview and follow the state. Pause and predict before a change. The finished video is a supplementary explanation; the student must still be able to solve a different example.
+
+The last valid index is two. After three reads, i becomes three and the condition is false. Pause before each addition and predict the next total. If sum begins at ten, the final total is twenty-two.
+
+Save the editable project, then export in Studio at seven twenty p and twenty-four frames per second. The normal account confirmation and canonical local CPU worker produce the movie. Download it and inspect the entire result.

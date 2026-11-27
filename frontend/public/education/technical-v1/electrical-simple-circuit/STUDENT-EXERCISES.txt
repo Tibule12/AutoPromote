@@ -1,0 +1,7 @@
+TECHNICAL EXERCISE
+Draw and label the source, switch, conductors and lamp. Predict lamp state before and after closing the switch. Trace conventional current only in the external circuit. Explain why the animation does not measure current, voltage, electron speed or lamp suitability. No physical wiring is required.
+
+CREATIVE EDITING EXERCISE
+Use separate native switch, lamp-light and indicator layers. Close the switch from −35° to 0° at 8.5–9.5s, switch the light on only at closure, and keep indicators inside 10–24s. Open at 24–25s and switch off as contact is broken. Add an original label that distinguishes conventional current from electrons.
+
+Submit predictions/reasoning, original assets, editable Studio project, exact keys and complete movie. The starter deliberately contains one incomplete value; correct it using the lesson.

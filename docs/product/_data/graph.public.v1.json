@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.64",
+  "knowledge_version": "1.0.71",
   "product_version": "1.2.0",
   "nodes": [
     {
@@ -510,6 +510,16 @@
     },
     {
       "id": "studio.logo_design",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "education.it_foundation",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "education.cat_html",
       "kind": "feature",
       "status": "PARTIAL"
     },
@@ -3934,6 +3944,46 @@
       "from": "studio.preview",
       "type": "editable_with",
       "to": "studio.preview.quality"
+    },
+    {
+      "from": "education.it_foundation",
+      "type": "requires",
+      "to": "studio.timeline"
+    },
+    {
+      "from": "education.it_foundation",
+      "type": "requires",
+      "to": "studio.export"
+    },
+    {
+      "from": "education.it_foundation",
+      "type": "optionally_uses",
+      "to": "studio.titles"
+    },
+    {
+      "from": "education.it_foundation",
+      "type": "optionally_uses",
+      "to": "studio.audio"
+    },
+    {
+      "from": "education.cat_html",
+      "type": "requires",
+      "to": "studio.timeline"
+    },
+    {
+      "from": "education.cat_html",
+      "type": "requires",
+      "to": "studio.export"
+    },
+    {
+      "from": "education.cat_html",
+      "type": "optionally_uses",
+      "to": "studio.titles"
+    },
+    {
+      "from": "education.cat_html",
+      "type": "optionally_uses",
+      "to": "studio.audio"
     }
   ]
 }

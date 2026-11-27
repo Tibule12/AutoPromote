@@ -1,6 +1,7 @@
 // tiktokService.js - TikTok OAuth 2.0 and Content Posting API integration
 const { db, admin } = require("../firebaseAdmin");
 const { safeFetch } = require("../utils/ssrfGuard");
+const { resolveTikTokDisclosures, tikTokDisclosurePostInfo } = require("../utils/tiktokDisclosures");
 
 let fetchFn = global.fetch;
 if (!fetchFn) {
@@ -47,34 +48,6 @@ function normalizeTikTokPrivacyLevel(value, fallback = "SELF_ONLY") {
     SELF_ONLY: "SELF_ONLY",
   };
   return aliases[raw] || aliases[String(fallback || "SELF_ONLY").toUpperCase()] || "SELF_ONLY";
-}
-
-function resolveTikTokCommercialFlags(payload = {}) {
-  const opts = payload?.platform_options?.tiktok || payload?.platformOptions?.tiktok || {};
-  const commercial = payload?.commercial || opts?.commercial || {};
-  const isCommercial = !!(
-    opts.is_commercial_content ||
-    opts.commercial ||
-    opts.isCommercial ||
-    payload.commercialContent ||
-    commercial.isCommercial ||
-    commercial.is_commercial_content
-  );
-  const brandOrganic = !!(
-    opts.brand_organic_toggle ||
-    opts.brandOrganic ||
-    opts.yourBrand ||
-    payload.yourBrand ||
-    commercial.yourBrand ||
-    commercial.brandOrganic
-  );
-  const brandedContent = !!(
-    opts.brand_content_toggle ||
-    opts.brandedContent ||
-    payload.brandedContent ||
-    commercial.brandedContent
-  );
-  return { isCommercial, brandOrganic, brandedContent };
 }
 
 // Compute candidate chunk sizes following TikTok Media Transfer Guide
@@ -512,6 +485,7 @@ async function initializeVideoUpload({
   isCommercial = false,
   brandOrganic = false,
   brandedContent = false,
+  aiGenerated = false,
 }) {
   if (!fetchFn) throw new Error("Fetch not available");
 
@@ -523,12 +497,7 @@ async function initializeVideoUpload({
       disable_comment: false,
       disable_stitch: false,
       video_cover_timestamp_ms: 1000,
-      ...(isCommercial
-        ? {
-            brand_organic_toggle: !!brandOrganic,
-            brand_content_toggle: !!brandedContent,
-          }
-        : {}),
+      ...tikTokDisclosurePostInfo({ isCommercial, brandOrganic, brandedContent, aiGenerated }),
     },
     source_info: {
       source: "FILE_UPLOAD",
@@ -1193,17 +1162,15 @@ async function pullFromUrlPublish({
   isCommercial = false,
   brandOrganic = false,
   brandedContent = false,
+  aiGenerated = false,
 }) {
   if (!fetchFn) throw new Error("Fetch not available");
   // Init PULL_FROM_URL
   const initBody = {
-        post_info: {
-          post_mode: "DIRECT_POST",
-          title: title || "",
-          privacy_level: normalizeTikTokPrivacyLevel(privacyLevel),
-          is_commercial_content: isCommercial,
-          brand_content_toggle: brandedContent,
-          brand_organic_toggle: brandOrganic,
+    post_info: {
+      title: title || "",
+      privacy_level: normalizeTikTokPrivacyLevel(privacyLevel),
+      ...tikTokDisclosurePostInfo({ isCommercial, brandOrganic, brandedContent, aiGenerated }),
     },
     source_info: { source: "PULL_FROM_URL", video_url: videoUrl },
   };
@@ -1335,11 +1302,18 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
     reason === "approved" ? "PUBLIC_TO_EVERYONE" : "SELF_ONLY"
   );
 
-  // Extract commercial content metrics
-  const { isCommercial, brandOrganic, brandedContent } = resolveTikTokCommercialFlags(payload);
-
-  if (isCommercial || brandOrganic || brandedContent) {
-    privacyLevel = "PUBLIC_TO_EVERYONE";
+  let disclosures;
+  try {
+    disclosures = resolveTikTokDisclosures(payload);
+  } catch (error) {
+    return { platform: "tiktok", success: false, error: error.code, message: error.message };
+  }
+  const { isCommercial, brandOrganic, brandedContent, aiGenerated } = disclosures;
+  if (isCommercial && !brandOrganic && !brandedContent) {
+    return { platform: "tiktok", success: false, error: "tiktok_commercial_content_missing_selection" };
+  }
+  if (brandedContent && privacyLevel === "SELF_ONLY") {
+    return { platform: "tiktok", success: false, error: "tiktok_branded_content_requires_public" };
   }
 
   // If we have a contentId, prefer a fresh signed URL from content doc
@@ -1418,6 +1392,7 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
         isCommercial,
         brandOrganic,
         brandedContent,
+        aiGenerated,
       });
 
       // If token is invalid, attempt a server-side refresh and retry once
@@ -1446,6 +1421,7 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
               isCommercial,
               brandOrganic,
               brandedContent,
+              aiGenerated,
             });
           } else {
             console.warn("[tiktok] no refresh token available for uid=%s", uid);
@@ -1515,7 +1491,9 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
     try {
 
     // For small videos, try the simpler single-PUT upload endpoint which is less error-prone
-    if (videoSize <= DEFAULT_CHUNK_SIZE) {
+    // The legacy endpoint cannot carry disclosure choices; use Direct Post when
+    // any label was selected so small files do not lose required disclosures.
+    if (videoSize <= DEFAULT_CHUNK_SIZE && !isCommercial && !aiGenerated) {
       try {
         const conn = await getUserTikTokConnection(uid);
         const openId = conn && (conn.open_id || (conn.meta && conn.meta.open_id));
@@ -1664,6 +1642,7 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
           isCommercial,
           brandOrganic,
           brandedContent,
+          aiGenerated,
         });
         publish_id = initData.publish_id;
         upload_url = initData.upload_url;

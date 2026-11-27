@@ -1,0 +1,58 @@
+[
+  {
+    "route": "cat",
+    "width": 1440,
+    "overflow": false,
+    "subtitleTracks": 0,
+    "errors": []
+  },
+  {
+    "route": "cat/html-structure",
+    "width": 1440,
+    "overflow": false,
+    "subtitleTracks": 0,
+    "errors": []
+  },
+  {
+    "route": "cat/html-images-links",
+    "width": 1440,
+    "overflow": false,
+    "subtitleTracks": 0,
+    "errors": []
+  },
+  {
+    "route": "cat/html-lists-tables",
+    "width": 1440,
+    "overflow": false,
+    "subtitleTracks": 0,
+    "errors": []
+  },
+  {
+    "route": "cat",
+    "width": 390,
+    "overflow": false,
+    "subtitleTracks": 0,
+    "errors": []
+  },
+  {
+    "route": "cat/html-structure",
+    "width": 390,
+    "overflow": false,
+    "subtitleTracks": 0,
+    "errors": []
+  },
+  {
+    "route": "cat/html-images-links",
+    "width": 390,
+    "overflow": false,
+    "subtitleTracks": 0,
+    "errors": []
+  },
+  {
+    "route": "cat/html-lists-tables",
+    "width": 390,
+    "overflow": false,
+    "subtitleTracks": 0,
+    "errors": []
+  }
+]

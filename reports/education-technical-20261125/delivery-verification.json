@@ -1,0 +1,108 @@
+{
+  "lessons": [
+    {
+      "id": "egd-drawing-views",
+      "evidence": {
+        "teacherFeedbackReceived": false,
+        "independentLearnerRecreation": false,
+        "schoolHardwareTrial": false,
+        "publicRelease": false,
+        "nativeExport": true,
+        "actualNativeDownload": true,
+        "completeMovingPreview": true,
+        "completeFinishedPlayback": true,
+        "exactColdRecovery": true,
+        "tutorial": true,
+        "technicalAccuracyChecked": true,
+        "bundle": true
+      },
+      "media": {
+        "resultSha256": "afc831c3eb3213c515836bec1fb29f9b0686ae17ee3afcbc2510f308e870e17d",
+        "tutorialSha256": "92db6c6df44a91f11bb9f7e887e4e42be0c7379daf0b0fe4f1f0ffaad071abb5",
+        "tutorialSeconds": 320.041667
+      },
+      "kitBytes": 11269013,
+      "ownerProjectRetainedSeparately": true
+    },
+    {
+      "id": "mechanical-gears",
+      "evidence": {
+        "teacherFeedbackReceived": false,
+        "independentLearnerRecreation": false,
+        "schoolHardwareTrial": false,
+        "publicRelease": false,
+        "nativeExport": true,
+        "actualNativeDownload": true,
+        "completeMovingPreview": true,
+        "completeFinishedPlayback": true,
+        "exactColdRecovery": true,
+        "tutorial": true,
+        "technicalAccuracyChecked": true,
+        "bundle": true
+      },
+      "media": {
+        "resultSha256": "bb050ac9f3b122ca757457e6db1f931c3ea926c900250255b1da993e58f23ddb",
+        "tutorialSha256": "1184319746e61061d3e1ef834d012d89f053ac2e0f3b8ab6e0e12c2a002f12f9",
+        "tutorialSeconds": 335.041667
+      },
+      "kitBytes": 13196360,
+      "ownerProjectRetainedSeparately": true
+    },
+    {
+      "id": "electrical-simple-circuit",
+      "evidence": {
+        "teacherFeedbackReceived": false,
+        "independentLearnerRecreation": false,
+        "schoolHardwareTrial": false,
+        "publicRelease": false,
+        "nativeExport": true,
+        "actualNativeDownload": true,
+        "completeMovingPreview": true,
+        "completeFinishedPlayback": true,
+        "exactColdRecovery": true,
+        "tutorial": true,
+        "technicalAccuracyChecked": true,
+        "bundle": true
+      },
+      "media": {
+        "resultSha256": "f4b2b0e520fddbb3eb14a0b8469eb76f6770c76ec960684001ff1a9cd73729d8",
+        "tutorialSha256": "7913841af8c5d0e580de0831cede4c164873096e72afd6d50d0387d908436745",
+        "tutorialSeconds": 318.333333
+      },
+      "kitBytes": 11292277,
+      "ownerProjectRetainedSeparately": true
+    },
+    {
+      "id": "civil-brick-sequence",
+      "evidence": {
+        "teacherFeedbackReceived": false,
+        "independentLearnerRecreation": false,
+        "schoolHardwareTrial": false,
+        "publicRelease": false,
+        "nativeExport": true,
+        "actualNativeDownload": true,
+        "completeMovingPreview": true,
+        "completeFinishedPlayback": true,
+        "exactColdRecovery": true,
+        "tutorial": true,
+        "technicalAccuracyChecked": true,
+        "bundle": true
+      },
+      "media": {
+        "resultSha256": "76b7c5ba4d02f6cdfa8820a0e25958b5cb622e245e69bac3fcbb3e8c7ef23555",
+        "tutorialSha256": "3b1f49efdc6b78619074dc071bc25f63a0f455a3be2e2827ae25bf8565e5d702",
+        "tutorialSeconds": 362.208333
+      },
+      "kitBytes": 11830378,
+      "ownerProjectRetainedSeparately": true
+    }
+  ],
+  "shareablePack": {
+    "bytes": 47616810,
+    "sha256": "94f0a8913bdc4756575268a86962e16e32e3145f9a57cb5a272d9bf876a7c3a4",
+    "privateOwnerProjectsIncluded": false
+  },
+  "productionDeployment": false,
+  "paidGpuJobs": 0,
+  "ITAndCATPreserved": true
+}

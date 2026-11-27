@@ -198,7 +198,7 @@ async function resolveEffectiveTierId(userId, billingData, userData) {
   const testerAccess = getActiveTesterAccess(safeUser, now);
   if (testerAccess) {
     const testerTier = normalizePlanId(testerAccess.planId || "pro");
-    const planRank = { free: 0, premium: 1, pro: 2, enterprise: 3 };
+    const planRank = { free: 0, plus: 1, premium: 2, pro: 3, enterprise: 4 };
     return planRank[billingTier] > planRank[testerTier] ? billingTier : testerTier;
   }
 
@@ -224,19 +224,27 @@ async function resolveEffectiveTierId(userId, billingData, userData) {
     "external_missing",
   ].includes(normalizedStatus);
 
-  if (isCancelledState) {
-    return "free";
+  if (billingTier === "plus" || userTier === "plus") {
+    const grant = safeBilling.administrativeGrant;
+    const adminGrant = grant?.authorized === true && grant.grantedBy &&
+      (!grant.expiresAt || Date.parse(grant.expiresAt) > now);
+    if (!adminGrant && (safeBilling.paymentVerified !== true || !hasFutureExpiry ||
+        !["active", "cancelled", "canceled"].includes(normalizedStatus))) return "free";
   }
+  if (["cancelled", "canceled"].includes(normalizedStatus) && hasFutureExpiry) {
+    return billingTier !== "free" ? billingTier : userTier;
+  }
+  if (isCancelledState) return "free";
 
   if (normalizedStatus === "active") {
-    if (isExpired) return billingTier !== "free" ? billingTier : "free";
+    if (isExpired) return "free";
     if (billingTier !== "free") return billingTier;
     if (hasFutureExpiry && userTier !== "free") return userTier;
     return "free";
   }
 
   if (isExpired) {
-    return billingTier !== "free" ? billingTier : "free";
+    return "free";
   }
 
   if (!normalizedStatus) {

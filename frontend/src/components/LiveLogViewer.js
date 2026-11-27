@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import "./LiveLogViewer.css"; // We'll create this CSS too
 import { API_BASE_URL } from "../config";
 import { auth } from "../firebaseClient";
+import { startVisiblePoller } from "../utils/visiblePoller";
 
 const LiveLogViewer = () => {
   const [logs, setLogs] = useState([]);
@@ -10,17 +11,16 @@ const LiveLogViewer = () => {
   const [active, setActive] = useState(true);
   const logsEndRef = useRef(null);
 
-  const fetchLogs = async () => {
+  const fetchLogs = async signal => {
     if (!active) return;
     try {
       const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
       if (!token) return;
 
       const url = `${API_BASE_URL}/api/admin/system/logs/live`;
-      console.log("[LiveLog] Fetching logs from:", url); // Debug log to see actual URL
-
       const res = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` },
+        signal,
       });
 
       if (!res.ok) {
@@ -49,7 +49,7 @@ const LiveLogViewer = () => {
         return;
       }
 
-      if (data.success && Array.isArray(data.logs)) {
+      if (!signal?.aborted && data.success && Array.isArray(data.logs)) {
         // Process logs for display
         const processed = data.logs.map((line, idx) => {
           // Basic parsing similar to the PowerShell script
@@ -86,7 +86,7 @@ const LiveLogViewer = () => {
         setError(null);
       }
     } catch (err) {
-      console.error("Live log fetch error:", err);
+      if (err.name !== "AbortError") console.error("Live log fetch error:", err);
       // Don't show error to UI to avoid flickering, just stop updating
     } finally {
       setLoading(false);
@@ -94,9 +94,8 @@ const LiveLogViewer = () => {
   };
 
   useEffect(() => {
-    fetchLogs(); // Initial fetch
-    const interval = setInterval(fetchLogs, 2000); // Poll every 2s
-    return () => clearInterval(interval);
+    if (!active) return;
+    return startVisiblePoller(fetchLogs, 2000);
   }, [active]);
 
   useEffect(() => {

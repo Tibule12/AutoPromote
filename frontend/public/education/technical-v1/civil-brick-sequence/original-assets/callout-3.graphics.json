@@ -1,0 +1,29 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Callout 3 \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Callout 3",
+      "name": "Callout 3",
+      "type": "text",
+      "text": "Alternate courses: half-module offset",
+      "x": 50.0,
+      "y": 91.66666666666667,
+      "width": 94,
+      "scale": 0.68,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

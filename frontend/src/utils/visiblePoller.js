@@ -1,6 +1,6 @@
 // Poll UI data only while it can be seen. Keep one request in flight and preserve
 // the refresh cadence across brief tab switches instead of querying on every focus.
-export function startVisiblePoller(poll, intervalMs = 60000) {
+export function startVisiblePoller(poll, intervalMs = 60000, { repeat = true } = {}) {
   let stopped = false;
   let running = false;
   let timer = null;
@@ -11,6 +11,7 @@ export function startVisiblePoller(poll, intervalMs = 60000) {
     clearTimeout(timer);
     timer = null;
     if (stopped || document.hidden || running) return;
+    if (!repeat && lastStarted !== null) return;
     const delay = lastStarted === null ? 0 : Math.max(0, intervalMs - (Date.now() - lastStarted));
     timer = setTimeout(run, delay);
   };
@@ -25,18 +26,23 @@ export function startVisiblePoller(poll, intervalMs = 60000) {
     } catch (_) {
       // A failed UI refresh can retry at the ordinary cadence.
     } finally {
+      if (!repeat && controller.signal.aborted) lastStarted = null;
       running = false;
       controller = null;
       schedule();
     }
   };
 
-  document.addEventListener("visibilitychange", schedule);
+  const visibility = () => {
+    if (document.hidden) controller?.abort();
+    schedule();
+  };
+  document.addEventListener("visibilitychange", visibility);
   schedule();
   return () => {
     stopped = true;
     clearTimeout(timer);
     controller?.abort();
-    document.removeEventListener("visibilitychange", schedule);
+    document.removeEventListener("visibilitychange", visibility);
   };
 }

@@ -1732,6 +1732,93 @@ body.dashboard-mode {
   font-size: 0.64rem;
 }
 
+.ap-dashboard-redesign .viral-format-sort-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--ap-border);
+  border-radius: 10px;
+  background: rgba(5, 13, 25, 0.48);
+}
+
+.ap-dashboard-redesign .viral-format-sort-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.ap-dashboard-redesign .viral-format-sort-buttons > span {
+  color: var(--ap-muted);
+  font-size: 0.66rem;
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+.ap-dashboard-redesign .viral-format-sort-buttons > button {
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--ap-border);
+  border-radius: 999px;
+  color: var(--ap-text-soft);
+  background: rgba(8, 18, 33, 0.78);
+  font-size: 0.64rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ap-dashboard-redesign .viral-format-sort-buttons > button.active {
+  border-color: rgba(139, 92, 246, 0.55);
+  color: #fff;
+  background: rgba(109, 74, 255, 0.24);
+}
+
+.ap-dashboard-redesign .viral-aspect-pill,
+.ap-dashboard-redesign .viral-format-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.ap-dashboard-redesign .viral-aspect-pill {
+  border: 1px solid rgba(34, 211, 238, 0.35);
+  color: #67e8f9;
+  background: rgba(34, 211, 238, 0.1);
+}
+
+.ap-dashboard-redesign .viral-moment-formats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.ap-dashboard-redesign .viral-format-pill {
+  border: 1px solid rgba(139, 92, 246, 0.28);
+  color: #ddd6fe;
+  background: rgba(109, 74, 255, 0.12);
+}
+
+.ap-dashboard-redesign .viral-format-pill.is-top {
+  border-color: rgba(34, 197, 94, 0.42);
+  color: #bbf7d0;
+  background: rgba(34, 197, 94, 0.14);
+}
+
+.ap-dashboard-redesign .viral-format-pill.is-warn {
+  border-color: rgba(251, 191, 36, 0.42);
+  color: #fde68a;
+  background: rgba(251, 191, 36, 0.12);
+}
+
 @keyframes ap-viral-spin {
   to {
     transform: rotate(360deg);

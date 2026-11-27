@@ -1,0 +1,238 @@
+CREATE
+Viral Clip Studio
+🔈
+Explain This Tab
+Local Pilot
+demo-pilot-alice@example.test
+Overview
+
+CREATE
+
+Cam Combiner
+Find Viral Clips
+Viral Clip Studio
+
+PUBLISH
+
+Publisher
+Queue
+
+SETTINGS
+
+Connections
+Team
+Billing
+Security
+Need help getting started?
+Visit the docs →
+Sign out
+Personal workspace
+CREATE
+Viral Clip Studio
+
+Edit detected moments on the full timeline, refine hooks, and render short clips.
+
+⚠️ System status degraded: degraded
+VIRAL CLIP STUDIO
+Full source video loaded for manual editing
+Quick
+Creator
+Signature
+FX Flow
+● Local edit active
+● Local editing uses no credits
+↶ Undo
+↷ Redo
+×
+✦
+Director
+✦
+Moments
+✂
+Cut
+⌁
+Hook
+⌗
+Reframe
+CC
+Captions
+T
+Graphics
+◆
+Motion
+◫
+Composite
+☍
+Node Flow
+✦
+Effects FX
+✺
+Creator FX
+≋
+Pacing
+▣
+B-roll
+◐
+Color
+♫
+Sound
+⇧
+Export
+Preview
+Before
+After
+Compare
+▶
+Show media
+Hide timeline
+Preview quality
+Full detail · 100%
+Auto playback · full detail paused
+Half · 50%
+Quarter · 25%
+View options
+Full detail · paused · 1920×1080
+↻ Preview synced
+▶
+0:0.18 / 0:28.0
+🔊
+100%
+Graphics controls
+
+Select a text or image layer to edit position, size, opacity and timing. The layer appears only during its timeline range.
+
+AI CREATIVE DIRECTOR
+Return to story direction
+☷
+Titles & graphics
+Build headlines, labels and lower thirds
+0 layers
+Logo Workshop
+
+Build a symbol and custom lettering. Every letter becomes editable curves, including its counters. Design the mark here, then animate its pieces in Motion.
+
+Brand name
+Flow
+Ribbon ascent
+Orbit
+Interlocking motion
+Facet
+Geometric structure
+Prism
+3D crystal core
+Crown
+Sovereign apex crest
+Pulse
+Sonic kinetic wave
+Infinity
+Dual mobius loop
+Layout
+Horizontal lockup
+Stacked lockup
+Symbol only
+Lettering
+Inter Black
+Inter SemiBold
+Letter spacing
+Symbol size
+Cyber UltravioletCinema GoldEmerald SurgeSolar FlareNeon MagentaArctic Titanium
+Primary
+Accent
+Lettering
+Gradient symbol
+Luminous vector contour outline (trim-path ready)
+Assemble the pieces with editable motion keys
+Add logo to timeline
+Logo motion
+Import animated graphics
+Vector artwork · editable paths
+H1
+Headline
+Bold hook copy
+▤
+Lower third
+Name and context
+TAG
+Label
+Short callout
+T
+Add or select a title
+Every title is timed, positioned and animated independently.
+✓
+
+Show Everyone starts at 0.18s and is recorded on the framing track.
+
+Timeline
+Comp & Rig
+Speed / Value Graph
+Signal Node Flow
+Synced 1:1 with canonical Studio project & FFmpeg render compiler
+Split
+Trim Start
+Trim End
+More actions
+V
+Select
+C
+Razor
+B
+Ripple
+N
+Roll
+Y
+Slip
+U
+Slide
+H
+Hand
+Sequence tracks
+Composition layers
+At playhead
+Show empty tracks
+⌁ Snap
+⛓ Linked
+⇥ Ripple layers
+−
++
+Fit
+1×
+◆ Keyframes
+0:00
+0:05
+0:10
+0:15
+0:20
+0:25
+Front → back · one row per layer · bars show clip timing · groups clip their children
+V1
+Source video · base
+◉
+□
+▏
+algorithm-stage.mp4
+28.0s
+▕
+RF
+Framing
+◉
+□
+Show Everyone
+A2
+Original audio
+◉
+□
+M
+S
+L
+L50
+C
+R50
+R
+algorithm-stage.mp4 audio
+Select Tool
+Magnetic Snapping
+Audio/Video Linked
+0:00 · Show Everyone · 0:00–0:28
+00:00:00:05
+30 Fps
+Go

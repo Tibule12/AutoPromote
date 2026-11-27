@@ -1,0 +1,288 @@
+AUTOPROMOTE EDUCATION — CURRICULUM REFERENCE AND ASSESSMENT
+Private teacher-review candidate, 24 November 2026. No formal CAPS approval or endorsement. No proof of faster learning is claimed.
+The five byte lessons remain the first project. Concept labs follow: variable/loop state, validation/debugging, bubble sort and database relationships.
+Curriculum reference: https://www.education.gov.za/LinkClick.aspx?fileticket=sgM2WgtQFqU%3D&mid=1208&portalid=0&tabid=570
+Curriculum reference, not formal approval. Page numbers are PDF pages of the amendment. Original pseudocode/JavaScript/SQLite examples supplement the school language and DBMS; they do not replace the CAPS Delphi practical.
+
+REFERENCE MAP
+Variables and assignment / Grade 10 / amendment PDF pages 10
+Separate text states on a watch panel; Hold timing makes changes explicit.
+Conditional statements / Grade 10 / amendment PDF pages 10, 13
+Timed guards and a decision token show why a branch is chosen.
+Loops and trace tables / Grade 10 / amendment PDF pages 13, 14
+Fixed index labels, timed watch values and grouped reading tokens.
+Input validation and debugging / Grades 10–11 / amendment PDF pages 13, 20, 21
+Contrast an incorrect boundary with the repaired range; retain the failing case.
+One-dimensional arrays and bubble sort / Grade 11 / amendment PDF pages 18
+Grouped card/value pairs, neighbouring-slot outline and X/Y swap keys.
+Database design and SQL joins / Grades 11–12 / amendment PDF pages 21, 24, 25
+Separate table rows, primary/foreign-key labels and a moving relationship highlight.
+
+ASSESSMENT: CONCEPT FIRST, EDIT SECOND
+Suggested supplementary rubric (teacher may adapt, not an official CAPS rubric):
+40% technical correctness: valid representation, state, control flow, array bounds, stable identities, correct query result.
+30% explanation and transfer: justify a step, predict the next state, solve an unseen input and diagnose a deliberate defect.
+20% editable construction: named native layers, exact timings/keys, reproducible controls and complete export.
+10% accessibility and responsible use: readable text, understandable audio/transcript, permitted assets, fictional data, disclosed assistance.
+Do not award algorithm marks simply because an imported composition plays. Require a trace and a short independent explanation.
+Teacher review: watch each entire native result and its corresponding actual Studio walkthrough; check keys at transitions, labels, sequencing and misconceptions.
+A named teacher review and independent learner recreation are still required before release. Local technical checks are not those reviews.
+
+PRACTICALS AND ANSWER GUIDE
+
+1. From working code to a clear demonstration
+This example is an unsigned byte: its whole-number range is 0 through 255. The bit weights are 128, 64, 32, 16, 8, 4, 2 and 1. Eighteen is 16 + 2, so its eight-bit representation is 00010010.
+Exercise: Record a small program you wrote. Identify its input and output in two sentences, then import the recording and save a named project.
+Q1 (3 points): Does 00010010 represent 18 or 12? Explain using the bit weights.
+Reasoning guide: 18: the 16 and 2 positions are set. The remaining positions contribute zero.
+Q2 (2 points): Explain one editing decision that makes this IT idea clearer without changing the evidence.
+Reasoning guide: Name an actual control, its value, the visible result and why it helps a viewer understand the concept.
+Teacher review: The example remains a small JavaScript conversion program. It is not a claim that software must use JavaScript or that a video replaces source code assessment.
+Editing reproduction:
+Choose videos | Select normal-input.mp4 | This original screen recording shows a real conversion. Do not upload learner names, passwords or API keys.
+Open Creator Studio | Click once the uploaded source is ready | The preview is the programme monitor; the timeline determines what will be in the export.
+Reframe → 16:9 → Preserve frame | Aspect 16:9; automatic reframing off | A portrait crop can hide code or its output. A screen demonstration needs both readable.
+Play comparison | Play the complete input recording | Check that you can read the number, the Convert action and the eight-bit result.
+Project name; Save project | IT · Explain a byte · 01 | Save retains editable decisions. Downloading a movie will not replace your editable backup.
+Export → Resolution; Frame rate | 720p; 24 fps; H.264 | These match the lesson delivery. Higher resolution increases detail and file size; it does not correct an inaccurate explanation.
+
+2. Trim the wait. Keep the evidence.
+The edit selects source seconds 1 through 7, producing six seconds. The split at programme second 3 corresponds to source second 4. Neither split nor trim changes the algorithm.
+Exercise: Trim a recorded program demonstration to remove waiting. Make one useful split. Explain which evidence you deliberately kept.
+Q1 (3 points): Which source time is shown at edited output second 3 after trimming away the first second?
+Reasoning guide: Source second 4. Distinguish the recording clock from the edited programme clock.
+Q2 (2 points): Explain one editing decision that makes this IT idea clearer without changing the evidence.
+Reasoning guide: Name an actual control, its value, the visible result and why it helps a viewer understand the concept.
+Teacher review: No speed manipulation is needed. A precise cut is easier to follow than a sped-up screen.
+Editing reproduction:
+Choose videos; Open Creator Studio | normal-input.mp4 | Use the same original recording so your teacher can compare before and after.
+Edited output position; Cut → Trim start to here; Trim end to here | Seek to 1.0 s, trim start; seek to programme 6.0 s, trim end | This keeps source seconds 1–7. After trimming the start, the programme clock begins at zero again.
+Edited output position | 3.0 s | This is the programme clock after trimming, not three seconds into the original file.
+Split | Click at programme 3.0 s | A split creates two editable occurrences without deleting source footage.
+Play comparison | Play 0.0–6.0 s | The input, clicked action and result must still make sense.
+Save project; Export | 720p; 24 fps; H.264 | The exported duration should be six seconds. Reopen the editable project to retain both occurrences.
+
+3. Tell the story of a test
+A normal case is 18. Valid boundaries are 0 and 255. Invalid examples include 256, -1 and a fraction. The movie preserves observed outcomes; the test table records expected and actual outcomes.
+Exercise: Make a three-case video test report for your own program. Submit a test table with input, expected result and actual result alongside the movie.
+Q1 (3 points): Why are 255 and 256 different tests, even though they differ by only one?
+Reasoning guide: 255 is the maximum valid unsigned byte; 256 must be rejected. Together they expose an off-by-one error.
+Q2 (2 points): Explain one editing decision that makes this IT idea clearer without changing the evidence.
+Reasoning guide: Name an actual control, its value, the visible result and why it helps a viewer understand the concept.
+Teacher review: The example is a useful testing exercise, not a substitute for your teacher’s required test coverage.
+Editing reproduction:
+Choose videos; Open Creator Studio; Trim start to here; Trim end to here | normal-input.mp4; start 1 s; end 5 s | Four seconds establish the ordinary conversion.
+Import project videos; Add to sequence | boundary-input.mp4; programme 7 s → trim start; programme 8 s → trim end (source 3–7 s) | The original includes 0 and 255. Keep the maximum-value result readable.
+Import project videos; Add to sequence | invalid-input.mp4; programme 9 s → trim start; programme 12 s → trim end (source 1–5 s) | Show the 256 validation message. Do not label this as a successful conversion.
+Sequence tracks | Normal → Boundary → Invalid; 12 s total | Order communicates an argument. Dragging a source into the library alone does not place it in the programme.
+Edited output position; Play comparison | Inspect just before and after 4 s and 8 s | Watch for hidden output, missing validation and incorrect source timing.
+Save project; Export | 720p; 24 fps; H.264 | A twelve-second summary can accompany a longer written test table.
+
+4. Explain a result with readable text
+The label 18 = 16 + 2 names the two active weights. It must agree with the visible eight-bit result and must not cover the evidence.
+Exercise: Add one concise technical annotation to your program demonstration. Ask a classmate to explain what the label adds before giving them the answer.
+Q1 (3 points): If the input changes to 42, what should the explanatory label say?
+Reasoning guide: 42 = 32 + 8 + 2, with binary 00101010. An unchanged 18 label would be technically false.
+Q2 (2 points): Explain one editing decision that makes this IT idea clearer without changing the evidence.
+Reasoning guide: Name an actual control, its value, the visible result and why it helps a viewer understand the concept.
+Teacher review: This lesson uses manually written text. It makes no automatic-caption accuracy claim.
+Editing reproduction:
+Choose videos; Open Creator Studio | normal-input.mp4; start 1 s; end 7 s | Use the six-second source interval from the trimming lesson.
+Graphics → Add Text | 18 = 16 + 2 | Use an explanatory label. Automatic transcription is not required.
+Title start time; Title duration | Start 1 s; duration 4 s | The label should appear after the conversion and leave enough time for the viewer to read it.
+Graphics → Lower; Motion → Transform keyframes → Target layer → Y | X 50%; Y 93% | Choose the text layer, then set Y to 93%. This keeps the label below the test cards instead of covering their headings. Increasing Y moves the layer down the frame.
+Title size; Title text color; Title background color | Inter; size 100%; white #ffffff; background #0b1020; Headline defaults: weight 900, 45% box, 0.3 s entrance/exit fades | Check the actual result at lesson size. Do not rely on a small thumbnail.
+Play comparison; Save project; Export | 720p; 24 fps; H.264 | The words, timing and placement must agree in preview and export. If they do not, do not hand in the video.
+
+5. Give your demonstration a clear voice
+The spoken statement and the displayed bits must describe the same accepted value. Good sound cannot repair an incorrect conversion.
+Exercise: Record or write your own twenty-second explanation of a program test. Submit a private movie with a short reflection on one improvement you made after watching it.
+Q1 (3 points): Would the existing narration still be correct over footage of 255? Explain.
+Reasoning guide: No. Its statement about 18, 16 and 2 would disagree with 255, which uses all eight bit weights.
+Q2 (2 points): Explain one editing decision that makes this IT idea clearer without changing the evidence.
+Reasoning guide: Name an actual control, its value, the visible result and why it helps a viewer understand the concept.
+Teacher review: No public publishing is used in this pathway. Existing commercial-account exports may require credits; a school entitlement has not been enabled.
+Editing reproduction:
+Choose videos; Open Creator Studio | normal-input.mp4; start 1 s; end 7 s | Keep the six-second sequence and preserve the whole code/output frame.
+Sound → Import voiceover | byte-explanation.wav | The supplied voice is disclosed synthetic narration. Do not clone a learner or teacher.
+Start for byte-explanation.wav; Volume for byte-explanation.wav; Keep original audio | Start 0 s; volume 100%; Keep original audio off for this silent source | Gain changes loudness; moving the clip changes when the words align with the picture.
+Play comparison | Play the complete six seconds | “Eighteen” must refer to the visible input and “sixteen plus two” to the visible active bit weights.
+Export → Resolution; Frame rate; Codec | 720p; 24 fps; H.264; AAC | These are delivery settings, not instructions to publish publicly.
+Render Final Clip; Download Rendered Clip | Play the complete file, with sound | Listen for clipping, check duration and readability, then retain the editable backup alongside your code.
+
+6. Animate a loop and its changing variables
+Initialise i = 0 and sum = 0. While i is less than 3, add values[i] to sum, then increment i. The visits are indices 0, 1 and 2. Final state: i = 3, sum = 12. Reading an element does not remove or change it. The condition prevents an out-of-bounds access.
+Exercise: Change the original example to [3, 5, 7]. Submit a trace table before adjusting text states and token timing. Show final i = 3 and sum = 15. Explain why a fourth read would be incorrect.
+Q1 (2 points): Predict the final sum if it starts at 10.
+Reasoning guide: 22, because 2 + 4 + 6 is added to the initial 10.
+Q2 (3 points): Why does i = 3 stop the loop?
+Reasoning guide: There are three elements at indices 0–2. The condition i < 3 is false at 3; values[3] must not be read.
+Q3 (2 points): How many reads and additions occur?
+Reasoning guide: Three of each. The source array remains [2, 4, 6].
+Teacher review: Pause before each update and ask learners to predict i and sum. Assess the trace before the animation. Copying an imported recipe without predicting states does not demonstrate loop understanding.
+Editing reproduction:
+Choose videos → algorithm-stage.mp4 → Open Creator Studio → Reframe | 16:9; Preserve frame; Rounded main footage off; preview captions off; source sound and voice repair off | The stage has no finished animation. The native layers and timeline supply the concept demonstration.
+Graphics → Import animated graphics → Import graphics composition… | variables-loops.graphics.json; composition 1280 × 720; duration 28 seconds | The composition expands to ordinary editable artwork, text, groups and keys. It is not a pre-rendered animation.
+Graphics → Titles / Vector artwork; Motion → Target layer | Inter text; rotation 0; opacity 1; native rectangle geometry; exact layer sizes and timings in the parameter tables below | Separate labels from animated values. A teacher or learner can correct wording and state without rebuilding a movie elsewhere.
+Composite → Graphic groups → Read value 2 · copied token → Curve keyframe | y · 5.500s; Selected group key value = 26; Selected group key easing = Ease In Out | This is an actual group-property key. The percentages are offsets from the original layer positions, not absolute slot coordinates.
+Edited output position; Play comparison; pause before each transition | Programme seconds 0–28; follow the exact layer timing and property-key tables | Predict each concept state before watching it. A smooth animation must still represent the correct algorithm or query.
+Save project → Export → Export resolution / Export frame rate → Render Final Clip | 720p; 24 fps; H.264; AAC if narration is added; one normal render after account confirmation | Save the editable project separately, then download and review the entire movie. Local proof does not guarantee every production route.
+Exact keys (programme seconds; group X/Y offsets in canvas percent; easing into arriving key):
+current-index | opacity | 0s | 0 | hold
+current-index | opacity | 3s | 1 | hold
+current-index | opacity | 21s | 0 | hold
+current-index | x | 0s | 25 | hold
+current-index | x | 9s | 50 | hold
+current-index | x | 15s | 75 | hold
+Read value 2 · copied token | x | 0s | 0 | hold
+Read value 2 · copied token | x | 3.5s | 0 | hold
+Read value 2 · copied token | x | 5.5s | 25 | ease_in_out
+Read value 2 · copied token | y | 0s | 0 | hold
+Read value 2 · copied token | y | 3.5s | 0 | hold
+Read value 2 · copied token | y | 5.5s | 26 | ease_in_out
+Read value 4 · copied token | x | 0s | 0 | hold
+Read value 4 · copied token | x | 9.5s | 0 | hold
+Read value 4 · copied token | x | 11.5s | 0 | ease_in_out
+Read value 4 · copied token | y | 0s | 0 | hold
+Read value 4 · copied token | y | 9.5s | 0 | hold
+Read value 4 · copied token | y | 11.5s | 26 | ease_in_out
+Read value 6 · copied token | x | 0s | 0 | hold
+Read value 6 · copied token | x | 15.5s | 0 | hold
+Read value 6 · copied token | x | 17.5s | -25 | ease_in_out
+Read value 6 · copied token | y | 0s | 0 | hold
+Read value 6 · copied token | y | 15.5s | 0 | hold
+Read value 6 · copied token | y | 17.5s | 26 | ease_in_out
+
+7. Make a validation bug visible
+The Byte Lab accepts one to three decimal digits after trimming and then requires a numeric value from 0 through 255. The input 256 passes the format check but fails the range check. An incorrect maximum of 256 accepts a nine-bit number, not an eight-bit unsigned byte. Fix the maximum, rerun the failing case and test valid boundaries. The illustrative broken path is labelled BUG; it is not the behaviour of the supplied working app.
+Exercise: Create a test table including blank input, 0, 255, 256, -1, 18.5 and 18. Animate two contrasting decisions, label the deliberately broken rule and show the retest after correction.
+Q1 (2 points): Which check rejects 256 in the supplied app?
+Reasoning guide: The range check; 256 has an accepted digits-only format but is greater than 255.
+Q2 (4 points): Give expected results for 0, 255, -1 and 18.5.
+Reasoning guide: 0 and 255 are valid and produce 00000000 and 11111111. -1 and 18.5 are rejected by the digits-only format guard.
+Q3 (2 points): Why is silently dropping the ninth bit not a valid fix?
+Reasoning guide: It changes the value and hides invalid input. Reject it or define a different numeric representation explicitly.
+Teacher review: The film contrasts a deliberately broken rule with the working Byte Lab guard. Ask the learner to name the defect, input, expected result, observed result and correction. Do not confuse format validation with proof that user data is true.
+Editing reproduction:
+Choose videos → algorithm-stage.mp4 → Open Creator Studio → Reframe | 16:9; Preserve frame; Rounded main footage off; preview captions off; source sound and voice repair off | The stage has no finished animation. The native layers and timeline supply the concept demonstration.
+Graphics → Import animated graphics → Import graphics composition… | validation-debugging.graphics.json; composition 1280 × 720; duration 28 seconds | The composition expands to ordinary editable artwork, text, groups and keys. It is not a pre-rendered animation.
+Graphics → Titles / Vector artwork; Motion → Target layer | Inter text; rotation 0; opacity 1; native rectangle geometry; exact layer sizes and timings in the parameter tables below | Separate labels from animated values. A teacher or learner can correct wording and state without rebuilding a movie elsewhere.
+Composite → Graphic groups → Rejection path · decision token → Curve keyframe | x · 7.000s; Selected group key value = 30; Selected group key easing = Ease In Out | This is an actual group-property key. The percentages are offsets from the original layer positions, not absolute slot coordinates.
+Edited output position; Play comparison; pause before each transition | Programme seconds 0–28; follow the exact layer timing and property-key tables | Predict each concept state before watching it. A smooth animation must still represent the correct algorithm or query.
+Save project → Export → Export resolution / Export frame rate → Render Final Clip | 720p; 24 fps; H.264; AAC if narration is added; one normal render after account confirmation | Save the editable project separately, then download and review the entire movie. Local proof does not guarantee every production route.
+Exact keys (programme seconds; group X/Y offsets in canvas percent; easing into arriving key):
+Rejection path · decision token | x | 0s | 0 | hold
+Rejection path · decision token | x | 5s | 0 | hold
+Rejection path · decision token | x | 7s | 30 | ease_in_out
+Rejection path · decision token | y | 0s | 0 | hold
+Rejection path · decision token | y | 5s | 0 | hold
+Rejection path · decision token | y | 7s | -6 | ease_in_out
+
+8. Animate bubble sort, comparison by comparison
+This ascending, zero-based example swaps only when the left value is greater than the right. After pass 1, [1, 4, 2, 5] has the largest value fixed on the right. Pass 2 produces [1, 2, 4, 5]. Pass 3 performs one comparison without a swap and stops. There are six comparisons and four swaps. The strict greater-than rule preserves the order of equal keys; this four-distinct-value film alone does not prove stability.
+Exercise: Trace [3, 2A, 2B, 1] on paper, then rebuild the Studio animation. Keep equal values in their initial order, count comparisons and swaps, label each pass and explain the rule without relying on colour.
+Q1 (3 points): Write the array after pass 1 and explain why its last value is settled.
+Reasoning guide: [1, 4, 2, 5]. Each comparison passes the larger value rightward, so the largest ends in the final slot.
+Q2 (2 points): Count comparisons and swaps separately.
+Reasoning guide: 6 comparisons and 4 swaps. Pass comparison counts are 3, 2 and 1; swap counts are 3, 1 and 0.
+Q3 (3 points): Why should equal values not swap in a stable ascending version?
+Reasoning guide: Strict > avoids exchanging equal keys, preserving their original relative order. Demonstrate with labelled duplicates, not just two indistinguishable 2s.
+Q4 (2 points): What prevents j + 1 going out of bounds?
+Reasoning guide: Use j < end with end initially n - 1, then reduce end after each pass. The largest accessed index is end.
+Teacher review: Reject an attractive animation if it swaps non-neighbours, loses a value, changes a fixed index or labels a comparison as a completed swap too early. Ask for a prediction on a new input. The zero-based pseudocode is an original teaching reference; adapt implementation to the class language.
+Editing reproduction:
+Choose videos → algorithm-stage.mp4 → Open Creator Studio → Reframe | 16:9; Preserve frame; Rounded main footage off; preview captions off; source sound and voice repair off | The stage has no finished animation. The native layers and timeline supply the concept demonstration.
+Graphics → Import animated graphics → Import graphics composition… | bubble-sort.graphics.json; composition 1280 × 720; duration 28 seconds | The composition expands to ordinary editable artwork, text, groups and keys. It is not a pre-rendered animation.
+Graphics → Titles / Vector artwork; Motion → Target layer | Inter text; rotation 0; opacity 1; native rectangle geometry; exact layer sizes and timings in the parameter tables below | Separate labels from animated values. A teacher or learner can correct wording and state without rebuilding a movie elsewhere.
+Composite → Graphic groups → Element 5 · card + value → Curve keyframe | x · 4.250s; Selected group key value = 17; Selected group key easing = Ease In Out | This is an actual group-property key. The percentages are offsets from the original layer positions, not absolute slot coordinates.
+Edited output position; Play comparison; pause before each transition | Programme seconds 0–28; follow the exact layer timing and property-key tables | Predict each concept state before watching it. A smooth animation must still represent the correct algorithm or query.
+Save project → Export → Export resolution / Export frame rate → Render Final Clip | 720p; 24 fps; H.264; AAC if narration is added; one normal render after account confirmation | Save the editable project separately, then download and review the entire movie. Local proof does not guarantee every production route.
+Exact keys (programme seconds; group X/Y offsets in canvas percent; easing into arriving key):
+Compared neighbouring slots | opacity | 0s | 0 | hold
+Compared neighbouring slots | opacity | 2s | 1 | hold
+Compared neighbouring slots | opacity | 20s | 0 | hold
+Compared neighbouring slots | x | 0s | 32.5 | hold
+Compared neighbouring slots | x | 2s | 32.5 | hold
+Compared neighbouring slots | x | 5s | 49.5 | hold
+Compared neighbouring slots | x | 8s | 66.5 | hold
+Compared neighbouring slots | x | 11s | 32.5 | hold
+Compared neighbouring slots | x | 14s | 49.5 | hold
+Compared neighbouring slots | x | 17s | 32.5 | hold
+Element 5 · card + value | x | 0s | 0 | hold
+Element 5 · card + value | y | 0s | 0 | hold
+Element 5 · card + value | x | 3s | 0 | hold
+Element 5 · card + value | x | 4.25s | 17 | ease_in_out
+Element 5 · card + value | y | 3s | 0 | hold
+Element 5 · card + value | y | 3.625s | -10 | ease_in_out
+Element 5 · card + value | y | 4.25s | 0 | ease_in_out
+Element 5 · card + value | x | 6s | 17 | hold
+Element 5 · card + value | x | 7.25s | 34 | ease_in_out
+Element 5 · card + value | y | 6s | 0 | hold
+Element 5 · card + value | y | 6.625s | -10 | ease_in_out
+Element 5 · card + value | y | 7.25s | 0 | ease_in_out
+Element 5 · card + value | x | 9s | 34 | hold
+Element 5 · card + value | x | 10.25s | 51 | ease_in_out
+Element 5 · card + value | y | 9s | 0 | hold
+Element 5 · card + value | y | 9.625s | -10 | ease_in_out
+Element 5 · card + value | y | 10.25s | 0 | ease_in_out
+Element 1 · card + value | x | 0s | 0 | hold
+Element 1 · card + value | y | 0s | 0 | hold
+Element 1 · card + value | x | 3s | 0 | hold
+Element 1 · card + value | x | 4.25s | -17 | ease_in_out
+Element 1 · card + value | y | 3s | 0 | hold
+Element 1 · card + value | y | 3.625s | 10 | ease_in_out
+Element 1 · card + value | y | 4.25s | 0 | ease_in_out
+Element 4 · card + value | x | 0s | 0 | hold
+Element 4 · card + value | y | 0s | 0 | hold
+Element 4 · card + value | x | 6s | 0 | hold
+Element 4 · card + value | x | 7.25s | -17 | ease_in_out
+Element 4 · card + value | y | 6s | 0 | hold
+Element 4 · card + value | y | 6.625s | 10 | ease_in_out
+Element 4 · card + value | y | 7.25s | 0 | ease_in_out
+Element 4 · card + value | x | 15s | -17 | hold
+Element 4 · card + value | x | 16.25s | 0 | ease_in_out
+Element 4 · card + value | y | 15s | 0 | hold
+Element 4 · card + value | y | 15.625s | -10 | ease_in_out
+Element 4 · card + value | y | 16.25s | 0 | ease_in_out
+Element 2 · card + value | x | 0s | 0 | hold
+Element 2 · card + value | y | 0s | 0 | hold
+Element 2 · card + value | x | 9s | 0 | hold
+Element 2 · card + value | x | 10.25s | -17 | ease_in_out
+Element 2 · card + value | y | 9s | 0 | hold
+Element 2 · card + value | y | 9.625s | 10 | ease_in_out
+Element 2 · card + value | y | 10.25s | 0 | ease_in_out
+Element 2 · card + value | x | 15s | -17 | hold
+Element 2 · card + value | x | 16.25s | -34 | ease_in_out
+Element 2 · card + value | y | 15s | 0 | hold
+Element 2 · card + value | y | 15.625s | 10 | ease_in_out
+Element 2 · card + value | y | 16.25s | 0 | ease_in_out
+
+9. Show how a database relationship makes a result
+Teams.id and Entries.id are primary keys in different tables. Entries.teamId references Teams.id. Joining matching IDs adds the team name to each entry. Filtering score >= 70 keeps entries 102 and 103; ordering score descending returns Prism 80 then Orbit 75. The storyboard presents the query conceptually; it is not a claim about the database engine’s physical execution order. Studio animates the explanation and does not execute SQL.
+Exercise: Add an entry for team 20 with score 72 in the SQL file. Predict the result, run it in an approved classroom DBMS and update the editable explanation. Discuss ties and add a secondary ORDER BY key if you need a deterministic tied order.
+Q1 (3 points): Why can Entries.teamId contain 10 more than once?
+Reasoning guide: Different entries may belong to the same team. A foreign key may repeat; each primary key identifies one row in its own table.
+Q2 (3 points): What does the query return and why is Prism first?
+Reasoning guide: Prism 80 then Orbit 75. Both scores meet >= 70, and descending order places 80 before 75.
+Q3 (2 points): Would an unmatched entry appear in this INNER JOIN?
+Reasoning guide: No. INNER JOIN requires a matching Teams.id. A properly enforced foreign-key constraint prevents such an orphan from being inserted.
+Q4 (2 points): Does moving a highlight in Studio run the SQL?
+Reasoning guide: No. SQL is independently executed in the supplied example; Studio supplies the visual explanation.
+Teacher review: Use only the fictional practice IDs. Review the actual SQL result and key constraints separately from the animation. The SQLite-compatible file is a supplementary example; school DBMS syntax and the current teaching plan remain authoritative.
+Editing reproduction:
+Choose videos → algorithm-stage.mp4 → Open Creator Studio → Reframe | 16:9; Preserve frame; Rounded main footage off; preview captions off; source sound and voice repair off | The stage has no finished animation. The native layers and timeline supply the concept demonstration.
+Graphics → Import animated graphics → Import graphics composition… | database-joins.graphics.json; composition 1280 × 720; duration 28 seconds | The composition expands to ordinary editable artwork, text, groups and keys. It is not a pre-rendered animation.
+Graphics → Titles / Vector artwork; Motion → Target layer | Inter text; rotation 0; opacity 1; native rectangle geometry; exact layer sizes and timings in the parameter tables below | Separate labels from animated values. A teacher or learner can correct wording and state without rebuilding a movie elsewhere.
+Composite → Graphic groups → Relationship highlight · matching IDs → Curve keyframe | x · 13.000s; Selected group key value = 46; Selected group key easing = Ease In Out | This is an actual group-property key. The percentages are offsets from the original layer positions, not absolute slot coordinates.
+Edited output position; Play comparison; pause before each transition | Programme seconds 0–28; follow the exact layer timing and property-key tables | Predict each concept state before watching it. A smooth animation must still represent the correct algorithm or query.
+Save project → Export → Export resolution / Export frame rate → Render Final Clip | 720p; 24 fps; H.264; AAC if narration is added; one normal render after account confirmation | Save the editable project separately, then download and review the entire movie. Local proof does not guarantee every production route.
+Exact keys (programme seconds; group X/Y offsets in canvas percent; easing into arriving key):
+relation-marker | opacity | 0s | 0 | hold
+relation-marker | opacity | 10s | 1 | hold
+relation-marker | opacity | 15s | 0 | hold
+Relationship highlight · matching IDs | x | 0s | 0 | hold
+Relationship highlight · matching IDs | x | 10s | 0 | hold
+Relationship highlight · matching IDs | x | 13s | 46 | ease_in_out
+Relationship highlight · matching IDs | y | 0s | 0 | hold
+Relationship highlight · matching IDs | y | 10s | 0 | hold
+Relationship highlight · matching IDs | y | 13s | -12 | ease_in_out

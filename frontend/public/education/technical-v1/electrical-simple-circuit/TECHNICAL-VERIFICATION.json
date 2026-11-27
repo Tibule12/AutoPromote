@@ -1,0 +1,138 @@
+{
+  "lessonId": "electrical-simple-circuit",
+  "sha256": "f4b2b0e520fddbb3eb14a0b8469eb76f6770c76ec960684001ff1a9cd73729d8",
+  "framesDecoded": 672,
+  "seconds": 28.0,
+  "width": 1280,
+  "height": 720,
+  "fps": 24.0,
+  "allFramesNonblank": true,
+  "nativeWorkflowProof": "tutorial/proof.json",
+  "geometryAssessment": {
+    "sourceVoltsLabel": 3,
+    "currentExternalDirection": "positive to negative",
+    "markerPathPixels": [
+      [
+        240.0,
+        280.0
+      ],
+      [
+        240.0,
+        200.0
+      ],
+      [
+        500.0,
+        200.0
+      ],
+      [
+        620.0,
+        200.0
+      ],
+      [
+        900.0,
+        200.0
+      ],
+      [
+        900.0,
+        350.0
+      ],
+      [
+        900.0,
+        520.0
+      ],
+      [
+        240.0,
+        520.0
+      ],
+      [
+        240.0,
+        420.0
+      ]
+    ],
+    "markersOnlyWhileClosed": true,
+    "switchLightCausalFrameCheck": true,
+    "illustrationNotSimulation": true,
+    "supervisedPracticalBoundary": true,
+    "measuredCurrentOrElectronSpeed": false,
+    "assessment": "Bounded geometry/kinematic/timing checks; not educator sign-off",
+    "teacherFeedbackReceived": false,
+    "independentLearnerRecreation": false,
+    "schoolHardwareTrial": false
+  },
+  "pairedPreFinalPreview": [
+    {
+      "time": 8,
+      "meanAbsoluteRgbDifference": 5.243625217013889,
+      "p95RgbDifference": 7.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 192,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    },
+    {
+      "time": 9.5,
+      "meanAbsoluteRgbDifference": 6.153469328703704,
+      "p95RgbDifference": 10.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 228,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    },
+    {
+      "time": 14,
+      "meanAbsoluteRgbDifference": 5.626210214120371,
+      "p95RgbDifference": 6.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 336,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    },
+    {
+      "time": 24.1,
+      "meanAbsoluteRgbDifference": 5.421999421296296,
+      "p95RgbDifference": 7.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 578,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    },
+    {
+      "time": 25,
+      "meanAbsoluteRgbDifference": 6.838077980324074,
+      "p95RgbDifference": 8.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 600,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    }
+  ],
+  "nativeGearMotion": null,
+  "strictWholeStudioPixelParity": false,
+  "externalTeacherReview": false,
+  "independentLearnerRecreation": false,
+  "actualSchoolHardwareTrial": false,
+  "creativeOwnerApproval": false,
+  "reviewLimit": "Geometry/kinematic/timing and actual decoded-film checks support a private teacher-review candidate. Teachers must judge educational suitability and practical terminology; full human listening and school-device trials remain required.",
+  "audioRms": 0.11573281139135361,
+  "noSubtitleTracks": true,
+  "nativePixelSemanticChecks": {
+    "all672NativeLampStatesMatchClosureInterval": true,
+    "all672NativeLeverAnglesMatchKeys": true,
+    "leverAngleToleranceDegrees": 3,
+    "currentMarkerVisibleFrames": 314,
+    "currentIndicatorOnlyWhileClosed": true,
+    "lampOffMedianLuma": 17.4544,
+    "lampOnMedianLuma": 136.66439999999997,
+    "source": "Every actual native output frame; illustrative direction indicators, no electrical simulation or measurement claim."
+  }
+}

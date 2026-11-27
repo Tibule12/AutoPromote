@@ -1,0 +1,22 @@
+SUPPLEMENTARY TEACHER REVIEW
+Find the fault, fix it, retest
+
+Reproduce the missing-file error and identify the exact reference (4).
+Correct the filename mismatch and explain extension validity (4).
+Retest the real link and record expected/actual outcomes (4).
+Align the source/output highlights and error/correction stages accurately (4).
+Recreate the native edit and justify a useful prediction prompt (4).
+
+REASONING GUIDE
+Are all .htm links wrong?
+No. Both .htm and .html can be valid filenames. This example fails because the referenced file does not exist at that path.
+
+Why should you click the link after changing href?
+Changing source alone does not prove the issue is resolved. Retest the actual navigation and confirm the intended destination.
+
+What belongs in the test table?
+The test/action, expected result, actual result and outcome. Keep the original failed case, the correction and the successful retest as distinct evidence.
+
+Reference: DBE CAT CAPS 2024 Section 3 amendment, PDF pages 20, 26, 29.
+https://www.education.gov.za/Portals/0/Documents/Publications/2025/CAT%20CAPS%202024%20-Section%203.pdf?ver=2025-11-28-102551-830
+No formal CAPS approval claimed. Teacher feedback and independent learner recreation are pending.

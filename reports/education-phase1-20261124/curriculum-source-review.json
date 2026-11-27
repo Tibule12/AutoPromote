@@ -1,0 +1,23 @@
+{
+  "reviewedAt": "2026-11-24",
+  "officialSource": {
+    "title": "DBE IT CAPS 2024 \u00b7 Section 3 amendment",
+    "url": "https://www.education.gov.za/LinkClick.aspx?fileticket=sgM2WgtQFqU%3D&mid=1208&portalid=0&tabid=570",
+    "portal": "https://www.education.gov.za/Curriculum/CurriculumAssessmentPolicyStatements(CAPS)/CAPSFET.aspx",
+    "reviewed": "2026-11-24",
+    "scope": "Curriculum reference, not formal approval. Page numbers are PDF pages of the amendment. Original pseudocode/JavaScript/SQLite examples supplement the school language and DBMS; they do not replace the CAPS Delphi practical."
+  },
+  "filesReadLocally": [
+    {
+      "file": "IT-CAPS-Gr10-12.pdf",
+      "bytes": 7952613,
+      "sha256": "caf78e5ec2173fbc74044c936ae62d1b0bf3b979f122858e342fb1fc99510557"
+    },
+    {
+      "file": "IT-CAPS-2024-Section3.pdf",
+      "bytes": 2182992,
+      "sha256": "b44a1f8fcb15ee490e52fb706bf6b9c45e90345f6f1037d2e7994f31bda73a22"
+    }
+  ],
+  "interpretation": "Original supplementary examples referencing the listed topics. Not formal approval, exhaustive coverage or a replacement for the school teaching plan/language/DBMS."
+}

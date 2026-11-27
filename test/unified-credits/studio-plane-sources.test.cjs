@@ -57,3 +57,20 @@ test('saved expired music renews against the owned admission manifest; foreign o
   await assert.rejects(gateway.prepare('owner',{operation:'studio.render',route:'/api/media/process',requestBody:foreign}),e=>e.code==='SOURCE_FORBIDDEN');assert.equal(records.length,1);assert.equal(quotes,1);
  }finally{Date.now=now;fs.rmSync(directory,{recursive:true,force:true});for(const key of Object.keys(process.env))if(!(key in previous))delete process.env[key];Object.assign(process.env,previous);}
 });
+
+test('local attachment intent is signed and download streams retain ownership and tamper checks',async()=>{
+ const previous={...process.env};Object.assign(process.env,{NODE_ENV:'test',UNIFIED_CREDITS_SANDBOX:'true',UNIFIED_CREDITS_PROJECT_ID:'demo-autopromote-credits',FIRESTORE_EMULATOR_HOST:'127.0.0.1:12345'});
+ try{
+  const bytes=Buffer.from('native movie');let generation='1';const db={projectId:'demo-autopromote-credits',_settings:{servicePath:'127.0.0.1',port:12345,ssl:false}};
+  const bucket={name:'demo-autopromote-credits',file:()=>({getMetadata:async()=>[{size:bytes.length,generation,contentType:'video/mp4',metadata:{ownerUid:'owner'}}],download:async()=>[bytes]})};
+  const gateway=createSourceGateway({db,bucket,origin:'http://127.0.0.1:1',storageOrigin:'http://127.0.0.1:2',secret:'unit-local',cohort:['owner'],admission:{},service:{}});
+  const inline=await gateway.signedUrl('owner','studio/sources/owner/result.mp4');const attachment=await gateway.signedUrl('owner','studio/sources/owner/result.mp4',{attachment:true});
+  const response=()=>({headers:{},set(k,v){if(typeof k==='object')Object.assign(this.headers,k);else this.headers[k]=v;return this},send(b){this.bytes=b;return this},sendStatus(s){this.status=s;return this}});
+  const request=url=>({originalUrl:new URL(url).pathname+new URL(url).search,path:new URL(url).pathname,get:()=>undefined});
+  const a=response();await gateway.stream(request(attachment),a);assert.equal(a.headers['Content-Disposition'],'attachment; filename="result.mp4"');assert.deepEqual(a.bytes,bytes);
+  const i=response();await gateway.stream(request(inline),i);assert.equal(i.headers['Content-Disposition'],undefined);
+  const tampered=new URL(inline),[payload,signature]=tampered.searchParams.get('cap').split('.');const changed=JSON.parse(Buffer.from(payload,'base64url'));changed.attachment=true;tampered.searchParams.set('cap',Buffer.from(JSON.stringify(changed)).toString('base64url')+'.'+signature);await assert.rejects(gateway.stream(request(tampered.href),response()));
+  generation='2';const conflict=response();await gateway.stream(request(attachment),conflict);assert.equal(conflict.status,409);
+  await assert.rejects(gateway.signedUrl('other','studio/sources/owner/result.mp4',{attachment:true}),e=>e.code==='SOURCE_FORBIDDEN');
+ }finally{for(const k of Object.keys(process.env))if(!(k in previous))delete process.env[k];Object.assign(process.env,previous)}
+});

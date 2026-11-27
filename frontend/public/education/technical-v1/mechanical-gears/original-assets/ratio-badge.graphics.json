@@ -1,0 +1,29 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Ratio badge \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Ratio badge",
+      "name": "Ratio badge",
+      "type": "text",
+      "text": "2 : 1",
+      "x": 84.375,
+      "y": 41.94444444444444,
+      "width": 94,
+      "scale": 1.22,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ffcc79",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

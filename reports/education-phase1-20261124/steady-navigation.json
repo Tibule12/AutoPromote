@@ -1,0 +1,17 @@
+{
+  "normalAuthenticatedStudio": true,
+  "continuousCapture": true,
+  "visibleWheelEvents": 10,
+  "automaticScrollCalls": 0,
+  "captionTracks": 0,
+  "addedTeachingBanner": false,
+  "duplicatedControlInset": false,
+  "localDemoBadgeVisible": false,
+  "renderStarted": false,
+  "voiceCueCount": 12,
+  "durationSeconds": 68.083333,
+  "sha256": "85316f7181f95440157a2aeb7807af20fc4a318c3cb52d85227c2974b1e994c5",
+  "nativeConceptMoviesChanged": false,
+  "ownerTeachingApproval": false,
+  "teacherReview": false
+}

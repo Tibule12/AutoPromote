@@ -1,4 +1,244 @@
 {
+  "educationPresentationRelease20261127": {
+    "date": "2026-11-27",
+    "scope": "Owner-authorised public teacher-review release of the four completed native technical lessons; existing IT and CAT gates preserved.",
+    "evidenceRefs": [
+      "reports/education-release-20261127/README.md",
+      "frontend/public/education/technical-v1/release-manifest.json",
+      "reports/education-technical-20261125/native-verification.json",
+      "reports/education-technical-20261125/kit-recreation.json"
+    ],
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "teacherFeedbackReceived": false,
+    "independentLearnerRecreation": false,
+    "schoolHardwareTrial": false,
+    "formalCAPSApproval": false,
+    "deploymentAuthorization": "Owner: deploy man education updates, 27 November 2026",
+    "learnerEnrolment": false,
+    "paidGpuJobs": 0,
+    "blockers": [
+      "External educator feedback, independent learner recreation and actual school device trials remain pending.",
+      "Shared S02/S04/S03 and historical typography13/16 limits remain unchanged."
+    ]
+  },
+  "technicalTeaching20261125": {
+    "date": "2026-11-25",
+    "scope": "Four complete private technical-school review packages using native Studio: EGD third-angle views,20/40 gears, low-voltage conventional-current illustration and stretcher-bond sequence. Preserve IT/CAT.",
+    "evidenceRefs": [
+      "reports/education-technical-20261125/README.md",
+      "reports/education-technical-20261125/curriculum-references.json",
+      "reports/education-technical-20261125/native-verification.json",
+      "reports/education-technical-20261125/delivery-verification.json",
+      "reports/education-technical-20261125/kit-recreation.json",
+      "reports/education-technical-20261125/owner-backup-restore.json",
+      "reports/education-technical-20261125/page-verification.json",
+      "reports/education-technical-20261125/preserved-existing-work.json",
+      "reports/education-technical-20261125/validation.json"
+    ],
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "teacherFeedbackReceived": false,
+    "independentLearnerRecreation": false,
+    "schoolHardwareTrial": false,
+    "formalCAPSApproval": false,
+    "paidGpuJobs": 0,
+    "productionDeployment": false,
+    "rejectedFirstTakesRetained": true,
+    "blockers": [
+      "External teacher/principal and owner creative/listening review pending",
+      "Independent learner recreation and actual school hardware/connectivity trials pending",
+      "Normal public build excludes the technical package; production deployment requires owner approval",
+      "Whole-Studio predictive pixel/colour/audio/edge/latency parity and shared S02/S04/S03 remain unqualified"
+    ]
+  },
+  "catTeaching20261125": {
+    "date": "2026-11-25",
+    "scope": "Dedicated private CAT HTML teacher-evaluation pathway; preserve IT work. Six real HTML/browser sources with native Studio focus motion, exact recipes, separate concept/editing exercises and teacher criteria. Per-artifact native/tutorial receipts are authoritative.",
+    "evidenceRefs": [
+      "reports/education-cat-20261124/README.md",
+      "reports/education-cat-20261124/curriculum-reference.json",
+      "reports/education-cat-20261124/html-accuracy.json",
+      "reports/education-cat-20261124/pathway-pages.json",
+      "reports/education-cat-20261124/graphics-fixed-images.json",
+      "reports/education-cat-20261124/delivery-verification.json",
+      "reports/education-cat-20261124/preserved-it.json",
+      "reports/education-cat-20261124/teacher-pack-player.json",
+      "reports/education-cat-20261124/review-hub-verification.json",
+      "reports/education-cat-20261124/printable-materials.json",
+      "reports/education-cat-20261124/additional-delivery-verification.json",
+      "reports/education-cat-20261124/additional-html-accuracy.json",
+      "reports/education-cat-20261124/additional-full-movie-playback.json",
+      "reports/education-cat-20261124/public-review-notes.json"
+    ],
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "teacherFeedbackReceived": false,
+    "formalCAPSApproval": false,
+    "paidCloudJobs": 0,
+    "preservedITPathway": true,
+    "fullFrame": "16:9, Fit full, Rounded frame off; header/footer reserved for text",
+    "captionTracks": false,
+    "graphicsImageFix": "Nested logo SVG master no longer duplicates preserveAspectRatio; XML and real browser decode verified.",
+    "localDownloadFix": "Signed local attachment intent is honoured after the same owner/generation/hash checks; no production signing change.",
+    "blockers": [
+      "Owner picture/listening approval, professional teacher usefulness/grade/pacing feedback and independent beginner recreation remain pending.",
+      "These are six focused supplementary mini-lessons, not complete CAT coverage or approval. Teacher must confirm current ATP/tag sheet.",
+      "No school/learner enrolment, new entitlement or paid rendering; owner authorises this bounded live teacher presentation, not broad readiness.",
+      "Shared S02/S04/S03, whole picture/audio/colour/edge/latency parity and strict typography 13/16 failures remain unchanged."
+    ],
+    "completedNativeMovies": 6,
+    "completedDetailedTutorials": 6,
+    "nativeMovieSecondsEach": 28,
+    "nativeExportsAndColdRecoveryVerified": true,
+    "captureLimitFailureRetained": true,
+    "explicitSavedProjectContinuation": true,
+    "completeRuntimeReplayQualified": false,
+    "singlePageReviewHub": {
+      "videoCount": 12,
+      "finishedFilmCount": 6,
+      "studioGuideCount": 6,
+      "realHTMLAndSource": true,
+      "printablePDFCount": 12,
+      "completeOfflineZIP": true,
+      "deviceLocalNotesAndDownload": true,
+      "approvalInferred": false,
+      "originalThreeNativeMoviesUnchanged": true,
+      "deviceNotesSurviveGuestSessionCleanup": true
+    },
+    "additionalLessons": {
+      "nativeExports": 3,
+      "additionalRendersForRecovery": 0,
+      "snapshotFailureRetained": true,
+      "sourceAndCompletedDeliveryRecovery": true,
+      "fullOriginalRuntimeReplayQualified": false
+    },
+    "ownerAuthorizedLiveTeacherPresentation": true
+  },
+  "education20261124": {
+    "date": "2026-11-24",
+    "evidenceRefs": [
+      "reports/education-phase1-20261124/README.md",
+      "reports/education-phase1-20261124/lesson-verification.json",
+      "reports/education-phase1-20261124/concept-verification.json",
+      "reports/education-phase1-20261124/guided-first-project.json",
+      "reports/education-phase1-20261124/manual-click-proof.json",
+      "reports/education-phase1-20261124/no-captions-delivery.json",
+      "reports/education-phase1-20261124/steady-navigation.json",
+      "reports/education-phase1-20261124/clean-timeline-studio.json",
+      "reports/education-phase1-20261124/continuous-navigation-player.json"
+    ],
+    "scope": "Education is integrated locally: byte-conversion foundations followed by native visual IT concept labs. Per-artifact receipts distinguish actual App exports, exact cold recovery, paused comparisons and concept checks. All lessons remain private review; no production release.",
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "blockers": [
+      "Teacher concept/communication review and independent learner reproduction remain required before lesson publication.",
+      "Original five-minute local graphics render failed; its signed termination and refused follow-up remain retained. Only the separately bounded local CPU window changes.",
+      "No production education deployment, school/minor onboarding, paid cloud job, public creative acceptance or concurrent-user qualification.",
+      "Whole predictive picture/audio/colour/edge/latency parity and shared S02/S04/S03 remain open; no strict pixel-parity claim."
+    ],
+    "manualTeachingCorrection": {
+      "actualManualActions": 29,
+      "positionKeys": 16,
+      "shortChapterCount": 9,
+      "maximumChapterSeconds": 106,
+      "subtitleTracks": false,
+      "addedBannerRemoved": true,
+      "teacherReview": false
+    },
+    "ownerTeachingClarification": "Owner accepts the video subject and starting small; tutorial control switching is rejected. Keep native content, correct demonstration to one task in one panel, pause for consequence; no captions. Additional recordings stopped pending the presentation correction.",
+    "continuousTeachingTake": {
+      "normalAuthenticatedStudio": true,
+      "visibleScrolling": true,
+      "automaticScroll": false,
+      "subtitles": false,
+      "localDemoBadgeVisible": false,
+      "renderStarted": false,
+      "ownerAndTeacherApproval": false,
+      "builtStudioBadgeRemovalVerified": true,
+      "injectedStylesRequired": false,
+      "anonymousWelcomeChecks": 8
+    }
+  },
+  "renderThroughputRelease20261122": {
+    "date": "2026-11-22",
+    "evidenceRefs": [
+      "reports/studio-render-throughput-20261122/README.md",
+      "reports/studio-render-throughput-20261122/release-verification.json"
+    ],
+    "scope": "PR554 merged and serving on frontend/API/CPU/GPU; one normal-account45s production retest, original film bytes, large-source PNG and credit label verified.",
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "productionComparison": {
+      "secondsBefore": 348.134,
+      "secondsAfter": 133.335,
+      "elapsedReductionPercent": 61.700092493120465,
+      "byteIdentical": true,
+      "actualCredits": 5,
+      "uniqueRenders": 1
+    },
+    "blockers": [
+      "One scoped timing comparison does not qualify concurrent users, forced CPU failover, cold starts, host loss, notifications or SLA",
+      "Headless captured playback drops82/1354 counters; smooth predictive real-time playback remains unqualified",
+      "Whole predictive picture/audio parity, broad source/preset coverage, sharedS02/S04/S03 and owner creative acceptance remain separate"
+    ]
+  },
+  "renderThroughput20261122": {
+    "date": "2026-11-22",
+    "evidenceRefs": [
+      "reports/studio-render-throughput-20261122/README.md",
+      "reports/studio-render-throughput-20261122/verification.json"
+    ],
+    "scope": "Bounded large-source paused-frame disk streaming, honest credit copy, per-export source/preparation reuse, immutable resize/hold reuse and quota-bounded parallel canonical layer preparation.",
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "localComparison": {
+      "secondsBefore": 757.970194205991,
+      "secondsAfter": 441.46774216598715,
+      "byteIdentical": true
+    },
+    "blockers": [
+      "One scoped timing comparison does not qualify concurrent users, forced CPU failover, cold starts, host loss, notifications or SLA",
+      "Headless captured playback drops82/1354 counters; smooth predictive real-time playback remains unqualified",
+      "Whole predictive picture/audio parity, broad source/preset coverage, sharedS02/S04/S03 and owner creative acceptance remain separate"
+    ],
+    "ciFollowup": {
+      "failedRun": "https://github.com/Tibule12/AutoPromote/actions/runs/45037430598/job/137254182794",
+      "failure": "ModuleNotFoundError: pytest via test_studio_video_reuse importing test_studio_overlay_zero.run",
+      "imageBuild": "passed",
+      "failedImageTests": 1,
+      "imageTestCount": 192,
+      "fix": "Self-contained subprocess FFmpeg helper; explicitly CPU-render cached and independently prepared reference sources, comparing every decoded RGB byte instead of spatial H.264 symmetry",
+      "validationStatus": "Passed: exact17 image-gate module list,192 tests on local CPU with pytest and original pytest fixture imports explicitly refused",
+      "releaseState": "Owner holds merge/deployment and production retest until further instruction",
+      "readinessPromotion": false,
+      "productionRetestStarted": false,
+      "localFirstReplay": {
+        "testCount": 192,
+        "failures": 1,
+        "elapsedSeconds": 98.508,
+        "cause": "CPU lossy H.264 spatial window equality assumption",
+        "resolution": "Compare shared-preparation output against a full independent-source reference; exact array equality, no relaxed thresholds"
+      },
+      "focusedVerification": {
+        "testCount": 5,
+        "elapsedSeconds": 5.533,
+        "status": "passed",
+        "pytestImports": "explicitly refused",
+        "finalFrameComparison": "exact decoded RGB equality across all24 frames and both moving windows"
+      },
+      "localFinalReplay": {
+        "testCount": 192,
+        "elapsedSeconds": 100.115,
+        "status": "passed",
+        "pytestImports": "explicitly refused",
+        "runtime": "Local Python3.12 and FFmpeg6.1; remote Python3.11/FFmpeg7.1 image rerun remains separate",
+        "logSha256": "47a526a28ebc7dec3c088ac5b893dfc2026a71d1269ef2842c89b9856df3a574"
+      },
+      "remoteActionState": "Fix to be pushed to PR#554; automatic new-head checks remain separate from local validation"
+    },
+    "releaseEvidenceRef": "reports/studio-render-throughput-20261122/release-verification.json"
+  },
   "videoSync20261121": {
     "date": "2026-11-21",
     "evidenceRefs": [
@@ -26799,6 +27039,72 @@
       "Production frontend/API/CPU/GPU deployment completion and live release checks remain separate",
       "Whole-Studio predictive colour/edge/low-alpha parity, broad device performance and creative/listening approval remain open",
       "Local45secondframe render took793.2seconds; final encoding usedNVENC but raster preparation is CPU-heavy"
+    ]
+  },
+  "productionVerification20261122": {
+    "status": "PARTIAL",
+    "evidence": "reports/studio-live-verification-20261122/verification.json",
+    "releaseCommit": "506de43b30e6838157f2ff3e057fe982455ffa1c",
+    "actualProductionRenders": 2,
+    "creditsDeducted": 10,
+    "gpuRenderAndDecodeVerified": true,
+    "cpuCapabilitiesVerified": true,
+    "automaticCpuFailoverVerified": false,
+    "nativeColdAndIndependentRestore": true,
+    "sameJobRetryWithoutDuplicateCharge": true,
+    "accuratePausedPreviewForLargeSources": "FAILED \u2014128MiBlimitrejects293713235bytepodcast",
+    "concurrencyOrLoadTested": false,
+    "emailCompletionVerified": false,
+    "productionFullyReady": false,
+    "remaining": [
+      "Accurate paused previews of sources above128MiB need a bounded large-source path.",
+      "The static No render credits used label is misleading after a paid export.",
+      "Healthy CPU capability and GPU execution are verified; actual automatic GPU-to-CPU failover was not forced.",
+      "No concurrency/load/worker-host-failure test was authorized or executed.",
+      "Notifications API returned200but contained neither job ID; email completion was not independently verified.",
+      "Drawn moving material recolour/heal/tracking and every Creative Effects preset were not exhaustively executed on production within these two renders.",
+      "Whole predictive colour/edge/low-alpha parity, device coverage, capture smoothness and owner creative/listening approval remain separate."
+    ]
+  },
+  "documentationEvidenceReconciliation20261122": {
+    "date": "2026-11-22",
+    "evidenceRefs": [
+      "docs/VERIFIED-FUNCTIONALITY-AND-RELEASE-STATUS.md",
+      "reports/studio-feature-documentation-20261122/retained-local-proofs.json",
+      "reports/studio-feature-documentation-20261122/README.md"
+    ],
+    "scope": "Recognize retained working caption/export/Node scopes separately from main/deployment and wider family limitations; seven private media hashes reverified. Documentation only.",
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "blockers": [
+      "Expanded caption/delivery implementations remain outside main; this task does not merge them",
+      "Overall recognition defects and broad preview/device/combination limits remain explicit",
+      "Newer local Node/VFX edits need matching-revision evidence reconciliation"
+    ]
+  },
+  "independentCostSecurityRelease20261127": {
+    "scope": "Infrastructure and legacy-payment safety only; no renderer, public plan or creative readiness change",
+    "evidenceRefs": [
+      "test/free-first/release-infrastructure.test.cjs",
+      "test/free-first/release-payments.test.cjs"
+    ],
+    "readinessPromotion": false,
+    "remaining": [
+      "Production serving verification",
+      "Existing S02/S04/S03 and typography13/16 limitations"
+    ],
+    "nextTaskId": "S02"
+  },
+  "retentionReadCache20261127": {
+    "date": "2026-11-27",
+    "scope": "Bounded negative retention cache; no deletion authorization or Studio readiness change.",
+    "evidenceRefs": [
+      "docs/releases/retention-read-cache-20261127.md"
+    ],
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "remaining": [
+      "Production warm-cycle measurement; all existing Studio S02/S04/S03 and creative gates remain."
     ]
   }
 }

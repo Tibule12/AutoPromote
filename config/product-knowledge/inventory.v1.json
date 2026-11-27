@@ -721,6 +721,18 @@
       "path": "src/services/studio3DLocalDurable.js",
       "anchor": "async function reconcile",
       "required": true
+    },
+    {
+      "feature_id": "education.it_foundation",
+      "path": "frontend/src/education/EducationPage.js",
+      "anchor": "EducationPage",
+      "required": true
+    },
+    {
+      "feature_id": "education.cat_html",
+      "path": "frontend/src/education/CatLearningPath.js",
+      "anchor": "CatLearningPath",
+      "required": true
     }
   ]
 }

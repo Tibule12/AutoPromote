@@ -5,6 +5,7 @@ import FilterEffects from "../FilterEffects";
 import { sanitizeUrl } from "../../utils/security";
 import AdaptiveMediaPreview from "./AdaptiveMediaPreview";
 import { revokeObjectUrlLater } from "../../utils/objectUrl";
+import { tikTokDisclosureLabels, tikTokDisclosureOptions } from "../../utils/tiktokDisclosures";
 
 const buildDefaultCaption = (title, description) =>
   [String(title || "").trim(), String(description || "").trim()].filter(Boolean).join("\n");
@@ -100,12 +101,11 @@ const TikTokForm = ({
   const [allowStitch, setAllowStitch] = useState(initialData.allowStitch !== false);
 
   // Advanced Disclosure Logic
-  const [commercialContent, setCommercialContent] = useState(
-    initialData.commercialContent || false
-  );
-  const [yourBrand, setYourBrand] = useState(initialData.yourBrand || false);
-  const [brandedContent, setBrandedContent] = useState(initialData.brandedContent || false);
-  const [aiGenerated, setAiGenerated] = useState(initialData.aiGenerated || false);
+  const initialDisclosures = tikTokDisclosureOptions(initialData);
+  const [commercialContent, setCommercialContent] = useState(initialDisclosures.commercialContent);
+  const [yourBrand, setYourBrand] = useState(initialDisclosures.yourBrand);
+  const [brandedContent, setBrandedContent] = useState(initialDisclosures.brandedContent);
+  const [aiGenerated, setAiGenerated] = useState(initialDisclosures.aiGenerated);
   const [consentChecked, setConsentChecked] = useState(
     initialData.consentChecked ||
       (typeof window !== "undefined" && window.__E2E_TEST_TIKTOK_CONSENT) ||
@@ -532,6 +532,11 @@ const TikTokForm = ({
           </div>
         </div>
 
+        <div className="tiktok-label-summary" role="status" aria-label="TikTok disclosure labels">
+          <strong>TikTok labels requested: </strong>
+          {tikTokDisclosureLabels({ commercialContent, yourBrand, brandedContent, aiGenerated })}
+          <p>TikTok may also apply labels automatically. Review the disclosure settings below before posting.</p>
+        </div>
         <details className="tiktok-advanced-options">
           <summary>Advanced TikTok disclosures and consent</summary>
           <div className="tiktok-advanced-options-body">
@@ -667,7 +672,8 @@ const TikTokForm = ({
                 This content is AI-generated
               </label>
               <div style={{ fontSize: 11, color: "#666", marginTop: 4, paddingLeft: 24 }}>
-                Required by TikTok for AI-created or modified content.
+                Use for realistic AI-generated or significantly AI-altered images, audio or video.
+                Trimming, captions, colour correction and minor retouching alone do not require this label.
               </div>
             </div>
 

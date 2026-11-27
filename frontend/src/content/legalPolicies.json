@@ -1,0 +1,272 @@
+{
+  "effectiveDate": "2026-11-23",
+  "updatedDate": "2026-11-23",
+  "operator": "AutoPromote",
+  "contactEmail": "thulani@autopromote.org",
+  "terms": {
+    "title": "Terms of Service",
+    "eyebrow": "TRUST / TERMS",
+    "intro": "The terms for using AutoPromote, your account and your content.",
+    "sections": [
+      {
+        "id": "agreement",
+        "title": "Agreement and eligibility",
+        "paragraphs": [
+          "These Terms govern your use of AutoPromote's website, application and related services. By using the Service, you agree to these Terms. If you do not agree, do not use the Service. Contact AutoPromote at thulani@autopromote.org with questions.",
+          "You must have authority to agree to these Terms and meet the age and eligibility requirements of the services and social platforms you connect. If you act for an organisation, you must be authorised to act on its behalf."
+        ]
+      },
+      {
+        "id": "service",
+        "title": "What the Service provides",
+        "paragraphs": [
+          "AutoPromote provides tools for creating and editing media, AI-assisted workflows, finding and preparing clips, combining recordings, and publishing, scheduling and reviewing content on supported connected platforms. Availability depends on your plan, credits, permissions, supported formats and the current feature configuration.",
+          "Processing times, third-party availability and publishing outcomes can vary. A queued job or accepted upload is not confirmation that a platform has published your content. We do not guarantee particular audience growth, engagement, revenue or uninterrupted availability."
+        ]
+      },
+      {
+        "id": "accounts",
+        "title": "Accounts and workspaces",
+        "paragraphs": [
+          "Provide accurate account information, protect your sign-in credentials and notify us promptly if you suspect unauthorised access. Only connect accounts and upload media you are authorised to use.",
+          "Workspace owners and administrators are responsible for the invitations, roles, shared materials and publishing permissions they grant. Review a workspace's access before sharing personal media or connected destinations with it."
+        ]
+      },
+      {
+        "id": "content",
+        "title": "Your content and permissions",
+        "paragraphs": [
+          "You retain your rights in the content you upload or create. You give AutoPromote a non-exclusive permission to store, copy, process, transform and transmit that content as needed to provide the features you request, including rendering, collaboration and publishing according to your instructions. This permission does not transfer ownership of your content to AutoPromote.",
+          "You are responsible for having the necessary rights and permissions for footage, music, artwork, voices, likenesses and other material you use. Review the licences and consent requirements that apply to source material and generated outputs."
+        ]
+      },
+      {
+        "id": "publishing",
+        "title": "Connected platforms and publishing",
+        "paragraphs": [
+          "Connecting a platform grants access within the permissions you approve. Publishing, scheduling and other enabled actions use those permissions and your selected settings. Review the media, destination, visibility, timing and disclosures before submitting. Disconnecting a platform does not remove posts already published there.",
+          "You must comply with each connected platform's terms, music and content rules, including applicable commercial and AI-content disclosures. The platform may apply additional labels, reject content, impose limits or change its APIs.",
+          "AutoPromote uses YouTube API Services. By using AutoPromote's YouTube features, you also agree to be bound by the YouTube Terms of Service."
+        ],
+        "links": [
+          {
+            "label": "YouTube Terms of Service",
+            "href": "https://www.youtube.com/t/terms"
+          }
+        ]
+      },
+      {
+        "id": "ai",
+        "title": "AI-assisted features and review",
+        "paragraphs": [
+          "AI-generated suggestions, captions, translations, analysis and media can contain errors or produce unexpected results. Review the finished picture, sound, wording and rights before sharing or relying on an output. AI assistance does not guarantee accuracy, originality, clearance of third-party rights or suitability for a particular purpose."
+        ]
+      },
+      {
+        "id": "payments",
+        "title": "Plans, credits and payments",
+        "paragraphs": [
+          "Prices, included allowances, processing-credit costs and any recurring billing terms are shown with the relevant offer or checkout. Review those details before purchasing or starting a paid operation. Payment processing is handled by the provider shown at checkout, such as PayPal; AutoPromote does not store full payment card numbers.",
+          "For a subscription, review its renewal and cancellation options in Billing or with the payment provider. Contact thulani@autopromote.org about billing errors, cancellation difficulties or refund requests. Any advertised refund terms and rights required by applicable consumer law continue to apply."
+        ]
+      },
+      {
+        "id": "conduct",
+        "title": "Acceptable use",
+        "paragraphs": ["You must not use the Service to:"],
+        "items": [
+          "Break the law, infringe intellectual-property or privacy rights, or publish material without necessary permissions.",
+          "Impersonate people deceptively, distribute unlawful or abusive content, send spam, or evade required platform disclosures.",
+          "Introduce malware, obtain unauthorised access, interfere with other users, or bypass security, account allowances or payment controls."
+        ]
+      },
+      {
+        "id": "availability",
+        "title": "Availability, storage and ending access",
+        "paragraphs": [
+          "Keep backups of important originals and finished work. Some editable projects are stored in your browser, and some processing files and download links are temporary. Follow any expiry shown in the product; clearing browser data can remove local projects.",
+          "We may restrict or suspend access when needed to address security risks, unlawful activity, non-payment or a breach of these Terms. Where appropriate, we will provide notice and an opportunity to resolve the issue. You can stop using the Service and request account or data deletion by emailing thulani@autopromote.org. Billing cancellation, data deletion and removal of content from third-party platforms are separate actions."
+        ]
+      },
+      {
+        "id": "liability",
+        "title": "Responsibility and your legal rights",
+        "paragraphs": [
+          "The Service is provided on an as-available basis. To the extent permitted by applicable law, AutoPromote disclaims implied warranties and is not liable for indirect or consequential losses arising from use of the Service, including losses caused by third-party outages or platform decisions.",
+          "Nothing in these Terms excludes liability or limits consumer, privacy or other rights that cannot lawfully be excluded. Disputes remain subject to the applicable law and courts with jurisdiction. Contact us first so we can try to resolve a concern."
+        ]
+      },
+      {
+        "id": "privacy-changes",
+        "title": "Privacy, changes and contact",
+        "paragraphs": [
+          "Our Privacy Policy explains the information we process, why we use it and how you can contact us about your rights. We may update these Terms and will identify the new effective date on this page. Material changes will be communicated where required by applicable law, and any required acceptance will be requested.",
+          "For questions about these Terms, contact AutoPromote at thulani@autopromote.org."
+        ],
+        "links": [
+          {
+            "label": "Privacy Policy",
+            "href": "https://autopromote.org/privacy/"
+          },
+          {
+            "label": "Contact AutoPromote",
+            "href": "mailto:thulani@autopromote.org"
+          }
+        ]
+      }
+    ]
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "eyebrow": "TRUST / PRIVACY",
+    "intro": "How AutoPromote handles account, media and connected-platform information.",
+    "sections": [
+      {
+        "id": "responsibility",
+        "title": "Who is responsible and how to contact us",
+        "paragraphs": [
+          "AutoPromote is responsible for the personal information it processes to operate this website and application. This Policy explains our collection, use, sharing and retention of that information. For privacy questions, access requests, corrections or deletion requests, contact thulani@autopromote.org."
+        ],
+        "links": [
+          {
+            "label": "Contact AutoPromote",
+            "href": "mailto:thulani@autopromote.org"
+          }
+        ]
+      },
+      {
+        "id": "information",
+        "title": "Information we process",
+        "paragraphs": ["The information involved depends on the features you use:"],
+        "items": [
+          "Account and support information: your name, email address, profile details, preferences and communications with us.",
+          "Media and project information: uploaded recordings, images, audio, prompts, transcripts, captions, editing decisions, generated outputs, saved projects and export or publishing history.",
+          "Connected-platform information: access and refresh tokens, account/channel/Page identifiers, profile details, selected permissions, posts and publishing status, and available engagement statistics authorised by the platform.",
+          "Billing information: plan, credit usage, payment-provider references, transaction status and relevant billing or payout details you provide. Full card details are handled by the payment provider.",
+          "Technical information: IP address, browser/device information, requests, error reports and usage logs needed to operate, support and protect the Service.",
+          "Workspace information: membership, invitations, roles, shared assets and review or activity records when you use a team workspace."
+        ]
+      },
+      {
+        "id": "purposes",
+        "title": "Why we use this information",
+        "paragraphs": [
+          "Depending on the activity and applicable law, processing is based on providing the service you request, your consent, legal obligations or legitimate operational and security interests. Some information is necessary to provide a requested feature; withholding it may prevent that feature from working."
+        ],
+        "items": [
+          "Authenticate you, manage your account and permissions, and provide the features you request.",
+          "Process and render media, analyse recordings, prepare captions or suggestions, and deliver exports or job notifications.",
+          "Publish or schedule selected content and retrieve permitted account or post statistics for connected destinations.",
+          "Administer plans, credits, payments and support requests.",
+          "Protect accounts, investigate failures or abuse, improve reliability and meet legal obligations."
+        ]
+      },
+      {
+        "id": "media-ai",
+        "title": "Media processing and AI-assisted features",
+        "paragraphs": [
+          "Media editing and analysis may process faces, bodies, voices, speech, motion and other information present in your recordings, for example to follow a subject, synchronise recordings or create captions. Upload only material you are entitled to process and share.",
+          "When you request a feature that uses a hosted model or an external AI provider, the inputs needed for that request, such as prompts, transcript excerpts, audio, frames or media files, may be sent for processing. Other tasks run in our media-processing infrastructure or your browser. Providers depend on the feature and its configuration; integrations include OpenAI for supported AI requests. Contact us if you need details about processing for a particular feature before submitting sensitive material."
+        ]
+      },
+      {
+        "id": "platforms",
+        "title": "Connected platforms and YouTube API Services",
+        "paragraphs": [
+          "AutoPromote uses platform APIs, including YouTube API Services. When you connect a platform, we access and store the account information, authorisation tokens and API data needed for the permissions and features you enable. For YouTube this can include channel details, video metadata, upload results and authorised statistics. We use this information for the connected publishing and analytics features, rather than requesting your social-network password.",
+          "You can disconnect an account in Connections where that control is available, or revoke access in the platform's own account settings. For Google/YouTube you can revoke AutoPromote access through Google's security settings. You can also email us to request deletion of stored connected-platform data. Revoking access or deleting our copy does not delete posts, videos or data held by the platform itself.",
+          "Information sent to a connected platform is also subject to that platform's privacy policy. Google's Privacy Policy applies to Google's handling of information."
+        ],
+        "links": [
+          {
+            "label": "Google Privacy Policy",
+            "href": "https://policies.google.com/privacy"
+          },
+          {
+            "label": "Revoke Google/YouTube access",
+            "href": "https://security.google.com/settings/security/permissions"
+          }
+        ]
+      },
+      {
+        "id": "sharing",
+        "title": "Who receives information",
+        "paragraphs": [
+          "We use service providers for authentication, storage, hosting, media processing, AI requests, email delivery, payments and error monitoring. Relevant integrations include Google Firebase/Google Cloud, Render, OpenAI, payment providers such as PayPal, and email delivery through Zoho ZeptoMail or the configured mail provider. The providers involved depend on the feature you use.",
+          "Media and post information are sent to the destinations you choose for publishing. Shared workspace information is accessible according to workspace roles and permissions. Content you publish or share through a download link can become accessible to its recipients or audience.",
+          "Information may also be disclosed where required by law or necessary to investigate abuse, protect rights or security, or respond to a lawful request. Third-party platforms and payment providers process information under their own policies."
+        ]
+      },
+      {
+        "id": "retention",
+        "title": "Storage, retention and deletion",
+        "paragraphs": [
+          "We retain information for the purposes described in this Policy, taking account of account activity, the feature's storage limits, legal requirements, billing records and dispute or security needs. Processing files and export links may expire; use the expiry shown in the product and keep your own backups.",
+          "Some Studio projects, media references and preferences are saved in your browser. Clearing site data or changing browser profiles can remove those local copies. A request to delete server-held data does not clear files you downloaded or browser storage on your devices.",
+          "To request account or data deletion, email thulani@autopromote.org from your account email where possible and identify the account or connected platform concerned. We may verify your identity before acting. We handle requests under applicable law and platform-specific requirements and explain any information that must be retained. Restricted backups, transaction records or security evidence may need separate retention. Deletion of data from AutoPromote does not delete content already held by another platform."
+        ]
+      },
+      {
+        "id": "browser-storage",
+        "title": "Cookies, browser storage and third-party content",
+        "paragraphs": [
+          "Authentication, preferences and local editing projects use cookies, local storage, IndexedDB or similar browser technologies. Browser settings let you restrict or clear these technologies, but doing so can affect sign-in or remove locally saved work.",
+          "Embedded players, connected-platform content and payment pages may involve third parties that receive technical information and use their own cookies or similar technologies. See our Cookies and browser storage page and the relevant provider's policy for additional details."
+        ],
+        "links": [
+          {
+            "label": "Cookies and browser storage",
+            "href": "https://autopromote.org/#/cookies"
+          }
+        ]
+      },
+      {
+        "id": "security-transfers",
+        "title": "Security and international processing",
+        "paragraphs": [
+          "We use safeguards such as secure connections, authenticated access and role or ownership checks to protect information. No online system or transmission can be guaranteed completely secure. Report suspected unauthorised access or exposure to thulani@autopromote.org.",
+          "Our hosting and processing providers may handle information outside your country, including on infrastructure in the United States or other regions. International processing is subject to applicable data-protection requirements. Contact us for information about the providers and processing relevant to your use of the Service."
+        ]
+      },
+      {
+        "id": "rights",
+        "title": "Your choices and privacy rights",
+        "paragraphs": [
+          "Depending on applicable law, including South Africa's Protection of Personal Information Act where it applies, you may request access to or correction, deletion or export of your personal information, object to certain processing, or withdraw consent. Withdrawing consent does not affect processing that was lawful before withdrawal. Rights may be subject to identity checks and legal exceptions.",
+          "Contact thulani@autopromote.org to make a request or raise a concern. You may also complain to the relevant data-protection authority, including South Africa's Information Regulator."
+        ],
+        "links": [
+          {
+            "label": "Information Regulator, South Africa",
+            "href": "https://inforegulator.org.za/"
+          }
+        ]
+      },
+      {
+        "id": "young-people",
+        "title": "Information about children",
+        "paragraphs": [
+          "AutoPromote is not directed at children. Users must meet the applicable eligibility requirements for the Service and connected platforms. If you believe a child has supplied personal information without the required authorisation, contact us so we can investigate and take appropriate action."
+        ]
+      },
+      {
+        "id": "changes-contact",
+        "title": "Changes and contact",
+        "paragraphs": [
+          "We will identify updates using the date at the top of this Policy and provide notice of material changes where required. If a new use of information requires consent, we will seek that consent before relying on it.",
+          "For questions about this Policy or your information, contact AutoPromote at thulani@autopromote.org."
+        ],
+        "links": [
+          {
+            "label": "Terms of Service",
+            "href": "https://autopromote.org/terms/"
+          },
+          {
+            "label": "Contact AutoPromote",
+            "href": "mailto:thulani@autopromote.org"
+          }
+        ]
+      }
+    ]
+  }
+}

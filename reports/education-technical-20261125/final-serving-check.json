@@ -1,0 +1,12 @@
+{
+  "origins": [
+    "http://127.0.0.1:5067",
+    "http://127.0.0.1:42073"
+  ],
+  "latestTeacherIntro": true,
+  "threePathways": true,
+  "eightActualVideoSlots": true,
+  "completePackLink": true,
+  "headless": true,
+  "muted": true
+}

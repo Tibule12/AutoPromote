@@ -1,0 +1,7 @@
+TECHNICAL EXERCISE
+Predict direction and turns for a 20-tooth driver and 40-tooth driven gear. Calculate output speed for 120 revolutions per minute input. Then consider a 30-tooth driven gear: state the new ratio, direction, output speed and required pitch-centre distance for drawing module 7.2 pixels.
+
+CREATIVE EDITING EXERCISE
+Recreate the two supplied original gear SVGs as separate native image layers. Set centres to (470,350) and (686,350) pixels; preserve dimensions and aspect. Use the key table to complete one full driver turn and half an opposite driven turn over 20 seconds. Do not ease constant-speed rotation. Explain why independent arbitrary spins would mislead a learner.
+
+Submit predictions/reasoning, original assets, editable Studio project, exact keys and complete movie. The starter deliberately contains one incomplete value; correct it using the lesson.

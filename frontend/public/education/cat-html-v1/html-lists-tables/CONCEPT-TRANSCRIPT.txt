@@ -1,0 +1,7 @@
+0.00s U L makes an unordered list. Each L I is one item.
+
+9.00s Change U L to O L when the order matters. The browser now numbers the items.
+
+16.00s A table contains rows. T H marks header cells. T D holds data. Friday matches Build.
+
+24.00s Legacy border attribute. Modern sites use C S S.

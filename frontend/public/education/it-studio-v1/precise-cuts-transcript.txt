@@ -1,0 +1,11 @@
+Trim the wait. Keep the evidence.
+
+Original teaching script, read using disclosed standard synthetic narration.
+
+Remove waiting, but keep the evidence. A technical edit must still show the input, the action and the result.
+
+In Cut, trim the start at source second one. At programme second six, click Trim end to here. This keeps six seconds.
+
+Move the edited output position to three seconds, then split. The programme clock starts after your trim; it is different from the source clock.
+
+Play across the split. A cut should help the explanation, not hide a failed test. Save both editable occurrences and export the six-second result.

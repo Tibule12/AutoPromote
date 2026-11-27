@@ -1,0 +1,767 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "A guard protects the result.",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "course",
+      "name": "course",
+      "type": "text",
+      "text": "AUTOPROMOTE EDUCATION  /  CONCEPTS IN MOTION",
+      "x": 50,
+      "y": 6,
+      "width": 94,
+      "scale": 0.48,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "heading",
+      "name": "heading",
+      "type": "text",
+      "text": "A guard protects the result.",
+      "x": 50,
+      "y": 15,
+      "width": 94,
+      "scale": 1.2,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "subtitle",
+      "name": "subtitle",
+      "type": "text",
+      "text": "Validate first. Convert only accepted input. A failing boundary test exposes the bug.",
+      "x": 50,
+      "y": 24,
+      "width": 95,
+      "scale": 0.59,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "footnote",
+      "name": "footnote",
+      "type": "text",
+      "text": "ORIGINAL SUPPLEMENTARY TEACHING EXAMPLE  /  PAUSE, PREDICT, EXPLAIN",
+      "x": 50,
+      "y": 96,
+      "width": 95,
+      "scale": 0.38,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8398b3",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "input-card",
+      "name": "input-card",
+      "type": "artwork",
+      "x": 22,
+      "y": 43,
+      "width": 25,
+      "height": 16,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 1,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 1,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "solid",
+          "color": "#86d9f2",
+          "endColor": "#86d9f2",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#426078",
+          "width": 0
+        }
+      },
+      "keys": []
+    },
+    {
+      "id": "input-caption",
+      "name": "input-caption",
+      "type": "text",
+      "text": "RAW INPUT",
+      "x": 22,
+      "y": 33,
+      "width": 26,
+      "scale": 0.5,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "input-256",
+      "name": "input-256",
+      "type": "text",
+      "text": "256",
+      "x": 22,
+      "y": 43,
+      "width": 23,
+      "scale": 1.5,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#101b2b",
+      "startTime": 0,
+      "duration": 18,
+      "keys": []
+    },
+    {
+      "id": "input-18",
+      "name": "input-18",
+      "type": "text",
+      "text": "18",
+      "x": 22,
+      "y": 43,
+      "width": 23,
+      "scale": 1.5,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#101b2b",
+      "startTime": 18,
+      "duration": 10,
+      "keys": []
+    },
+    {
+      "id": "guard-card",
+      "name": "guard-card",
+      "type": "artwork",
+      "x": 52,
+      "y": 43,
+      "width": 25,
+      "height": 16,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 1,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 1,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "solid",
+          "color": "#15263d",
+          "endColor": "#15263d",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#426078",
+          "width": 0
+        }
+      },
+      "keys": []
+    },
+    {
+      "id": "guard-label",
+      "name": "guard-label",
+      "type": "text",
+      "text": "Digits only?\n0 through 255?",
+      "x": 52,
+      "y": 43,
+      "width": 23,
+      "scale": 0.67,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "reject-card",
+      "name": "reject-card",
+      "type": "artwork",
+      "x": 82,
+      "y": 37,
+      "width": 23,
+      "height": 10,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 1,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 1,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "solid",
+          "color": "#432230",
+          "endColor": "#432230",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#426078",
+          "width": 0
+        }
+      },
+      "keys": []
+    },
+    {
+      "id": "reject-label",
+      "name": "reject-label",
+      "type": "text",
+      "text": "REJECT",
+      "x": 82,
+      "y": 37,
+      "width": 22,
+      "scale": 0.72,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ffc1c4",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "accept-card",
+      "name": "accept-card",
+      "type": "artwork",
+      "x": 82,
+      "y": 53,
+      "width": 23,
+      "height": 10,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 1,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 1,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "solid",
+          "color": "#16352c",
+          "endColor": "#16352c",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#426078",
+          "width": 0
+        }
+      },
+      "keys": []
+    },
+    {
+      "id": "accept-label",
+      "name": "accept-label",
+      "type": "text",
+      "text": "CONVERT",
+      "x": 82,
+      "y": 53,
+      "width": 22,
+      "scale": 0.72,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "decision-packet",
+      "name": "decision-packet",
+      "type": "text",
+      "text": "●",
+      "x": 52,
+      "y": 43,
+      "width": 9,
+      "scale": 0.8,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ffc1c4",
+      "startTime": 3,
+      "duration": 6,
+      "keys": []
+    },
+    {
+      "id": "case-0",
+      "name": "case-0",
+      "type": "text",
+      "text": "Test case: 256. Expected outcome: reject.",
+      "x": 50,
+      "y": 75,
+      "width": 95,
+      "scale": 0.66,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 0,
+      "duration": 3,
+      "keys": []
+    },
+    {
+      "id": "case-3",
+      "name": "case-3",
+      "type": "text",
+      "text": "Digits-only format passes. Now test the numeric range.",
+      "x": 50,
+      "y": 75,
+      "width": 95,
+      "scale": 0.66,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 3,
+      "duration": 3,
+      "keys": []
+    },
+    {
+      "id": "case-6",
+      "name": "case-6",
+      "type": "text",
+      "text": "256 is above 255. Reject; do not generate a byte.",
+      "x": 50,
+      "y": 75,
+      "width": 95,
+      "scale": 0.66,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ffc1c4",
+      "startTime": 6,
+      "duration": 3,
+      "keys": []
+    },
+    {
+      "id": "case-9",
+      "name": "case-9",
+      "type": "text",
+      "text": "BUG: accepting 0 through 256 would allow a 9-bit result.",
+      "x": 50,
+      "y": 75,
+      "width": 95,
+      "scale": 0.66,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ffc1c4",
+      "startTime": 9,
+      "duration": 5,
+      "keys": []
+    },
+    {
+      "id": "case-14",
+      "name": "case-14",
+      "type": "text",
+      "text": "FIX: maximum 255. Rerun the failing case; 256 is rejected.",
+      "x": 50,
+      "y": 75,
+      "width": 95,
+      "scale": 0.66,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 14,
+      "duration": 4,
+      "keys": []
+    },
+    {
+      "id": "case-18",
+      "name": "case-18",
+      "type": "text",
+      "text": "18 passes both guards. Convert: 18 = 00010010.",
+      "x": 50,
+      "y": 75,
+      "width": 95,
+      "scale": 0.66,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 18,
+      "duration": 6,
+      "keys": []
+    },
+    {
+      "id": "case-24",
+      "name": "case-24",
+      "type": "text",
+      "text": "Test next: 0, 255, -1 and 18.5. Predict each outcome first.",
+      "x": 50,
+      "y": 75,
+      "width": 95,
+      "scale": 0.66,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 24,
+      "duration": 4,
+      "keys": []
+    },
+    {
+      "id": "wrong-result",
+      "name": "wrong-result",
+      "type": "text",
+      "text": "Wrong output: 100000000  /  nine bits",
+      "x": 50,
+      "y": 85,
+      "width": 94,
+      "scale": 0.63,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ffc1c4",
+      "startTime": 9,
+      "duration": 5,
+      "keys": []
+    },
+    {
+      "id": "correct-result",
+      "name": "correct-result",
+      "type": "text",
+      "text": "Accepted output: 00010010  /  eight bits",
+      "x": 50,
+      "y": 85,
+      "width": 94,
+      "scale": 0.63,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 18,
+      "duration": 6,
+      "keys": []
+    }
+  ],
+  "groups": [
+    {
+      "id": "rejection-path",
+      "name": "Rejection path · decision token",
+      "layerIds": [
+        "decision-packet"
+      ],
+      "startTime": 0,
+      "duration": 28,
+      "keys": [
+        {
+          "property": "x",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 5,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 7,
+          "value": 30,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "y",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 5,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 7,
+          "value": -6,
+          "easing": "ease_in_out"
+        }
+      ]
+    }
+  ]
+}

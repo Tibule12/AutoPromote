@@ -743,9 +743,11 @@ export function studioLogoMasterSvg(
     svg = svg
       .replace(/id="paint"/g, `id="logo-paint-${index}"`)
       .replace(/url\(#paint\)/g, `url(#logo-paint-${index})`)
+      .replace('preserveAspectRatio="none"',
+        `preserveAspectRatio="${fit === "stretch" ? "none" : fit === "cover" ? "xMidYMid slice" : "xMidYMid meet"}"`)
       .replace(
         'width="1024" height="1024"',
-        `x="${-ax}" y="${-ay}" width="${w}" height="${h}" preserveAspectRatio="${fit === "stretch" ? "none" : fit === "cover" ? "xMidYMid slice" : "xMidYMid meet"}"`
+        `x="${-ax}" y="${-ay}" width="${w}" height="${h}"`
       );
     return `<g opacity="${layer.opacity ?? 1}" transform="translate(${x} ${y}) rotate(${rotation}) scale(${scale})">${svg}</g>`;
   });

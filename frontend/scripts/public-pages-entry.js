@@ -1,6 +1,11 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { StaticRouter } from "react-router";
+import { visibleEducationLessons } from "../src/education/educationCatalog";
+import catCatalog from "../src/education/catCatalog.json";
+import technicalCatalog from "../src/education/technicalCatalog.json";
+import { hasTechnicalPresentationRelease } from "../src/education/technicalPresentationRelease";
+import EducationPage from "../src/education/EducationPage";
 import About from "../src/About";
 import Contact from "../src/Contact";
 import { FOOTER_GROUPS } from "../src/components/public/PublicFooter";
@@ -15,6 +20,10 @@ import posts from "../src/blog/posts";
 export const retiredRoutes = ["analytics", "metrics", "smart-promo", "smart_promo", "smartpromo", "idea-video", "idea_video", "idea-to-video", "idea_to_video"].map(route => `/${route}`);
 export const footerRoutes = FOOTER_GROUPS.flatMap(([, links]) => links.map(([, route]) => route));
 export const nestedRoutes = [
+  "/education/library", "/education/teachers", "/education/partners", "/education/cat",
+  ...(hasTechnicalPresentationRelease(technicalCatalog) ? ["/education/technical", ...technicalCatalog.lessons.map(lesson => `/education/technical/${lesson.id}`)] : []),
+  ...(catCatalog.presentationRelease?.channel === "teacher-review" ? catCatalog.lessons.map(lesson => `/education/cat/${lesson.id}`) : []),
+  ...visibleEducationLessons().map(lesson => `/education/lessons/${lesson.id}`),
   ...guides.map(guide => `/docs/${guide.slug}`),
   ...guides.filter(guide => guide.file).map(guide => `/docs/${guide.file.replace(/\.md$/, "")}`),
   ...posts.map(post => `/blog/${post.slug}`),
@@ -26,6 +35,7 @@ export const nestedRoutes = [
 // Use the same components as the application, with no duplicate page copy.
 export function renderPublicPage(route) {
   const components = {
+    "/education": EducationPage,
     "/about": About,
     "/contact": Contact,
     "/help": HelpCenter,
@@ -47,7 +57,9 @@ export function renderPublicPage(route) {
     components[route] ||
     (info[route]
       ? () => <InformationPage page={info[route]} />
-      : route.startsWith("/blog/")
+      : route.startsWith("/education/")
+        ? EducationPage
+        : route.startsWith("/blog/")
         ? Blog
         : null);
   if (!Page) return null;

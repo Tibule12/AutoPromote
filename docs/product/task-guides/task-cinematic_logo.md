@@ -1,8 +1,8 @@
 # Create a cinematic logo reveal
 
-Development documentation • product 1.2.0 • knowledge 1.0.64 • 2026-11-18
+Development documentation • product 1.2.0 • knowledge 1.0.71 • 2026-11-25
 
-Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
+Overall feature ratings and working subfeatures are separate. PARTIAL or BROKEN does not mean every control fails; entries identify verified workflows, release state and the remaining limitation. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
 ID: `task.cinematic_logo` • **PARTIAL** • SUPPORTED_WITH_LIMITATIONS
 
@@ -28,10 +28,10 @@ Use owned branding and supported authored scene movement; no public-quality logo
 
 ## Feature readiness
 
-- studio.export — **PARTIAL**: Requests a final movie and downloads the exact completed output after applicable ownership and review checks. Full preview parity and all product combinations are not qualified.
+- studio.export — **PARTIAL**: Downloads the exact completed movie. The released 45-second GPU export is verified, including a faster byte-identical retest. Strict size enforcement, Opus, Display P3 and SDR-mapped HDR10/PCM32 also have retained native local proof; those extensions have not reached the released build. PARTIAL applies to the wider delivery and compatibility scope.
 - creative.logo_brand — **PARTIAL**: Draft template slots accept owned branding and a reviewed reveal. Rejected earlier logo films remain rejected and are not approved public examples.
 - studio.three_d — **PARTIAL**: Builds bounded mesh compositions and continuously flowing ribbon surfaces. Individual objects retain colours, surfaces, roughness, transforms and pose keys; browser and final lighting/materials remain approximate.
-- studio.sfx — **PARTIAL**: Places sound cues on the native timeline. Included sound-design presets synthesize deterministic PCM; owned external sound files can be used in the supported audio path.
+- studio.sfx — **PARTIAL**: Places sound cues in editable projects. The deployed 45-second frame collection verifies 12 sound cues plus its original score through native save/reopen, GPU rendering, exact download and finished playback with sound. Broader audio/template combinations retain their separate limits.
 - studio.vector_artwork — **PARTIAL**: Author editable cubic artwork with single or compound contours, even-odd counters, fill/gradient and stroke; animate it with normal layer keys.
 
 ## Result and limitations

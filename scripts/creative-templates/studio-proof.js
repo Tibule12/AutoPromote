@@ -100,7 +100,7 @@ async function apply(page, name) {
   console.log(JSON.stringify({ applied: true, projectId: record.id, clips: record.snapshot.timeline.length,
     templateRef: record.snapshot.creativeTemplateInstance.templateRef }));
 }
-async function render(page, name) {
+async function render(page, name, teachingControls = {}) {
   const uploadBudget = Number(process.env.STUDIO_QA_UPLOAD_BUDGET_MS || 120000);
   const renderBudget = Number(process.env.STUDIO_QA_RENDER_OBSERVATION_BUDGET_MS || 720000);
   assert(Number.isSafeInteger(renderBudget) && renderBudget >= 720000 && renderBudget <= 1800000,
@@ -109,7 +109,7 @@ async function render(page, name) {
   require('./proof-storage').requireProofSpace(folder);
   const pause = page.getByRole('button', { name: 'Pause comparison', exact: true });
   if (await pause.isVisible()) await pause.click();
-  const record = await save(page, name), events = [];
+  const record = teachingControls.savedRecord || await save(page, name), events = [];
   const startedAt = new Date().toISOString(); let submittedJobId, terminal, statusRequest;
   const done = new Promise(resolve => { terminal = resolve; });
   page.on('response', async response => {
@@ -132,13 +132,16 @@ async function render(page, name) {
     if (new URL(request.url()).pathname === '/api/media/process')
       fs.writeFileSync(path.join(folder, `${name}-render-request.private.json`), request.postData(), { mode: 0o600 });
   });
-  await q.tool(page, 'Export');
-  await page.getByLabel('Export resolution', { exact: true }).selectOption(process.env.STUDIO_QA_EXPORT_RESOLUTION || '720p');
-  await page.getByLabel('Export frame rate', { exact: true }).selectOption(process.env.STUDIO_QA_EXPORT_FPS || '24');
+  if (!teachingControls.settingsAlreadyShown) {
+    await q.tool(page, 'Export');
+    await page.getByLabel('Export resolution', { exact: true }).selectOption(process.env.STUDIO_QA_EXPORT_RESOLUTION || '720p');
+    await page.getByLabel('Export frame rate', { exact: true }).selectOption(process.env.STUDIO_QA_EXPORT_FPS || '24');
+  }
   // Reuse a caller's normal confirmation handler instead of racing two
   // acceptors on the same dialog (notably when cancelling preparation).
   if (!page.listenerCount('dialog')) page.once('dialog', dialog => dialog.accept());
-  await page.getByRole('button', { name: /^Render (Final Clip|Again)$/ }).click();
+  if (teachingControls.clickRender) await teachingControls.clickRender();
+  else await page.getByRole('button', { name: /^Render (Final Clip|Again)$/ }).click();
   const acknowledgedUntil = Date.now() + uploadBudget;
   while (!submittedJobId && Date.now() < acknowledgedUntil) {
     const failure = page.getByTestId('studio-export-error');

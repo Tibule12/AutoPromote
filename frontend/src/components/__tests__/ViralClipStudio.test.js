@@ -7975,4 +7975,281 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(dualStatus).toHaveTextContent("Download Clean Textless Master");
   });
 
+  test("auto-runs face tracking when opened from Find Viral Clips and handles missing faces gracefully", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    global.fetch.mockImplementation(url => {
+      if (String(url).endsWith("/api/media/track-studio-faces")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            mode: "source_shots",
+            engine: "opencv-yunet-source-shot-follow",
+            start: 0,
+            end: 15,
+            sceneCuts: [],
+            reviewRequired: true,
+            decodeFailures: [],
+            tracks: {
+              solo: {
+                coverage: 0.94,
+                keyframes: [
+                  { time: 0, x: 34, y: 42 },
+                  { time: 7.5, x: 64, y: 44 },
+                  { time: 15, x: 60, y: 45 },
+                ],
+              },
+            },
+            editPlan: { version: 1, preflight: { passed: true }, timelineCuts: [{ time: 0, mode: "speaker_track", zoom: 1 }], splitSuggestions: [] },
+          }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        blob: async () => new Blob(["video"], { type: "video/mp4" }),
+      });
+    });
+
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "viral-1", start: 0, end: 15, duration: 15, autoTrackOnOpen: true, targetAspectRatio: "9:16" }]}
+        onSave={onSave}
+        onCancel={jest.fn()}
+      />
+    );
+
+    readyCutawaySource(20);
+    await waitFor(() =>
+      expect(global.fetch.mock.calls.some(([url]) => String(url).endsWith("/api/media/track-studio-faces"))).toBe(true)
+    );
+
+    await clickRenderFinalClip();
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    const reframe = onSave.mock.calls[0][2].finishPlan.reframe;
+    expect(reframe.aspect).toBe("9:16");
+    expect(reframe.mode).toBe("speaker_track");
+    expect(reframe.keyframes.length).toBeGreaterThanOrEqual(3);
+
+    // When face tracking finds no faces (422), Studio keeps framing centered cleanly without blocking export.
+    global.fetch.mockImplementation(url => {
+      if (String(url).endsWith("/api/media/track-studio-faces")) {
+        return Promise.resolve({
+          ok: false,
+          status: 422,
+          json: async () => ({ error: "No face detected in range" }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        blob: async () => new Blob(["video"], { type: "video/mp4" }),
+      });
+    });
+
+    const onSaveFallback = jest.fn(() => Promise.resolve());
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/no-face.mp4"
+        clips={[{ id: "viral-2", start: 0, end: 10, duration: 10, autoTrackOnOpen: true, targetAspectRatio: "9:16" }]}
+        onSave={onSaveFallback}
+        onCancel={jest.fn()}
+      />
+    );
+    const videos = screen.getAllByTestId("studio-after-video");
+    const secondVideo = videos[videos.length - 1];
+    Object.defineProperties(secondVideo, {
+      duration: { configurable: true, value: 12 },
+      readyState: { configurable: true, value: 4 },
+      currentSrc: { configurable: true, get: () => secondVideo.src },
+    });
+    fireEvent.loadedMetadata(secondVideo);
+    fireEvent.loadedData(secondVideo);
+    await waitFor(() =>
+      expect(
+        global.fetch.mock.calls.filter(([url]) => String(url).endsWith("/api/media/track-studio-faces")).length
+      ).toBeGreaterThanOrEqual(2)
+    );
+  });
+
+  test("Director directs 9:16 vertical tracking for Shorts and picks Shorts-ready moments", async () => {
+    const onDirectorReview = jest.fn();
+    const onSave = jest.fn(() => Promise.resolve());
+    const url = "https://example.com/source.mp4";
+    const storagePath = "studio/sources/test-user/source.mp4";
+    const trackingRequests = [];
+    global.fetch.mockImplementation((fetchUrl, options) => {
+      const targetUrl = String(fetchUrl);
+      if (targetUrl.endsWith("/api/media/track-studio-faces")) {
+        const body = options?.body;
+        trackingRequests.push({
+          mode: body?.get?.("mode"),
+          anchors: JSON.parse(String(body?.get?.("anchors") || "{}")),
+        });
+        const submittedProjectId = body?.get?.("projectId");
+        const submittedAssetId = body?.get?.("sourceAssetId");
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            mode: "source_shots",
+            engine: "opencv-yunet-source-shot-follow",
+            start: 0,
+            end: 72,
+            sceneCuts: [24, 48],
+            reviewRequired: true,
+            decodeFailures: [],
+            tracks: {
+              solo: {
+                coverage: 0.9,
+                keyframes: [
+                  { time: 0, x: 25, y: 45 },
+                  { time: 24, x: 75, y: 45, cut: true },
+                  { time: 72, x: 70, y: 45 },
+                ],
+              },
+            },
+            editPlan: {
+              version: 1,
+              preflight: { passed: true },
+              timelineCuts: [{ time: 0, mode: "speaker_track", zoom: 1 }],
+              splitSuggestions: [{
+                start: 24,
+                end: 34,
+                reason: "two_clean_foreground_faces",
+                confidence: 0.91,
+                top: {
+                  x: 25,
+                  y: 40,
+                  keyframes: [{ time: 24, x: 25, y: 40 }, { time: 30, x: 22, y: 40 }],
+                },
+                bottom: {
+                  x: 75,
+                  y: 40,
+                  keyframes: [{ time: 24, x: 75, y: 40 }, { time: 30, x: 78, y: 40 }],
+                },
+              }],
+            },
+            sourceShotArtifact: {
+              artifactHash: "d".repeat(64),
+              sourceSha256: "e".repeat(64),
+              projectId: submittedProjectId,
+              sourceAssetId: submittedAssetId,
+              analysisRange: { space: "source", startTick: 0, endTick: secondsToTicks(72) },
+              createdAt: "2026-09-29T17:00:00.000Z",
+            },
+          }),
+        });
+      }
+      if (targetUrl.endsWith("/api/studio/director/projects/revisions")) {
+        const { document } = JSON.parse(options.body);
+        const canonical = JSON.stringify(document, (_key, item) =>
+          item && typeof item === "object" && !Array.isArray(item)
+            ? Object.fromEntries(Object.keys(item).sort().map(key => [key, item[key]]))
+            : item
+        );
+        return Promise.resolve({
+          ok: true,
+          status: 201,
+          json: () => Promise.resolve({
+            ok: true,
+            projectId: document.projectId,
+            revision: document.revision,
+            documentFingerprint: createHash("sha256").update(canonical).digest("hex"),
+            serverRevisionId: "e".repeat(64),
+            registeredAt: "2026-09-30T12:00:00.000Z",
+            duplicate: false,
+          }),
+        });
+      }
+      if (targetUrl.endsWith("/api/studio/director/reviews")) {
+        const { proposal, decision } = JSON.parse(options.body);
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve({
+            ok: true,
+            serverReviewId: "f".repeat(64),
+            projectId: proposal.projectId,
+            proposalId: proposal.proposalId,
+            baseRevision: proposal.baseRevision,
+            proposalFingerprint: proposal.proposalFingerprint,
+            decision,
+            reviewerUid: "test-user",
+            reviewedAt: "2026-09-29T12:00:00.000Z",
+            duplicate: false,
+          }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({}),
+        blob: () => Promise.resolve(new Blob(["video"], { type: "video/mp4" })),
+      });
+    });
+
+    render(
+      <ViralClipStudio
+        videoUrl={url}
+        sourceStoragePath={storagePath}
+        clips={[
+          { id: "source", start: 0, end: 72, duration: 72, url, storagePath, score: 92, preferredDestination: "youtube_shorts" },
+          { id: "long", start: 2, end: 68, duration: 66, url, storagePath, score: 95 },
+          {
+            id: "short",
+            start: 6,
+            end: 38,
+            duration: 32,
+            url,
+            storagePath,
+            score: 88,
+            destinationScores: { youtube_shorts: 96, instagram_reels: 91, tiktok: 89 },
+          },
+        ]}
+        onSave={onSave}
+        onDirectorReview={onDirectorReview}
+        onCancel={jest.fn()}
+      />
+    );
+    readyCutawaySource(72);
+
+    const tools = within(screen.getByRole("navigation", { name: "Creative tools" }));
+    fireEvent.click(tools.getByRole("button", { name: "Export", exact: true }));
+    expect(
+      within(screen.getByRole("radiogroup", { name: "Export destination" })).getByRole("radio", { name: /Shorts/i })
+    ).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByTestId("export-destination-limit-note")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("export-fit-destination-limit"));
+    await waitFor(() => expect(screen.queryByTestId("export-destination-limit-note")).not.toBeInTheDocument());
+    fireEvent.click(screen.getByTestId("studio-undo-button"));
+    await waitFor(() => expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("1:12.0"));
+
+    fireEvent.click(tools.getByRole("button", { name: "Director", exact: true }));
+    expect(screen.getByTestId("director-vertical-controls")).toBeInTheDocument();
+    expect(screen.getByTestId("director-dest-shorts")).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByTestId("director-direct-vertical-track"));
+    await waitFor(() => expect(trackingRequests.length).toBeGreaterThanOrEqual(1));
+    expect(trackingRequests.at(-1).mode).toBe("source_shots");
+    expect(trackingRequests.at(-1).anchors?.solo).toBeDefined();
+
+    const reframePanel = await screen.findByTestId("studio-director-review", {}, { timeout: 10000 });
+    expect(screen.getByTestId("director-apply-two-speaker-split")).toBeInTheDocument();
+    fireEvent.click(within(reframePanel).getByTestId("studio-director-review-open"));
+    await within(reframePanel).findByTestId("studio-director-review-approve");
+    fireEvent.click(within(reframePanel).getByTestId("studio-director-review-approve"));
+    await waitFor(() => expect(onDirectorReview).toHaveBeenCalledTimes(1));
+
+    fireEvent.click(screen.getByTestId("director-propose-moment"));
+    const openMomentReview = await screen.findByTestId("studio-director-review-open", {}, { timeout: 10000 });
+    const panel = screen.getByTestId("studio-director-review");
+    fireEvent.click(openMomentReview);
+    await within(panel).findByTestId("studio-director-review-approve");
+    fireEvent.click(within(panel).getByTestId("studio-director-review-approve"));
+    await waitFor(() => expect(onDirectorReview).toHaveBeenCalledTimes(2));
+    expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:32.0");
+
+    await clickRenderFinalClip();
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(onSave.mock.calls[0][2].finishPlan.reframe.aspect).toBe("9:16");
+    expect(onSave.mock.calls[0][2].finishPlan.reframe.mode).toBe("speaker_track");
+    expect(onSave.mock.calls[0][2].finishPlan.reframe.keyframes.length).toBeGreaterThanOrEqual(3);
+  }, 90000);
+
 });

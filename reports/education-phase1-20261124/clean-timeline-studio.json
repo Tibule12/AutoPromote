@@ -1,0 +1,12 @@
+{
+  "normalEmulatorSignIn": true,
+  "actualSourceUpload": true,
+  "realTimelineVisible": true,
+  "localDemoBadgeVisible": false,
+  "balanceOverlayVisible": false,
+  "recordingMode": false,
+  "injectedStyles": false,
+  "noRenderStarted": true,
+  "contextualHelp": true,
+  "uiErrors": []
+}

@@ -1,0 +1,29 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Pathway marker \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Pathway marker",
+      "name": "Pathway marker",
+      "type": "text",
+      "text": "AUTOPROMOTE EDUCATION  /  MECHANICAL TECHNOLOGY",
+      "x": 50.0,
+      "y": 4.166666666666667,
+      "width": 94,
+      "scale": 0.35,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

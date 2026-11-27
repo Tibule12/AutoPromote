@@ -1,0 +1,3970 @@
+{
+  "version": 1,
+  "id": "it-studio-foundation-v1",
+  "title": "Understand the idea. Create the explanation.",
+  "audience": "IT students, with teacher supervision",
+  "project": "Byte conversion, then programming concepts in motion",
+  "lessons": [
+    {
+      "id": "first-project",
+      "number": 1,
+      "title": "From working code to a clear demonstration",
+      "level": "Beginner",
+      "minutes": 18,
+      "summary": "Make a project that explains one normal input: 18 becomes 00010010.",
+      "objectives": [
+        "Distinguish a source recording, an editable project and an exported movie.",
+        "Read video dimensions and frame rate without confusing them with file size.",
+        "Import original screen footage and save an editable Studio project."
+      ],
+      "technique": "A technical demonstration gives viewers evidence: an input, a visible operation and a result. A project keeps editing decisions; an MP4 is the finished viewing copy.",
+      "applications": [
+        "A programming portfolio demonstration",
+        "Evidence for a classroom practical",
+        "A short explanation for a school coding club"
+      ],
+      "steps": [
+        {
+          "title": "Choose the source",
+          "control": "Choose videos",
+          "value": "Select normal-input.mp4",
+          "why": "This original screen recording shows a real conversion. Do not upload learner names, passwords or API keys."
+        },
+        {
+          "title": "Open the editor",
+          "control": "Open Creator Studio",
+          "value": "Click once the uploaded source is ready",
+          "why": "The preview is the programme monitor; the timeline determines what will be in the export."
+        },
+        {
+          "title": "Preserve the whole screen",
+          "control": "Reframe \u2192 16:9 \u2192 Preserve frame",
+          "value": "Aspect 16:9; automatic reframing off",
+          "why": "A portrait crop can hide code or its output. A screen demonstration needs both readable."
+        },
+        {
+          "title": "Review the source",
+          "control": "Play comparison",
+          "value": "Play the complete input recording",
+          "why": "Check that you can read the number, the Convert action and the eight-bit result."
+        },
+        {
+          "title": "Name and save",
+          "control": "Project name; Save project",
+          "value": "IT \u00b7 Explain a byte \u00b7 01",
+          "why": "Save retains editable decisions. Downloading a movie will not replace your editable backup."
+        },
+        {
+          "title": "Choose a viewing format",
+          "control": "Export \u2192 Resolution; Frame rate",
+          "value": "720p; 24 fps; H.264",
+          "why": "These match the lesson delivery. Higher resolution increases detail and file size; it does not correct an inaccurate explanation."
+        }
+      ],
+      "assets": [
+        {
+          "label": "Source video",
+          "file": "normal-input.mp4",
+          "description": "Original AutoPromote Byte Lab browser recording."
+        },
+        {
+          "label": "Practice app",
+          "file": "byte-lab.html",
+          "description": "Run the supplied converter locally using a static server."
+        },
+        {
+          "label": "Code",
+          "file": "byteLabAlgorithm.mjs",
+          "description": "Read the validation and conversion algorithm."
+        }
+      ],
+      "assessment": [
+        "The source shows 18 and the correct eight-bit output.",
+        "The complete code/output screen stays readable at 16:9.",
+        "The named project can be saved and reopened."
+      ],
+      "assignment": "Record a small program you wrote. Identify its input and output in two sentences, then import the recording and save a named project.",
+      "troubleshooting": [
+        {
+          "problem": "My preview is cropped",
+          "solution": "Choose 16:9 and Preserve frame; do not use speaker tracking for a screen recording."
+        },
+        {
+          "problem": "Saving does not create a movie",
+          "solution": "Use Export for a viewing copy and Download project backup for the editable project."
+        }
+      ],
+      "teacherNote": "The example remains a small JavaScript conversion program. It is not a claim that software must use JavaScript or that a video replaces source code assessment. The recording\u2019s code panel illustrates the numeric conversion core. Inspect byteLabAlgorithm.mjs for the complete preceding digits-only format guard. When invalid input is rejected, lit bits may still show the previous accepted value; the error is the current test outcome, not a conversion of the rejected input.",
+      "releaseStatus": "review",
+      "nextLesson": "precise-cuts",
+      "media": {
+        "source": "normal-input.mp4",
+        "result": "first-project-result.mp4",
+        "tutorial": "first-project-tutorial.mp4",
+        "transcript": "first-project-transcript.txt",
+        "screenshot": "first-project-studio.jpg",
+        "poster": "normal-input.jpg",
+        "project": "first-project-practice.json",
+        "bundle": "first-project-practice-kit.zip"
+      },
+      "evidence": {
+        "nativeControls": true,
+        "realMovingSource": true,
+        "canonicalExport": true,
+        "fullDurationInspected": false,
+        "previewExportReviewed": false,
+        "independentReproduction": false,
+        "teacherReview": false,
+        "reference": "reports/education-phase1-20261124/lesson-verification.json"
+      },
+      "languages": {
+        "en": {
+          "status": "private-review"
+        },
+        "xh": {
+          "status": "planned",
+          "reviewRequired": true
+        }
+      },
+      "module": "Byte conversion foundation",
+      "practiceSource": "normal-input.mp4",
+      "sourceDescription": "Original screen recording of the working Byte Lab program",
+      "concept": {
+        "title": "A byte is eight bits.",
+        "explanation": "This example is an unsigned byte: its whole-number range is 0 through 255. The bit weights are 128, 64, 32, 16, 8, 4, 2 and 1. Eighteen is 16 + 2, so its eight-bit representation is 00010010."
+      },
+      "knowledgeChecks": [
+        {
+          "question": "Does 00010010 represent 18 or 12? Explain using the bit weights.",
+          "expectedAnswer": "18: the 16 and 2 positions are set. The remaining positions contribute zero.",
+          "marks": 3
+        },
+        {
+          "question": "Explain one editing decision that makes this IT idea clearer without changing the evidence.",
+          "expectedAnswer": "Name an actual control, its value, the visible result and why it helps a viewer understand the concept.",
+          "marks": 2
+        }
+      ],
+      "curriculum": {
+        "title": "DBE IT CAPS 2024 \u00b7 Section 3 amendment",
+        "url": "https://www.education.gov.za/LinkClick.aspx?fileticket=sgM2WgtQFqU%3D&mid=1208&portalid=0&tabid=570",
+        "portal": "https://www.education.gov.za/Curriculum/CurriculumAssessmentPolicyStatements(CAPS)/CAPSFET.aspx",
+        "reviewed": "2026-11-24",
+        "scope": "Curriculum reference, not formal approval. Page numbers are PDF pages of the amendment. Original pseudocode/JavaScript/SQLite examples supplement the school language and DBMS; they do not replace the CAPS Delphi practical.",
+        "pages": [
+          10
+        ],
+        "note": "Original unsigned-byte foundation example; teacher chooses the classroom context."
+      },
+      "captionPolicy": "No subtitles or caption tracks, per owner instruction. Written lesson steps and transcripts remain separate."
+    },
+    {
+      "id": "precise-cuts",
+      "number": 2,
+      "title": "Trim the wait. Keep the evidence.",
+      "level": "Beginner",
+      "minutes": 20,
+      "summary": "Cut a technical demo so the input, action and result remain understandable.",
+      "objectives": [
+        "Trim leading and trailing idle time.",
+        "Split a clip at a programme time.",
+        "Check that a shorter edit still proves what the program does."
+      ],
+      "technique": "Editing removes waiting while preserving cause and effect. Cutting away a validation message can make a failing test look successful. Keep the complete evidence of the case you are explaining.",
+      "applications": [
+        "A concise debugging report",
+        "A practical assessment screen demonstration",
+        "A project submission with a time limit"
+      ],
+      "steps": [
+        {
+          "title": "Open the practice source",
+          "control": "Choose videos; Open Creator Studio",
+          "value": "normal-input.mp4",
+          "why": "Use the same original recording so your teacher can compare before and after."
+        },
+        {
+          "title": "Set the source interval",
+          "control": "Edited output position; Cut \u2192 Trim start to here; Trim end to here",
+          "value": "Seek to 1.0 s, trim start; seek to programme 6.0 s, trim end",
+          "why": "This keeps source seconds 1\u20137. After trimming the start, the programme clock begins at zero again."
+        },
+        {
+          "title": "Choose the cut point",
+          "control": "Edited output position",
+          "value": "3.0 s",
+          "why": "This is the programme clock after trimming, not three seconds into the original file."
+        },
+        {
+          "title": "Make a split",
+          "control": "Split",
+          "value": "Click at programme 3.0 s",
+          "why": "A split creates two editable occurrences without deleting source footage."
+        },
+        {
+          "title": "Check the cut",
+          "control": "Play comparison",
+          "value": "Play 0.0\u20136.0 s",
+          "why": "The input, clicked action and result must still make sense."
+        },
+        {
+          "title": "Save and export",
+          "control": "Save project; Export",
+          "value": "720p; 24 fps; H.264",
+          "why": "The exported duration should be six seconds. Reopen the editable project to retain both occurrences."
+        }
+      ],
+      "assets": [
+        {
+          "label": "Source video",
+          "file": "normal-input.mp4",
+          "description": "Same unchanged source as lesson one."
+        },
+        {
+          "file": "byteLabAlgorithm.mjs",
+          "label": "Complete working byte-converter code",
+          "description": "Includes the raw-string format guard before numeric range validation. The video code panel illustrates the numeric core."
+        }
+      ],
+      "assessment": [
+        "The edit lasts six seconds, allowing one output frame of rounding.",
+        "There are two editable timeline occurrences after the split.",
+        "The 18 \u2192 00010010 conversion remains visible and is not misrepresented."
+      ],
+      "assignment": "Trim a recorded program demonstration to remove waiting. Make one useful split. Explain which evidence you deliberately kept.",
+      "troubleshooting": [
+        {
+          "problem": "The split is in the wrong place",
+          "solution": "Seek on Edited output position after trimming. Check the programme time, then Undo and split again."
+        },
+        {
+          "problem": "The result disappears too quickly",
+          "solution": "Extend the selected interval or hold the source recording longer; do not falsify an output."
+        }
+      ],
+      "teacherNote": "No speed manipulation is needed. A precise cut is easier to follow than a sped-up screen. The recording\u2019s code panel illustrates the numeric conversion core. Inspect byteLabAlgorithm.mjs for the complete preceding digits-only format guard. When invalid input is rejected, lit bits may still show the previous accepted value; the error is the current test outcome, not a conversion of the rejected input.",
+      "releaseStatus": "review",
+      "nextLesson": "sequence-test-cases",
+      "media": {
+        "source": "normal-input.mp4",
+        "result": "precise-cuts-result.mp4",
+        "tutorial": "precise-cuts-tutorial.mp4",
+        "transcript": "precise-cuts-transcript.txt",
+        "screenshot": "precise-cuts-studio.jpg",
+        "poster": "normal-input.jpg",
+        "project": "precise-cuts-practice.json",
+        "bundle": "precise-cuts-practice-kit.zip"
+      },
+      "evidence": {
+        "nativeControls": true,
+        "realMovingSource": true,
+        "canonicalExport": true,
+        "fullDurationInspected": false,
+        "previewExportReviewed": false,
+        "independentReproduction": false,
+        "teacherReview": false,
+        "reference": "reports/education-phase1-20261124/lesson-verification.json"
+      },
+      "languages": {
+        "en": {
+          "status": "private-review"
+        },
+        "xh": {
+          "status": "planned",
+          "reviewRequired": true
+        }
+      },
+      "module": "Byte conversion foundation",
+      "practiceSource": "normal-input.mp4",
+      "sourceDescription": "Original screen recording of the working Byte Lab program",
+      "concept": {
+        "title": "Source time and program evidence.",
+        "explanation": "The edit selects source seconds 1 through 7, producing six seconds. The split at programme second 3 corresponds to source second 4. Neither split nor trim changes the algorithm."
+      },
+      "knowledgeChecks": [
+        {
+          "question": "Which source time is shown at edited output second 3 after trimming away the first second?",
+          "expectedAnswer": "Source second 4. Distinguish the recording clock from the edited programme clock.",
+          "marks": 3
+        },
+        {
+          "question": "Explain one editing decision that makes this IT idea clearer without changing the evidence.",
+          "expectedAnswer": "Name an actual control, its value, the visible result and why it helps a viewer understand the concept.",
+          "marks": 2
+        }
+      ],
+      "curriculum": {
+        "title": "DBE IT CAPS 2024 \u00b7 Section 3 amendment",
+        "url": "https://www.education.gov.za/LinkClick.aspx?fileticket=sgM2WgtQFqU%3D&mid=1208&portalid=0&tabid=570",
+        "portal": "https://www.education.gov.za/Curriculum/CurriculumAssessmentPolicyStatements(CAPS)/CAPSFET.aspx",
+        "reviewed": "2026-11-24",
+        "scope": "Curriculum reference, not formal approval. Page numbers are PDF pages of the amendment. Original pseudocode/JavaScript/SQLite examples supplement the school language and DBMS; they do not replace the CAPS Delphi practical.",
+        "pages": [
+          10
+        ],
+        "note": "Original unsigned-byte foundation example; teacher chooses the classroom context."
+      },
+      "captionPolicy": "No subtitles or caption tracks, per owner instruction. Written lesson steps and transcripts remain separate."
+    },
+    {
+      "id": "sequence-test-cases",
+      "number": 3,
+      "title": "Tell the story of a test",
+      "level": "Beginner",
+      "minutes": 25,
+      "summary": "Sequence a normal case, a boundary case and a rejected input.",
+      "objectives": [
+        "Import and order multiple source videos.",
+        "Separate normal, boundary and invalid test evidence.",
+        "Use the timeline to make a clear three-part explanation."
+      ],
+      "technique": "A convincing test demonstration shows expected behaviour and failure handling. Use an example that works, a value at the valid limit, and an invalid value that the program refuses.",
+      "applications": [
+        "A software testing presentation",
+        "A debugging handover",
+        "A school project portfolio"
+      ],
+      "steps": [
+        {
+          "title": "Start with normal behaviour",
+          "control": "Choose videos; Open Creator Studio; Trim start to here; Trim end to here",
+          "value": "normal-input.mp4; start 1 s; end 5 s",
+          "why": "Four seconds establish the ordinary conversion."
+        },
+        {
+          "title": "Add the boundary recording",
+          "control": "Import project videos; Add to sequence",
+          "value": "boundary-input.mp4; programme 7 s \u2192 trim start; programme 8 s \u2192 trim end (source 3\u20137 s)",
+          "why": "The original includes 0 and 255. Keep the maximum-value result readable."
+        },
+        {
+          "title": "Add rejection evidence",
+          "control": "Import project videos; Add to sequence",
+          "value": "invalid-input.mp4; programme 9 s \u2192 trim start; programme 12 s \u2192 trim end (source 1\u20135 s)",
+          "why": "Show the 256 validation message. Do not label this as a successful conversion."
+        },
+        {
+          "title": "Read the timeline",
+          "control": "Sequence tracks",
+          "value": "Normal \u2192 Boundary \u2192 Invalid; 12 s total",
+          "why": "Order communicates an argument. Dragging a source into the library alone does not place it in the programme."
+        },
+        {
+          "title": "Review every cut",
+          "control": "Edited output position; Play comparison",
+          "value": "Inspect just before and after 4 s and 8 s",
+          "why": "Watch for hidden output, missing validation and incorrect source timing."
+        },
+        {
+          "title": "Save and export",
+          "control": "Save project; Export",
+          "value": "720p; 24 fps; H.264",
+          "why": "A twelve-second summary can accompany a longer written test table."
+        }
+      ],
+      "assets": [
+        {
+          "label": "Normal input",
+          "file": "normal-input.mp4",
+          "description": "Normal case: 18."
+        },
+        {
+          "label": "Boundary input",
+          "file": "boundary-input.mp4",
+          "description": "0 and 255."
+        },
+        {
+          "label": "Invalid input",
+          "file": "invalid-input.mp4",
+          "description": "256 and -1 rejected; 18 accepted."
+        },
+        {
+          "file": "byteLabAlgorithm.mjs",
+          "label": "Complete working byte-converter code",
+          "description": "Includes the raw-string format guard before numeric range validation. The video code panel illustrates the numeric core."
+        }
+      ],
+      "assessment": [
+        "The timeline contains three source occurrences in the specified order.",
+        "All three cases are technically labelled correctly in the written explanation.",
+        "The sequence lasts twelve seconds and all cut points retain readable evidence."
+      ],
+      "assignment": "Make a three-case video test report for your own program. Submit a test table with input, expected result and actual result alongside the movie.",
+      "troubleshooting": [
+        {
+          "problem": "The extra clip is missing from the export",
+          "solution": "Use Add to sequence after import. Check the timeline occurrence, not only the media library."
+        },
+        {
+          "problem": "An invalid result looks like an ordinary result",
+          "solution": "Keep the rejection message visible and identify it explicitly in your explanation."
+        },
+        {
+          "problem": "The bits remain lit after an invalid input is rejected.",
+          "solution": "They belong to the previous accepted conversion. Read the rejection message as the current test outcome. Do not describe unchanged bits as a new output for invalid input."
+        }
+      ],
+      "teacherNote": "The example is a useful testing exercise, not a substitute for your teacher\u2019s required test coverage. The recording\u2019s code panel illustrates the numeric conversion core. Inspect byteLabAlgorithm.mjs for the complete preceding digits-only format guard. When invalid input is rejected, lit bits may still show the previous accepted value; the error is the current test outcome, not a conversion of the rejected input.",
+      "releaseStatus": "review",
+      "nextLesson": "explain-with-text",
+      "media": {
+        "source": "normal-input.mp4",
+        "result": "sequence-test-cases-result.mp4",
+        "tutorial": "sequence-test-cases-tutorial.mp4",
+        "transcript": "sequence-test-cases-transcript.txt",
+        "screenshot": "sequence-test-cases-studio.jpg",
+        "poster": "normal-input.jpg",
+        "project": "sequence-test-cases-practice.json",
+        "bundle": "sequence-test-cases-practice-kit.zip"
+      },
+      "evidence": {
+        "nativeControls": true,
+        "realMovingSource": true,
+        "canonicalExport": true,
+        "fullDurationInspected": false,
+        "previewExportReviewed": false,
+        "independentReproduction": false,
+        "teacherReview": false,
+        "reference": "reports/education-phase1-20261124/lesson-verification.json"
+      },
+      "languages": {
+        "en": {
+          "status": "private-review"
+        },
+        "xh": {
+          "status": "planned",
+          "reviewRequired": true
+        }
+      },
+      "module": "Byte conversion foundation",
+      "practiceSource": "normal-input.mp4",
+      "sourceDescription": "Original screen recording of the working Byte Lab program",
+      "concept": {
+        "title": "A test suite checks different classes of input.",
+        "explanation": "A normal case is 18. Valid boundaries are 0 and 255. Invalid examples include 256, -1 and a fraction. The movie preserves observed outcomes; the test table records expected and actual outcomes."
+      },
+      "knowledgeChecks": [
+        {
+          "question": "Why are 255 and 256 different tests, even though they differ by only one?",
+          "expectedAnswer": "255 is the maximum valid unsigned byte; 256 must be rejected. Together they expose an off-by-one error.",
+          "marks": 3
+        },
+        {
+          "question": "Explain one editing decision that makes this IT idea clearer without changing the evidence.",
+          "expectedAnswer": "Name an actual control, its value, the visible result and why it helps a viewer understand the concept.",
+          "marks": 2
+        }
+      ],
+      "curriculum": {
+        "title": "DBE IT CAPS 2024 \u00b7 Section 3 amendment",
+        "url": "https://www.education.gov.za/LinkClick.aspx?fileticket=sgM2WgtQFqU%3D&mid=1208&portalid=0&tabid=570",
+        "portal": "https://www.education.gov.za/Curriculum/CurriculumAssessmentPolicyStatements(CAPS)/CAPSFET.aspx",
+        "reviewed": "2026-11-24",
+        "scope": "Curriculum reference, not formal approval. Page numbers are PDF pages of the amendment. Original pseudocode/JavaScript/SQLite examples supplement the school language and DBMS; they do not replace the CAPS Delphi practical.",
+        "pages": [
+          13,
+          20
+        ],
+        "note": "Original unsigned-byte foundation example; teacher chooses the classroom context."
+      },
+      "captionPolicy": "No subtitles or caption tracks, per owner instruction. Written lesson steps and transcripts remain separate."
+    },
+    {
+      "id": "explain-with-text",
+      "number": 4,
+      "title": "Explain a result with readable text",
+      "level": "Beginner",
+      "minutes": 22,
+      "summary": "Add a precise technical label without hiding the code.",
+      "objectives": [
+        "Create a text layer over moving video.",
+        "Position and time the label so it supports the evidence.",
+        "Use concise wording that is technically accurate."
+      ],
+      "technique": "A label connects visible output to an idea. \u201c18 = 16 + 2\u201d explains the active binary positions. Readability depends on contrast, placement and enough time to read, not on adding more effects.",
+      "applications": [
+        "An algorithm walkthrough",
+        "A code review presentation",
+        "An educational screen recording"
+      ],
+      "steps": [
+        {
+          "title": "Open the normal case",
+          "control": "Choose videos; Open Creator Studio",
+          "value": "normal-input.mp4; start 1 s; end 7 s",
+          "why": "Use the six-second source interval from the trimming lesson."
+        },
+        {
+          "title": "Create a text layer",
+          "control": "Graphics \u2192 Add Text",
+          "value": "18 = 16 + 2",
+          "why": "Use an explanatory label. Automatic transcription is not required."
+        },
+        {
+          "title": "Set text timing",
+          "control": "Title start time; Title duration",
+          "value": "Start 1 s; duration 4 s",
+          "why": "The label should appear after the conversion and leave enough time for the viewer to read it."
+        },
+        {
+          "title": "Set a readable position",
+          "control": "Graphics \u2192 Lower; Motion \u2192 Transform keyframes \u2192 Target layer \u2192 Y",
+          "value": "X 50%; Y 93%",
+          "why": "Choose the text layer, then set Y to 93%. This keeps the label below the test cards instead of covering their headings. Increasing Y moves the layer down the frame."
+        },
+        {
+          "title": "Choose text appearance",
+          "control": "Title size; Title text color; Title background color",
+          "value": "Inter; size 100%; white #ffffff; background #0b1020; Headline defaults: weight 900, 45% box, 0.3 s entrance/exit fades",
+          "why": "Check the actual result at lesson size. Do not rely on a small thumbnail."
+        },
+        {
+          "title": "Preview, save and export",
+          "control": "Play comparison; Save project; Export",
+          "value": "720p; 24 fps; H.264",
+          "why": "The words, timing and placement must agree in preview and export. If they do not, do not hand in the video."
+        }
+      ],
+      "assets": [
+        {
+          "label": "Source video",
+          "file": "normal-input.mp4",
+          "description": "A real conversion is visible beneath the label."
+        },
+        {
+          "file": "byteLabAlgorithm.mjs",
+          "label": "Complete working byte-converter code",
+          "description": "Includes the raw-string format guard before numeric range validation. The video code panel illustrates the numeric core."
+        }
+      ],
+      "assessment": [
+        "The text states the correct relation: 18 = 16 + 2.",
+        "Text remains visible for four seconds and does not cover the code or output.",
+        "The text layer remains editable after saving and reopening."
+      ],
+      "assignment": "Add one concise technical annotation to your program demonstration. Ask a classmate to explain what the label adds before giving them the answer.",
+      "troubleshooting": [
+        {
+          "problem": "The title hides the evidence",
+          "solution": "Move its Y position toward a clear margin or shorten the text. Review the full output."
+        },
+        {
+          "problem": "Text looks different in the export",
+          "solution": "Use the supported font and inspect the final file; keep the lesson unpublished until the mismatch is fixed."
+        }
+      ],
+      "teacherNote": "This lesson uses manually written text. It makes no automatic-caption accuracy claim. The recording\u2019s code panel illustrates the numeric conversion core. Inspect byteLabAlgorithm.mjs for the complete preceding digits-only format guard. When invalid input is rejected, lit bits may still show the previous accepted value; the error is the current test outcome, not a conversion of the rejected input.",
+      "releaseStatus": "review",
+      "nextLesson": "sound-and-delivery",
+      "media": {
+        "source": "normal-input.mp4",
+        "result": "explain-with-text-result.mp4",
+        "tutorial": "explain-with-text-tutorial.mp4",
+        "transcript": "explain-with-text-transcript.txt",
+        "screenshot": "explain-with-text-studio.jpg",
+        "poster": "normal-input.jpg",
+        "project": "explain-with-text-practice.json",
+        "bundle": "explain-with-text-practice-kit.zip"
+      },
+      "evidence": {
+        "nativeControls": true,
+        "realMovingSource": true,
+        "canonicalExport": true,
+        "fullDurationInspected": false,
+        "previewExportReviewed": false,
+        "independentReproduction": false,
+        "teacherReview": false,
+        "reference": "reports/education-phase1-20261124/lesson-verification.json"
+      },
+      "languages": {
+        "en": {
+          "status": "private-review"
+        },
+        "xh": {
+          "status": "planned",
+          "reviewRequired": true
+        }
+      },
+      "module": "Byte conversion foundation",
+      "practiceSource": "normal-input.mp4",
+      "sourceDescription": "Original screen recording of the working Byte Lab program",
+      "concept": {
+        "title": "Annotations explain representation.",
+        "explanation": "The label 18 = 16 + 2 names the two active weights. It must agree with the visible eight-bit result and must not cover the evidence."
+      },
+      "knowledgeChecks": [
+        {
+          "question": "If the input changes to 42, what should the explanatory label say?",
+          "expectedAnswer": "42 = 32 + 8 + 2, with binary 00101010. An unchanged 18 label would be technically false.",
+          "marks": 3
+        },
+        {
+          "question": "Explain one editing decision that makes this IT idea clearer without changing the evidence.",
+          "expectedAnswer": "Name an actual control, its value, the visible result and why it helps a viewer understand the concept.",
+          "marks": 2
+        }
+      ],
+      "curriculum": {
+        "title": "DBE IT CAPS 2024 \u00b7 Section 3 amendment",
+        "url": "https://www.education.gov.za/LinkClick.aspx?fileticket=sgM2WgtQFqU%3D&mid=1208&portalid=0&tabid=570",
+        "portal": "https://www.education.gov.za/Curriculum/CurriculumAssessmentPolicyStatements(CAPS)/CAPSFET.aspx",
+        "reviewed": "2026-11-24",
+        "scope": "Curriculum reference, not formal approval. Page numbers are PDF pages of the amendment. Original pseudocode/JavaScript/SQLite examples supplement the school language and DBMS; they do not replace the CAPS Delphi practical.",
+        "pages": [
+          10
+        ],
+        "note": "Original unsigned-byte foundation example; teacher chooses the classroom context."
+      },
+      "captionPolicy": "No subtitles or caption tracks, per owner instruction. Written lesson steps and transcripts remain separate."
+    },
+    {
+      "id": "sound-and-delivery",
+      "number": 5,
+      "title": "Give your demonstration a clear voice",
+      "level": "Beginner",
+      "minutes": 25,
+      "summary": "Mix a short explanation and export a file your teacher can review.",
+      "objectives": [
+        "Import a provided explanation as audio.",
+        "Set its level and compare audible content with the picture.",
+        "Export, play the complete movie, and submit the source code and test evidence separately."
+      ],
+      "technique": "Narration explains why an output matters. It should describe the visible input and result at the moment they appear. Music and sound effects are optional and must not obscure the explanation.",
+      "applications": [
+        "A narrated programming portfolio",
+        "An accessible practical demonstration",
+        "A school media or coding club tutorial"
+      ],
+      "steps": [
+        {
+          "title": "Open your edit",
+          "control": "Choose videos; Open Creator Studio",
+          "value": "normal-input.mp4; start 1 s; end 7 s",
+          "why": "Keep the six-second sequence and preserve the whole code/output frame."
+        },
+        {
+          "title": "Import the provided explanation",
+          "control": "Sound \u2192 Import voiceover",
+          "value": "byte-explanation.wav",
+          "why": "The supplied voice is disclosed synthetic narration. Do not clone a learner or teacher."
+        },
+        {
+          "title": "Set timing and gain",
+          "control": "Start for byte-explanation.wav; Volume for byte-explanation.wav; Keep original audio",
+          "value": "Start 0 s; volume 100%; Keep original audio off for this silent source",
+          "why": "Gain changes loudness; moving the clip changes when the words align with the picture."
+        },
+        {
+          "title": "Review synchronisation",
+          "control": "Play comparison",
+          "value": "Play the complete six seconds",
+          "why": "\u201cEighteen\u201d must refer to the visible input and \u201csixteen plus two\u201d to the visible active bit weights."
+        },
+        {
+          "title": "Choose export settings",
+          "control": "Export \u2192 Resolution; Frame rate; Codec",
+          "value": "720p; 24 fps; H.264; AAC",
+          "why": "These are delivery settings, not instructions to publish publicly."
+        },
+        {
+          "title": "Inspect the downloaded movie",
+          "control": "Render Final Clip; Download Rendered Clip",
+          "value": "Play the complete file, with sound",
+          "why": "Listen for clipping, check duration and readability, then retain the editable backup alongside your code."
+        }
+      ],
+      "assets": [
+        {
+          "label": "Source video",
+          "file": "normal-input.mp4",
+          "description": "Silent original screen recording."
+        },
+        {
+          "label": "Narration",
+          "file": "byte-explanation.wav",
+          "description": "Original script; standard synthetic voice; disclosed in the asset manifest."
+        },
+        {
+          "file": "byteLabAlgorithm.mjs",
+          "label": "Complete working byte-converter code",
+          "description": "Includes the raw-string format guard before numeric range validation. The video code panel illustrates the numeric core."
+        }
+      ],
+      "assessment": [
+        "The narration is intelligible and matches the visible conversion.",
+        "The exported file contains video and audio and plays completely.",
+        "The submission contains the movie, editable project, source code and test table."
+      ],
+      "assignment": "Record or write your own twenty-second explanation of a program test. Submit a private movie with a short reflection on one improvement you made after watching it.",
+      "troubleshooting": [
+        {
+          "problem": "There is no sound in the movie",
+          "solution": "Confirm the voiceover track is audible, its volume is not zero, and it overlaps the selected programme."
+        },
+        {
+          "problem": "The words do not match the action",
+          "solution": "Move the narration start or revise the edit. Do not speed up speech just to meet an arbitrary duration."
+        }
+      ],
+      "teacherNote": "No public publishing is used in this pathway. Existing commercial-account exports may require credits; a school entitlement has not been enabled. The recording\u2019s code panel illustrates the numeric conversion core. Inspect byteLabAlgorithm.mjs for the complete preceding digits-only format guard. When invalid input is rejected, lit bits may still show the previous accepted value; the error is the current test outcome, not a conversion of the rejected input.",
+      "releaseStatus": "review",
+      "nextLesson": "variables-loops",
+      "media": {
+        "source": "normal-input.mp4",
+        "result": "sound-and-delivery-result.mp4",
+        "tutorial": "sound-and-delivery-tutorial.mp4",
+        "transcript": "sound-and-delivery-transcript.txt",
+        "screenshot": "sound-and-delivery-studio.jpg",
+        "poster": "normal-input.jpg",
+        "project": "sound-and-delivery-practice.json",
+        "bundle": "sound-and-delivery-practice-kit.zip"
+      },
+      "evidence": {
+        "nativeControls": true,
+        "realMovingSource": true,
+        "canonicalExport": true,
+        "fullDurationInspected": false,
+        "previewExportReviewed": false,
+        "independentReproduction": false,
+        "teacherReview": false,
+        "reference": "reports/education-phase1-20261124/lesson-verification.json"
+      },
+      "languages": {
+        "en": {
+          "status": "private-review"
+        },
+        "xh": {
+          "status": "planned",
+          "reviewRequired": true
+        }
+      },
+      "module": "Byte conversion foundation",
+      "practiceSource": "normal-input.mp4",
+      "sourceDescription": "Original screen recording of the working Byte Lab program",
+      "concept": {
+        "title": "An explanation must agree across picture and sound.",
+        "explanation": "The spoken statement and the displayed bits must describe the same accepted value. Good sound cannot repair an incorrect conversion."
+      },
+      "knowledgeChecks": [
+        {
+          "question": "Would the existing narration still be correct over footage of 255? Explain.",
+          "expectedAnswer": "No. Its statement about 18, 16 and 2 would disagree with 255, which uses all eight bit weights.",
+          "marks": 3
+        },
+        {
+          "question": "Explain one editing decision that makes this IT idea clearer without changing the evidence.",
+          "expectedAnswer": "Name an actual control, its value, the visible result and why it helps a viewer understand the concept.",
+          "marks": 2
+        }
+      ],
+      "curriculum": {
+        "title": "DBE IT CAPS 2024 \u00b7 Section 3 amendment",
+        "url": "https://www.education.gov.za/LinkClick.aspx?fileticket=sgM2WgtQFqU%3D&mid=1208&portalid=0&tabid=570",
+        "portal": "https://www.education.gov.za/Curriculum/CurriculumAssessmentPolicyStatements(CAPS)/CAPSFET.aspx",
+        "reviewed": "2026-11-24",
+        "scope": "Curriculum reference, not formal approval. Page numbers are PDF pages of the amendment. Original pseudocode/JavaScript/SQLite examples supplement the school language and DBMS; they do not replace the CAPS Delphi practical.",
+        "pages": [
+          10
+        ],
+        "note": "Original unsigned-byte foundation example; teacher chooses the classroom context."
+      },
+      "captionPolicy": "No subtitles or caption tracks, per owner instruction. Written lesson steps and transcripts remain separate."
+    },
+    {
+      "id": "variables-loops",
+      "number": 6,
+      "title": "Animate a loop and its changing variables",
+      "level": "Concept lab \u00b7 Grade 10 reference",
+      "minutes": 40,
+      "summary": "Read [2, 4, 6] once, trace i and sum, and show why the loop stops before index 3.",
+      "concept": {
+        "title": "A loop repeats instructions while its condition is true.",
+        "explanation": "Initialise i = 0 and sum = 0. While i is less than 3, add values[i] to sum, then increment i. The visits are indices 0, 1 and 2. Final state: i = 3, sum = 12. Reading an element does not remove or change it. The condition prevents an out-of-bounds access."
+      },
+      "objectives": [
+        "Trace assignment, array indexing, a condition and counter-controlled repetition.",
+        "Distinguish an index, a stored value and a running total.",
+        "Animate a copied reading token while preserving fixed array values and index labels."
+      ],
+      "assignment": "Change the original example to [3, 5, 7]. Submit a trace table before adjusting text states and token timing. Show final i = 3 and sum = 15. Explain why a fourth read would be incorrect.",
+      "teacherNote": "Pause before each update and ask learners to predict i and sum. Assess the trace before the animation. Copying an imported recipe without predicting states does not demonstrate loop understanding.",
+      "module": "Programming concepts in motion",
+      "practiceSource": "algorithm-stage.mp4",
+      "sourceDescription": "Original empty 28-second stage. All concept graphics and movement are authored inside Studio.",
+      "technique": "A visual explanation should expose the changing state. Use separate, editable layers and exact timeline keys so learners can pause, predict and correct each step.",
+      "applications": [
+        "A supplementary classroom explanation",
+        "An assessed code-and-trace exercise chosen by a teacher",
+        "A creative technical portfolio"
+      ],
+      "curriculum": {
+        "title": "DBE IT CAPS 2024 \u00b7 Section 3 amendment",
+        "url": "https://www.education.gov.za/LinkClick.aspx?fileticket=sgM2WgtQFqU%3D&mid=1208&portalid=0&tabid=570",
+        "portal": "https://www.education.gov.za/Curriculum/CurriculumAssessmentPolicyStatements(CAPS)/CAPSFET.aspx",
+        "reviewed": "2026-11-24",
+        "scope": "Curriculum reference, not formal approval. Page numbers are PDF pages of the amendment. Original pseudocode/JavaScript/SQLite examples supplement the school language and DBMS; they do not replace the CAPS Delphi practical.",
+        "pages": [
+          10,
+          13,
+          14
+        ]
+      },
+      "knowledgeChecks": [
+        {
+          "question": "Predict the final sum if it starts at 10.",
+          "expectedAnswer": "22, because 2 + 4 + 6 is added to the initial 10.",
+          "marks": 2
+        },
+        {
+          "question": "Why does i = 3 stop the loop?",
+          "expectedAnswer": "There are three elements at indices 0\u20132. The condition i < 3 is false at 3; values[3] must not be read.",
+          "marks": 3
+        },
+        {
+          "question": "How many reads and additions occur?",
+          "expectedAnswer": "Three of each. The source array remains [2, 4, 6].",
+          "marks": 2
+        }
+      ],
+      "steps": [
+        {
+          "title": "Open an empty stage",
+          "control": "Choose videos \u2192 algorithm-stage.mp4 \u2192 Open Creator Studio \u2192 Reframe",
+          "value": "16:9; Preserve frame; Rounded main footage off; preview captions off; source sound and voice repair off",
+          "why": "The stage has no finished animation. The native layers and timeline supply the concept demonstration."
+        },
+        {
+          "title": "Import editable graphics",
+          "control": "Graphics \u2192 Import animated graphics \u2192 Import graphics composition\u2026",
+          "value": "variables-loops.graphics.json; composition 1280 \u00d7 720; duration 28 seconds",
+          "why": "The composition expands to ordinary editable artwork, text, groups and keys. It is not a pre-rendered animation."
+        },
+        {
+          "title": "Inspect the layers and fixed labels",
+          "control": "Graphics \u2192 Titles / Vector artwork; Motion \u2192 Target layer",
+          "value": "Inter text; rotation 0; opacity 1; native rectangle geometry; exact layer sizes and timings in the parameter tables below",
+          "why": "Separate labels from animated values. A teacher or learner can correct wording and state without rebuilding a movie elsewhere."
+        },
+        {
+          "title": "Reproduce a motion endpoint",
+          "control": "Composite \u2192 Graphic groups \u2192 Read value 2 \u00b7 copied token \u2192 Curve keyframe",
+          "value": "y \u00b7 5.500s; Selected group key value = 26; Selected group key easing = Ease In Out",
+          "why": "This is an actual group-property key. The percentages are offsets from the original layer positions, not absolute slot coordinates."
+        },
+        {
+          "title": "Trace the full timeline",
+          "control": "Edited output position; Play comparison; pause before each transition",
+          "value": "Programme seconds 0\u201328; follow the exact layer timing and property-key tables",
+          "why": "Predict each concept state before watching it. A smooth animation must still represent the correct algorithm or query."
+        },
+        {
+          "title": "Save, export and inspect",
+          "control": "Save project \u2192 Export \u2192 Export resolution / Export frame rate \u2192 Render Final Clip",
+          "value": "720p; 24 fps; H.264; AAC if narration is added; one normal render after account confirmation",
+          "why": "Save the editable project separately, then download and review the entire movie. Local proof does not guarantee every production route."
+        }
+      ],
+      "troubleshooting": [
+        {
+          "problem": "The graphics import rejects the duration or aspect.",
+          "solution": "Use the supplied 28-second stage and set the programme to 16:9 before importing. Do not shorten it before import."
+        },
+        {
+          "problem": "The card or label moves at the wrong time.",
+          "solution": "Check programme time, target group and the exact key rows. Studio easing belongs to the arriving key. Hold preserves a state until that key; Ease In Out interpolates into it."
+        },
+        {
+          "problem": "The movie looks clear but the explanation is wrong.",
+          "solution": "Compare it with the independent trace or SQL result. Correct the concept and its labels first. An export passing technical checks is not teacher approval."
+        }
+      ],
+      "assessment": [
+        "My predicted trace or query result is correct before editing.",
+        "My animation matches every stated concept step and keeps identities and indices clear.",
+        "I can explain the named controls, values and timings used.",
+        "I tested a different input and explained what changed.",
+        "I supplied the editable project and full movie for teacher review."
+      ],
+      "nextLesson": "validation-debugging",
+      "languages": {
+        "en": {
+          "status": "private-review"
+        },
+        "xh": {
+          "status": "planned",
+          "reviewRequired": true
+        }
+      },
+      "releaseStatus": "review",
+      "assets": [
+        {
+          "file": "algorithm-stage.mp4",
+          "label": "Empty 28-second stage",
+          "description": "Original silent colour plate; contains no concept animation."
+        },
+        {
+          "file": "variables-loops.graphics.json",
+          "label": "Editable Studio graphics composition",
+          "description": "Import with Graphics \u2192 Import animated graphics; editable native layers and keys."
+        },
+        {
+          "file": "variables-loops-trace.json",
+          "label": "Concept trace or working example",
+          "description": "Independently check the explanation before reproducing the edit."
+        }
+      ],
+      "media": {
+        "source": "algorithm-stage.mp4",
+        "result": "variables-loops-result.mp4",
+        "tutorial": "variables-loops-tutorial.mp4",
+        "transcript": "variables-loops-transcript.txt",
+        "screenshot": "variables-loops-studio.jpg",
+        "poster": "variables-loops-poster.jpg",
+        "project": "variables-loops-practice.json",
+        "bundle": "variables-loops-practice-kit.zip"
+      },
+      "evidence": {
+        "nativeControls": true,
+        "realMovingSource": false,
+        "nativeMotionScene": true,
+        "realMovingPreview": true,
+        "canonicalExport": true,
+        "fullDurationInspected": false,
+        "previewExportReviewed": false,
+        "teacherReview": false,
+        "independentReproduction": false,
+        "reference": "reports/education-phase1-20261124/concept-verification.json"
+      },
+      "motionReference": {
+        "units": "X/Y in percent of canvas; group X/Y are offsets. Times are programme seconds. Easing is on the arriving key.",
+        "layers": [
+          {
+            "name": "course",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 50,
+            "y": 6,
+            "width": 94,
+            "height": null,
+            "scale": 0.48,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "heading",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 50,
+            "y": 15,
+            "width": 94,
+            "height": null,
+            "scale": 1.2,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "subtitle",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 50,
+            "y": 24,
+            "width": 95,
+            "height": null,
+            "scale": 0.59,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "footnote",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 50,
+            "y": 96,
+            "width": 95,
+            "height": null,
+            "scale": 0.38,
+            "colour": "#8398b3"
+          },
+          {
+            "name": "array-card-0",
+            "type": "artwork",
+            "start": 0,
+            "duration": 28,
+            "x": 25,
+            "y": 42,
+            "width": 14,
+            "height": 14,
+            "scale": 1,
+            "colour": "#a8edcd"
+          },
+          {
+            "name": "array-value-0",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 25,
+            "y": 42,
+            "width": 12,
+            "height": null,
+            "scale": 1.55,
+            "colour": "#101b2b"
+          },
+          {
+            "name": "array-index-0",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 25,
+            "y": 32,
+            "width": 18,
+            "height": null,
+            "scale": 0.52,
+            "colour": "#b4c2d5"
+          },
+          {
+            "name": "array-card-1",
+            "type": "artwork",
+            "start": 0,
+            "duration": 28,
+            "x": 50,
+            "y": 42,
+            "width": 14,
+            "height": 14,
+            "scale": 1,
+            "colour": "#86d9f2"
+          },
+          {
+            "name": "array-value-1",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 50,
+            "y": 42,
+            "width": 12,
+            "height": null,
+            "scale": 1.55,
+            "colour": "#101b2b"
+          },
+          {
+            "name": "array-index-1",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 50,
+            "y": 32,
+            "width": 18,
+            "height": null,
+            "scale": 0.52,
+            "colour": "#b4c2d5"
+          },
+          {
+            "name": "array-card-2",
+            "type": "artwork",
+            "start": 0,
+            "duration": 28,
+            "x": 75,
+            "y": 42,
+            "width": 14,
+            "height": 14,
+            "scale": 1,
+            "colour": "#c4afff"
+          },
+          {
+            "name": "array-value-2",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 75,
+            "y": 42,
+            "width": 12,
+            "height": null,
+            "scale": 1.55,
+            "colour": "#101b2b"
+          },
+          {
+            "name": "array-index-2",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 75,
+            "y": 32,
+            "width": 18,
+            "height": null,
+            "scale": 0.52,
+            "colour": "#b4c2d5"
+          },
+          {
+            "name": "current-index",
+            "type": "artwork",
+            "start": 0,
+            "duration": 28,
+            "x": 25,
+            "y": 42,
+            "width": 18,
+            "height": 18,
+            "scale": 1,
+            "colour": "#ffffff"
+          },
+          {
+            "name": "watch-panel",
+            "type": "artwork",
+            "start": 0,
+            "duration": 28,
+            "x": 50,
+            "y": 68,
+            "width": 72,
+            "height": 12,
+            "scale": 1,
+            "colour": "#15263d"
+          },
+          {
+            "name": "initial-state",
+            "type": "text",
+            "start": 0,
+            "duration": 6,
+            "x": 50,
+            "y": 68,
+            "width": 68,
+            "height": null,
+            "scale": 0.82,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "watch-6",
+            "type": "text",
+            "start": 6,
+            "duration": 2,
+            "x": 50,
+            "y": 68,
+            "width": 68,
+            "height": null,
+            "scale": 0.82,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "watch-8",
+            "type": "text",
+            "start": 8,
+            "duration": 4,
+            "x": 50,
+            "y": 68,
+            "width": 68,
+            "height": null,
+            "scale": 0.82,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "watch-12",
+            "type": "text",
+            "start": 12,
+            "duration": 2,
+            "x": 50,
+            "y": 68,
+            "width": 68,
+            "height": null,
+            "scale": 0.82,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "watch-14",
+            "type": "text",
+            "start": 14,
+            "duration": 4,
+            "x": 50,
+            "y": 68,
+            "width": 68,
+            "height": null,
+            "scale": 0.82,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "watch-18",
+            "type": "text",
+            "start": 18,
+            "duration": 2,
+            "x": 50,
+            "y": 68,
+            "width": 68,
+            "height": null,
+            "scale": 0.82,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "watch-20",
+            "type": "text",
+            "start": 20,
+            "duration": 8,
+            "x": 50,
+            "y": 68,
+            "width": 68,
+            "height": null,
+            "scale": 0.82,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "start-rule",
+            "type": "text",
+            "start": 0,
+            "duration": 3,
+            "x": 50,
+            "y": 82,
+            "width": 95,
+            "height": null,
+            "scale": 0.64,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "read-copy-0",
+            "type": "text",
+            "start": 3.5,
+            "duration": 3,
+            "x": 25,
+            "y": 42,
+            "width": 12,
+            "height": null,
+            "scale": 0.8,
+            "colour": "#ffffff"
+          },
+          {
+            "name": "iteration-0",
+            "type": "text",
+            "start": 3,
+            "duration": 6,
+            "x": 50,
+            "y": 82,
+            "width": 95,
+            "height": null,
+            "scale": 0.61,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "read-copy-1",
+            "type": "text",
+            "start": 9.5,
+            "duration": 3,
+            "x": 50,
+            "y": 42,
+            "width": 12,
+            "height": null,
+            "scale": 0.8,
+            "colour": "#ffffff"
+          },
+          {
+            "name": "iteration-1",
+            "type": "text",
+            "start": 9,
+            "duration": 6,
+            "x": 50,
+            "y": 82,
+            "width": 95,
+            "height": null,
+            "scale": 0.61,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "read-copy-2",
+            "type": "text",
+            "start": 15.5,
+            "duration": 3,
+            "x": 75,
+            "y": 42,
+            "width": 12,
+            "height": null,
+            "scale": 0.8,
+            "colour": "#ffffff"
+          },
+          {
+            "name": "iteration-2",
+            "type": "text",
+            "start": 15,
+            "duration": 6,
+            "x": 50,
+            "y": 82,
+            "width": 95,
+            "height": null,
+            "scale": 0.61,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "stop",
+            "type": "text",
+            "start": 21,
+            "duration": 3,
+            "x": 50,
+            "y": 82,
+            "width": 95,
+            "height": null,
+            "scale": 0.61,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "exercise",
+            "type": "text",
+            "start": 24,
+            "duration": 4,
+            "x": 50,
+            "y": 82,
+            "width": 95,
+            "height": null,
+            "scale": 0.61,
+            "colour": "#f2f6fc"
+          }
+        ],
+        "keys": [
+          {
+            "target": "current-index",
+            "property": "opacity",
+            "time": 0,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "current-index",
+            "property": "opacity",
+            "time": 3,
+            "value": 1,
+            "easing": "hold"
+          },
+          {
+            "target": "current-index",
+            "property": "opacity",
+            "time": 21,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "current-index",
+            "property": "x",
+            "time": 0,
+            "value": 25,
+            "easing": "hold"
+          },
+          {
+            "target": "current-index",
+            "property": "x",
+            "time": 9,
+            "value": 50,
+            "easing": "hold"
+          },
+          {
+            "target": "current-index",
+            "property": "x",
+            "time": 15,
+            "value": 75,
+            "easing": "hold"
+          },
+          {
+            "target": "Read value 2 \u00b7 copied token",
+            "property": "x",
+            "time": 0,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Read value 2 \u00b7 copied token",
+            "property": "x",
+            "time": 3.5,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Read value 2 \u00b7 copied token",
+            "property": "x",
+            "time": 5.5,
+            "value": 25,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Read value 2 \u00b7 copied token",
+            "property": "y",
+            "time": 0,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Read value 2 \u00b7 copied token",
+            "property": "y",
+            "time": 3.5,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Read value 2 \u00b7 copied token",
+            "property": "y",
+            "time": 5.5,
+            "value": 26,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Read value 4 \u00b7 copied token",
+            "property": "x",
+            "time": 0,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Read value 4 \u00b7 copied token",
+            "property": "x",
+            "time": 9.5,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Read value 4 \u00b7 copied token",
+            "property": "x",
+            "time": 11.5,
+            "value": 0,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Read value 4 \u00b7 copied token",
+            "property": "y",
+            "time": 0,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Read value 4 \u00b7 copied token",
+            "property": "y",
+            "time": 9.5,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Read value 4 \u00b7 copied token",
+            "property": "y",
+            "time": 11.5,
+            "value": 26,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Read value 6 \u00b7 copied token",
+            "property": "x",
+            "time": 0,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Read value 6 \u00b7 copied token",
+            "property": "x",
+            "time": 15.5,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Read value 6 \u00b7 copied token",
+            "property": "x",
+            "time": 17.5,
+            "value": -25,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Read value 6 \u00b7 copied token",
+            "property": "y",
+            "time": 0,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Read value 6 \u00b7 copied token",
+            "property": "y",
+            "time": 15.5,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Read value 6 \u00b7 copied token",
+            "property": "y",
+            "time": 17.5,
+            "value": 26,
+            "easing": "ease_in_out"
+          }
+        ]
+      },
+      "captionPolicy": "No subtitles or caption tracks, per owner instruction. Written lesson steps and transcripts remain separate."
+    },
+    {
+      "id": "validation-debugging",
+      "number": 7,
+      "title": "Make a validation bug visible",
+      "level": "Concept lab \u00b7 Grades 10\u201311 reference",
+      "minutes": 40,
+      "summary": "Follow an invalid 256 through the guard, expose an off-by-one bug and test the repaired upper bound.",
+      "concept": {
+        "title": "A guard prevents invalid data reaching the calculation.",
+        "explanation": "The Byte Lab accepts one to three decimal digits after trimming and then requires a numeric value from 0 through 255. The input 256 passes the format check but fails the range check. An incorrect maximum of 256 accepts a nine-bit number, not an eight-bit unsigned byte. Fix the maximum, rerun the failing case and test valid boundaries. The illustrative broken path is labelled BUG; it is not the behaviour of the supplied working app."
+      },
+      "objectives": [
+        "Separate a format check, a range check and a conversion.",
+        "Use a failing boundary case to identify and repair an off-by-one logic error.",
+        "Explain a conditional branch using timed labels, grouped token motion and evidence of retesting."
+      ],
+      "assignment": "Create a test table including blank input, 0, 255, 256, -1, 18.5 and 18. Animate two contrasting decisions, label the deliberately broken rule and show the retest after correction.",
+      "teacherNote": "The film contrasts a deliberately broken rule with the working Byte Lab guard. Ask the learner to name the defect, input, expected result, observed result and correction. Do not confuse format validation with proof that user data is true.",
+      "module": "Programming concepts in motion",
+      "practiceSource": "algorithm-stage.mp4",
+      "sourceDescription": "Original empty 28-second stage. All concept graphics and movement are authored inside Studio.",
+      "technique": "A visual explanation should expose the changing state. Use separate, editable layers and exact timeline keys so learners can pause, predict and correct each step.",
+      "applications": [
+        "A supplementary classroom explanation",
+        "An assessed code-and-trace exercise chosen by a teacher",
+        "A creative technical portfolio"
+      ],
+      "curriculum": {
+        "title": "DBE IT CAPS 2024 \u00b7 Section 3 amendment",
+        "url": "https://www.education.gov.za/LinkClick.aspx?fileticket=sgM2WgtQFqU%3D&mid=1208&portalid=0&tabid=570",
+        "portal": "https://www.education.gov.za/Curriculum/CurriculumAssessmentPolicyStatements(CAPS)/CAPSFET.aspx",
+        "reviewed": "2026-11-24",
+        "scope": "Curriculum reference, not formal approval. Page numbers are PDF pages of the amendment. Original pseudocode/JavaScript/SQLite examples supplement the school language and DBMS; they do not replace the CAPS Delphi practical.",
+        "pages": [
+          13,
+          20,
+          21
+        ]
+      },
+      "knowledgeChecks": [
+        {
+          "question": "Which check rejects 256 in the supplied app?",
+          "expectedAnswer": "The range check; 256 has an accepted digits-only format but is greater than 255.",
+          "marks": 2
+        },
+        {
+          "question": "Give expected results for 0, 255, -1 and 18.5.",
+          "expectedAnswer": "0 and 255 are valid and produce 00000000 and 11111111. -1 and 18.5 are rejected by the digits-only format guard.",
+          "marks": 4
+        },
+        {
+          "question": "Why is silently dropping the ninth bit not a valid fix?",
+          "expectedAnswer": "It changes the value and hides invalid input. Reject it or define a different numeric representation explicitly.",
+          "marks": 2
+        }
+      ],
+      "steps": [
+        {
+          "title": "Open an empty stage",
+          "control": "Choose videos \u2192 algorithm-stage.mp4 \u2192 Open Creator Studio \u2192 Reframe",
+          "value": "16:9; Preserve frame; Rounded main footage off; preview captions off; source sound and voice repair off",
+          "why": "The stage has no finished animation. The native layers and timeline supply the concept demonstration."
+        },
+        {
+          "title": "Import editable graphics",
+          "control": "Graphics \u2192 Import animated graphics \u2192 Import graphics composition\u2026",
+          "value": "validation-debugging.graphics.json; composition 1280 \u00d7 720; duration 28 seconds",
+          "why": "The composition expands to ordinary editable artwork, text, groups and keys. It is not a pre-rendered animation."
+        },
+        {
+          "title": "Inspect the layers and fixed labels",
+          "control": "Graphics \u2192 Titles / Vector artwork; Motion \u2192 Target layer",
+          "value": "Inter text; rotation 0; opacity 1; native rectangle geometry; exact layer sizes and timings in the parameter tables below",
+          "why": "Separate labels from animated values. A teacher or learner can correct wording and state without rebuilding a movie elsewhere."
+        },
+        {
+          "title": "Reproduce a motion endpoint",
+          "control": "Composite \u2192 Graphic groups \u2192 Rejection path \u00b7 decision token \u2192 Curve keyframe",
+          "value": "x \u00b7 7.000s; Selected group key value = 30; Selected group key easing = Ease In Out",
+          "why": "This is an actual group-property key. The percentages are offsets from the original layer positions, not absolute slot coordinates."
+        },
+        {
+          "title": "Trace the full timeline",
+          "control": "Edited output position; Play comparison; pause before each transition",
+          "value": "Programme seconds 0\u201328; follow the exact layer timing and property-key tables",
+          "why": "Predict each concept state before watching it. A smooth animation must still represent the correct algorithm or query."
+        },
+        {
+          "title": "Save, export and inspect",
+          "control": "Save project \u2192 Export \u2192 Export resolution / Export frame rate \u2192 Render Final Clip",
+          "value": "720p; 24 fps; H.264; AAC if narration is added; one normal render after account confirmation",
+          "why": "Save the editable project separately, then download and review the entire movie. Local proof does not guarantee every production route."
+        }
+      ],
+      "troubleshooting": [
+        {
+          "problem": "The graphics import rejects the duration or aspect.",
+          "solution": "Use the supplied 28-second stage and set the programme to 16:9 before importing. Do not shorten it before import."
+        },
+        {
+          "problem": "The card or label moves at the wrong time.",
+          "solution": "Check programme time, target group and the exact key rows. Studio easing belongs to the arriving key. Hold preserves a state until that key; Ease In Out interpolates into it."
+        },
+        {
+          "problem": "The movie looks clear but the explanation is wrong.",
+          "solution": "Compare it with the independent trace or SQL result. Correct the concept and its labels first. An export passing technical checks is not teacher approval."
+        }
+      ],
+      "assessment": [
+        "My predicted trace or query result is correct before editing.",
+        "My animation matches every stated concept step and keeps identities and indices clear.",
+        "I can explain the named controls, values and timings used.",
+        "I tested a different input and explained what changed.",
+        "I supplied the editable project and full movie for teacher review."
+      ],
+      "nextLesson": "bubble-sort",
+      "languages": {
+        "en": {
+          "status": "private-review"
+        },
+        "xh": {
+          "status": "planned",
+          "reviewRequired": true
+        }
+      },
+      "releaseStatus": "review",
+      "assets": [
+        {
+          "file": "algorithm-stage.mp4",
+          "label": "Empty 28-second stage",
+          "description": "Original silent colour plate; contains no concept animation."
+        },
+        {
+          "file": "validation-debugging.graphics.json",
+          "label": "Editable Studio graphics composition",
+          "description": "Import with Graphics \u2192 Import animated graphics; editable native layers and keys."
+        },
+        {
+          "file": "byteLabAlgorithm.mjs",
+          "label": "Concept trace or working example",
+          "description": "Independently check the explanation before reproducing the edit."
+        }
+      ],
+      "media": {
+        "source": "algorithm-stage.mp4"
+      },
+      "evidence": {
+        "nativeControls": false,
+        "realMovingSource": false,
+        "nativeMotionScene": true,
+        "realMovingPreview": false,
+        "canonicalExport": false,
+        "fullDurationInspected": false,
+        "previewExportReviewed": false,
+        "teacherReview": false,
+        "independentReproduction": false
+      },
+      "motionReference": {
+        "units": "X/Y in percent of canvas; group X/Y are offsets. Times are programme seconds. Easing is on the arriving key.",
+        "layers": [
+          {
+            "name": "course",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 50,
+            "y": 6,
+            "width": 94,
+            "height": null,
+            "scale": 0.48,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "heading",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 50,
+            "y": 15,
+            "width": 94,
+            "height": null,
+            "scale": 1.2,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "subtitle",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 50,
+            "y": 24,
+            "width": 95,
+            "height": null,
+            "scale": 0.59,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "footnote",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 50,
+            "y": 96,
+            "width": 95,
+            "height": null,
+            "scale": 0.38,
+            "colour": "#8398b3"
+          },
+          {
+            "name": "input-card",
+            "type": "artwork",
+            "start": 0,
+            "duration": 28,
+            "x": 22,
+            "y": 43,
+            "width": 25,
+            "height": 16,
+            "scale": 1,
+            "colour": "#86d9f2"
+          },
+          {
+            "name": "input-caption",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 22,
+            "y": 33,
+            "width": 26,
+            "height": null,
+            "scale": 0.5,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "input-256",
+            "type": "text",
+            "start": 0,
+            "duration": 18,
+            "x": 22,
+            "y": 43,
+            "width": 23,
+            "height": null,
+            "scale": 1.5,
+            "colour": "#101b2b"
+          },
+          {
+            "name": "input-18",
+            "type": "text",
+            "start": 18,
+            "duration": 10,
+            "x": 22,
+            "y": 43,
+            "width": 23,
+            "height": null,
+            "scale": 1.5,
+            "colour": "#101b2b"
+          },
+          {
+            "name": "guard-card",
+            "type": "artwork",
+            "start": 0,
+            "duration": 28,
+            "x": 52,
+            "y": 43,
+            "width": 25,
+            "height": 16,
+            "scale": 1,
+            "colour": "#15263d"
+          },
+          {
+            "name": "guard-label",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 52,
+            "y": 43,
+            "width": 23,
+            "height": null,
+            "scale": 0.67,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "reject-card",
+            "type": "artwork",
+            "start": 0,
+            "duration": 28,
+            "x": 82,
+            "y": 37,
+            "width": 23,
+            "height": 10,
+            "scale": 1,
+            "colour": "#432230"
+          },
+          {
+            "name": "reject-label",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 82,
+            "y": 37,
+            "width": 22,
+            "height": null,
+            "scale": 0.72,
+            "colour": "#ffc1c4"
+          },
+          {
+            "name": "accept-card",
+            "type": "artwork",
+            "start": 0,
+            "duration": 28,
+            "x": 82,
+            "y": 53,
+            "width": 23,
+            "height": 10,
+            "scale": 1,
+            "colour": "#16352c"
+          },
+          {
+            "name": "accept-label",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 82,
+            "y": 53,
+            "width": 22,
+            "height": null,
+            "scale": 0.72,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "decision-packet",
+            "type": "text",
+            "start": 3,
+            "duration": 6,
+            "x": 52,
+            "y": 43,
+            "width": 9,
+            "height": null,
+            "scale": 0.8,
+            "colour": "#ffc1c4"
+          },
+          {
+            "name": "case-0",
+            "type": "text",
+            "start": 0,
+            "duration": 3,
+            "x": 50,
+            "y": 75,
+            "width": 95,
+            "height": null,
+            "scale": 0.66,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "case-3",
+            "type": "text",
+            "start": 3,
+            "duration": 3,
+            "x": 50,
+            "y": 75,
+            "width": 95,
+            "height": null,
+            "scale": 0.66,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "case-6",
+            "type": "text",
+            "start": 6,
+            "duration": 3,
+            "x": 50,
+            "y": 75,
+            "width": 95,
+            "height": null,
+            "scale": 0.66,
+            "colour": "#ffc1c4"
+          },
+          {
+            "name": "case-9",
+            "type": "text",
+            "start": 9,
+            "duration": 5,
+            "x": 50,
+            "y": 75,
+            "width": 95,
+            "height": null,
+            "scale": 0.66,
+            "colour": "#ffc1c4"
+          },
+          {
+            "name": "case-14",
+            "type": "text",
+            "start": 14,
+            "duration": 4,
+            "x": 50,
+            "y": 75,
+            "width": 95,
+            "height": null,
+            "scale": 0.66,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "case-18",
+            "type": "text",
+            "start": 18,
+            "duration": 6,
+            "x": 50,
+            "y": 75,
+            "width": 95,
+            "height": null,
+            "scale": 0.66,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "case-24",
+            "type": "text",
+            "start": 24,
+            "duration": 4,
+            "x": 50,
+            "y": 75,
+            "width": 95,
+            "height": null,
+            "scale": 0.66,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "wrong-result",
+            "type": "text",
+            "start": 9,
+            "duration": 5,
+            "x": 50,
+            "y": 85,
+            "width": 94,
+            "height": null,
+            "scale": 0.63,
+            "colour": "#ffc1c4"
+          },
+          {
+            "name": "correct-result",
+            "type": "text",
+            "start": 18,
+            "duration": 6,
+            "x": 50,
+            "y": 85,
+            "width": 94,
+            "height": null,
+            "scale": 0.63,
+            "colour": "#9ce9ca"
+          }
+        ],
+        "keys": [
+          {
+            "target": "Rejection path \u00b7 decision token",
+            "property": "x",
+            "time": 0,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Rejection path \u00b7 decision token",
+            "property": "x",
+            "time": 5,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Rejection path \u00b7 decision token",
+            "property": "x",
+            "time": 7,
+            "value": 30,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Rejection path \u00b7 decision token",
+            "property": "y",
+            "time": 0,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Rejection path \u00b7 decision token",
+            "property": "y",
+            "time": 5,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Rejection path \u00b7 decision token",
+            "property": "y",
+            "time": 7,
+            "value": -6,
+            "easing": "ease_in_out"
+          }
+        ]
+      },
+      "captionPolicy": "No subtitles or caption tracks, per owner instruction. Written lesson steps and transcripts remain separate."
+    },
+    {
+      "id": "bubble-sort",
+      "number": 8,
+      "title": "Animate bubble sort, comparison by comparison",
+      "level": "Concept lab \u00b7 Grade 11 reference",
+      "minutes": 50,
+      "summary": "Make [5, 1, 4, 2] become [1, 2, 4, 5] with six adjacent comparisons and four visible swaps.",
+      "concept": {
+        "title": "Bubble sort compares neighbours and swaps an out-of-order pair.",
+        "explanation": "This ascending, zero-based example swaps only when the left value is greater than the right. After pass 1, [1, 4, 2, 5] has the largest value fixed on the right. Pass 2 produces [1, 2, 4, 5]. Pass 3 performs one comparison without a swap and stops. There are six comparisons and four swaps. The strict greater-than rule preserves the order of equal keys; this four-distinct-value film alone does not prove stability."
+      },
+      "objectives": [
+        "Trace adjacent comparisons, swaps, pass boundaries and an early-exit flag.",
+        "Distinguish comparisons from swaps and explain why the unsorted range shrinks.",
+        "Animate independent array elements using editable shapes, titles, groups and exact X/Y keys."
+      ],
+      "assignment": "Trace [3, 2A, 2B, 1] on paper, then rebuild the Studio animation. Keep equal values in their initial order, count comparisons and swaps, label each pass and explain the rule without relying on colour.",
+      "teacherNote": "Reject an attractive animation if it swaps non-neighbours, loses a value, changes a fixed index or labels a comparison as a completed swap too early. Ask for a prediction on a new input. The zero-based pseudocode is an original teaching reference; adapt implementation to the class language.",
+      "module": "Programming concepts in motion",
+      "practiceSource": "algorithm-stage.mp4",
+      "sourceDescription": "Original empty 28-second stage. All concept graphics and movement are authored inside Studio.",
+      "technique": "A visual explanation should expose the changing state. Use separate, editable layers and exact timeline keys so learners can pause, predict and correct each step.",
+      "applications": [
+        "A supplementary classroom explanation",
+        "An assessed code-and-trace exercise chosen by a teacher",
+        "A creative technical portfolio"
+      ],
+      "curriculum": {
+        "title": "DBE IT CAPS 2024 \u00b7 Section 3 amendment",
+        "url": "https://www.education.gov.za/LinkClick.aspx?fileticket=sgM2WgtQFqU%3D&mid=1208&portalid=0&tabid=570",
+        "portal": "https://www.education.gov.za/Curriculum/CurriculumAssessmentPolicyStatements(CAPS)/CAPSFET.aspx",
+        "reviewed": "2026-11-24",
+        "scope": "Curriculum reference, not formal approval. Page numbers are PDF pages of the amendment. Original pseudocode/JavaScript/SQLite examples supplement the school language and DBMS; they do not replace the CAPS Delphi practical.",
+        "pages": [
+          18
+        ]
+      },
+      "knowledgeChecks": [
+        {
+          "question": "Write the array after pass 1 and explain why its last value is settled.",
+          "expectedAnswer": "[1, 4, 2, 5]. Each comparison passes the larger value rightward, so the largest ends in the final slot.",
+          "marks": 3
+        },
+        {
+          "question": "Count comparisons and swaps separately.",
+          "expectedAnswer": "6 comparisons and 4 swaps. Pass comparison counts are 3, 2 and 1; swap counts are 3, 1 and 0.",
+          "marks": 2
+        },
+        {
+          "question": "Why should equal values not swap in a stable ascending version?",
+          "expectedAnswer": "Strict > avoids exchanging equal keys, preserving their original relative order. Demonstrate with labelled duplicates, not just two indistinguishable 2s.",
+          "marks": 3
+        },
+        {
+          "question": "What prevents j + 1 going out of bounds?",
+          "expectedAnswer": "Use j < end with end initially n - 1, then reduce end after each pass. The largest accessed index is end.",
+          "marks": 2
+        },
+        {
+          "question": "If the left and right values become 1 and 5, should you keep the same swap animation?",
+          "expectedAnswer": "No. The left value is already smaller. Ascending bubble sort holds this pair. Changing labels without changing the animation would teach the wrong algorithm.",
+          "marks": 3
+        }
+      ],
+      "steps": [
+        {
+          "title": "Open an empty stage",
+          "control": "Choose videos \u2192 algorithm-stage.mp4 \u2192 Open Creator Studio \u2192 Reframe",
+          "value": "16:9; Preserve frame; Rounded main footage off; preview captions off; source sound and voice repair off",
+          "why": "The stage has no finished animation. The native layers and timeline supply the concept demonstration."
+        },
+        {
+          "title": "Import editable graphics",
+          "control": "Graphics \u2192 Import animated graphics \u2192 Import graphics composition\u2026",
+          "value": "bubble-sort.graphics.json; composition 1280 \u00d7 720; duration 28 seconds",
+          "why": "The composition expands to ordinary editable artwork, text, groups and keys. It is not a pre-rendered animation."
+        },
+        {
+          "title": "Inspect the layers and fixed labels",
+          "control": "Graphics \u2192 Titles / Vector artwork; Motion \u2192 Target layer",
+          "value": "Inter text; rotation 0; opacity 1; native rectangle geometry; exact layer sizes and timings in the parameter tables below",
+          "why": "Separate labels from animated values. A teacher or learner can correct wording and state without rebuilding a movie elsewhere."
+        },
+        {
+          "title": "Reproduce a motion endpoint",
+          "control": "Composite \u2192 Graphic groups \u2192 Element 5 \u00b7 card + value \u2192 Curve keyframe",
+          "value": "x \u00b7 4.250s; Selected group key value = 17; Selected group key easing = Ease In Out",
+          "why": "This is an actual group-property key. The percentages are offsets from the original layer positions, not absolute slot coordinates."
+        },
+        {
+          "title": "Trace the full timeline",
+          "control": "Edited output position; Play comparison; pause before each transition",
+          "value": "Programme seconds 0\u201328; follow the exact layer timing and property-key tables",
+          "why": "Predict each concept state before watching it. A smooth animation must still represent the correct algorithm or query."
+        },
+        {
+          "title": "Save, export and inspect",
+          "control": "Save project \u2192 Export \u2192 Export resolution / Export frame rate \u2192 Render Final Clip",
+          "value": "720p; 24 fps; H.264; AAC if narration is added; one normal render after account confirmation",
+          "why": "Save the editable project separately, then download and review the entire movie. Local proof does not guarantee every production route."
+        }
+      ],
+      "troubleshooting": [
+        {
+          "problem": "The graphics import rejects the duration or aspect.",
+          "solution": "Use the supplied 28-second stage and set the programme to 16:9 before importing. Do not shorten it before import."
+        },
+        {
+          "problem": "The card or label moves at the wrong time.",
+          "solution": "Check programme time, target group and the exact key rows. Studio easing belongs to the arriving key. Hold preserves a state until that key; Ease In Out interpolates into it."
+        },
+        {
+          "problem": "The movie looks clear but the explanation is wrong.",
+          "solution": "Compare it with the independent trace or SQL result. Correct the concept and its labels first. An export passing technical checks is not teacher approval."
+        }
+      ],
+      "assessment": [
+        "My predicted trace or query result is correct before editing.",
+        "My animation matches every stated concept step and keeps identities and indices clear.",
+        "I can explain the named controls, values and timings used.",
+        "I tested a different input and explained what changed.",
+        "I supplied the editable project and full movie for teacher review."
+      ],
+      "nextLesson": "database-joins",
+      "languages": {
+        "en": {
+          "status": "private-review"
+        },
+        "xh": {
+          "status": "planned",
+          "reviewRequired": true
+        }
+      },
+      "releaseStatus": "review",
+      "assets": [
+        {
+          "file": "algorithm-stage.mp4",
+          "label": "Empty 28-second stage",
+          "description": "Original silent colour plate; contains no concept animation."
+        },
+        {
+          "file": "bubble-sort.graphics.json",
+          "label": "Editable Studio graphics composition",
+          "description": "Import with Graphics \u2192 Import animated graphics; editable native layers and keys."
+        },
+        {
+          "file": "bubble-sort-trace.json",
+          "label": "Concept trace or working example",
+          "description": "Independently check the explanation before reproducing the edit."
+        },
+        {
+          "file": "first-swap-stage.mp4",
+          "label": "Manual first-swap stage \u00b7 six seconds",
+          "description": "Use for the short control-by-control exercise; the complete four-value composition uses the separate 28-second stage."
+        }
+      ],
+      "media": {
+        "source": "algorithm-stage.mp4",
+        "result": "bubble-sort-result.mp4",
+        "tutorial": "bubble-sort-tutorial.mp4",
+        "transcript": "bubble-sort-transcript.txt",
+        "screenshot": "bubble-sort-studio.jpg",
+        "poster": "bubble-sort-poster.jpg",
+        "project": "bubble-sort-practice.json",
+        "bundle": "bubble-sort-practice-kit.zip",
+        "manualSource": "first-swap-stage.mp4",
+        "manualResult": "first-swap-result.mp4",
+        "manualTutorial": "first-swap-setup.mp4",
+        "manualTranscript": "first-swap-click-by-click-transcript.txt",
+        "manualChaptersetup": "first-swap-setup.mp4",
+        "manualChaptercreatecard1": "first-swap-create-card-1.mp4",
+        "manualChaptercreatecard2": "first-swap-create-card-2.mp4",
+        "manualChapteranimatefive1": "first-swap-animate-five-1.mp4",
+        "manualChapteranimatefive2": "first-swap-animate-five-2.mp4",
+        "manualChaptercreateone": "first-swap-create-one.mp4",
+        "manualChapteranimateone1": "first-swap-animate-one-1.mp4",
+        "manualChapteranimateone2": "first-swap-animate-one-2.mp4",
+        "manualChapterreviewexport": "first-swap-review-export.mp4",
+        "demonstrationSample": "first-swap-continuous-navigation.mp4"
+      },
+      "evidence": {
+        "nativeControls": true,
+        "realMovingSource": false,
+        "nativeMotionScene": true,
+        "realMovingPreview": true,
+        "canonicalExport": true,
+        "fullDurationInspected": false,
+        "previewExportReviewed": false,
+        "teacherReview": false,
+        "independentReproduction": false,
+        "reference": "reports/education-phase1-20261124/concept-verification.json",
+        "teachingClarityReviewed": false
+      },
+      "motionReference": {
+        "units": "X/Y in percent of canvas; group X/Y are offsets. Times are programme seconds. Easing is on the arriving key.",
+        "layers": [
+          {
+            "name": "Course identity",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 50,
+            "y": 6,
+            "width": 88,
+            "height": null,
+            "scale": 0.48,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "Lesson title",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 50,
+            "y": 15,
+            "width": 94,
+            "height": null,
+            "scale": 1.28,
+            "colour": "#f4f7fb"
+          },
+          {
+            "name": "Comparison rule",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 50,
+            "y": 25,
+            "width": 94,
+            "height": null,
+            "scale": 0.6,
+            "colour": "#f4f7fb"
+          },
+          {
+            "name": "Card 5",
+            "type": "artwork",
+            "start": 0,
+            "duration": 28,
+            "x": 24,
+            "y": 47,
+            "width": 12,
+            "height": 16,
+            "scale": 1,
+            "colour": "#a8edcd"
+          },
+          {
+            "name": "Value 5",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 24,
+            "y": 47,
+            "width": 11,
+            "height": null,
+            "scale": 1.9,
+            "colour": "#101b2b"
+          },
+          {
+            "name": "Fixed index 0",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 24,
+            "y": 69,
+            "width": 15,
+            "height": null,
+            "scale": 0.57,
+            "colour": "#b4c2d5"
+          },
+          {
+            "name": "Card 1",
+            "type": "artwork",
+            "start": 0,
+            "duration": 28,
+            "x": 41,
+            "y": 47,
+            "width": 12,
+            "height": 16,
+            "scale": 1,
+            "colour": "#86d9f2"
+          },
+          {
+            "name": "Value 1",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 41,
+            "y": 47,
+            "width": 11,
+            "height": null,
+            "scale": 1.9,
+            "colour": "#101b2b"
+          },
+          {
+            "name": "Fixed index 1",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 41,
+            "y": 69,
+            "width": 15,
+            "height": null,
+            "scale": 0.57,
+            "colour": "#b4c2d5"
+          },
+          {
+            "name": "Card 4",
+            "type": "artwork",
+            "start": 0,
+            "duration": 28,
+            "x": 58,
+            "y": 47,
+            "width": 12,
+            "height": 16,
+            "scale": 1,
+            "colour": "#c4afff"
+          },
+          {
+            "name": "Value 4",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 58,
+            "y": 47,
+            "width": 11,
+            "height": null,
+            "scale": 1.9,
+            "colour": "#101b2b"
+          },
+          {
+            "name": "Fixed index 2",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 58,
+            "y": 69,
+            "width": 15,
+            "height": null,
+            "scale": 0.57,
+            "colour": "#b4c2d5"
+          },
+          {
+            "name": "Card 2",
+            "type": "artwork",
+            "start": 0,
+            "duration": 28,
+            "x": 75,
+            "y": 47,
+            "width": 12,
+            "height": 16,
+            "scale": 1,
+            "colour": "#ffc982"
+          },
+          {
+            "name": "Value 2",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 75,
+            "y": 47,
+            "width": 11,
+            "height": null,
+            "scale": 1.9,
+            "colour": "#101b2b"
+          },
+          {
+            "name": "Fixed index 3",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 75,
+            "y": 69,
+            "width": 15,
+            "height": null,
+            "scale": 0.57,
+            "colour": "#b4c2d5"
+          },
+          {
+            "name": "Compared neighbouring slots",
+            "type": "artwork",
+            "start": 0,
+            "duration": 28,
+            "x": 32.5,
+            "y": 47,
+            "width": 30,
+            "height": 20,
+            "scale": 1,
+            "colour": "#ffffff"
+          },
+          {
+            "name": "Initial state prompt",
+            "type": "text",
+            "start": 0,
+            "duration": 2,
+            "x": 50,
+            "y": 77,
+            "width": 94,
+            "height": null,
+            "scale": 0.72,
+            "colour": "#f4f7fb"
+          },
+          {
+            "name": "Comparison 1",
+            "type": "text",
+            "start": 2,
+            "duration": 3,
+            "x": 50,
+            "y": 77,
+            "width": 94,
+            "height": null,
+            "scale": 0.68,
+            "colour": "#f4f7fb"
+          },
+          {
+            "name": "Trace state 1",
+            "type": "text",
+            "start": 2,
+            "duration": 3,
+            "x": 50,
+            "y": 87,
+            "width": 90,
+            "height": null,
+            "scale": 0.52,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "Comparison 2",
+            "type": "text",
+            "start": 5,
+            "duration": 3,
+            "x": 50,
+            "y": 77,
+            "width": 94,
+            "height": null,
+            "scale": 0.68,
+            "colour": "#f4f7fb"
+          },
+          {
+            "name": "Trace state 2",
+            "type": "text",
+            "start": 5,
+            "duration": 3,
+            "x": 50,
+            "y": 87,
+            "width": 90,
+            "height": null,
+            "scale": 0.52,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "Comparison 3",
+            "type": "text",
+            "start": 8,
+            "duration": 3,
+            "x": 50,
+            "y": 77,
+            "width": 94,
+            "height": null,
+            "scale": 0.68,
+            "colour": "#f4f7fb"
+          },
+          {
+            "name": "Trace state 3",
+            "type": "text",
+            "start": 8,
+            "duration": 3,
+            "x": 50,
+            "y": 87,
+            "width": 90,
+            "height": null,
+            "scale": 0.52,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "Comparison 4",
+            "type": "text",
+            "start": 11,
+            "duration": 3,
+            "x": 50,
+            "y": 77,
+            "width": 94,
+            "height": null,
+            "scale": 0.68,
+            "colour": "#f4f7fb"
+          },
+          {
+            "name": "Trace state 4",
+            "type": "text",
+            "start": 11,
+            "duration": 3,
+            "x": 50,
+            "y": 87,
+            "width": 90,
+            "height": null,
+            "scale": 0.52,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "Comparison 5",
+            "type": "text",
+            "start": 14,
+            "duration": 3,
+            "x": 50,
+            "y": 77,
+            "width": 94,
+            "height": null,
+            "scale": 0.68,
+            "colour": "#f4f7fb"
+          },
+          {
+            "name": "Trace state 5",
+            "type": "text",
+            "start": 14,
+            "duration": 3,
+            "x": 50,
+            "y": 87,
+            "width": 90,
+            "height": null,
+            "scale": 0.52,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "Comparison 6",
+            "type": "text",
+            "start": 17,
+            "duration": 3,
+            "x": 50,
+            "y": 77,
+            "width": 94,
+            "height": null,
+            "scale": 0.68,
+            "colour": "#f4f7fb"
+          },
+          {
+            "name": "Trace state 6",
+            "type": "text",
+            "start": 17,
+            "duration": 3,
+            "x": 50,
+            "y": 87,
+            "width": 90,
+            "height": null,
+            "scale": 0.52,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "Sorted result",
+            "type": "text",
+            "start": 20,
+            "duration": 4,
+            "x": 50,
+            "y": 77,
+            "width": 94,
+            "height": null,
+            "scale": 0.79,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "Early exit explanation",
+            "type": "text",
+            "start": 20,
+            "duration": 4,
+            "x": 50,
+            "y": 87,
+            "width": 94,
+            "height": null,
+            "scale": 0.56,
+            "colour": "#f4f7fb"
+          },
+          {
+            "name": "Learner prediction exercise",
+            "type": "text",
+            "start": 24,
+            "duration": 4,
+            "x": 50,
+            "y": 77,
+            "width": 94,
+            "height": null,
+            "scale": 0.67,
+            "colour": "#f4f7fb"
+          },
+          {
+            "name": "Learner explanation prompt",
+            "type": "text",
+            "start": 24,
+            "duration": 4,
+            "x": 50,
+            "y": 87,
+            "width": 94,
+            "height": null,
+            "scale": 0.56,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "Supplementary resource identity",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 50,
+            "y": 96,
+            "width": 96,
+            "height": null,
+            "scale": 0.35,
+            "colour": "#8398b3"
+          }
+        ],
+        "keys": [
+          {
+            "target": "Compared neighbouring slots",
+            "property": "opacity",
+            "time": 0,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Compared neighbouring slots",
+            "property": "opacity",
+            "time": 2,
+            "value": 1,
+            "easing": "hold"
+          },
+          {
+            "target": "Compared neighbouring slots",
+            "property": "opacity",
+            "time": 20,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Compared neighbouring slots",
+            "property": "x",
+            "time": 0,
+            "value": 32.5,
+            "easing": "hold"
+          },
+          {
+            "target": "Compared neighbouring slots",
+            "property": "x",
+            "time": 2,
+            "value": 32.5,
+            "easing": "hold"
+          },
+          {
+            "target": "Compared neighbouring slots",
+            "property": "x",
+            "time": 5,
+            "value": 49.5,
+            "easing": "hold"
+          },
+          {
+            "target": "Compared neighbouring slots",
+            "property": "x",
+            "time": 8,
+            "value": 66.5,
+            "easing": "hold"
+          },
+          {
+            "target": "Compared neighbouring slots",
+            "property": "x",
+            "time": 11,
+            "value": 32.5,
+            "easing": "hold"
+          },
+          {
+            "target": "Compared neighbouring slots",
+            "property": "x",
+            "time": 14,
+            "value": 49.5,
+            "easing": "hold"
+          },
+          {
+            "target": "Compared neighbouring slots",
+            "property": "x",
+            "time": 17,
+            "value": 32.5,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 5 \u00b7 card + value",
+            "property": "x",
+            "time": 0,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 5 \u00b7 card + value",
+            "property": "y",
+            "time": 0,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 5 \u00b7 card + value",
+            "property": "x",
+            "time": 3,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 5 \u00b7 card + value",
+            "property": "x",
+            "time": 4.25,
+            "value": 17,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 5 \u00b7 card + value",
+            "property": "y",
+            "time": 3,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 5 \u00b7 card + value",
+            "property": "y",
+            "time": 3.625,
+            "value": -10,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 5 \u00b7 card + value",
+            "property": "y",
+            "time": 4.25,
+            "value": 0,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 5 \u00b7 card + value",
+            "property": "x",
+            "time": 6,
+            "value": 17,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 5 \u00b7 card + value",
+            "property": "x",
+            "time": 7.25,
+            "value": 34,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 5 \u00b7 card + value",
+            "property": "y",
+            "time": 6,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 5 \u00b7 card + value",
+            "property": "y",
+            "time": 6.625,
+            "value": -10,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 5 \u00b7 card + value",
+            "property": "y",
+            "time": 7.25,
+            "value": 0,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 5 \u00b7 card + value",
+            "property": "x",
+            "time": 9,
+            "value": 34,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 5 \u00b7 card + value",
+            "property": "x",
+            "time": 10.25,
+            "value": 51,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 5 \u00b7 card + value",
+            "property": "y",
+            "time": 9,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 5 \u00b7 card + value",
+            "property": "y",
+            "time": 9.625,
+            "value": -10,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 5 \u00b7 card + value",
+            "property": "y",
+            "time": 10.25,
+            "value": 0,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 1 \u00b7 card + value",
+            "property": "x",
+            "time": 0,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 1 \u00b7 card + value",
+            "property": "y",
+            "time": 0,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 1 \u00b7 card + value",
+            "property": "x",
+            "time": 3,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 1 \u00b7 card + value",
+            "property": "x",
+            "time": 4.25,
+            "value": -17,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 1 \u00b7 card + value",
+            "property": "y",
+            "time": 3,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 1 \u00b7 card + value",
+            "property": "y",
+            "time": 3.625,
+            "value": 10,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 1 \u00b7 card + value",
+            "property": "y",
+            "time": 4.25,
+            "value": 0,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 4 \u00b7 card + value",
+            "property": "x",
+            "time": 0,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 4 \u00b7 card + value",
+            "property": "y",
+            "time": 0,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 4 \u00b7 card + value",
+            "property": "x",
+            "time": 6,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 4 \u00b7 card + value",
+            "property": "x",
+            "time": 7.25,
+            "value": -17,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 4 \u00b7 card + value",
+            "property": "y",
+            "time": 6,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 4 \u00b7 card + value",
+            "property": "y",
+            "time": 6.625,
+            "value": 10,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 4 \u00b7 card + value",
+            "property": "y",
+            "time": 7.25,
+            "value": 0,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 4 \u00b7 card + value",
+            "property": "x",
+            "time": 15,
+            "value": -17,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 4 \u00b7 card + value",
+            "property": "x",
+            "time": 16.25,
+            "value": 0,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 4 \u00b7 card + value",
+            "property": "y",
+            "time": 15,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 4 \u00b7 card + value",
+            "property": "y",
+            "time": 15.625,
+            "value": -10,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 4 \u00b7 card + value",
+            "property": "y",
+            "time": 16.25,
+            "value": 0,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 2 \u00b7 card + value",
+            "property": "x",
+            "time": 0,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 2 \u00b7 card + value",
+            "property": "y",
+            "time": 0,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 2 \u00b7 card + value",
+            "property": "x",
+            "time": 9,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 2 \u00b7 card + value",
+            "property": "x",
+            "time": 10.25,
+            "value": -17,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 2 \u00b7 card + value",
+            "property": "y",
+            "time": 9,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 2 \u00b7 card + value",
+            "property": "y",
+            "time": 9.625,
+            "value": 10,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 2 \u00b7 card + value",
+            "property": "y",
+            "time": 10.25,
+            "value": 0,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 2 \u00b7 card + value",
+            "property": "x",
+            "time": 15,
+            "value": -17,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 2 \u00b7 card + value",
+            "property": "x",
+            "time": 16.25,
+            "value": -34,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 2 \u00b7 card + value",
+            "property": "y",
+            "time": 15,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Element 2 \u00b7 card + value",
+            "property": "y",
+            "time": 15.625,
+            "value": 10,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Element 2 \u00b7 card + value",
+            "property": "y",
+            "time": 16.25,
+            "value": 0,
+            "easing": "ease_in_out"
+          }
+        ]
+      },
+      "visualSteps": [
+        {
+          "id": "source",
+          "title": "Choose the empty source",
+          "instruction": "We will build the first bubble sort swap ourselves. Start at Choose videos. Click it and select the six-second empty stage. Nothing is animated yet.",
+          "start": 0.6350002288818359,
+          "actionAt": 11.733050115503152,
+          "end": 17.83900022506714,
+          "control": "click-source-control.png",
+          "before": "click-source-before.jpg",
+          "after": "click-source-after.jpg"
+        },
+        {
+          "id": "open",
+          "title": "Open the editor",
+          "instruction": "Look at Open Creator Studio. Click once the upload is ready. The large middle panel is the picture; the bottom panel is the editable timeline.",
+          "start": 18.21400022506714,
+          "actionAt": 28.197492288559204,
+          "end": 35.03400015830994,
+          "control": "click-open-control.png",
+          "before": "click-open-before.jpg",
+          "after": "click-open-after.jpg"
+        },
+        {
+          "id": "name",
+          "title": "Name the editable project",
+          "instruction": "In the open media panel, click Project name and enter First adjacent swap. Then click Save project. Naming and saving the editable project keeps this lesson easy to find again.",
+          "start": 35.60300016403198,
+          "actionAt": 48.570256399859645,
+          "end": 57.26100015640259,
+          "control": "click-name-control.png",
+          "before": "click-name-before.jpg",
+          "after": "click-name-after.jpg"
+        },
+        {
+          "id": "aspect",
+          "title": "Set the picture shape",
+          "instruction": "On the left, click Reframe. Then choose sixteen by nine. This gives us a wide teaching canvas.",
+          "start": 57.61500000953674,
+          "actionAt": 64.47540817280205,
+          "end": 77.40100002288818,
+          "control": "click-aspect-control.png",
+          "before": "click-aspect-before.jpg",
+          "after": "click-aspect-after.jpg"
+        },
+        {
+          "id": "preserve",
+          "title": "Keep the whole canvas",
+          "instruction": "Click Preserve frame. This keeps the whole canvas visible instead of automatically cropping it.",
+          "start": 77.74600005149841,
+          "actionAt": 84.06073928052335,
+          "end": 90.2350001335144,
+          "control": "click-preserve-control.png",
+          "before": "click-preserve-before.jpg",
+          "after": "click-preserve-after.jpg"
+        },
+        {
+          "id": "graphics",
+          "title": "Find the title controls",
+          "instruction": "On the far left, click Graphics. In the right panel, find the three title buttons. We will use a title background as an editable number card.",
+          "start": 90.61900019645691,
+          "actionAt": 100.76503194248865,
+          "end": 107.4520001411438,
+          "control": "click-graphics-control.png",
+          "before": "click-graphics-before.jpg",
+          "after": "click-graphics-after.jpg"
+        },
+        {
+          "id": "headline5",
+          "title": "Create the first editable card",
+          "instruction": "Click Headline. One title layer appears on the timeline. It fades in, so its first frame can be transparent. Next we will place the playhead inside it so you can see each change.",
+          "start": 107.8140001296997,
+          "actionAt": 119.89889808888337,
+          "end": 126.19400000572205,
+          "control": "click-headline5-control.png",
+          "before": "click-headline5-before.jpg",
+          "after": "click-headline5-after.jpg"
+        },
+        {
+          "id": "show5",
+          "title": "Make the title visible before editing",
+          "instruction": "Set Title start time to zero and Title duration to six seconds. Then move Edited output position to half a second. You can now see the title while you change its words and colours.",
+          "start": 126.56600022315979,
+          "actionAt": 138.73216802361333,
+          "end": 149.97700023651123,
+          "control": "click-show5-control.png",
+          "before": "click-show5-before.jpg",
+          "after": "click-show5-after.jpg"
+        },
+        {
+          "id": "text5",
+          "title": "Set the stored value",
+          "instruction": "In the Copy box, replace the sample words with the number five. This number is an array value, not an array index.",
+          "start": 150.44600009918213,
+          "actionAt": 158.85053524657442,
+          "end": 164.59500002861023,
+          "control": "click-text5-control.png",
+          "before": "click-text5-before.jpg",
+          "after": "click-text5-after.jpg"
+        },
+        {
+          "id": "bg5",
+          "title": "Colour the first card",
+          "instruction": "Find Background. Set the hex colour to A eight E D C D. Watch the background behind five turn mint. Colour helps us recognise this same value while it moves.",
+          "start": 164.99000000953674,
+          "actionAt": 176.6104988757499,
+          "end": 182.3970000743866,
+          "control": "click-bg5-control.png",
+          "before": "click-bg5-before.jpg",
+          "after": "click-bg5-after.jpg"
+        },
+        {
+          "id": "ink5",
+          "title": "Make the number readable",
+          "instruction": "Find Text colour. Set it to one zero one B two B. The dark number stays readable against the pale card.",
+          "start": 182.79100012779236,
+          "actionAt": 190.38283686248624,
+          "end": 196.20300006866455,
+          "control": "click-ink5-control.png",
+          "before": "click-ink5-before.jpg",
+          "after": "click-ink5-after.jpg"
+        },
+        {
+          "id": "size5",
+          "title": "Set card size and duration",
+          "instruction": "Set Size to one hundred and ninety percent, Text box width to fifteen percent, Start to zero and Duration to six seconds. These settings keep this card visible for the whole small example.",
+          "start": 196.59400010108948,
+          "actionAt": 210.06048536186046,
+          "end": 224.13900017738342,
+          "control": "click-size5-control.png",
+          "before": "click-size5-before.jpg",
+          "after": "click-size5-after.jpg"
+        },
+        {
+          "id": "motion5",
+          "title": "Open Motion",
+          "instruction": "Click Motion on the far left. If Transform keyframes is shown, open it. Target layer identifies which layer these controls will change. Choose the title five.",
+          "start": 224.9670000076294,
+          "actionAt": 237.2376576040013,
+          "end": 250.19500017166138,
+          "control": "click-motion5-control.png",
+          "before": "click-motion5-before.jpg",
+          "after": "click-motion5-after.jpg"
+        },
+        {
+          "id": "x5",
+          "title": "Place five in the left slot",
+          "instruction": "In Motion, set X to thirty. X is a percentage across the picture. The number card moves to the left slot. Y stays fifty, halfway down the picture.",
+          "start": 250.58400011062622,
+          "actionAt": 261.08994115371013,
+          "end": 269.56500005722046,
+          "control": "click-x5-control.png",
+          "before": "click-x5-before.jpg",
+          "after": "click-x5-after.jpg"
+        },
+        {
+          "id": "key5zero",
+          "title": "Remember the starting position",
+          "instruction": "The edited output position is zero seconds. Click Add position key. Studio now remembers X thirty and Y fifty at this time. The diamond on the timeline represents a stored value.",
+          "start": 269.9540002346039,
+          "actionAt": 282.0969480804089,
+          "end": 291.1060001850128,
+          "control": "click-key5zero-control.png",
+          "before": "click-key5zero-before.jpg",
+          "after": "click-key5zero-after.jpg"
+        },
+        {
+          "id": "hold5",
+          "title": "Hold until one second",
+          "instruction": "Move Edited output position to one second. Click Add position key again. The same position at zero and one seconds creates a pause before the swap.",
+          "start": 291.478000164032,
+          "actionAt": 302.2393607082497,
+          "end": 311.2190001010895,
+          "control": "click-hold5-control.png",
+          "before": "click-hold5-before.jpg",
+          "after": "click-hold5-after.jpg"
+        },
+        {
+          "id": "middle5",
+          "title": "Lift five during the swap",
+          "instruction": "Move Edited output position to one point seven five seconds. Add a position key, then set X fifty and Y thirty-five. Five moves through the centre above the other value.",
+          "start": 311.6190001964569,
+          "actionAt": 323.55296845042517,
+          "end": 337.9760000705719,
+          "control": "click-middle5-control.png",
+          "before": "click-middle5-before.jpg",
+          "after": "click-middle5-after.jpg"
+        },
+        {
+          "id": "end5",
+          "title": "Land five in the right slot",
+          "instruction": "Move Edited output position to two point five seconds. Add a position key, then set X seventy and Y fifty. Five now lands in the right slot.",
+          "start": 338.41100001335144,
+          "actionAt": 349.13753062559636,
+          "end": 363.53400015830994,
+          "control": "click-end5-control.png",
+          "before": "click-end5-before.jpg",
+          "after": "click-end5-after.jpg"
+        },
+        {
+          "id": "graphics1",
+          "title": "Create the second value",
+          "instruction": "Return to Graphics and click Headline again. Replace its Copy with one. This creates a separate editable layer; we are not changing five into one.",
+          "start": 363.9500000476837,
+          "actionAt": 374.0960317937155,
+          "end": 386.71600008010864,
+          "control": "click-graphics1-control.png",
+          "before": "click-graphics1-before.jpg",
+          "after": "click-graphics1-after.jpg"
+        },
+        {
+          "id": "style1",
+          "title": "Give one its own card",
+          "instruction": "Set the background to eight six D nine F two and the text to one zero one B two B. Use the same size, width, start and six-second duration as five.",
+          "start": 387.08000016212463,
+          "actionAt": 399.106848234687,
+          "end": 418.71400022506714,
+          "control": "click-style1-control.png",
+          "before": "click-style1-before.jpg",
+          "after": "click-style1-after.jpg"
+        },
+        {
+          "id": "motion1",
+          "title": "Place one in the right slot",
+          "instruction": "Return to Motion and choose title one. Move the playhead back to zero, then set X seventy and Y fifty. Always check Target layer before editing a position.",
+          "start": 419.5570001602173,
+          "actionAt": 430.6318300921901,
+          "end": 451.83900022506714,
+          "control": "click-motion1-control.png",
+          "before": "click-motion1-before.jpg",
+          "after": "click-motion1-after.jpg"
+        },
+        {
+          "id": "key1zero",
+          "title": "Remember one at time zero",
+          "instruction": "At zero seconds, click Add position key. Studio stores one in the right slot. Each value now has its own layer and its own keys.",
+          "start": 452.2330000400543,
+          "actionAt": 462.7157211284897,
+          "end": 468.97300004959106,
+          "control": "click-key1zero-control.png",
+          "before": "click-key1zero-before.jpg",
+          "after": "click-key1zero-after.jpg"
+        },
+        {
+          "id": "hold1",
+          "title": "Hold one until one second",
+          "instruction": "Move to one second and add another position key. This matches the pause on five, so both values begin moving together.",
+          "start": 469.32100009918213,
+          "actionAt": 477.6210454506561,
+          "end": 486.5840001106262,
+          "control": "click-hold1-control.png",
+          "before": "click-hold1-before.jpg",
+          "after": "click-hold1-after.jpg"
+        },
+        {
+          "id": "middle1",
+          "title": "Pass one below five",
+          "instruction": "Move to one point seven five seconds. Add a position key, then set X fifty and Y sixty-five. One goes below while five goes above. They remain visible as separate values.",
+          "start": 486.97700023651123,
+          "actionAt": 499.3521476288015,
+          "end": 513.8540000915527,
+          "control": "click-middle1-control.png",
+          "before": "click-middle1-before.jpg",
+          "after": "click-middle1-after.jpg"
+        },
+        {
+          "id": "end1",
+          "title": "Land one in the left slot",
+          "instruction": "Move to two point five seconds. Add a position key, then set X thirty and Y fifty. The pair is now one, five. Both values still exist; only their positions changed.",
+          "start": 514.2620000839233,
+          "actionAt": 527.2292563197509,
+          "end": 541.7890000343323,
+          "control": "click-end1-control.png",
+          "before": "click-end1-before.jpg",
+          "after": "click-end1-after.jpg"
+        },
+        {
+          "id": "play",
+          "title": "Watch the comparison and swap",
+          "instruction": "Move back to zero and press Play. Ask why these values swap: five is greater than one. For ascending bubble sort, compare neighbours and exchange only an out-of-order pair. A smaller left value would stay.",
+          "start": 542.2430000305176,
+          "actionAt": 556.7659932277965,
+          "end": 569.0380001068115,
+          "control": "click-play-control.png",
+          "before": "click-play-before.jpg",
+          "after": "click-play-after.jpg"
+        },
+        {
+          "id": "save",
+          "title": "Save editable work",
+          "instruction": "Click Save project. The editable project keeps both cards and all sixteen position keys. A movie alone cannot show how you constructed the explanation.",
+          "start": 569.6400001049042,
+          "actionAt": 580.6683901275799,
+          "end": 584.0500001907349,
+          "control": "click-save-control.png",
+          "before": "click-save-before.jpg",
+          "after": "click-save-after.jpg"
+        },
+        {
+          "id": "export",
+          "title": "Render the proof",
+          "instruction": "Click Export. Choose seven twenty p and twenty-four frames per second. Click Render Final Clip, read the normal cost confirmation, and approve only when your account permits it. This demonstration uses local test credits.",
+          "start": 584.451000213623,
+          "actionAt": 599.2642428440084,
+          "end": 608.2642428440084,
+          "control": "click-export-control.png",
+          "before": "click-export-before.jpg",
+          "after": "click-export-after.jpg"
+        },
+        {
+          "id": "finish",
+          "title": "Review the actual result",
+          "instruction": "Play the downloaded Studio result from beginning to end. You have built one real comparison and swap manually. The longer four-value lesson repeats this construction and adds the comparison outline, fixed indices and pass labels.",
+          "start": 608.7412428421011,
+          "actionAt": 625.1218324112621,
+          "end": 636.1962427658071,
+          "control": null,
+          "before": null,
+          "after": "click-finish-after.jpg"
+        }
+      ],
+      "manualChapters": [
+        {
+          "title": "Upload and set up the canvas",
+          "file": "first-swap-setup.mp4",
+          "seconds": 90.0,
+          "start": 0.6350002288818359,
+          "end": 90.61900019645691
+        },
+        {
+          "title": "Create a number card \u00b7 1",
+          "file": "first-swap-create-card-1.mp4",
+          "seconds": 106.0,
+          "start": 90.61900019645691,
+          "end": 196.59400010108948
+        },
+        {
+          "title": "Create a number card \u00b7 2",
+          "file": "first-swap-create-card-2.mp4",
+          "seconds": 28.375,
+          "start": 196.59400010108948,
+          "end": 224.9670000076294
+        },
+        {
+          "title": "Animate the first value \u00b7 1",
+          "file": "first-swap-animate-five-1.mp4",
+          "seconds": 86.666667,
+          "start": 224.9670000076294,
+          "end": 311.6190001964569
+        },
+        {
+          "title": "Animate the first value \u00b7 2",
+          "file": "first-swap-animate-five-2.mp4",
+          "seconds": 52.333333,
+          "start": 311.6190001964569,
+          "end": 363.9500000476837
+        },
+        {
+          "title": "Create the second card",
+          "file": "first-swap-create-one.mp4",
+          "seconds": 55.625,
+          "start": 363.9500000476837,
+          "end": 419.5570001602173
+        },
+        {
+          "title": "Animate the second value \u00b7 1",
+          "file": "first-swap-animate-one-1.mp4",
+          "seconds": 94.708333,
+          "start": 419.5570001602173,
+          "end": 514.2620000839233
+        },
+        {
+          "title": "Animate the second value \u00b7 2",
+          "file": "first-swap-animate-one-2.mp4",
+          "seconds": 28.0,
+          "start": 514.2620000839233,
+          "end": 542.2430000305176
+        },
+        {
+          "title": "Explain, save and export",
+          "file": "first-swap-review-export.mp4",
+          "seconds": 94.000998,
+          "start": 542.2430000305176,
+          "end": 636.2442426246633
+        }
+      ],
+      "captionPolicy": "No subtitles or caption tracks, per owner instruction. Written lesson steps and transcripts remain separate.",
+      "navigationSteps": [
+        {
+          "id": "workspace",
+          "control": "Workspace \u2192 Viral Clip Studio",
+          "text": "Start in your workspace. Click Viral Clip Studio."
+        },
+        {
+          "id": "upload",
+          "control": "Choose videos \u2192 algorithm-stage.mp4",
+          "text": "Click Choose videos. Select the supplied practice stage."
+        },
+        {
+          "id": "open",
+          "control": "Open Creator Studio",
+          "text": "The file is ready. Click Open Creator Studio."
+        },
+        {
+          "id": "pause",
+          "control": "Pause \u2192 beginning of playback bar",
+          "text": "Pause the preview, then click the beginning of the playback bar. We will add the title at the start."
+        },
+        {
+          "id": "view",
+          "control": "After",
+          "text": "Click After so we can see the changes we make."
+        },
+        {
+          "id": "graphics",
+          "control": "Graphics",
+          "text": "On the left, click Graphics. Keep watching the panel on the right."
+        },
+        {
+          "id": "scroll_titles",
+          "control": "Scroll the right-hand Graphics panel",
+          "text": "Scroll down in the Graphics panel. Stop at the Headline button."
+        },
+        {
+          "id": "headline",
+          "control": "Headline",
+          "text": "Click Headline once. This adds one editable title layer to the picture and timeline."
+        },
+        {
+          "id": "show",
+          "control": "Play \u2192 Pause",
+          "text": "Press Play briefly, then pause. The title fades in, so we need to look inside its duration."
+        },
+        {
+          "id": "scroll_copy",
+          "control": "Scroll the same panel to Copy",
+          "text": "Scroll a little farther down, until you see the Copy box."
+        },
+        {
+          "id": "type",
+          "control": "Copy \u2192 select existing words \u2192 type 5",
+          "text": "Click inside Copy. Select the existing words, then type five."
+        },
+        {
+          "id": "result",
+          "control": "Preview the changed value",
+          "text": "Look at the preview. The text now reads five. This card represents a value for our later array animation. Pause here and repeat this one step."
+        }
+      ]
+    },
+    {
+      "id": "database-joins",
+      "number": 9,
+      "title": "Show how a database relationship makes a result",
+      "level": "Concept lab \u00b7 Grades 11\u201312 reference",
+      "minutes": 45,
+      "summary": "Connect fictional entries to teams by key, filter scores and explain a descending SQL result.",
+      "concept": {
+        "title": "A foreign key connects a row to the row it references.",
+        "explanation": "Teams.id and Entries.id are primary keys in different tables. Entries.teamId references Teams.id. Joining matching IDs adds the team name to each entry. Filtering score >= 70 keeps entries 102 and 103; ordering score descending returns Prism 80 then Orbit 75. The storyboard presents the query conceptually; it is not a claim about the database engine\u2019s physical execution order. Studio animates the explanation and does not execute SQL."
+      },
+      "objectives": [
+        "Identify primary and foreign keys and explain an inner join using actual matching values.",
+        "Predict filtering and ordering results from two small fictional tables.",
+        "Use editable table labels, row outlines and group motion to explain a relationship."
+      ],
+      "assignment": "Add an entry for team 20 with score 72 in the SQL file. Predict the result, run it in an approved classroom DBMS and update the editable explanation. Discuss ties and add a secondary ORDER BY key if you need a deterministic tied order.",
+      "teacherNote": "Use only the fictional practice IDs. Review the actual SQL result and key constraints separately from the animation. The SQLite-compatible file is a supplementary example; school DBMS syntax and the current teaching plan remain authoritative.",
+      "module": "Programming concepts in motion",
+      "practiceSource": "algorithm-stage.mp4",
+      "sourceDescription": "Original empty 28-second stage. All concept graphics and movement are authored inside Studio.",
+      "technique": "A visual explanation should expose the changing state. Use separate, editable layers and exact timeline keys so learners can pause, predict and correct each step.",
+      "applications": [
+        "A supplementary classroom explanation",
+        "An assessed code-and-trace exercise chosen by a teacher",
+        "A creative technical portfolio"
+      ],
+      "curriculum": {
+        "title": "DBE IT CAPS 2024 \u00b7 Section 3 amendment",
+        "url": "https://www.education.gov.za/LinkClick.aspx?fileticket=sgM2WgtQFqU%3D&mid=1208&portalid=0&tabid=570",
+        "portal": "https://www.education.gov.za/Curriculum/CurriculumAssessmentPolicyStatements(CAPS)/CAPSFET.aspx",
+        "reviewed": "2026-11-24",
+        "scope": "Curriculum reference, not formal approval. Page numbers are PDF pages of the amendment. Original pseudocode/JavaScript/SQLite examples supplement the school language and DBMS; they do not replace the CAPS Delphi practical.",
+        "pages": [
+          21,
+          24,
+          25
+        ]
+      },
+      "knowledgeChecks": [
+        {
+          "question": "Why can Entries.teamId contain 10 more than once?",
+          "expectedAnswer": "Different entries may belong to the same team. A foreign key may repeat; each primary key identifies one row in its own table.",
+          "marks": 3
+        },
+        {
+          "question": "What does the query return and why is Prism first?",
+          "expectedAnswer": "Prism 80 then Orbit 75. Both scores meet >= 70, and descending order places 80 before 75.",
+          "marks": 3
+        },
+        {
+          "question": "Would an unmatched entry appear in this INNER JOIN?",
+          "expectedAnswer": "No. INNER JOIN requires a matching Teams.id. A properly enforced foreign-key constraint prevents such an orphan from being inserted.",
+          "marks": 2
+        },
+        {
+          "question": "Does moving a highlight in Studio run the SQL?",
+          "expectedAnswer": "No. SQL is independently executed in the supplied example; Studio supplies the visual explanation.",
+          "marks": 2
+        }
+      ],
+      "steps": [
+        {
+          "title": "Open an empty stage",
+          "control": "Choose videos \u2192 algorithm-stage.mp4 \u2192 Open Creator Studio \u2192 Reframe",
+          "value": "16:9; Preserve frame; Rounded main footage off; preview captions off; source sound and voice repair off",
+          "why": "The stage has no finished animation. The native layers and timeline supply the concept demonstration."
+        },
+        {
+          "title": "Import editable graphics",
+          "control": "Graphics \u2192 Import animated graphics \u2192 Import graphics composition\u2026",
+          "value": "database-joins.graphics.json; composition 1280 \u00d7 720; duration 28 seconds",
+          "why": "The composition expands to ordinary editable artwork, text, groups and keys. It is not a pre-rendered animation."
+        },
+        {
+          "title": "Inspect the layers and fixed labels",
+          "control": "Graphics \u2192 Titles / Vector artwork; Motion \u2192 Target layer",
+          "value": "Inter text; rotation 0; opacity 1; native rectangle geometry; exact layer sizes and timings in the parameter tables below",
+          "why": "Separate labels from animated values. A teacher or learner can correct wording and state without rebuilding a movie elsewhere."
+        },
+        {
+          "title": "Reproduce a motion endpoint",
+          "control": "Composite \u2192 Graphic groups \u2192 Relationship highlight \u00b7 matching IDs \u2192 Curve keyframe",
+          "value": "x \u00b7 13.000s; Selected group key value = 46; Selected group key easing = Ease In Out",
+          "why": "This is an actual group-property key. The percentages are offsets from the original layer positions, not absolute slot coordinates."
+        },
+        {
+          "title": "Trace the full timeline",
+          "control": "Edited output position; Play comparison; pause before each transition",
+          "value": "Programme seconds 0\u201328; follow the exact layer timing and property-key tables",
+          "why": "Predict each concept state before watching it. A smooth animation must still represent the correct algorithm or query."
+        },
+        {
+          "title": "Save, export and inspect",
+          "control": "Save project \u2192 Export \u2192 Export resolution / Export frame rate \u2192 Render Final Clip",
+          "value": "720p; 24 fps; H.264; AAC if narration is added; one normal render after account confirmation",
+          "why": "Save the editable project separately, then download and review the entire movie. Local proof does not guarantee every production route."
+        }
+      ],
+      "troubleshooting": [
+        {
+          "problem": "The graphics import rejects the duration or aspect.",
+          "solution": "Use the supplied 28-second stage and set the programme to 16:9 before importing. Do not shorten it before import."
+        },
+        {
+          "problem": "The card or label moves at the wrong time.",
+          "solution": "Check programme time, target group and the exact key rows. Studio easing belongs to the arriving key. Hold preserves a state until that key; Ease In Out interpolates into it."
+        },
+        {
+          "problem": "The movie looks clear but the explanation is wrong.",
+          "solution": "Compare it with the independent trace or SQL result. Correct the concept and its labels first. An export passing technical checks is not teacher approval."
+        }
+      ],
+      "assessment": [
+        "My predicted trace or query result is correct before editing.",
+        "My animation matches every stated concept step and keeps identities and indices clear.",
+        "I can explain the named controls, values and timings used.",
+        "I tested a different input and explained what changed.",
+        "I supplied the editable project and full movie for teacher review."
+      ],
+      "nextLesson": null,
+      "languages": {
+        "en": {
+          "status": "private-review"
+        },
+        "xh": {
+          "status": "planned",
+          "reviewRequired": true
+        }
+      },
+      "releaseStatus": "review",
+      "assets": [
+        {
+          "file": "algorithm-stage.mp4",
+          "label": "Empty 28-second stage",
+          "description": "Original silent colour plate; contains no concept animation."
+        },
+        {
+          "file": "database-joins.graphics.json",
+          "label": "Editable Studio graphics composition",
+          "description": "Import with Graphics \u2192 Import animated graphics; editable native layers and keys."
+        },
+        {
+          "file": "database-example.sql",
+          "label": "Concept trace or working example",
+          "description": "Independently check the explanation before reproducing the edit."
+        }
+      ],
+      "media": {
+        "source": "algorithm-stage.mp4"
+      },
+      "evidence": {
+        "nativeControls": false,
+        "realMovingSource": false,
+        "nativeMotionScene": true,
+        "realMovingPreview": false,
+        "canonicalExport": false,
+        "fullDurationInspected": false,
+        "previewExportReviewed": false,
+        "teacherReview": false,
+        "independentReproduction": false
+      },
+      "motionReference": {
+        "units": "X/Y in percent of canvas; group X/Y are offsets. Times are programme seconds. Easing is on the arriving key.",
+        "layers": [
+          {
+            "name": "course",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 50,
+            "y": 6,
+            "width": 94,
+            "height": null,
+            "scale": 0.48,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "heading",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 50,
+            "y": 15,
+            "width": 94,
+            "height": null,
+            "scale": 1.2,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "subtitle",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 50,
+            "y": 24,
+            "width": 95,
+            "height": null,
+            "scale": 0.59,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "footnote",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 50,
+            "y": 96,
+            "width": 95,
+            "height": null,
+            "scale": 0.38,
+            "colour": "#8398b3"
+          },
+          {
+            "name": "entries-title",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 29,
+            "y": 33,
+            "width": 45,
+            "height": null,
+            "scale": 0.7,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "teams-title",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 75,
+            "y": 33,
+            "width": 37,
+            "height": null,
+            "scale": 0.7,
+            "colour": "#9ce9ca"
+          },
+          {
+            "name": "entries-table",
+            "type": "artwork",
+            "start": 0,
+            "duration": 28,
+            "x": 29,
+            "y": 48,
+            "width": 46,
+            "height": 24,
+            "scale": 1,
+            "colour": "#15263d"
+          },
+          {
+            "name": "teams-table",
+            "type": "artwork",
+            "start": 0,
+            "duration": 28,
+            "x": 75,
+            "y": 45,
+            "width": 33,
+            "height": 18,
+            "scale": 1,
+            "colour": "#15263d"
+          },
+          {
+            "name": "entries-head",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 29,
+            "y": 39,
+            "width": 43,
+            "height": null,
+            "scale": 0.61,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "teams-head",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 75,
+            "y": 39,
+            "width": 30,
+            "height": null,
+            "scale": 0.61,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "entry-101",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 29,
+            "y": 45,
+            "width": 43,
+            "height": null,
+            "scale": 0.62,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "entry-102",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 29,
+            "y": 51,
+            "width": 43,
+            "height": null,
+            "scale": 0.62,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "entry-103",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 29,
+            "y": 57,
+            "width": 43,
+            "height": null,
+            "scale": 0.62,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "team-10",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 75,
+            "y": 45,
+            "width": 30,
+            "height": null,
+            "scale": 0.62,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "team-20",
+            "type": "text",
+            "start": 0,
+            "duration": 28,
+            "x": 75,
+            "y": 51,
+            "width": 30,
+            "height": null,
+            "scale": 0.62,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "relation-marker",
+            "type": "artwork",
+            "start": 0,
+            "duration": 28,
+            "x": 29,
+            "y": 57,
+            "width": 46,
+            "height": 5.5,
+            "scale": 1,
+            "colour": "#ffffff"
+          },
+          {
+            "name": "query-step-0",
+            "type": "text",
+            "start": 0,
+            "duration": 5,
+            "x": 50,
+            "y": 72,
+            "width": 96,
+            "height": null,
+            "scale": 0.62,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "query-step-5",
+            "type": "text",
+            "start": 5,
+            "duration": 5,
+            "x": 50,
+            "y": 72,
+            "width": 96,
+            "height": null,
+            "scale": 0.62,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "query-step-10",
+            "type": "text",
+            "start": 10,
+            "duration": 5,
+            "x": 50,
+            "y": 72,
+            "width": 96,
+            "height": null,
+            "scale": 0.62,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "query-step-15",
+            "type": "text",
+            "start": 15,
+            "duration": 5,
+            "x": 50,
+            "y": 72,
+            "width": 96,
+            "height": null,
+            "scale": 0.62,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "query-step-20",
+            "type": "text",
+            "start": 20,
+            "duration": 4,
+            "x": 50,
+            "y": 72,
+            "width": 96,
+            "height": null,
+            "scale": 0.62,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "query-step-24",
+            "type": "text",
+            "start": 24,
+            "duration": 4,
+            "x": 50,
+            "y": 72,
+            "width": 96,
+            "height": null,
+            "scale": 0.62,
+            "colour": "#f2f6fc"
+          },
+          {
+            "name": "query-rule",
+            "type": "text",
+            "start": 0,
+            "duration": 24,
+            "x": 50,
+            "y": 84,
+            "width": 96,
+            "height": null,
+            "scale": 0.53,
+            "colour": "#b4c2d5"
+          },
+          {
+            "name": "query-result",
+            "type": "text",
+            "start": 24,
+            "duration": 4,
+            "x": 50,
+            "y": 84,
+            "width": 96,
+            "height": null,
+            "scale": 0.82,
+            "colour": "#9ce9ca"
+          }
+        ],
+        "keys": [
+          {
+            "target": "relation-marker",
+            "property": "opacity",
+            "time": 0,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "relation-marker",
+            "property": "opacity",
+            "time": 10,
+            "value": 1,
+            "easing": "hold"
+          },
+          {
+            "target": "relation-marker",
+            "property": "opacity",
+            "time": 15,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Relationship highlight \u00b7 matching IDs",
+            "property": "x",
+            "time": 0,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Relationship highlight \u00b7 matching IDs",
+            "property": "x",
+            "time": 10,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Relationship highlight \u00b7 matching IDs",
+            "property": "x",
+            "time": 13,
+            "value": 46,
+            "easing": "ease_in_out"
+          },
+          {
+            "target": "Relationship highlight \u00b7 matching IDs",
+            "property": "y",
+            "time": 0,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Relationship highlight \u00b7 matching IDs",
+            "property": "y",
+            "time": 10,
+            "value": 0,
+            "easing": "hold"
+          },
+          {
+            "target": "Relationship highlight \u00b7 matching IDs",
+            "property": "y",
+            "time": 13,
+            "value": -12,
+            "easing": "ease_in_out"
+          }
+        ]
+      },
+      "captionPolicy": "No subtitles or caption tracks, per owner instruction. Written lesson steps and transcripts remain separate."
+    }
+  ]
+}

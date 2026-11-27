@@ -1,0 +1,7 @@
+0.00s Attributes add information inside an opening tag. S R C gives the image path.
+
+9.00s A wrong path breaks the image. Check the filename and folder.
+
+16.00s Alt describes the image. Here the corrected file loads.
+
+22.00s H ref gives the destination. Click the link: the browser opens the other page.

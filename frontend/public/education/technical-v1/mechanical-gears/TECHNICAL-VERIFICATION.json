@@ -1,0 +1,111 @@
+{
+  "lessonId": "mechanical-gears",
+  "sha256": "bb050ac9f3b122ca757457e6db1f931c3ea926c900250255b1da993e58f23ddb",
+  "framesDecoded": 672,
+  "seconds": 28.0,
+  "width": 1280,
+  "height": 720,
+  "fps": 24.0,
+  "allFramesNonblank": true,
+  "nativeWorkflowProof": "tutorial/proof.json",
+  "geometryAssessment": {
+    "driverTeeth": 20,
+    "drivenTeeth": 40,
+    "pressureAngleDegrees": 20,
+    "drawingModulePixels": 7.2,
+    "pitchRadiiPixels": [
+      72,
+      144
+    ],
+    "centreDistancePixels": 216,
+    "oppositeRotation": true,
+    "nativeRateRatio": 2,
+    "driverIntervalDegrees": 360,
+    "drivenIntervalDegrees": -180,
+    "linearKeys": true,
+    "sampledToothMeshStates": 361,
+    "maxErodedRasterInteriorOverlapSquarePixels": 0.0,
+    "rasterBoundaryTolerancePixels": 0.2,
+    "manufacturingOrForceSimulation": false,
+    "120rpmInputAnswer": 60,
+    "idealPowerNotCreated": true,
+    "assessment": "Bounded geometry/kinematic/timing checks; not educator sign-off",
+    "teacherFeedbackReceived": false,
+    "independentLearnerRecreation": false,
+    "schoolHardwareTrial": false
+  },
+  "pairedPreFinalPreview": [
+    {
+      "time": 4,
+      "meanAbsoluteRgbDifference": 5.267142650462963,
+      "p95RgbDifference": 10.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 96,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    },
+    {
+      "time": 9,
+      "meanAbsoluteRgbDifference": 5.378853443287037,
+      "p95RgbDifference": 11.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 216,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    },
+    {
+      "time": 14,
+      "meanAbsoluteRgbDifference": 7.1606626157407405,
+      "p95RgbDifference": 11.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 336,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    },
+    {
+      "time": 19,
+      "meanAbsoluteRgbDifference": 8.421110387731481,
+      "p95RgbDifference": 11.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 456,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    },
+    {
+      "time": 24,
+      "meanAbsoluteRgbDifference": 8.178661024305555,
+      "p95RgbDifference": 11.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 576,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    }
+  ],
+  "nativeGearMotion": {
+    "all481MovingSamplesDetected": true,
+    "maxIndexAngleErrorDegrees": 1.3799145681203129,
+    "driverMeasuredTurnDegrees": 359.42347724411866,
+    "drivenMeasuredTurnDegrees": -180.5927468849868,
+    "measuredOppositeSpeedRatio": 1.990243148984399,
+    "toleranceDegrees": 2.0,
+    "note": "Tracks coloured index dots in actual native final frames. This is kinematic illustration verification, not engineering force simulation."
+  },
+  "strictWholeStudioPixelParity": false,
+  "externalTeacherReview": false,
+  "independentLearnerRecreation": false,
+  "actualSchoolHardwareTrial": false,
+  "creativeOwnerApproval": false,
+  "reviewLimit": "Geometry/kinematic/timing and actual decoded-film checks support a private teacher-review candidate. Teachers must judge educational suitability and practical terminology; full human listening and school-device trials remain required.",
+  "audioRms": 0.12520352005958557,
+  "noSubtitleTracks": true
+}

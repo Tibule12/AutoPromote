@@ -1,0 +1,7 @@
+HTML EXERCISE
+Run index.html and reproduce its broken link. Record the requested path, expected destination and actual response. Correct href so it matches the supplied file, then retest. For a second test, create a real file called extra.htm and link to it. Explain why that .htm link can work.
+
+CREATIVE EDITING EXERCISE
+Explain the fault/correction/retest in three purposeful stages. Retarget the native outlines, use a caution colour only for the failed case and keep the actual click and corrected destination in the source. Add a short prediction prompt without covering the code.
+
+Submit working files, expected/actual test evidence, the native editable project and complete movie.

@@ -132,7 +132,27 @@ async function reconcileRetentionState(docRef, data, sourceState, cleanupResult)
     return;
   }
 
+  const sameState = current => current?.sourceRetentionStatus === baseUpdate.sourceRetentionStatus &&
+    current?.sourceRetentionDays === baseUpdate.sourceRetentionDays &&
+    current?.storagePath === baseUpdate.storagePath &&
+    toMillis(current?.sourceDeleteAfter) === toMillis(baseUpdate.sourceDeleteAfter);
+  // UpdatedAt describes a retention STATE change. Rewriting identical held /
+  // pending outcomes used to wake all four content-update Functions each pass.
+  if (sameState(data)) return false;
+  if (docRef.firestore?.runTransaction) {
+    return docRef.firestore.runTransaction(async transaction => {
+      const snapshot = await transaction.get(docRef);
+      if (!snapshot.exists) return false;
+      const current = snapshot.data();
+      const fresh = resolveSourceUploadState(docRef.id, current);
+      if (!fresh || fresh.sourceUrl !== sourceState.sourceUrl || fresh.storagePath !== sourceState.storagePath ||
+          fresh.deleteAfterIso !== sourceState.deleteAfterIso || sameState(current)) return false;
+      transaction.set(docRef, baseUpdate, { merge: true });
+      return true;
+    });
+  }
   await docRef.set(baseUpdate, { merge: true });
+  return true;
 }
 
 /**
@@ -386,6 +406,7 @@ async function cleanupExpiredMulticamRenders() {
 }
 
 module.exports = {
+  reconcileRetentionState,
   cleanupPublishedVideos: async (options = {}) => {
     if (!storage || !db) return [];
     return require("./publishedVideoRetention").cleanupPublishedVideos({

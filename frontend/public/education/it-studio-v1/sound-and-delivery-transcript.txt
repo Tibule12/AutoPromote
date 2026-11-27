@@ -1,0 +1,13 @@
+Give your demonstration a clear voice
+
+Original teaching script, read using disclosed standard synthetic narration.
+
+A clear voice connects the visible output to the idea. Use narration to explain, not to compete with the picture.
+
+In Sound, import the provided voiceover. This is a disclosed synthetic reading of an original script, not a cloned student or teacher.
+
+Place the voiceover at zero seconds and set its volume to one hundred percent. This source recording is silent, so no original speech needs mixing.
+
+Play the whole six seconds. Check that the words about eighteen and the bit weights refer to what is visible.
+
+In Export, choose seven twenty p, twenty-four frames per second, H dot two sixty-four and A A C audio. Render once, then download and inspect the complete movie with sound.

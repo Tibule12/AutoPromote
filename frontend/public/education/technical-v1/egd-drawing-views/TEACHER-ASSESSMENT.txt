@@ -1,0 +1,35 @@
+SUPPLEMENTARY PRIVATE TEACHER REVIEW — NOT CAPS APPROVED
+One object. Three connected views.
+Grade 10 introduction; Grades 11–12 revision
+
+OBJECTIVES
+Match visible edges of a stepped isometric object to its front, top and right-side views.
+Distinguish pictorial appearance from dimension-preserving orthographic views.
+Explain and use the stated third-angle layout.
+Animate native outlines and matching colours to communicate corresponding views.
+
+DRAFT RUBRIC /20
+Correct front, top and right-side geometry and matching dimensions (6).
+State third-angle convention and align the views correctly (4).
+Explain a new dimension change without relying on colour alone (4).
+Accurate native outline timing, readable labels and safe placement (3).
+Editable Studio reconstruction and justified technique choices (3).
+
+REASONING GUIDE
+Where does the top view go in this stated convention?
+Above the front view. This lesson explicitly uses third-angle projection.
+
+Why is there a line at x=30 in the top view?
+It marks the visible change from the tall portion to the lower step; it is not a separate slot.
+
+What width does the right-side view show?
+The depth, 50 model units; its height is 40. The front view width is 80.
+
+LIMITS
+Prepared original static isometric/orthographic SVG assets, not Studio CAD, automatic projection, an engineered working drawing or a rendered 3D scene. Model units are explanatory; no manufacturing dimensions or SANS compliance certification is claimed.
+
+REFERENCE
+DBE CAPS Grades 10–12 — Engineering Graphics and Design; PDF pages 18, 22
+https://www.education.gov.za/LinkClick.aspx?fileticket=pqcxCwUTO98%3D&forcedownload=true&mid=1558&portalid=0&tabid=570
+
+Teacher confirms current ATP, specialisation, terminology and suitability before learner use. No teacher endorsement or learning-speed claim is made.

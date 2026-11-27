@@ -28,6 +28,22 @@ describe("viral render recovery", () => {
     expect(loadViralRenderAttempt("owner-b", "project-b").requestId).toBe(REQUEST_B);
   });
 
+  test("guest-session cleanup preserves only the three declared device education records", () => {
+    const notes = JSON.stringify({"html-images-links":"Review the link explanation."});
+    const progress = JSON.stringify({version:1,lessons:{}});
+    window.localStorage.setItem("autopromote.education.cat.review.v1", notes);
+    window.localStorage.setItem("autopromote.education.it-studio.v1", progress);
+    window.localStorage.setItem("autopromote.education.technical.review.v1", notes);
+    window.localStorage.setItem("autopromote.education.private-session", "must be cleared");
+    window.localStorage.setItem("user", "private account");
+    window.localStorage.setItem("token", "private token");
+    clearSessionPreservingRenderAttempts();
+    expect(window.localStorage.getItem("autopromote.education.cat.review.v1")).toBe(notes);
+    expect(window.localStorage.getItem("autopromote.education.it-studio.v1")).toBe(progress);
+    expect(window.localStorage.getItem("autopromote.education.technical.review.v1")).toBe(notes);
+    for (const key of ["user","token","autopromote.education.private-session"]) expect(window.localStorage.getItem(key)).toBeNull();
+  });
+
   afterEach(() => {
     jest.restoreAllMocks();
     window.localStorage.clear();

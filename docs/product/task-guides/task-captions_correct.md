@@ -1,8 +1,8 @@
 # Create captions and correct transcription
 
-Development documentation • product 1.2.0 • knowledge 1.0.64 • 2026-11-18
+Development documentation • product 1.2.0 • knowledge 1.0.71 • 2026-11-25
 
-Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
+Overall feature ratings and working subfeatures are separate. PARTIAL or BROKEN does not mean every control fails; entries identify verified workflows, release state and the remaining limitation. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
 ID: `task.captions_correct` • **BROKEN** • SUPPORTED_WITH_LIMITATIONS
 
@@ -25,12 +25,13 @@ Choose the speech language, generate editable timed lines and review uncertain w
 
 ## Feature readiness
 
-- studio.captions — **BROKEN**: Creates editable timed captions with a speech-language choice. Regeneration replaces only the selected source and preserves edits made while listening. Mixed-language wording still needs review.
+- studio.captions — **BROKEN**: Creates editable speech drafts. The expanded local correction workflow has passing tests and a real signed-in save/reopen/export example. The overall BROKEN rating refers to remaining recognition errors; it does not mean the tested correction controls fail. Expanded uncertain-word review, missing-speech markers and names/terms are not yet part of the released build.
 
 ## Result and limitations
 
 An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.
 
+- Expanded caption review and additional delivery profiles have retained local proof but are not all released. A broad feature label must not be read as a failure of every tested control.
 - The empty-hint repetition trigger is repaired on retained speech, but code-switched wording still needs correction. Broad automatic transcription, all caption styles and full preview/export parity are not qualified.
 
 Troubleshooting references: system.unsupported_media, studio.revision.

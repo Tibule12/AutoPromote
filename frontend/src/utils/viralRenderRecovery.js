@@ -1,15 +1,22 @@
 const KEY_PREFIX = "autopromote-viral-render-attempt:";
+const DEVICE_EDUCATION_KEYS = new Set([
+  "autopromote.education.it-studio.v1",
+  "autopromote.education.cat.review.v1",
+  "autopromote.education.technical.review.v1",
+]);
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 // Recovery receipts contain owner-scoped request IDs, never tokens or media
 // URLs. A transient signed-out auth event must not erase a paid/completed job.
 // Access to that job is checked again by the server after authentication.
+// Public learning progress/review notes are explicitly device-local, not account
+// credentials. A guest auth callback on page reload must preserve those keys.
 export const clearSessionPreservingRenderAttempts = () => {
   if (typeof window === "undefined") return;
   try {
     const storage = window.localStorage;
     const keys = Array.from({ length: storage.length }, (_, index) => storage.key(index));
-    keys.filter(key => key && !key.startsWith(KEY_PREFIX)).forEach(key => storage.removeItem(key));
+    keys.filter(key => key && !key.startsWith(KEY_PREFIX) && !DEVICE_EDUCATION_KEYS.has(key)).forEach(key => storage.removeItem(key));
   } catch (_error) { /* Browser storage may be unavailable. */ }
 };
 

@@ -1,0 +1,717 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "A relationship connects the rows.",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "course",
+      "name": "course",
+      "type": "text",
+      "text": "AUTOPROMOTE EDUCATION  /  CONCEPTS IN MOTION",
+      "x": 50,
+      "y": 6,
+      "width": 94,
+      "scale": 0.48,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "heading",
+      "name": "heading",
+      "type": "text",
+      "text": "A relationship connects the rows.",
+      "x": 50,
+      "y": 15,
+      "width": 94,
+      "scale": 1.2,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "subtitle",
+      "name": "subtitle",
+      "type": "text",
+      "text": "Synthetic team data. A foreign key references a primary key; a query selects useful information.",
+      "x": 50,
+      "y": 24,
+      "width": 95,
+      "scale": 0.59,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "footnote",
+      "name": "footnote",
+      "type": "text",
+      "text": "ORIGINAL SUPPLEMENTARY TEACHING EXAMPLE  /  PAUSE, PREDICT, EXPLAIN",
+      "x": 50,
+      "y": 96,
+      "width": 95,
+      "scale": 0.38,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8398b3",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "entries-title",
+      "name": "entries-title",
+      "type": "text",
+      "text": "ENTRIES",
+      "x": 29,
+      "y": 33,
+      "width": 45,
+      "scale": 0.7,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "teams-title",
+      "name": "teams-title",
+      "type": "text",
+      "text": "TEAMS",
+      "x": 75,
+      "y": 33,
+      "width": 37,
+      "scale": 0.7,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "entries-table",
+      "name": "entries-table",
+      "type": "artwork",
+      "x": 29,
+      "y": 48,
+      "width": 46,
+      "height": 24,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 1,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 1,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "solid",
+          "color": "#15263d",
+          "endColor": "#15263d",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#426078",
+          "width": 0
+        }
+      },
+      "keys": []
+    },
+    {
+      "id": "teams-table",
+      "name": "teams-table",
+      "type": "artwork",
+      "x": 75,
+      "y": 45,
+      "width": 33,
+      "height": 18,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 1,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 1,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "solid",
+          "color": "#15263d",
+          "endColor": "#15263d",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#426078",
+          "width": 0
+        }
+      },
+      "keys": []
+    },
+    {
+      "id": "entries-head",
+      "name": "entries-head",
+      "type": "text",
+      "text": "id     teamId     score",
+      "x": 29,
+      "y": 39,
+      "width": 43,
+      "scale": 0.61,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "teams-head",
+      "name": "teams-head",
+      "type": "text",
+      "text": "id       name",
+      "x": 75,
+      "y": 39,
+      "width": 30,
+      "scale": 0.61,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "entry-101",
+      "name": "entry-101",
+      "type": "text",
+      "text": "101        10        60",
+      "x": 29,
+      "y": 45,
+      "width": 43,
+      "scale": 0.62,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "entry-102",
+      "name": "entry-102",
+      "type": "text",
+      "text": "102        20        80",
+      "x": 29,
+      "y": 51,
+      "width": 43,
+      "scale": 0.62,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "entry-103",
+      "name": "entry-103",
+      "type": "text",
+      "text": "103        10        75",
+      "x": 29,
+      "y": 57,
+      "width": 43,
+      "scale": 0.62,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "team-10",
+      "name": "team-10",
+      "type": "text",
+      "text": "10       Orbit",
+      "x": 75,
+      "y": 45,
+      "width": 30,
+      "scale": 0.62,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "team-20",
+      "name": "team-20",
+      "type": "text",
+      "text": "20       Prism",
+      "x": 75,
+      "y": 51,
+      "width": 30,
+      "scale": 0.62,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "relation-marker",
+      "name": "relation-marker",
+      "type": "artwork",
+      "x": 29,
+      "y": 57,
+      "width": 46,
+      "height": 5.5,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 1,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 1,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#9ce9ca",
+          "width": 1.6
+        }
+      },
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "opacity",
+          "time": 10,
+          "value": 1,
+          "easing": "hold"
+        },
+        {
+          "property": "opacity",
+          "time": 15,
+          "value": 0,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "id": "query-step-0",
+      "name": "query-step-0",
+      "type": "text",
+      "text": "Two tables store different facts. Read the field names before joining.",
+      "x": 50,
+      "y": 72,
+      "width": 96,
+      "scale": 0.62,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 0,
+      "duration": 5,
+      "keys": []
+    },
+    {
+      "id": "query-step-5",
+      "name": "query-step-5",
+      "type": "text",
+      "text": "Primary keys: Entries.id and Teams.id. Each identifies one row.",
+      "x": 50,
+      "y": 72,
+      "width": 96,
+      "scale": 0.62,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 5,
+      "duration": 5,
+      "keys": []
+    },
+    {
+      "id": "query-step-10",
+      "name": "query-step-10",
+      "type": "text",
+      "text": "Entries.teamId is a foreign key. Match 10 to Teams.id = 10.",
+      "x": 50,
+      "y": 72,
+      "width": 96,
+      "scale": 0.62,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 10,
+      "duration": 5,
+      "keys": []
+    },
+    {
+      "id": "query-step-15",
+      "name": "query-step-15",
+      "type": "text",
+      "text": "WHERE score is at least 70 keeps entries 102 and 103.",
+      "x": 50,
+      "y": 72,
+      "width": 96,
+      "scale": 0.62,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 15,
+      "duration": 5,
+      "keys": []
+    },
+    {
+      "id": "query-step-20",
+      "name": "query-step-20",
+      "type": "text",
+      "text": "JOIN on Teams.id = Entries.teamId adds the matching team name.",
+      "x": 50,
+      "y": 72,
+      "width": 96,
+      "scale": 0.62,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 20,
+      "duration": 4,
+      "keys": []
+    },
+    {
+      "id": "query-step-24",
+      "name": "query-step-24",
+      "type": "text",
+      "text": "ORDER BY score DESC: Prism 80, then Orbit 75.",
+      "x": 50,
+      "y": 72,
+      "width": 96,
+      "scale": 0.62,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 24,
+      "duration": 4,
+      "keys": []
+    },
+    {
+      "id": "query-rule",
+      "name": "query-rule",
+      "type": "text",
+      "text": "SELECT team name, score  /  JOIN by ID  /  filter score  /  order descending",
+      "x": 50,
+      "y": 84,
+      "width": 96,
+      "scale": 0.53,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#b4c2d5",
+      "startTime": 0,
+      "duration": 24,
+      "keys": []
+    },
+    {
+      "id": "query-result",
+      "name": "query-result",
+      "type": "text",
+      "text": "Prism   80       •       Orbit   75",
+      "x": 50,
+      "y": 84,
+      "width": 96,
+      "scale": 0.82,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 24,
+      "duration": 4,
+      "keys": []
+    }
+  ],
+  "groups": [
+    {
+      "id": "relationship",
+      "name": "Relationship highlight · matching IDs",
+      "layerIds": [
+        "relation-marker"
+      ],
+      "startTime": 0,
+      "duration": 28,
+      "keys": [
+        {
+          "property": "x",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 10,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 13,
+          "value": 46,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "y",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 10,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 13,
+          "value": -12,
+          "easing": "ease_in_out"
+        }
+      ]
+    }
+  ]
+}

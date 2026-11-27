@@ -173,6 +173,35 @@ class StudioFaceTrackingTests(unittest.TestCase):
         self.assertNotEqual(temporal[0]["bottom"]["sourceTimeOffsetSeconds"], 0)
         self.assertFalse(plan["preflight"]["reactionWindowsUsedForSplit"])
 
+    def test_edit_plan_tracks_split_speakers_within_shot_without_crossing_cuts(self):
+        plan = build_podcast_edit_plan(0, 12, [6.0], [
+            {"time": 0.0, "faceY": .35, "pictureFill": 1, "faces": [(.26, .32, .05), (.88, .34, .048)]},
+            {"time": 2.0, "faceY": .35, "pictureFill": 1, "faces": [(.18, .31, .05), (.86, .34, .048)]},
+            {"time": 4.0, "faceY": .35, "pictureFill": 1, "faces": [(.10, .30, .05), (.84, .35, .048)]},
+            {"time": 6.5, "faceY": .35, "pictureFill": 1, "faces": [(.50, .40, .06)]},
+        ])
+        self.assertEqual(len(plan["splitSuggestions"]), 1)
+        sugg = plan["splitSuggestions"][0]
+        self.assertAlmostEqual(sugg["end"], 4.5, places=2)
+        self.assertEqual([k["x"] for k in sugg["top"]["keyframes"]], [26.0, 18.0, 10.0])
+        self.assertEqual([k["x"] for k in sugg["bottom"]["keyframes"]], [88.0, 86.0, 84.0])
+
+    def test_source_shots_locks_off_center_opening_speaker_instead_of_dropping_shot_zero(self):
+        capture = self.capture([np.zeros((180, 320, 3), np.uint8)] * 3)
+        detector = Mock()
+        detector.empty.return_value = False
+        # Opening speaker stands near far right (cx ~ 0.875) while anchor is center (50, 50)
+        detector.detect.side_effect = [(None, np.array([[260, 45, 40, 40]]))] * 3
+        with patch("studio_face_tracking.cv2.VideoCapture", return_value=capture), \
+             patch("studio_face_tracking.cv2.FaceDetectorYN.create", return_value=detector), \
+             patch("studio_face_tracking.detect_source_cuts", return_value=[]):
+            data = track_faces("fixture", {"solo": {"x": 50, "y": 50}}, end=1.5, mode="source_shots")
+        keys = data["tracks"]["solo"]["keyframes"]
+        self.assertEqual(data["tracks"]["solo"]["missing"], [])
+        self.assertGreater(len(keys), 0)
+        self.assertEqual(keys[0]["time"], 0.0)
+        self.assertGreater(keys[0]["x"], 80.0)
+
 
 if __name__ == "__main__":
     unittest.main()

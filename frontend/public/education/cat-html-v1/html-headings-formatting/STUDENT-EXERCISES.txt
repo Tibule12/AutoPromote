@@ -1,0 +1,7 @@
+HTML EXERCISE
+Create a Science Fair page with one clear h1, two h2 section headings and a paragraph under each. Use b and i purposefully. Compare the DOM and browser after changing one h2 to h1. Explain why larger text alone does not make a good hierarchy. Do not use underline merely to imitate a hyperlink.
+
+CREATIVE EDITING EXERCISE
+Record your original and flattened heading examples. Retarget the native source/output outlines to your headings. Keep the hierarchy comparison readable and add one original short callout in the reserved footer. Explain how its timing supports the concept.
+
+Submit working files, expected/actual test evidence, the native editable project and complete movie.

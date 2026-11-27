@@ -1,0 +1,53 @@
+{
+  "manualTextLayers": 2,
+  "exactPositionKeys": 16,
+  "expectedPoses": {
+    "5": [
+      [
+        0,
+        30,
+        50
+      ],
+      [
+        1,
+        30,
+        50
+      ],
+      [
+        1.75,
+        50,
+        35
+      ],
+      [
+        2.5,
+        70,
+        50
+      ]
+    ],
+    "1": [
+      [
+        0,
+        70,
+        50
+      ],
+      [
+        1,
+        70,
+        50
+      ],
+      [
+        1.75,
+        50,
+        65
+      ],
+      [
+        2.5,
+        30,
+        50
+      ]
+    ]
+  },
+  "nativeMovieSeconds": 6,
+  "fullDecodeVerifiedByNativeDownload": true,
+  "teacherReview": false
+}

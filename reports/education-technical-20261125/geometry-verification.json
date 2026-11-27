@@ -1,0 +1,128 @@
+{
+  "egd-drawing-views": {
+    "thirdAnglePlacement": true,
+    "frontWidthHeight": [
+      80,
+      40
+    ],
+    "topWidthDepth": [
+      80,
+      50
+    ],
+    "rightDepthHeight": [
+      50,
+      40
+    ],
+    "sameSteppedSolid": true,
+    "preparedStaticProjectionDisclosed": true,
+    "CADOr3DSimulation": false,
+    "assessment": "Bounded geometry/kinematic/timing checks; not educator sign-off",
+    "teacherFeedbackReceived": false,
+    "independentLearnerRecreation": false,
+    "schoolHardwareTrial": false
+  },
+  "mechanical-gears": {
+    "driverTeeth": 20,
+    "drivenTeeth": 40,
+    "pressureAngleDegrees": 20,
+    "drawingModulePixels": 7.2,
+    "pitchRadiiPixels": [
+      72,
+      144
+    ],
+    "centreDistancePixels": 216,
+    "oppositeRotation": true,
+    "nativeRateRatio": 2,
+    "driverIntervalDegrees": 360,
+    "drivenIntervalDegrees": -180,
+    "linearKeys": true,
+    "sampledToothMeshStates": 361,
+    "maxErodedRasterInteriorOverlapSquarePixels": 0.0,
+    "rasterBoundaryTolerancePixels": 0.2,
+    "manufacturingOrForceSimulation": false,
+    "120rpmInputAnswer": 60,
+    "idealPowerNotCreated": true,
+    "assessment": "Bounded geometry/kinematic/timing checks; not educator sign-off",
+    "teacherFeedbackReceived": false,
+    "independentLearnerRecreation": false,
+    "schoolHardwareTrial": false
+  },
+  "electrical-simple-circuit": {
+    "sourceVoltsLabel": 3,
+    "currentExternalDirection": "positive to negative",
+    "markerPathPixels": [
+      [
+        240.0,
+        280.0
+      ],
+      [
+        240.0,
+        200.0
+      ],
+      [
+        500.0,
+        200.0
+      ],
+      [
+        620.0,
+        200.0
+      ],
+      [
+        900.0,
+        200.0
+      ],
+      [
+        900.0,
+        350.0
+      ],
+      [
+        900.0,
+        520.0
+      ],
+      [
+        240.0,
+        520.0
+      ],
+      [
+        240.0,
+        420.0
+      ]
+    ],
+    "markersOnlyWhileClosed": true,
+    "switchLightCausalFrameCheck": true,
+    "illustrationNotSimulation": true,
+    "supervisedPracticalBoundary": true,
+    "measuredCurrentOrElectronSpeed": false,
+    "assessment": "Bounded geometry/kinematic/timing checks; not educator sign-off",
+    "teacherFeedbackReceived": false,
+    "independentLearnerRecreation": false,
+    "schoolHardwareTrial": false
+  },
+  "civil-brick-sequence": {
+    "courses": 4,
+    "bottomUpNativeStartsSeconds": [
+      3,
+      8,
+      13,
+      18
+    ],
+    "drawingModulePixels": 160,
+    "alternateOffsetPixels": 80,
+    "brickHeightPixels": 52,
+    "bedJointPixels": 8,
+    "perpJointPixels": 10,
+    "nativeGroupCrop": {
+      "enabled": true,
+      "shape": "polygon",
+      "path": "polygon(19.53125% 38%, 81.25% 38%, 81.25% 76.388889%, 19.53125% 76.388889%)",
+      "feather": 0,
+      "inverted": false
+    },
+    "cropFragmentsNotCutInstructions": true,
+    "structuralOrConstructionSpecification": false,
+    "assessment": "Bounded geometry/kinematic/timing checks; not educator sign-off",
+    "teacherFeedbackReceived": false,
+    "independentLearnerRecreation": false,
+    "schoolHardwareTrial": false
+  }
+}

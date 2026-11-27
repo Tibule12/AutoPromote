@@ -1,0 +1,89 @@
+MANUAL FIRST SWAP — ACTUAL STUDIO CONTROLS
+Original script, standard synthetic narration. Pointer, mint outlines and WALKTHROUGH GUIDE labels are tutorial annotations. No composition was imported. Unattended render waiting is removed. Select a short chapter; no compulsory long movie is delivered.
+
+Choose the empty source
+We will build the first bubble sort swap ourselves. Start at Choose videos. Click it and select the six-second empty stage. Nothing is animated yet.
+
+Open the editor
+Look at Open Creator Studio. Click once the upload is ready. The large middle panel is the picture; the bottom panel is the editable timeline.
+
+Name the editable project
+In the open media panel, click Project name and enter First adjacent swap. Then click Save project. Naming and saving the editable project keeps this lesson easy to find again.
+
+Set the picture shape
+On the left, click Reframe. Then choose sixteen by nine. This gives us a wide teaching canvas.
+
+Keep the whole canvas
+Click Preserve frame. This keeps the whole canvas visible instead of automatically cropping it.
+
+Find the title controls
+On the far left, click Graphics. In the right panel, find the three title buttons. We will use a title background as an editable number card.
+
+Create the first editable card
+Click Headline. One title layer appears on the timeline. It fades in, so its first frame can be transparent. Next we will place the playhead inside it so you can see each change.
+
+Make the title visible before editing
+Set Title start time to zero and Title duration to six seconds. Then move Edited output position to half a second. You can now see the title while you change its words and colours.
+
+Set the stored value
+In the Copy box, replace the sample words with the number five. This number is an array value, not an array index.
+
+Colour the first card
+Find Background. Set the hex colour to A eight E D C D. Watch the background behind five turn mint. Colour helps us recognise this same value while it moves.
+
+Make the number readable
+Find Text colour. Set it to one zero one B two B. The dark number stays readable against the pale card.
+
+Set card size and duration
+Set Size to one hundred and ninety percent, Text box width to fifteen percent, Start to zero and Duration to six seconds. These settings keep this card visible for the whole small example.
+
+Open Motion
+Click Motion on the far left. If Transform keyframes is shown, open it. Target layer identifies which layer these controls will change. Choose the title five.
+
+Place five in the left slot
+In Motion, set X to thirty. X is a percentage across the picture. The number card moves to the left slot. Y stays fifty, halfway down the picture.
+
+Remember the starting position
+The edited output position is zero seconds. Click Add position key. Studio now remembers X thirty and Y fifty at this time. The diamond on the timeline represents a stored value.
+
+Hold until one second
+Move Edited output position to one second. Click Add position key again. The same position at zero and one seconds creates a pause before the swap.
+
+Lift five during the swap
+Move Edited output position to one point seven five seconds. Add a position key, then set X fifty and Y thirty-five. Five moves through the centre above the other value.
+
+Land five in the right slot
+Move Edited output position to two point five seconds. Add a position key, then set X seventy and Y fifty. Five now lands in the right slot.
+
+Create the second value
+Return to Graphics and click Headline again. Replace its Copy with one. This creates a separate editable layer; we are not changing five into one.
+
+Give one its own card
+Set the background to eight six D nine F two and the text to one zero one B two B. Use the same size, width, start and six-second duration as five.
+
+Place one in the right slot
+Return to Motion and choose title one. Move the playhead back to zero, then set X seventy and Y fifty. Always check Target layer before editing a position.
+
+Remember one at time zero
+At zero seconds, click Add position key. Studio stores one in the right slot. Each value now has its own layer and its own keys.
+
+Hold one until one second
+Move to one second and add another position key. This matches the pause on five, so both values begin moving together.
+
+Pass one below five
+Move to one point seven five seconds. Add a position key, then set X fifty and Y sixty-five. One goes below while five goes above. They remain visible as separate values.
+
+Land one in the left slot
+Move to two point five seconds. Add a position key, then set X thirty and Y fifty. The pair is now one, five. Both values still exist; only their positions changed.
+
+Watch the comparison and swap
+Move back to zero and press Play. Ask why these values swap: five is greater than one. For ascending bubble sort, compare neighbours and exchange only an out-of-order pair. A smaller left value would stay.
+
+Save editable work
+Click Save project. The editable project keeps both cards and all sixteen position keys. A movie alone cannot show how you constructed the explanation.
+
+Render the proof
+Click Export. Choose seven twenty p and twenty-four frames per second. Click Render Final Clip, read the normal cost confirmation, and approve only when your account permits it. This demonstration uses local test credits.
+
+Review the actual result
+Play the downloaded Studio result from beginning to end. You have built one real comparison and swap manually. The longer four-value lesson repeats this construction and adds the comparison outline, fixed indices and pass labels.

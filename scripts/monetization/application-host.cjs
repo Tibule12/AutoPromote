@@ -66,13 +66,15 @@ const bucket = new Proxy(rawBucket, {
     if (key === "file")
       return (name, options) => {
         const file = target.file(name, options);
-        file.getSignedUrl = async () => {
+        file.getSignedUrl = async (options = {}) => {
           const [meta] = await file.getMetadata();
           const uid =
             meta.metadata?.ownerUid ||
             meta.metadata?.userId ||
             config.cohort.find(id => name.split("/").includes(id));
-          return [await gateway.signedUrl(uid, name)];
+          return [await gateway.signedUrl(uid, name, {
+            attachment: /^attachment(?:;|$)/i.test(options.responseDisposition || ""),
+          })];
         };
         file.makePublic = async () => {
           throw new Error("PRIVATE_STORAGE_REQUIRED");
@@ -323,7 +325,7 @@ if (!Array.isArray(candidateOrigins) || candidateOrigins.length > 2 || candidate
   try { const url = new URL(value); return url.protocol !== 'http:' || url.hostname !== '127.0.0.1' || url.origin !== value; }
   catch { return true; }
 })) throw Error('Candidate builds require at most two exact loopback origins.');
-if (process.env.STUDIO_BACKGROUND_LONG_DEMO === 'true') {
+if (process.env.STUDIO_BACKGROUND_LONG_DEMO === 'true' || process.env.UNIFIED_CREDITS_APPLICATION === 'true') {
   const bounds = require('./local-review-bounds.cjs').localReviewBounds(process.env);
   // The Storage emulator's GCS endpoint finalizes the first PUT instead of
   // acknowledging partial GCS chunks. Its bounded local review transfer must

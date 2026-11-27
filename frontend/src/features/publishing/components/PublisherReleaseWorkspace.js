@@ -5,6 +5,7 @@ import { PUBLISHER_PLATFORMS, PUBLISHER_STEPS, destinationCopy, mediaUrl, source
 import { formatScheduleTime, timezoneLabel } from "../../../UserDashboardTabs/scheduleReleaseModel";
 import { sanitizeUrl } from "../../../utils/security";
 import PlatformIcon from "../../../components/PlatformIcon";
+import { tikTokDisclosureLabels } from "../../../utils/tiktokDisclosures";
 
 export function PublisherPlatformIcon({ platform }) {
   return <span aria-hidden="true" className={`release-platform-icon ${platform}`}><PlatformIcon platform={platform} /></span>;
@@ -139,6 +140,7 @@ export default function PublisherReleaseWorkspace({
             {selected.map(platform => { const options = reviewOptions[platform]; const content = destinationCopy(platform, options, title, description); const instant = delivery?.platformTimes?.[platform] || delivery?.scheduledTime; return <details key={platform} open={focus === platform} className="release-review-destination"><summary><PublisherPlatformIcon platform={platform} /><strong>{getPlatformName(platform)}</strong><span>{issues[platform]?.length ? "Needs attention" : "Form complete"}</span></summary><div>
               <h4>{content.title || "No title"}</h4><p className="release-full-copy">{content.body || "No caption/body"}</p><ReleaseMedia file={getData(platform).file || file} preview={preview} poster={poster} label={`${getPlatformName(platform)} review media`} />
               <dl>{[["Destination", options.destinationLabel], ["Delivery format", ["telegram", "discord"].includes(platform) ? options.deliveryMode || "native" : ""], ["Page", options.pageName || options.pageId], ["Subreddit", options.subreddit], ["Post type", options.kind || options.postType], ["Link", options.url], ["Visibility", options.privacy || options.visibility], ["Company Page", options.companyId], ["Category", options.category], ["Tags", options.tags], ["Made for kids", typeof options.madeForKids === "boolean" ? options.madeForKids ? "Yes" : "No" : ""], ["Commercial disclosure", options.commercialContent ? "Enabled" : ""], ["Paid promotion", options.paidPromotion ? "Enabled" : ""]].filter(([, value]) => value !== undefined && value !== null && value !== "").map(([name, value]) => <div key={name}><dt>{name}</dt><dd>{Array.isArray(value) ? value.join(", ") : String(value)}</dd></div>)}</dl>
+              {platform === "tiktok" && <p><strong>TikTok labels requested: </strong>{tikTokDisclosureLabels(options)}. TikTok may also apply labels automatically.</p>}
               <p>{mode === "schedule" && instant ? `${formatScheduleTime(instant, timezone)} · ${timezoneLabel(timezone, instant)}${teamReview ? " · Requires approval before scheduling" : ""}` : teamReview ? "Send after approval and scheduling" : "Send immediately after submission"}</p><button type="button" className="release-text-button" onClick={() => { activatePlatform(platform); moveToStep(2); }}>Edit {getPlatformName(platform)} settings</button>
             </div></details>; })}
           </section>}

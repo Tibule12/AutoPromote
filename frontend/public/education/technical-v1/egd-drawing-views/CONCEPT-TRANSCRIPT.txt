@@ -1,0 +1,7 @@
+0.15s — One stepped object. The isometric picture shows its shape. The front view shows its stepped height.
+
+7.15s — The top view shows width and depth. Its internal line marks where the height changes.
+
+14.15s — The right-side view shows depth and height. The horizontal edge separates the two levels.
+
+21.15s — This is third-angle projection: top above front, right-side on the right. Match every view to the same object.

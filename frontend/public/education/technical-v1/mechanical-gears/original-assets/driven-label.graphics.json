@@ -1,0 +1,29 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Driven label \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Driven label",
+      "name": "Driven label",
+      "type": "text",
+      "text": "DRIVEN  /  40 TEETH",
+      "x": 62.890625,
+      "y": 77.08333333333333,
+      "width": 94,
+      "scale": 0.57,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

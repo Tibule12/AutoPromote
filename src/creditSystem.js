@@ -271,6 +271,9 @@ const deductCredits = async (userId, amount, operation = "unknown", metadata = {
 };
 
 const refundCredits = async (userId, refund, operation = "refund", metadata = {}) => {
+  if (refund?.processingTokens === true && refund?.deferredSettlement === true)
+    return { success:false, deferredSettlement:true, processingTokens:true, requestId:refund.requestId, message:"Awaiting a trusted terminal job outcome" };
+
   // Status/recovery reads run outside the original request's async context.
   // A shared-wallet receipt must never enter a legacy balance writer.
   if (refund?.deferredSettlement === true && refund?.unifiedOperationId)

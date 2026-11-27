@@ -1,0 +1,9 @@
+{
+  "project": "autopromote-cc6d3",
+  "target": "cloud.firestore",
+  "source": "config/security/firestore.cost-security-release.rules",
+  "sha256": "176ad0acd047e6b4f748787e2fe845d767531c9c70c598e601b5a5910a2cf07d",
+  "baselineRuleset": "projects/autopromote-cc6d3/rulesets/54a118f4-dba4-474c-80b6-60fc53393b04",
+  "baselineSha256": "a6f2ddfe1a3d4f48d15b91d7e112736cb45e235bdd68dc01259d451682823deb",
+  "scope": "Financial evidence/admin catchall and profile delete only; preserve the current deployed workspace/content rules. No Storage/IAM/data/balance changes."
+}

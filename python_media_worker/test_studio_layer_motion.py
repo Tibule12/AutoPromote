@@ -66,6 +66,38 @@ def test_still_holds_reuse_one_raster_without_changing_encoded_pixels(tmp_path, 
     assert len(calls) == 2, "Each distinct held pose is rasterized once"
 
 
+def test_resize_reuse_keeps_exact_alpha_edges_and_invalidates_on_size_or_source():
+    rng = np.random.default_rng(17)
+    assets = [Image.fromarray(rng.integers(0, 256, (63, 85, 4), dtype=np.uint8)) for _ in range(2)]
+    overlay = {'type': 'image', 'width': 63, 'height': 70, 'mediaFit': 'cover', 'frameShape': 'round'}
+    layer = {'effects': {'mask': {'enabled': True, 'shape': 'ellipse', 'feather': 2}}}
+    cache = {}
+    for asset, scale, rotation, opacity in [(assets[0], 1, 0, 1), (assets[0], 1, 13, .2),
+            (assets[0], 1.13, -9, .7), (assets[1], 1.13, -9, .7), (assets[1], 1.13, 0, .001)]:
+        pose = dict(x=43, y=54, scale=scale, rotation=rotation, opacity=opacity, crop_x=1.1, crop_y=2.3)
+        expected = _render_pose(asset, overlay, layer, pose, (96, 80))
+        actual = _render_pose(asset, overlay, layer, pose, (96, 80), resize_cache=cache)
+        np.testing.assert_array_equal(np.asarray(actual), np.asarray(expected))
+        assert cache['asset'] is asset
+
+
+def test_encoded_hold_cache_does_not_confuse_a_transparent_gap_with_a_visible_hold(tmp_path):
+    source, output = tmp_path/'alpha.png', tmp_path/'alpha.mov'
+    Image.new('RGBA', (24, 24), (147, 80, 223, 190)).save(source)
+    overlay = dict(type='image', start_time=0, duration=1, width=80, height=80, frameShape='edge')
+    layer = {'motion_keyframes': [dict(property='opacity', time=t, value=v, easing='hold')
+                                 for t, v in [(0, .7), (.25, 0), (.5, .7), (.75, .7)]]}
+    render_image_layer_motion(source, output, overlay, layer, 48, 48, 1, [], fps=8)
+    raw = subprocess.check_output(['ffmpeg', '-v', 'error', '-i', str(output), '-pix_fmt', 'rgba', '-f', 'rawvideo', '-'])
+    frames = np.frombuffer(raw, np.uint8).reshape(8, 48, 48, 4)
+    for i, frame in enumerate(frames):
+        expected = Image.new('RGBA', (48, 48))
+        pose = layer_pose(layer, overlay, i/8)
+        if pose['opacity'] > 0:
+            expected.alpha_composite(_render_pose(Image.open(source).convert('RGBA'), overlay, layer, pose, (48, 48)))
+        np.testing.assert_array_equal(frame, np.asarray(expected))
+
+
 def test_large_alpha_gradient_retains_exact_pixels_with_bounded_intermediate(tmp_path):
     source, output = tmp_path / 'gradient.png', tmp_path / 'gradient.mov'
     # Alpha and colour both vary: dropping alpha or quantizing RGB cannot pass.

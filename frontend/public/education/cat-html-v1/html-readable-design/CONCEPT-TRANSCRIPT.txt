@@ -1,0 +1,7 @@
+0.00s Pale text on white hides the workshop details. This is a deliberately poor design.
+
+7.00s The revised page uses readable dark text. The time and equipment are easy to find.
+
+14.00s A main heading, a section heading and a short paragraph give the information a clear order.
+
+21.00s Read the workshop plan describes the destination. Click it, then check the actual page.

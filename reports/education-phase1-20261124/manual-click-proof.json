@@ -1,0 +1,84 @@
+{
+  "actualStudioControls": true,
+  "manuallyCreated": true,
+  "compositionImported": false,
+  "nativeResultSha256": "d91b6b1e2f3ee8397b1228ab9fe2bc1235e1d78701c0a21c0695e1d2183db4bf",
+  "renderWaitingRemovedSeconds": 20.130757375336657,
+  "visibleSteps": 29,
+  "separateShortChapters": [
+    {
+      "title": "Upload and set up the canvas",
+      "file": "first-swap-setup.mp4",
+      "captions": "first-swap-setup-en.vtt",
+      "seconds": 90.0,
+      "start": 0.6350002288818359,
+      "end": 90.61900019645691
+    },
+    {
+      "title": "Create a number card \u00b7 1",
+      "file": "first-swap-create-card-1.mp4",
+      "captions": "first-swap-create-card-1-en.vtt",
+      "seconds": 106.0,
+      "start": 90.61900019645691,
+      "end": 196.59400010108948
+    },
+    {
+      "title": "Create a number card \u00b7 2",
+      "file": "first-swap-create-card-2.mp4",
+      "captions": "first-swap-create-card-2-en.vtt",
+      "seconds": 28.375,
+      "start": 196.59400010108948,
+      "end": 224.9670000076294
+    },
+    {
+      "title": "Animate the first value \u00b7 1",
+      "file": "first-swap-animate-five-1.mp4",
+      "captions": "first-swap-animate-five-1-en.vtt",
+      "seconds": 86.666667,
+      "start": 224.9670000076294,
+      "end": 311.6190001964569
+    },
+    {
+      "title": "Animate the first value \u00b7 2",
+      "file": "first-swap-animate-five-2.mp4",
+      "captions": "first-swap-animate-five-2-en.vtt",
+      "seconds": 52.333333,
+      "start": 311.6190001964569,
+      "end": 363.9500000476837
+    },
+    {
+      "title": "Create the second card",
+      "file": "first-swap-create-one.mp4",
+      "captions": "first-swap-create-one-en.vtt",
+      "seconds": 55.625,
+      "start": 363.9500000476837,
+      "end": 419.5570001602173
+    },
+    {
+      "title": "Animate the second value \u00b7 1",
+      "file": "first-swap-animate-one-1.mp4",
+      "captions": "first-swap-animate-one-1-en.vtt",
+      "seconds": 94.708333,
+      "start": 419.5570001602173,
+      "end": 514.2620000839233
+    },
+    {
+      "title": "Animate the second value \u00b7 2",
+      "file": "first-swap-animate-one-2.mp4",
+      "captions": "first-swap-animate-one-2-en.vtt",
+      "seconds": 28.0,
+      "start": 514.2620000839233,
+      "end": 542.2430000305176
+    },
+    {
+      "title": "Explain, save and export",
+      "file": "first-swap-review-export.mp4",
+      "captions": "first-swap-review-export-en.vtt",
+      "seconds": 94.000998,
+      "start": 542.2430000305176,
+      "end": 636.2442426246633
+    }
+  ],
+  "teacherReview": false,
+  "independentReproduction": false
+}

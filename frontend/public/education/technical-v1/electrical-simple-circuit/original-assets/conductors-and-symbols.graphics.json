@@ -1,0 +1,28 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Conductors and symbols \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Conductors and symbols",
+      "name": "Conductors and symbols",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><line x1=\"240\" y1=\"280\" x2=\"240\" y2=\"200\" stroke=\"#74bfff\" stroke-width=\"5\"/><line x1=\"240\" y1=\"200\" x2=\"500\" y2=\"200\" stroke=\"#74bfff\" stroke-width=\"5\"/><line x1=\"620\" y1=\"200\" x2=\"900\" y2=\"200\" stroke=\"#74bfff\" stroke-width=\"5\"/><line x1=\"900\" y1=\"200\" x2=\"900\" y2=\"310\" stroke=\"#74bfff\" stroke-width=\"5\"/><line x1=\"900\" y1=\"390\" x2=\"900\" y2=\"520\" stroke=\"#74bfff\" stroke-width=\"5\"/><line x1=\"900\" y1=\"520\" x2=\"240\" y2=\"520\" stroke=\"#74bfff\" stroke-width=\"5\"/><line x1=\"240\" y1=\"520\" x2=\"240\" y2=\"420\" stroke=\"#74bfff\" stroke-width=\"5\"/><line x1=\"240\" y1=\"280\" x2=\"240\" y2=\"316\" stroke=\"#eff5ff\" stroke-width=\"4\"/><line x1=\"204\" y1=\"316\" x2=\"276\" y2=\"316\" stroke=\"#eff5ff\" stroke-width=\"5\"/><line x1=\"219\" y1=\"332\" x2=\"261\" y2=\"332\" stroke=\"#eff5ff\" stroke-width=\"5\"/><line x1=\"240\" y1=\"332\" x2=\"240\" y2=\"360\" stroke=\"#eff5ff\" stroke-width=\"4\"/><line x1=\"204\" y1=\"360\" x2=\"276\" y2=\"360\" stroke=\"#eff5ff\" stroke-width=\"5\"/><line x1=\"219\" y1=\"377\" x2=\"261\" y2=\"377\" stroke=\"#eff5ff\" stroke-width=\"5\"/><line x1=\"240\" y1=\"377\" x2=\"240\" y2=\"420\" stroke=\"#eff5ff\" stroke-width=\"4\"/><circle cx=\"900\" cy=\"350\" r=\"40\" fill=\"none\" stroke=\"#eff5ff\" stroke-width=\"4\"/><line x1=\"872\" y1=\"322\" x2=\"928\" y2=\"378\" stroke=\"#eff5ff\" stroke-width=\"3\"/><line x1=\"872\" y1=\"378\" x2=\"928\" y2=\"322\" stroke=\"#eff5ff\" stroke-width=\"3\"/><circle cx=\"500\" cy=\"200\" r=\"6\" fill=\"#eff5ff\" stroke=\"none\" stroke-width=\"1\"/><circle cx=\"620\" cy=\"200\" r=\"6\" fill=\"#eff5ff\" stroke=\"none\" stroke-width=\"1\"/></svg>",
+      "x": 50.0,
+      "y": 50.0,
+      "width": 100.0,
+      "height": 100.0,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "contain",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

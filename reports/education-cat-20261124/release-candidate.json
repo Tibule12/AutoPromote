@@ -1,0 +1,35 @@
+{
+  "date": "2026-11-25",
+  "ownerAuthorisedMainAndLivePresentation": true,
+  "scope": "Six supplementary CAT HTML lessons; no school enrolment or formal CAPS approval",
+  "productionBuild": {
+    "passed": true,
+    "publicEntryPages": 58,
+    "teacherReviewLessons": 6,
+    "welcomeAssets": 19,
+    "unreleasedITMediaExcluded": 61
+  },
+  "verification": {
+    "frontendTests": 42,
+    "knowledgeAndStorageTests": 20,
+    "educationAlgorithmAndReleaseTests": 7,
+    "anonymousWelcomeViewportChecks": 8,
+    "matchingWelcomeContent": true,
+    "realLocalSignIn": true,
+    "normalUploadAndStudioEntry": true,
+    "contextualHelpHTTP200AndCorrectFeature": true,
+    "allSevenSymbolsAndMasterDecode": true,
+    "originalITAndCATHashesPreserved": true,
+    "ownerLoginSHA256": "00d48e87bd9b77ba9ead11c92bf93039f43fc3e7e6b322c3e379f6b4dac55254"
+  },
+  "completePack": {
+    "githubReleaseTag": "education-cat-review-20261125-v1",
+    "sha256": "737bacd6e0e83800e4c6efdc8dfb1941aa53f07b2e7fd900ff7f0612f7089f4a",
+    "bytes": 264563529,
+    "privateProjectBackupsExcluded": true
+  },
+  "newRendersForReleaseVerification": 0,
+  "remoteServingVerification": "Pending main push and deployment; recorded separately after serving checks",
+  "teacherFeedbackReceived": false,
+  "readinessPromotion": false
+}

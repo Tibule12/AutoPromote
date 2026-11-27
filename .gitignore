@@ -284,3 +284,10 @@ reports/**/browser-profile*/
 reports/**/restored-runtime/
 reports/**/checkpoint-*/storage_export/
 **/transport-token
+
+# The complete CAT review ZIP is a versioned GitHub Release asset (>100 MiB).
+frontend/public/education/cat-html-v1/teacher-review-pack.zip
+# Versioned educational practice and selected proof movies are build inputs.
+!frontend/public/education/**/*.mp4
+# Required production build guard; it is not a temporary verification script.
+!frontend/scripts/verify-education-assets.js

@@ -1,0 +1,7 @@
+0.00s H one identifies the main heading. It gives the page a top level.
+
+7.00s H two marks a section below it. Heading levels communicate structure, not just size.
+
+14.00s B makes text bold. I makes it italic. U underlines it. Use each choice deliberately.
+
+21.00s Now both headings use H one. The levels look the same. Explain what changed.

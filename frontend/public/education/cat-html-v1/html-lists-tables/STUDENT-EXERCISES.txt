@@ -1,0 +1,7 @@
+HTML EXERCISE
+Create a club event page with an ordered setup checklist, an unordered equipment list and a table with two columns and three data rows. Use useful headers. Diagnose an intentionally missing closing table tag by inspecting source and actual browser DOM; do not assume every malformed tag causes an obvious visual error.
+
+CREATIVE EDITING EXERCISE
+Use a native outline to follow one list item, then one table row. Place a short explanation in the footer. Change its arrival easing and explain whether the slower movement makes the correspondence easier to follow. Include a readable pause at each endpoint.
+
+Submit your working files, test table, native editable project and complete movie. Explain one different example without relying on the animation. Do not submit learner names or personal information.

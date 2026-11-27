@@ -1,0 +1,174 @@
+{
+  "results": [
+    {
+      "route": "",
+      "width": 1440,
+      "overflow": false,
+      "heading": "Understand the idea.\nCreate the explanation."
+    },
+    {
+      "route": "library",
+      "width": 1440,
+      "overflow": false,
+      "heading": "Understand it. Then animate it."
+    },
+    {
+      "route": "teachers",
+      "width": 1440,
+      "overflow": false,
+      "heading": "Assess the thinking behind the edit."
+    },
+    {
+      "route": "partners",
+      "width": 1440,
+      "overflow": false,
+      "heading": "Help make creative technology reachable."
+    },
+    {
+      "route": "lessons/first-project",
+      "width": 1440,
+      "overflow": false,
+      "heading": "From working code to a clear demonstration"
+    },
+    {
+      "route": "lessons/precise-cuts",
+      "width": 1440,
+      "overflow": false,
+      "heading": "Trim the wait. Keep the evidence."
+    },
+    {
+      "route": "lessons/sequence-test-cases",
+      "width": 1440,
+      "overflow": false,
+      "heading": "Tell the story of a test"
+    },
+    {
+      "route": "lessons/explain-with-text",
+      "width": 1440,
+      "overflow": false,
+      "heading": "Explain a result with readable text"
+    },
+    {
+      "route": "lessons/sound-and-delivery",
+      "width": 1440,
+      "overflow": false,
+      "heading": "Give your demonstration a clear voice"
+    },
+    {
+      "route": "lessons/variables-loops",
+      "width": 1440,
+      "overflow": false,
+      "heading": "Animate a loop and its changing variables"
+    },
+    {
+      "route": "lessons/validation-debugging",
+      "width": 1440,
+      "overflow": false,
+      "heading": "Make a validation bug visible"
+    },
+    {
+      "route": "lessons/bubble-sort",
+      "width": 1440,
+      "overflow": false,
+      "heading": "Animate bubble sort, comparison by comparison"
+    },
+    {
+      "route": "lessons/database-joins",
+      "width": 1440,
+      "overflow": false,
+      "heading": "Show how a database relationship makes a result"
+    },
+    {
+      "route": "lessons/no-such-lesson",
+      "width": 1440,
+      "overflow": false,
+      "heading": "Lesson not available"
+    },
+    {
+      "route": "",
+      "width": 390,
+      "overflow": false,
+      "heading": "Understand the idea.\nCreate the explanation."
+    },
+    {
+      "route": "library",
+      "width": 390,
+      "overflow": false,
+      "heading": "Understand it. Then animate it."
+    },
+    {
+      "route": "teachers",
+      "width": 390,
+      "overflow": false,
+      "heading": "Assess the thinking behind the edit."
+    },
+    {
+      "route": "partners",
+      "width": 390,
+      "overflow": false,
+      "heading": "Help make creative technology reachable."
+    },
+    {
+      "route": "lessons/first-project",
+      "width": 390,
+      "overflow": false,
+      "heading": "From working code to a clear demonstration"
+    },
+    {
+      "route": "lessons/precise-cuts",
+      "width": 390,
+      "overflow": false,
+      "heading": "Trim the wait. Keep the evidence."
+    },
+    {
+      "route": "lessons/sequence-test-cases",
+      "width": 390,
+      "overflow": false,
+      "heading": "Tell the story of a test"
+    },
+    {
+      "route": "lessons/explain-with-text",
+      "width": 390,
+      "overflow": false,
+      "heading": "Explain a result with readable text"
+    },
+    {
+      "route": "lessons/sound-and-delivery",
+      "width": 390,
+      "overflow": false,
+      "heading": "Give your demonstration a clear voice"
+    },
+    {
+      "route": "lessons/variables-loops",
+      "width": 390,
+      "overflow": false,
+      "heading": "Animate a loop and its changing variables"
+    },
+    {
+      "route": "lessons/validation-debugging",
+      "width": 390,
+      "overflow": false,
+      "heading": "Make a validation bug visible"
+    },
+    {
+      "route": "lessons/bubble-sort",
+      "width": 390,
+      "overflow": false,
+      "heading": "Animate bubble sort, comparison by comparison"
+    },
+    {
+      "route": "lessons/database-joins",
+      "width": 390,
+      "overflow": false,
+      "heading": "Show how a database relationship makes a result"
+    },
+    {
+      "route": "lessons/no-such-lesson",
+      "width": 390,
+      "overflow": false,
+      "heading": "Lesson not available"
+    }
+  ],
+  "localChecklistSaveReopenClear": true,
+  "browserErrors": []
+}

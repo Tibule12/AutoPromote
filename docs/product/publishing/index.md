@@ -1,8 +1,8 @@
 # Publishing
 
-Development documentation • product 1.2.0 • knowledge 1.0.64 • 2026-11-18
+Development documentation • product 1.2.0 • knowledge 1.0.71 • 2026-11-25
 
-Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
+Overall feature ratings and working subfeatures are separate. PARTIAL or BROKEN does not mean every control fails; entries identify verified workflows, release state and the remaining limitation. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
 ## Connected publishing platforms
 
@@ -147,10 +147,11 @@ Submits selected owned content to eligible connected platforms under the existin
 
 1. Select the finished media in Publisher and choose the intended connected platforms.
 2. Customize titles, copy, destination and required disclosures for each platform.
-3. Review timing and destinations, then submit through the normal account checks.
-4. Inspect the queue and final provider result; do not treat accepted uploads as posted videos.
+3. For TikTok, review the requested labels before submitting. Commercial and AI disclosure choices are independent. Turning commercial disclosure off clears its brand selections.
+4. Review timing and destinations, then submit through the normal account checks.
+5. Inspect the queue and final provider result; do not treat accepted uploads as posted videos.
 
-**Preview:** Publisher shows a platform preview and final media/destination/timing review.
+**Preview:** Publisher shows a platform preview and final media/destination/timing review. TikTok displays the requested disclosure labels in its form and final review, including when none are selected.
 
 **Final render:** Posting uses the owned uploaded movie. Selected Reddit video media carries a native video submission type rather than a text-only post.
 
@@ -160,6 +161,8 @@ Submits selected owned content to eligible connected platforms under the existin
 - Queue acceptance and pending schedules do not confirm external publication.
 - Broad six-platform delivery remains unqualified until actual provider results exist.
 - Own-business promotion and paid partnerships use different disclosures. Describe the actual relationship before selecting the platform fields.
+- TikTok disclosure switches start off for a new post. Cuts, captions, colour correction and minor retouching alone do not require an AI label. Realistic AI-generated or significantly AI-altered media still needs the applicable disclosure.
+- TikTok can apply additional labels automatically. AutoPromote cannot remove TikTok-applied AI labels or change an existing post's commercial label; provider rules still apply.
 - A created Reddit post can lack playable video. Publication requires a completed attachment and accessible media; a link or upload acknowledgement is insufficient.
 
 **Common errors**

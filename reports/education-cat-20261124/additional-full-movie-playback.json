@@ -1,0 +1,41 @@
+[
+  {
+    "lesson": "html-headings-formatting",
+    "fullNativePlayback": true,
+    "seconds": 28,
+    "sampledTimes": [
+      3,
+      8,
+      12,
+      18,
+      23,
+      27
+    ]
+  },
+  {
+    "lesson": "html-path-troubleshooting",
+    "fullNativePlayback": true,
+    "seconds": 28,
+    "sampledTimes": [
+      3,
+      8,
+      12,
+      18,
+      23,
+      27
+    ]
+  },
+  {
+    "lesson": "html-readable-design",
+    "fullNativePlayback": true,
+    "seconds": 28,
+    "sampledTimes": [
+      3,
+      8,
+      12,
+      18,
+      23,
+      27
+    ]
+  }
+]

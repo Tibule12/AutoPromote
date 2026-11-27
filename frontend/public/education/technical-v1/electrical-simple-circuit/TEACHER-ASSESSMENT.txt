@@ -1,0 +1,36 @@
+SUPPLEMENTARY PRIVATE TEACHER REVIEW — NOT CAPS APPROVED
+Close the path. Light the load.
+Grade 10 basic principles; Grades 11–12 revision
+
+OBJECTIVES
+Identify source, conductor, switch and load in a simple DC schematic.
+Predict lamp state for open and closed paths.
+Trace conventional current through the external circuit from positive to negative.
+Distinguish an illustrative animation from an electrical calculation or simulation.
+Coordinate switch rotation, lamp opacity and current-marker position keys.
+
+DRAFT RUBRIC /20
+Correct component identification and open/closed reasoning (6).
+Correct conventional current direction and distinction from electrons (6).
+Clear simulation/supervision limits (2).
+Switch/light/marker timings remain causally consistent (3).
+Editable project, exact native controls and justified visual choices (3).
+
+REASONING GUIDE
+Why is the lamp off with the switch open?
+The conducting loop is interrupted. In this elementary ideal DC illustration, no steady current flows through the lamp.
+
+Which way is conventional current shown?
+From the positive terminal through the external circuit and load to the negative terminal. Electron drift in metal is opposite.
+
+Do the moving dots measure current or electron speed?
+No. Their speed and spacing are visual teaching choices. A simulation or measurement would require a circuit model and component values.
+
+LIMITS
+Illustrative low-voltage DC schematic, not an electrical solver or practical wiring plan. 3V is an example source label; component ratings/current are not calculated. No mains activity or unsupervised workshop task. Any real practical must use teacher-approved components and direct supervision.
+
+REFERENCE
+DBE CAPS Grades 10–12 — Electrical Technology; PDF pages 11, 23, 26
+https://www.education.gov.za/LinkClick.aspx?fileticket=D5mc22RBvDA%3D&forcedownload=true&mid=1558&portalid=0&tabid=570
+
+Teacher confirms current ATP, specialisation, terminology and suitability before learner use. No teacher endorsement or learning-speed claim is made.

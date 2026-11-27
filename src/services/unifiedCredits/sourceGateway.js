@@ -131,8 +131,9 @@ function createSourceGateway({
     return ownedUrl(uid, url);
   }
   const api = {
-    async signedUrl(uid, name) {
-      return capability(await describe(uid, name));
+    async signedUrl(uid, name, { attachment = false } = {}) {
+      const source = await describe(uid, name);
+      return capability(attachment ? { ...source, attachment: true } : source);
     },
     async refreshWorkerAudio(uid, body, declaredSources) {
       // Renew credentials, not source identity. The admission manifest remains
@@ -298,6 +299,13 @@ function createSourceGateway({
         "Accept-Ranges": "bytes",
         "Cache-Control": "private, no-store",
       });
+      // Local Storage does not implement GCS responseDisposition. Honour the
+      // signed attachment intent after the same ownership/hash checks so a
+      // normal Download click saves the file rather than navigating to it.
+      if (data.attachment === true) {
+        const filename = data.storagePath.split("/").pop().replace(/[^a-zA-Z0-9._-]/g, "-");
+        res.set("Content-Disposition", `attachment; filename="${filename}"`);
+      }
       const range = /^bytes=([0-9]+)-([0-9]*)$/.exec(req.get("Range") || "");
       if (range) {
         const start = Number(range[1]),

@@ -1,5 +1,6 @@
 import { isValidTimezone, zonedFieldsToIso } from "../../../UserDashboardTabs/scheduleReleaseModel";
 import { buildTikTokCaption } from "./publishingUtils";
+import { tikTokDisclosureOptions } from "../../../utils/tiktokDisclosures";
 
 export const PUBLISHER_PLATFORMS = ["facebook", "instagram", "linkedin", "reddit", "tiktok", "youtube", "telegram", "discord"];
 export const PUBLISHER_STEPS = ["Content", "Destinations", "Customize", "Delivery", "Review"];
@@ -112,13 +113,14 @@ export function platformIssues(platform, data, context = {}) {
   }
   if (platform === "linkedin" && data.postingTarget === "company" && !/^\d+$/.test(text(data.companyId))) errors.push("Enter the company Page ID");
   if (platform === "tiktok") {
+    const disclosures = tikTokDisclosureOptions(data);
     if (!text(data.privacy)) errors.push("Select TikTok privacy");
     const aliases = { EVERYONE: "PUBLIC_TO_EVERYONE", FRIENDS: "MUTUAL_FOLLOW_FRIENDS" };
     const normalize = value => aliases[value] || value;
     if (context.creator?.privacy_level_options?.length && !context.creator.privacy_level_options.some(value => normalize(value) === normalize(data.privacy))) errors.push("Choose an available TikTok privacy option");
     if (!data.consentChecked) errors.push("Confirm the TikTok declaration");
-    if (data.commercialContent && !data.yourBrand && !data.brandedContent) errors.push("Select the commercial content disclosure");
-    if (data.brandedContent && data.privacy === "SELF_ONLY") errors.push("Branded content cannot use private visibility");
+    if (disclosures.commercialContent && !disclosures.yourBrand && !disclosures.brandedContent) errors.push("Select the commercial content disclosure");
+    if (disclosures.brandedContent && data.privacy === "SELF_ONLY") errors.push("Branded content cannot use private visibility");
     if (context.creator?.posting_remaining === 0) errors.push("TikTok's posting limit has been reached");
     if (context.publishReady === false) errors.push("Reconnect TikTok with publishing permissions");
   }
@@ -142,8 +144,7 @@ export function preparePlatformOptions(platform, data, title, description) {
   if (mediaUrl(data.file)) options.media_url = mediaUrl(data.file);
   if (platform === "tiktok") {
     options.caption = buildTikTokCaption({ title: data.title || title, description: data.description || description, caption: data.caption });
-    options.commercial = { isCommercial: data.commercialContent, yourBrand: data.yourBrand,
-      brandedContent: data.brandedContent, is_commercial_content: data.commercialContent };
+    Object.assign(options, tikTokDisclosureOptions(data));
   }
   if (platform === "instagram" && options.isPaidPartnership && !options.sponsorUser) options.isPaidPartnership = false;
   return options;

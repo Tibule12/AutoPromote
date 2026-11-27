@@ -1,12 +1,12 @@
 # AutoPromote product knowledge
 
-Development documentation • product 1.2.0 • knowledge 1.0.64 • 2026-11-18
+Development documentation • product 1.2.0 • knowledge 1.0.71 • 2026-11-25
 
-Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
+Overall feature ratings and working subfeatures are separate. PARTIAL or BROKEN does not mean every control fails; entries identify verified workflows, release state and the remaining limitation. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
 This generated user documentation describes the actual development snapshot. It does not announce a release or certify public showcase films.
 
-The canonical internal catalogue has 104 features, 205 control records and 19 task guides. This safe projection contains 102 features; internal-only provider records and implementation/evidence paths are excluded.
+The canonical internal catalogue has 106 features, 205 control records and 19 task guides. This safe projection contains 104 features; internal-only provider records and implementation/evidence paths are excluded.
 
 ## Readiness
 
@@ -15,7 +15,7 @@ The canonical internal catalogue has 104 features, 205 control records and 19 ta
 | UNIMPLEMENTED | 6 |
 | BROKEN | 1 |
 | PROXY_ONLY | 6 |
-| PARTIAL | 62 |
+| PARTIAL | 64 |
 | FUNCTIONAL | 29 |
 | PRO_READY | 0 |
 | PRODUCTION_READY | 0 |
@@ -24,6 +24,7 @@ UNIMPLEMENTED means no qualified implementation. BROKEN identifies a known block
 
 ## Start here
 
+- [Verified workflows, retained proof and release status](../VERIFIED-FUNCTIONALITY-AND-RELEASE-STATUS.md)
 - [Getting started](getting-started/index.md)
 - [Studio](studio/index.md)
 - [Cam Combiner](cam-combiner/index.md)
@@ -31,6 +32,7 @@ UNIMPLEMENTED means no qualified implementation. BROKEN identifies a known block
 - [Generated media](generated-media/index.md)
 - [Templates](templates/index.md)
 - [Publishing](publishing/index.md)
+- [Education](education/index.md)
 - [Troubleshooting](troubleshooting/index.md)
 - [Motion / Transform Keyframes](studio/motion-keyframes.md)
 - [Real masks and placement proxies](studio/subject-effects.md)

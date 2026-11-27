@@ -8,6 +8,39 @@ import json
 from pathlib import Path
 
 
+def video_preparation_key(source, commands, prefix):
+    """Same owned input and exact trim/loop/hold/speed/audio commands only.
+
+    Generated scratch names have no pixel meaning. All other arguments,
+    including source seek, audio filters and fractional clock, remain exact.
+    This key is used only inside one render, after source authorization/ingest.
+    """
+    def argument(value):
+        value = str(value)
+        if value != str(source) and value.startswith(str(prefix) + '_'):
+            return '<prepared>' + value[len(str(prefix)):]
+        return value
+    return json.dumps([str(source), [[argument(value) for value in command] for command in commands]],
+                      separators=(',', ':'))
+
+
+def image_layer_uses_canonical_raster(layer, composition, overlay):
+    if not layer:
+        return False
+    effects = layer.get('effects') or {}
+    matte = ((layer.get('track_matte') or {}).get('mode') or 'none') != 'none' or any(
+        str(((candidate.get('track_matte') or {}).get('source_layer_id') or '')) == str(overlay.id)
+        for candidate in (composition or {}).get('layers') or [])
+    return bool(matte or layer.get('vector_shape') is not None or layer.get('perspective') is not None
+                or layer.get('motion_keyframes') or (effects.get('mask') or {}).get('enabled')
+                or float((layer.get('base_transform') or {}).get('crop_x') or 0) > 0
+                or float((layer.get('base_transform') or {}).get('crop_y') or 0) > 0
+                or effects.get('node') or float(effects.get('blur') or 0) > 0
+                or any((effects.get(name) or {}).get('enabled')
+                       for name in ('glow', 'colorize', 'shadow', 'motion_blur', 'scrapbook_frame'))
+                or getattr(overlay, 'motionDesign', False))
+
+
 def video_layer_uses_canonical_raster(identity, layer, composition, overlay=None):
     """Canonical geometry needs its declared canvas even when the pose is held.
 

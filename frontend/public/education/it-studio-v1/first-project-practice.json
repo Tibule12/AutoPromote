@@ -1,0 +1,57 @@
+{
+  "format": "autopromote-education-practice",
+  "version": 1,
+  "lessonId": "first-project",
+  "projectName": "IT practice 1 \u00b7 Explain a byte",
+  "sourceFiles": [
+    "normal-input.mp4",
+    "byte-lab.html",
+    "byteLabAlgorithm.mjs"
+  ],
+  "openInStudio": "/?tab=viral_clip_studio&educationLesson=first-project",
+  "accountBinding": "Upload practice media through the normal authenticated Studio entry. The starter is fresh and belongs to that account. This recipe transfers no owner, Storage path, cloud allowance or completed render.",
+  "startingSettings": {
+    "aspect": "16:9",
+    "captions": false,
+    "resolution": "720p",
+    "fps": 24
+  },
+  "steps": [
+    {
+      "title": "Choose the source",
+      "control": "Choose videos",
+      "value": "Select normal-input.mp4",
+      "why": "This original screen recording shows a real conversion. Do not upload learner names, passwords or API keys."
+    },
+    {
+      "title": "Open the editor",
+      "control": "Open Creator Studio",
+      "value": "Click once the uploaded source is ready",
+      "why": "The preview is the programme monitor; the timeline determines what will be in the export."
+    },
+    {
+      "title": "Preserve the whole screen",
+      "control": "Reframe \u2192 16:9 \u2192 Preserve frame",
+      "value": "Aspect 16:9; automatic reframing off",
+      "why": "A portrait crop can hide code or its output. A screen demonstration needs both readable."
+    },
+    {
+      "title": "Review the source",
+      "control": "Play comparison",
+      "value": "Play the complete input recording",
+      "why": "Check that you can read the number, the Convert action and the eight-bit result."
+    },
+    {
+      "title": "Name and save",
+      "control": "Project name; Save project",
+      "value": "IT \u00b7 Explain a byte \u00b7 01",
+      "why": "Save retains editable decisions. Downloading a movie will not replace your editable backup."
+    },
+    {
+      "title": "Choose a viewing format",
+      "control": "Export \u2192 Resolution; Frame rate",
+      "value": "720p; 24 fps; H.264",
+      "why": "These match the lesson delivery. Higher resolution increases detail and file size; it does not correct an inaccurate explanation."
+    }
+  ]
+}

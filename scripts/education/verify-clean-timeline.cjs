@@ -1,0 +1,58 @@
+const fs = require('fs');
+const path = require('path');
+const assert = require('assert/strict');
+const { chromium } = require('playwright');
+const root = path.resolve(__dirname, '../..');
+const config = JSON.parse(fs.readFileSync(process.argv[2] + '/browser-private.json'));
+const origin = process.env.EDUCATION_TEST_ORIGIN || 'http://127.0.0.1:5073';
+assert.equal(new URL(origin).hostname, '127.0.0.1');
+(async () => {
+  const browser = await chromium.launch({ headless: true, executablePath: '/home/tibule12/.cache/ms-playwright/chromium-1217/chrome-linux64/chrome', args: ['--mute-audio', '--disable-dev-shm-usage'] });
+  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  page.setDefaultTimeout(30000);
+  page.on('dialog', dialog => dialog.accept());
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  try {
+    await page.goto(origin + '/?tab=overview');
+    const close = page.getByRole('button', { name: 'Close video showcase', exact: true });
+    if (await close.isVisible()) await close.click({ timeout: 2000 }).catch(() => {});
+    await page.getByRole('button', { name: 'Sign In', exact: true }).click();
+    await page.locator('#login-email').fill(config.email);
+    await page.locator('#login-password').fill(config.password);
+    await page.locator('form input[type=checkbox]').check();
+    await page.locator('form button[type=submit]').click();
+    await page.getByTestId('shared-credit-balance').waitFor({ state: 'attached', timeout: 30000 });
+    console.log('Signed in to the normal App.');
+    await page.getByRole('button', { name: 'Viral Clip Studio', exact: true }).first().click();
+    console.log('Opened Studio upload.');
+    await page.getByLabel('Choose videos for Studio', { exact: true }).setInputFiles(root + '/frontend/public/education/it-studio-v1/algorithm-stage.mp4');
+    console.log('Source selected.');
+    await page.getByRole('button', { name: 'Open Creator Studio', exact: true }).click({ timeout: 30000 });
+    await page.getByTestId('studio-pro-timeline').waitFor();
+    assert.equal(await page.locator('.credit-pilot > small').isVisible(), false);
+    assert.equal(await page.locator('.credit-pilot > details').isVisible(), false);
+    assert.equal(await page.evaluate(() => document.body.dataset.educationRecording || null), null);
+    assert.equal(await page.locator('.credit-pilot').evaluate(element => getComputedStyle(element).backgroundColor), 'rgba(0, 0, 0, 0)');
+    await page.screenshot({ path: root + '/reports/education-phase1-20261124/clean-timeline-studio.png' });
+    await page.getByRole('button', { name: 'Close Clip Studio', exact: true }).click();
+    const help = page.getByRole('button', { name: 'Ask AutoPromote', exact: true });
+    await help.click();
+    const dialog = page.getByRole('dialog', { name: 'Ask AutoPromote', exact: true });
+    await dialog.waitFor();
+    await dialog.getByLabel('Question', { exact: true }).fill('How do I add keyframes?');
+    const responsePromise = page.waitForResponse(response => new URL(response.url()).pathname === '/api/product-assistance/ask' && response.request().method() === 'POST');
+    await dialog.getByRole('button', { name: 'Ask', exact: true }).click();
+    const response = await responsePromise;
+    assert.equal(response.status(), 200);
+    const reply = await response.json();
+    assert.equal(reply.features?.[0]?.feature_id, 'studio.keyframes');
+    assert.deepEqual(errors, []);
+    fs.writeFileSync(root + '/reports/education-phase1-20261124/clean-timeline-studio.json', JSON.stringify({ normalEmulatorSignIn: true, actualSourceUpload: true, realTimelineVisible: true, localDemoBadgeVisible: false, balanceOverlayVisible: false, recordingMode: false, injectedStyles: false, noRenderStarted: true, contextualHelp: true, uiErrors: errors }, null, 2));
+    console.log('Normal built Studio: local-demo banner removed, timeline visible, contextual help passes; no render.');
+  } catch (error) {
+    await page.screenshot({ path: root + '/reports/education-phase1-20261124/clean-timeline-failure.png' });
+    fs.writeFileSync('/home/tibule12/.local/share/autopromote-qa/education-20261124/clean-timeline-failure.private.txt', error.stack + '\n' + await page.locator('body').innerText());
+    throw error;
+  } finally { await browser.close(); }
+})().catch(error => { console.error(error.stack); process.exitCode = 1; });

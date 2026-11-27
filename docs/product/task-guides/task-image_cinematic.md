@@ -1,8 +1,8 @@
 # Turn an image into a cinematic scene
 
-Development documentation • product 1.2.0 • knowledge 1.0.64 • 2026-11-18
+Development documentation • product 1.2.0 • knowledge 1.0.71 • 2026-11-25
 
-Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
+Overall feature ratings and working subfeatures are separate. PARTIAL or BROKEN does not mean every control fails; entries identify verified workflows, release state and the remaining limitation. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
 ID: `task.image_cinematic` • **PARTIAL** • SUPPORTED_WITH_LIMITATIONS
 
@@ -32,7 +32,7 @@ Use image-conditioned generation only when the owned image, job availability and
 - studio.media_ingest — **FUNCTIONAL**: Imports owned media into the ordinary project. A ready video can replace the entire source sequence at the same programme length while retaining timed graphics and soundtrack. Unused project media can be removed with Undo; source files remain stored.
 - generation.image_to_video — **PARTIAL**: The shared generation capability supports image-conditioned video. A valid example needs the conditioning image attached to verified execution and the resulting moving shot imported and reviewed.
 - generation.scene_workflow — **PARTIAL**: Plans a bounded shot, requests it, reviews the returned video and imports only an accepted owned asset into the same canonical project.
-- studio.render — **FUNCTIONAL**: Compiles the canonical project into the existing deterministic final path. Output must match the current project revision and owned source evidence.
+- studio.render — **FUNCTIONAL**: Renders the canonical project through the shared worker. A deployed 45-second GPU master is verified end to end, and the optimized retest produces exactly the original movie bytes in 133.335 seconds instead of 348.134 seconds.
 
 ## Result and limitations
 

@@ -1,0 +1,55 @@
+{
+  "format": "autopromote-education-practice",
+  "version": 1,
+  "lessonId": "precise-cuts",
+  "projectName": "IT practice 2 \u00b7 Explain a byte",
+  "sourceFiles": [
+    "normal-input.mp4"
+  ],
+  "openInStudio": "/?tab=viral_clip_studio&educationLesson=precise-cuts",
+  "accountBinding": "Upload practice media through the normal authenticated Studio entry. The starter is fresh and belongs to that account. This recipe transfers no owner, Storage path, cloud allowance or completed render.",
+  "startingSettings": {
+    "aspect": "16:9",
+    "captions": false,
+    "resolution": "720p",
+    "fps": 24
+  },
+  "steps": [
+    {
+      "title": "Open the practice source",
+      "control": "Choose videos; Open Creator Studio",
+      "value": "normal-input.mp4",
+      "why": "Use the same original recording so your teacher can compare before and after."
+    },
+    {
+      "title": "Set the source interval",
+      "control": "Edited output position; Cut \u2192 Trim start to here; Trim end to here",
+      "value": "Seek to 1.0 s, trim start; seek to programme 6.0 s, trim end",
+      "why": "This keeps source seconds 1\u20137. After trimming the start, the programme clock begins at zero again."
+    },
+    {
+      "title": "Choose the cut point",
+      "control": "Edited output position",
+      "value": "3.0 s",
+      "why": "This is the programme clock after trimming, not three seconds into the original file."
+    },
+    {
+      "title": "Make a split",
+      "control": "Split",
+      "value": "Click at programme 3.0 s",
+      "why": "A split creates two editable occurrences without deleting source footage."
+    },
+    {
+      "title": "Check the cut",
+      "control": "Play comparison",
+      "value": "Play 0.0\u20136.0 s",
+      "why": "The input, clicked action and result must still make sense."
+    },
+    {
+      "title": "Save and export",
+      "control": "Save project; Export",
+      "value": "720p; 24 fps; H.264",
+      "why": "The exported duration should be six seconds. Reopen the editable project to retain both occurrences."
+    }
+  ]
+}

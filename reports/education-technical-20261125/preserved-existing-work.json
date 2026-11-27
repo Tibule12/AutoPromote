@@ -1,0 +1,1004 @@
+{
+  "files": [
+    {
+      "file": "frontend/public/education/it-studio-v1/ASSET-PERMISSIONS.txt",
+      "unchangedGitBlob": "778dc4ad246ad5ab8b26c48980b08b3d2c58a75c"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/CURRICULUM-AND-ASSESSMENT.txt",
+      "unchangedGitBlob": "03391cb5bd98fc3fc3cfbc94a19f42bf95fadde4"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/MANUAL-FIRST-SWAP.txt",
+      "unchangedGitBlob": "86413391c3fb0e424379e69b7db4809500fd4989"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/TEACHER-BRIEF.txt",
+      "unchangedGitBlob": "8f77fccb85c4d9b8d0d34151f0725eae2f1def54"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/algorithm-stage.mp4",
+      "unchangedGitBlob": "211a4e83dcbaff6b821bef3006ebff08d4e08680"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/boundary-input.jpg",
+      "unchangedGitBlob": "b55fd18aade07f3b78f147457edaeede948766f9"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/boundary-input.mp4",
+      "unchangedGitBlob": "78971a4fb17dbbdc3b1dd6821d3e84bc4f35518e"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/bubble-sort-poster.jpg",
+      "unchangedGitBlob": "8a11400b47e49bae3d7bd5be361bc62be9163b96"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/bubble-sort-practice-kit.zip",
+      "unchangedGitBlob": "1c0269a3776087a9e0398d01d6c6dcd39cd24b96"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/bubble-sort-practice.json",
+      "unchangedGitBlob": "1d2501b1ad41437d8e908551315e80b51b1d54a7"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/bubble-sort-pseudocode.txt",
+      "unchangedGitBlob": "b88ddcf9950683dfd2cda17a36a233b627b8b0ee"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/bubble-sort-result.mp4",
+      "unchangedGitBlob": "e4098e05e4bf88b0cbd773d3eb347e07e3afc4d2"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/bubble-sort-studio.jpg",
+      "unchangedGitBlob": "2a2feb0b6991b124f114c7d55aeb0b3a03cd811c"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/bubble-sort-trace.json",
+      "unchangedGitBlob": "94f4c7d37299e468cd74fc9a9da46cc00def81dc"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/bubble-sort-transcript.txt",
+      "unchangedGitBlob": "8eff9a9a35d599efeace5845c88e603b1d4ae0e9"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/bubble-sort-tutorial.mp4",
+      "unchangedGitBlob": "241e32b781cc013bf9f3283534ffe357cb150007"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/bubble-sort.graphics.json",
+      "unchangedGitBlob": "9cea5b65731eee3bcf22f956ada8bacbd7837a66"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/bubbleSortTrace.mjs",
+      "unchangedGitBlob": "51636491a1bfd877f665b211e0736169451e9087"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/byte-explanation.wav",
+      "unchangedGitBlob": "d4eaf80ce296c085ed0354bdaa8b48ab6dd77677"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/byte-lab.html",
+      "unchangedGitBlob": "df89ac097ac4267c36f855be28eaf35daed37944"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/byteLabAlgorithm.mjs",
+      "unchangedGitBlob": "1cea039abc949e0c8e3e7bdc98a4d0970383ba97"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-aspect-after.jpg",
+      "unchangedGitBlob": "45449181cdbac2a2a7950253d826c99e1dc14a49"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-aspect-before.jpg",
+      "unchangedGitBlob": "b04d81b99c3660bf25a84246089d85cede02ebc5"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-bg5-after.jpg",
+      "unchangedGitBlob": "dca08e1d823726045afd4554c58e4a4172992c7b"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-bg5-before.jpg",
+      "unchangedGitBlob": "a51c0507e8706836cc8afd727561f4042425102d"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-end1-after.jpg",
+      "unchangedGitBlob": "32439b43166da1d73e19b6764bea23796feee0ea"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-end1-before.jpg",
+      "unchangedGitBlob": "58accba15dc1fafb3e037d8c6c2d07b28b68941a"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-end5-after.jpg",
+      "unchangedGitBlob": "5d4d9931d936af7bb6758a8457aa0ea5c87e8a46"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-end5-before.jpg",
+      "unchangedGitBlob": "24b44025cc02bb2d1729f80221c87b715bedc596"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-export-after.jpg",
+      "unchangedGitBlob": "2d30c2873d9bba8bf3cb19a1c55c4dc96aaf23b0"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-export-before.jpg",
+      "unchangedGitBlob": "2cab68ec629ef12a8587cc37f122322083ad3822"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-finish-after.jpg",
+      "unchangedGitBlob": "2c099fad23cfd4315f207a44fdd3351d66e79a0b"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-graphics-after.jpg",
+      "unchangedGitBlob": "48441fe37984b73be2d8be2a2324933cd4e6d384"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-graphics-before.jpg",
+      "unchangedGitBlob": "80f07b625200e2157612ab5c782ffc789d0c20ef"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-graphics1-after.jpg",
+      "unchangedGitBlob": "16f2e834fe2242cea300ee93ea1aba1816eb77ed"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-graphics1-before.jpg",
+      "unchangedGitBlob": "9d616b68baece2a842284cafb2c1692fceff4df9"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-headline5-after.jpg",
+      "unchangedGitBlob": "c1a1a35a12c9f2adb056cdc8b367dbab9665cd44"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-headline5-before.jpg",
+      "unchangedGitBlob": "be9b94cf0db531f923a58189c7f1ff11bc8f9f67"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-hold1-after.jpg",
+      "unchangedGitBlob": "fc9ba5d69d0290b74a520bec0a098963d2a66c71"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-hold1-before.jpg",
+      "unchangedGitBlob": "ea570b6e2f1d81e16f56ab57e25ada6b7dc68c53"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-hold5-after.jpg",
+      "unchangedGitBlob": "2148833e80202ae50194dddff4a100f7fd93f21e"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-hold5-before.jpg",
+      "unchangedGitBlob": "9b3cfb96702eab414aea0059ecad13c9871e6ca9"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-ink5-after.jpg",
+      "unchangedGitBlob": "8687a655bc28fababfe6ef6af04486665635e7c6"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-ink5-before.jpg",
+      "unchangedGitBlob": "f8a388975a495c036001bd723f7411aa90f6bced"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-key1zero-after.jpg",
+      "unchangedGitBlob": "3938ace028aa3fcbdf5c553d11d344402d098f94"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-key1zero-before.jpg",
+      "unchangedGitBlob": "deb10b08d85e4855b04e529642ff969381b6f900"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-key5zero-after.jpg",
+      "unchangedGitBlob": "01f5c13ae4ec394587c8ec71aa8b59bf72ce5e4d"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-key5zero-before.jpg",
+      "unchangedGitBlob": "874166c1740c31d17cbe54257ac0aedce6059cd1"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-middle1-after.jpg",
+      "unchangedGitBlob": "160502ae0f683f025d0cf10c8d6d1e21b43cc736"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-middle1-before.jpg",
+      "unchangedGitBlob": "953e27594ea6560cbf7f945e9c2f8dfb54a3cbac"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-middle5-after.jpg",
+      "unchangedGitBlob": "b7dce19db94625e0b819f95f64479325f8e4feb9"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-middle5-before.jpg",
+      "unchangedGitBlob": "59c16ece0f9419808f9124cd46e615fd26a2d52c"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-motion1-after.jpg",
+      "unchangedGitBlob": "1948a1e1902d56c07f59772f09e0acef6839e545"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-motion1-before.jpg",
+      "unchangedGitBlob": "52894f3bbd98c074b8bdc1d8c48b343b40fe97fd"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-motion5-after.jpg",
+      "unchangedGitBlob": "ff8bda8d69268348b66caee4fc55817d7738b184"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-motion5-before.jpg",
+      "unchangedGitBlob": "fa741046faf06ce457cf74bebe3ada08da98cb72"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-name-after.jpg",
+      "unchangedGitBlob": "0aae36e41cad1d3eeb3713187813618133ffbe50"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-name-before.jpg",
+      "unchangedGitBlob": "76be520b757f74a7325d229b7b094bbc35b2d624"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-open-after.jpg",
+      "unchangedGitBlob": "0f8f67764cd0be2a97e05e2c6e9618b257c52fcb"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-open-before.jpg",
+      "unchangedGitBlob": "17e4e358318a05b13e750cb74ced168f66711d94"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-play-after.jpg",
+      "unchangedGitBlob": "9ddbc104094efd8868392cb7150c24adafbdd79e"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-play-before.jpg",
+      "unchangedGitBlob": "c955f858ea3bc94c72b4d22bb1e506d19f9e6c91"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-preserve-after.jpg",
+      "unchangedGitBlob": "9d34d848c8b199c769d25136daefade969b64415"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-preserve-before.jpg",
+      "unchangedGitBlob": "ffc18f24881d7fe2ca337dcc8da7a893675491b5"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-save-after.jpg",
+      "unchangedGitBlob": "90081cc900515b943c1345b1fd6431150d031d9f"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-save-before.jpg",
+      "unchangedGitBlob": "dc48bf258bbf01fab77fe5914ea3a28644caa6af"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-show5-after.jpg",
+      "unchangedGitBlob": "f0c3ad2afbcf9869d3c0dd96d65b184445c29fb6"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-show5-before.jpg",
+      "unchangedGitBlob": "fda8dd0de26980dfaf97a59e59825f435ce0507e"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-size5-after.jpg",
+      "unchangedGitBlob": "ed255d77524f1d434bcfbe7eca812ed52586ef75"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-size5-before.jpg",
+      "unchangedGitBlob": "218145aee3392fb425e17881b7db08cd031c615c"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-source-after.jpg",
+      "unchangedGitBlob": "a7e412ec23fe2602b6891545e27f4fd171d0376a"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-source-before.jpg",
+      "unchangedGitBlob": "bd195d052778b362d5d09d6a00c0d69d7cb70a9b"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-style1-after.jpg",
+      "unchangedGitBlob": "81d886cad06c56f819a3b25541361c5de6547c46"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-style1-before.jpg",
+      "unchangedGitBlob": "9015695ab8b03ab9a2d6991b3acf0319e21f5217"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-text5-after.jpg",
+      "unchangedGitBlob": "96f6ca1736e8ba465694aa56731f0f2236e59ef8"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-text5-before.jpg",
+      "unchangedGitBlob": "e67197df34cf40f23ade6f2f421d776f85b9b0b0"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-x5-after.jpg",
+      "unchangedGitBlob": "862df435b5d1aa23ee2f32783b72a95a471896f8"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/click-x5-before.jpg",
+      "unchangedGitBlob": "787706b331e657e070a442109f61facdf2b3be40"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/database-example.sql",
+      "unchangedGitBlob": "076a975ef29a83b142f512f1b0fc1f977f223130"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/database-joins.graphics.json",
+      "unchangedGitBlob": "90ec92bdb1c4ea44e641b14ad5d5272f56d2cae7"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/explain-with-text-practice-kit.zip",
+      "unchangedGitBlob": "b2f1eae5083e7dd98d510c4e59b837c5219842ba"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/explain-with-text-practice.json",
+      "unchangedGitBlob": "9067b6714e6484948e7c9d9b2478227127950d8d"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/explain-with-text-result.mp4",
+      "unchangedGitBlob": "2216405cbf3264796a4c64de40a08e335d2d2d05"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/explain-with-text-studio.jpg",
+      "unchangedGitBlob": "8073f857c3e49e15a90391be4ee5c404a3ef96a8"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/explain-with-text-transcript.txt",
+      "unchangedGitBlob": "20e058c17c82662eaee5f7009277f619524601dc"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/explain-with-text-tutorial.mp4",
+      "unchangedGitBlob": "640063d83a57874da59caa19a1b6fe184d89a4d7"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/first-project-practice-kit.zip",
+      "unchangedGitBlob": "7d2004e497bee69d4604ecb46f231a89fbd8d345"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/first-project-practice.json",
+      "unchangedGitBlob": "6262d53f39bec1c1b9bcf799d2ed949f513f4dc4"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/first-project-result.mp4",
+      "unchangedGitBlob": "01be4a215a42a0864a83a9e07aeed6dd5001dca4"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/first-project-studio.jpg",
+      "unchangedGitBlob": "e373443f4fe6c38baf84d88d698725e32faa90ed"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/first-project-transcript.txt",
+      "unchangedGitBlob": "50de9991104119c8c427948952960bcbc79cfcea"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/first-project-tutorial.mp4",
+      "unchangedGitBlob": "813a05c17514a109006ede0d997b8b1e71abe171"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/first-swap-animate-five-1.mp4",
+      "unchangedGitBlob": "ec27d965c9f3e5505380659dc24f21643465dcdb"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/first-swap-animate-five-2.mp4",
+      "unchangedGitBlob": "87b1800edf3ca9dd934352eae463edb8fc1a7207"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/first-swap-animate-one-1.mp4",
+      "unchangedGitBlob": "05d9654781b61ad2305455ea75d075e155f62d2b"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/first-swap-animate-one-2.mp4",
+      "unchangedGitBlob": "66d73d0322e140dac5d57141e6883b0063d3b300"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/first-swap-click-by-click-transcript.txt",
+      "unchangedGitBlob": "60cf60d9994ca3afaf4a2748222259276ee5484e"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/first-swap-continuous-navigation.mp4",
+      "unchangedGitBlob": "2f6a2002235f7fa2a7f863f61801819db71711e5"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/first-swap-create-card-1.mp4",
+      "unchangedGitBlob": "63d1cad75df617c8b573f4eb8f1bc84a83987286"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/first-swap-create-card-2.mp4",
+      "unchangedGitBlob": "7951dde5978beabdd549704b4718fee418c89e48"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/first-swap-create-one.mp4",
+      "unchangedGitBlob": "ef24c41e458e928474f07565647c1effc44d20fc"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/first-swap-result.mp4",
+      "unchangedGitBlob": "6f16ee47650108dac2136e3a1356ec0acdd758a8"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/first-swap-review-export.mp4",
+      "unchangedGitBlob": "df9802ac1ea5f1f03bae5a7c571956246c330862"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/first-swap-setup.mp4",
+      "unchangedGitBlob": "93f6d6e41c79efb23cf55c920bf4eaf6731b37be"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/first-swap-single-control.mp4",
+      "unchangedGitBlob": "ff1a68b2e3838ba6ead03173b0a5c8e63697dbfc"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/first-swap-stage.mp4",
+      "unchangedGitBlob": "29877da112a26f8abfa1c1d6d43e7a55065ab275"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/invalid-input.jpg",
+      "unchangedGitBlob": "f5467adefeff4706e4d85163469d404eaf1a6ccf"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/invalid-input.mp4",
+      "unchangedGitBlob": "3a2fdeed1ab7b534219c504e5bf771fe0bfed21a"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/normal-input.jpg",
+      "unchangedGitBlob": "f5467adefeff4706e4d85163469d404eaf1a6ccf"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/normal-input.mp4",
+      "unchangedGitBlob": "e160e530aae64b934423888d3eb3738dfa51c9fd"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/precise-cuts-practice-kit.zip",
+      "unchangedGitBlob": "8913eafe33838bc438232823408f742c0f10bb4e"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/precise-cuts-practice.json",
+      "unchangedGitBlob": "1d79510265f95a7e04c4758bc579c55bcd817133"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/precise-cuts-result.mp4",
+      "unchangedGitBlob": "3d4b3e4870753e60b61ba6126ab1a7f8c5c5fefb"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/precise-cuts-studio.jpg",
+      "unchangedGitBlob": "263282b66dbdfd52e704ec62ee5f636fc3c60a26"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/precise-cuts-transcript.txt",
+      "unchangedGitBlob": "4b562c437b3acd42fa963b97a9e1d66fc367e680"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/precise-cuts-tutorial.mp4",
+      "unchangedGitBlob": "aafe8316f393c2209047622e7fd2f4af8939b827"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/sequence-test-cases-practice-kit.zip",
+      "unchangedGitBlob": "b856d2d24a7b6bcbaed4f068ac06e6660d870f03"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/sequence-test-cases-practice.json",
+      "unchangedGitBlob": "01469feccc6e5eb7c1f4850a5fab2bd45da7b123"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/sequence-test-cases-result.mp4",
+      "unchangedGitBlob": "ff2e360f22bbb98b0e829b88608743a20bf73033"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/sequence-test-cases-studio.jpg",
+      "unchangedGitBlob": "80c8045cb9ee9ea68b27dd37f7fece8ee0eef058"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/sequence-test-cases-transcript.txt",
+      "unchangedGitBlob": "afad021ab696d8fe7a1eebfc363c0787874ecbe0"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/sequence-test-cases-tutorial.mp4",
+      "unchangedGitBlob": "3e0f5305e67b8423ce16d0001c0c34f2bc2917ec"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/sound-and-delivery-practice-kit.zip",
+      "unchangedGitBlob": "b0779da61fb76b9bcfc72655453f1c39bbbcecbb"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/sound-and-delivery-practice.json",
+      "unchangedGitBlob": "e3d760595e6c0d3ca70d910c11672a3b1da77a10"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/sound-and-delivery-result.mp4",
+      "unchangedGitBlob": "3f57de83ff8fcfc766ec4f5575e7d3cc3f0b5330"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/sound-and-delivery-studio.jpg",
+      "unchangedGitBlob": "956de1975ebc880f7b45a4b9042e86f03a13e34e"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/sound-and-delivery-transcript.txt",
+      "unchangedGitBlob": "608adae3a6b3c09afa7ddd3e5ea3d5fa462b93c0"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/sound-and-delivery-tutorial.mp4",
+      "unchangedGitBlob": "6f78e327d062e7601364a04037dec753417b60bc"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/validation-debugging-studio.jpg",
+      "unchangedGitBlob": "ffc921c270731075e5ccf1496f78e4e0007068d2"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/validation-debugging.graphics.json",
+      "unchangedGitBlob": "4127bbaa9d712d1ce1632e7b9b2abb9a0bf869d5"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/variables-loops-poster.jpg",
+      "unchangedGitBlob": "ab8025343aef135fdd1e205ae8ad4fcf3e4bdf89"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/variables-loops-practice-kit.zip",
+      "unchangedGitBlob": "cef96d8d697f9dde7eb3ecba47dc46fe18fd0b53"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/variables-loops-practice.json",
+      "unchangedGitBlob": "7667057baaf1091cf0780eb431b9851ec3e66f87"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/variables-loops-result.mp4",
+      "unchangedGitBlob": "ace0abe938f9520744c6051cace1f9fc75237c40"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/variables-loops-studio.jpg",
+      "unchangedGitBlob": "22b061089bc278fcfdddcaeb5fc5ef7aa035cf26"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/variables-loops-trace.json",
+      "unchangedGitBlob": "e7039f3d4fc555917c8333e3ecf1cddc70960a6e"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/variables-loops-transcript.txt",
+      "unchangedGitBlob": "acc85b71fb8f87cf9458d7ea2dcfc5b6406bed0f"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/variables-loops-tutorial.mp4",
+      "unchangedGitBlob": "6d8ff44391ccc11deaeee9e3926d14e42dec108d"
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/variables-loops.graphics.json",
+      "unchangedGitBlob": "32a4ba9f17864db1be33c7451b7c12feb9e8aefb"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/PERMISSIONS.txt",
+      "unchangedGitBlob": "076df359cfceb82bca251c7023eba0949bcad7c2"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/TEACHER-REVIEW.txt",
+      "unchangedGitBlob": "ab9051d58912655c61b7d91805653fe6454e6109"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/catalog.json",
+      "unchangedGitBlob": "d66f9f7b827cd645cbed3469d83731b79991f031"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-headings-formatting/CONCEPT-TRANSCRIPT.txt",
+      "unchangedGitBlob": "5cdbb8a0181ed5149c24989e145e2cef108652ac"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-headings-formatting/LEARNER-NOTES.txt",
+      "unchangedGitBlob": "3f045e4f102263fd752445443883adf062df389d"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-headings-formatting/SOURCE-PROVENANCE.txt",
+      "unchangedGitBlob": "5b9f1512d4294b7e34428640020b406979714a3d"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-headings-formatting/STUDENT-EXERCISES.txt",
+      "unchangedGitBlob": "e348598e126624c0bc97190e0f7d4d7ef29a9e1c"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-headings-formatting/STUDIO-RECIPE.txt",
+      "unchangedGitBlob": "4ce0ad3e9e7d63e0bd71c88472030d905948604c"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-headings-formatting/TEACHER-ASSESSMENT.txt",
+      "unchangedGitBlob": "ef5fdeb9acda8ff462c26f86fd4616cb73b78c06"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-headings-formatting/TUTORIAL-TRANSCRIPT.txt",
+      "unchangedGitBlob": "c4e30407e3cbaae796c68d64ff1a982c6d3e32b4"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-headings-formatting/flat.html",
+      "unchangedGitBlob": "53c612c21b2f9e8140b334edc86f59d6dbc6ce01"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-headings-formatting/index.html",
+      "unchangedGitBlob": "bb65da734402ab1749567c564859bf38e743ff7b"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-headings-formatting/lesson.graphics.json",
+      "unchangedGitBlob": "1a119a90fad246d9759d088aed580d286a3907bd"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-headings-formatting/practice-kit.zip",
+      "unchangedGitBlob": "9f8d09cd4309fff2dc3c94c1462076824555b71e"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-headings-formatting/result.mp4",
+      "unchangedGitBlob": "87a8f8fe81839897bd50b6bca830cbdbc101d1f8"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-headings-formatting/source.mp4",
+      "unchangedGitBlob": "d9c2a0501b8a51a5a7229fe01931d1440d78a30b"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-headings-formatting/student-worksheet.pdf",
+      "unchangedGitBlob": "ca25848680abe272c39249a075dbfe990d6b7ace"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-headings-formatting/teacher-guide.pdf",
+      "unchangedGitBlob": "78d7000b76dacee2f1a46556b7005c45e9abb999"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-headings-formatting/tutorial-result.mp4",
+      "unchangedGitBlob": "87a8f8fe81839897bd50b6bca830cbdbc101d1f8"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-headings-formatting/tutorial.mp4",
+      "unchangedGitBlob": "d6e44562111a20221a6d7828527a33f6dd5aff35"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-images-links/CONCEPT-TRANSCRIPT.txt",
+      "unchangedGitBlob": "975f6a641518b75c57977e87aeedeb4b8245ebc5"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-images-links/LEARNER-NOTES.txt",
+      "unchangedGitBlob": "830d6a23f8f57877b33a788bda295daf30e9e89b"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-images-links/SOURCE-PROVENANCE.txt",
+      "unchangedGitBlob": "5b9f1512d4294b7e34428640020b406979714a3d"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-images-links/STUDENT-EXERCISES.txt",
+      "unchangedGitBlob": "0c922064f03e35dfdbce6c8327e227b4cc8f7243"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-images-links/STUDIO-RECIPE.txt",
+      "unchangedGitBlob": "6db41d8531deeffd5a25353d4afd0e868eec81d3"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-images-links/TEACHER-ASSESSMENT.txt",
+      "unchangedGitBlob": "04760473b9e1d252b5b06874594d978680c2533d"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-images-links/TUTORIAL-TRANSCRIPT.txt",
+      "unchangedGitBlob": "ba19468d142a46b06444abe3a1534a461d53ed95"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-images-links/about.html",
+      "unchangedGitBlob": "092dedbba548daa93a587ae869fef418ab26bd86"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-images-links/broken.html",
+      "unchangedGitBlob": "ad7bd18d881ef2094d1e29901f0dbbc49b1f8ea3"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-images-links/club.svg",
+      "unchangedGitBlob": "a664ec535c93e2f44d3f8c939c2c15797f597445"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-images-links/index.html",
+      "unchangedGitBlob": "b700a22a41e2e59c609d2bd4ffb41e1544ec52e2"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-images-links/lesson.graphics.json",
+      "unchangedGitBlob": "945ae3cf23fac96a268806dc469b48b6efccc534"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-images-links/practice-kit.zip",
+      "unchangedGitBlob": "50eb2d881f357dc6fb7cf40d6510ff61dba6b1ca"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-images-links/result.mp4",
+      "unchangedGitBlob": "7ba7ea43f8defc2c2a474e6a868cc9b2e964ce08"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-images-links/source.mp4",
+      "unchangedGitBlob": "69439182c2a663e59a6be36e595a760e3bb65d6b"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-images-links/student-worksheet.pdf",
+      "unchangedGitBlob": "4ad181abc2254bdb99fe299f43111f93a92d1ab2"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-images-links/teacher-guide.pdf",
+      "unchangedGitBlob": "8386072778734b0e584ea7e92e84179d2786b57a"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-images-links/tutorial-result.mp4",
+      "unchangedGitBlob": "ca6e99bf4581a007a89515e4649f8db0198e98d1"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-images-links/tutorial.mp4",
+      "unchangedGitBlob": "6f270dffca4675c18fbff4d2dba664b72c31ab69"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-lists-tables/CONCEPT-TRANSCRIPT.txt",
+      "unchangedGitBlob": "cbf3c3e29c72b2625f64458536ece7fe9f283bf9"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-lists-tables/LEARNER-NOTES.txt",
+      "unchangedGitBlob": "fc0e2f7ce75ee0fde5e5f2e6f9835b7c5ab4d532"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-lists-tables/SOURCE-PROVENANCE.txt",
+      "unchangedGitBlob": "5b9f1512d4294b7e34428640020b406979714a3d"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-lists-tables/STUDENT-EXERCISES.txt",
+      "unchangedGitBlob": "20e3b7c84d33c50c00f169d18a94c1246ad47772"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-lists-tables/STUDIO-RECIPE.txt",
+      "unchangedGitBlob": "3df341e6e6dc8c96f4f730c3ceb2ef5b7afcb5ca"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-lists-tables/TEACHER-ASSESSMENT.txt",
+      "unchangedGitBlob": "3d72309307b204713035a4045aae2c56c8740123"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-lists-tables/TUTORIAL-TRANSCRIPT.txt",
+      "unchangedGitBlob": "4eba45ae95e27fcb36c7e3238830a6787237a17b"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-lists-tables/index.html",
+      "unchangedGitBlob": "2b3484bab930bbb00ccea4c1ec8724f3271e6266"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-lists-tables/lesson.graphics.json",
+      "unchangedGitBlob": "c913d062349882deaee1d32a498ce525fc7fd943"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-lists-tables/ordered.html",
+      "unchangedGitBlob": "79b74a5b0f0885e4970adde2f035bb36db94f3ce"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-lists-tables/practice-kit.zip",
+      "unchangedGitBlob": "f7880730988d2509e24768f74714be251a6d91c6"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-lists-tables/result.mp4",
+      "unchangedGitBlob": "e49cd7e9dbe5593a6e56dbd217192521ab3a1ae3"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-lists-tables/source.mp4",
+      "unchangedGitBlob": "ead5154e528b5870b4e37181d3ebd411bad79d55"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-lists-tables/student-worksheet.pdf",
+      "unchangedGitBlob": "0777902b9badf1c862ad4f788dfbcfa6a6dc1366"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-lists-tables/teacher-guide.pdf",
+      "unchangedGitBlob": "744c69022a9897018fb677948e9d65ba0a4f1c21"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-lists-tables/tutorial-result.mp4",
+      "unchangedGitBlob": "31b619092adb5e056e32d5f04071824573563b0b"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-lists-tables/tutorial.mp4",
+      "unchangedGitBlob": "d1d2dfa885d59655d0663c8244e885398abe23e5"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-path-troubleshooting/CONCEPT-TRANSCRIPT.txt",
+      "unchangedGitBlob": "2a07bd0c492f05ff0eb229cfea6220d5ab4b5c78"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-path-troubleshooting/LEARNER-NOTES.txt",
+      "unchangedGitBlob": "5175bb53f487d226ac4b63a08cad184542c419fd"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-path-troubleshooting/SOURCE-PROVENANCE.txt",
+      "unchangedGitBlob": "5b9f1512d4294b7e34428640020b406979714a3d"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-path-troubleshooting/STUDENT-EXERCISES.txt",
+      "unchangedGitBlob": "73092349a6452220f2784ef8376e295b43ae787a"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-path-troubleshooting/STUDIO-RECIPE.txt",
+      "unchangedGitBlob": "213dc9d025a11bf705b9a386704cfcce1ace71b7"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-path-troubleshooting/TEACHER-ASSESSMENT.txt",
+      "unchangedGitBlob": "cbf31083675695d1adf7ce5306e18b4b45916435"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-path-troubleshooting/TUTORIAL-TRANSCRIPT.txt",
+      "unchangedGitBlob": "e9f010438f8143aedcf80f328db95e9f4cad1842"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-path-troubleshooting/details.html",
+      "unchangedGitBlob": "69273c5850fa2600fd7b1a0159be6f02911a5e33"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-path-troubleshooting/fixed.html",
+      "unchangedGitBlob": "a6f8101ce0301997935692fe4a962a1b739d00f7"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-path-troubleshooting/index.html",
+      "unchangedGitBlob": "51126630a4a8cec29e8f0ee33dc1c3ac97804531"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-path-troubleshooting/lesson.graphics.json",
+      "unchangedGitBlob": "1d0acdf4e553e16fdac7c0cabec770862c7e5cce"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-path-troubleshooting/practice-kit.zip",
+      "unchangedGitBlob": "762e43ff584c7004ae6e3fe2c67d18649b080e5e"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-path-troubleshooting/result.mp4",
+      "unchangedGitBlob": "092b11b19e616352f119b865a283485bfec2d0b7"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-path-troubleshooting/source.mp4",
+      "unchangedGitBlob": "bb058dc7cb2c2b89d4d1656714c97a79300f64f9"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-path-troubleshooting/student-worksheet.pdf",
+      "unchangedGitBlob": "31d01fe36340f7b7557d9e49333b00aff29445bd"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-path-troubleshooting/teacher-guide.pdf",
+      "unchangedGitBlob": "e35cb9ebae915ba0805ca8661b44dd2ea09d90f8"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-path-troubleshooting/tutorial-result.mp4",
+      "unchangedGitBlob": "092b11b19e616352f119b865a283485bfec2d0b7"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-path-troubleshooting/tutorial.mp4",
+      "unchangedGitBlob": "c7e5cc5e79c5fe8e581b3bd1eeb9dbfd5c1717e0"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-readable-design/CONCEPT-TRANSCRIPT.txt",
+      "unchangedGitBlob": "7e612b398bca36dbcc090f279c38d8b7ce3d9d41"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-readable-design/LEARNER-NOTES.txt",
+      "unchangedGitBlob": "928e284d68553f479a8c8263cb9ce407c63a4a56"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-readable-design/SOURCE-PROVENANCE.txt",
+      "unchangedGitBlob": "5b9f1512d4294b7e34428640020b406979714a3d"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-readable-design/STUDENT-EXERCISES.txt",
+      "unchangedGitBlob": "774e01b81ea9ea76c9bc94db1463a93a2f3f2930"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-readable-design/STUDIO-RECIPE.txt",
+      "unchangedGitBlob": "02f3e0536de2d9b06f4fe65b020123cee20325cb"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-readable-design/TEACHER-ASSESSMENT.txt",
+      "unchangedGitBlob": "f1cccf3b9756d4a2aa126bfeab9f77a853122872"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-readable-design/TUTORIAL-TRANSCRIPT.txt",
+      "unchangedGitBlob": "47ccd98b22bb140dfd192335a181619e18388cfa"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-readable-design/clear.html",
+      "unchangedGitBlob": "980a644b8ee55a4756a7d26922432a3545aa2ea1"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-readable-design/index.html",
+      "unchangedGitBlob": "af4e8c93cb172dfa5dbe4f8bf53e0876cf8c1134"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-readable-design/lesson.graphics.json",
+      "unchangedGitBlob": "740e070e33591c31dbac3e95e2f452d390a978cd"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-readable-design/plan.html",
+      "unchangedGitBlob": "108692ebf0c481b465346b457001a46049edaf52"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-readable-design/practice-kit.zip",
+      "unchangedGitBlob": "ce49b5b6332949022c86bb9f9ca602f714a14069"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-readable-design/result.mp4",
+      "unchangedGitBlob": "b528df357a5eeb54ba74fdc5cb9aa0a9d06f8397"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-readable-design/source.mp4",
+      "unchangedGitBlob": "bd501932a5e4e378dbf5fa3be97bc79d1f6ac3a0"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-readable-design/student-worksheet.pdf",
+      "unchangedGitBlob": "00862935c417696b6c565ecd2ca51d9def5f549b"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-readable-design/teacher-guide.pdf",
+      "unchangedGitBlob": "c612d84335a6bc21448a097b91fc1829839eae9d"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-readable-design/tutorial-result.mp4",
+      "unchangedGitBlob": "b528df357a5eeb54ba74fdc5cb9aa0a9d06f8397"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-readable-design/tutorial.mp4",
+      "unchangedGitBlob": "0dbed2b632e85f420c346ce40fa004568c739e5e"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-structure/CONCEPT-TRANSCRIPT.txt",
+      "unchangedGitBlob": "8155d8cc30f0d115388edc8736718af687890ec5"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-structure/LEARNER-NOTES.txt",
+      "unchangedGitBlob": "3cd6e44a3b28ac484c0ae433a1952cc736bfb9f0"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-structure/SOURCE-PROVENANCE.txt",
+      "unchangedGitBlob": "5b9f1512d4294b7e34428640020b406979714a3d"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-structure/STUDENT-EXERCISES.txt",
+      "unchangedGitBlob": "4efc0ce4b7e0e15ac6f062d7883113f3d4a124d5"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-structure/STUDIO-RECIPE.txt",
+      "unchangedGitBlob": "5764768cbed15829db3a8a4f0e31e9a5f2e33dbe"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-structure/TEACHER-ASSESSMENT.txt",
+      "unchangedGitBlob": "c18366962026112f39dbfe630acece9b797410b3"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-structure/TUTORIAL-TRANSCRIPT.txt",
+      "unchangedGitBlob": "2b52d5c5eba7dfe5e0e1f312078b639f70000357"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-structure/index.html",
+      "unchangedGitBlob": "23eef988811b75b4fb22651c363d2fce6e87e4fd"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-structure/lesson.graphics.json",
+      "unchangedGitBlob": "cab7bcd11066d5b2aebfc9cb16d0b87df20fef9f"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-structure/practice-kit.zip",
+      "unchangedGitBlob": "d1f9b922c36157f718e0f7a1a69e0ba51c41f8ef"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-structure/result.mp4",
+      "unchangedGitBlob": "4220d866525cf6323f0ea2cc34b5ef25071a76be"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-structure/source.mp4",
+      "unchangedGitBlob": "173a366f7465fb34828de36b26eedfae45d70616"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-structure/student-worksheet.pdf",
+      "unchangedGitBlob": "5d8a95d91ecf24de717afa4b7d42494777412766"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-structure/teacher-guide.pdf",
+      "unchangedGitBlob": "b9524c92bd1907b5820f05c5e9d185948ac7cbe6"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-structure/tutorial-result.mp4",
+      "unchangedGitBlob": "4220d866525cf6323f0ea2cc34b5ef25071a76be"
+    },
+    {
+      "file": "frontend/public/education/cat-html-v1/html-structure/tutorial.mp4",
+      "unchangedGitBlob": "9ec95b93ed8e7441b11824002f0de3085ea76ee0"
+    },
+    {
+      "file": "frontend/src/education/lessons.json",
+      "unchangedGitBlob": "98874e9ed9169e0b100d32c4381be0070929ffb0"
+    },
+    {
+      "file": "frontend/src/education/catCatalog.json",
+      "unchangedGitBlob": "d66f9f7b827cd645cbed3469d83731b79991f031"
+    }
+  ],
+  "ITAndCATUnchanged": true,
+  "originalOwnerLoginSha256": "00d48e87bd9b77ba9ead11c92bf93039f43fc3e7e6b322c3e379f6b4dac55254",
+  "originalOwnerLoginUnchanged": true,
+  "productionDeployment": false
+}

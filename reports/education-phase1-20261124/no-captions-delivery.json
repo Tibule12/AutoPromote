@@ -1,0 +1,71 @@
+{
+  "ownerInstruction": "No captions, subtitle tracks or added teaching-banner text in delivered guides.",
+  "captionSidecarsRemoved": true,
+  "lessonPlayerTracksRemoved": true,
+  "guides": [
+    {
+      "file": "first-swap-setup.mp4",
+      "sha256": "932e7c219fad16f6a61027ac95b70f90cff2c07e82e3bce2705d896a50ef59a4",
+      "noSubtitleStream": true,
+      "addedTeachingBannerRemoved": true,
+      "nativeExportModified": false
+    },
+    {
+      "file": "first-swap-create-card-1.mp4",
+      "sha256": "f2356f594044dad060dbef391e37149c1e3df323bdca4dd72bd2302120899964",
+      "noSubtitleStream": true,
+      "addedTeachingBannerRemoved": true,
+      "nativeExportModified": false
+    },
+    {
+      "file": "first-swap-create-card-2.mp4",
+      "sha256": "c408ff23c7eaf86a0f5c216ef2aa61df8f7cf3b8f5cd6fbfd418704eca2f26d1",
+      "noSubtitleStream": true,
+      "addedTeachingBannerRemoved": true,
+      "nativeExportModified": false
+    },
+    {
+      "file": "first-swap-animate-five-1.mp4",
+      "sha256": "567813584c2f1e67aa945368d71692d94a9f533794522f04ca3e39ed59c9d479",
+      "noSubtitleStream": true,
+      "addedTeachingBannerRemoved": true,
+      "nativeExportModified": false
+    },
+    {
+      "file": "first-swap-animate-five-2.mp4",
+      "sha256": "14df8a80b991a25cc3d0f5cd927f95b509a6fa137ecd9a57c4973a2b3ce65b61",
+      "noSubtitleStream": true,
+      "addedTeachingBannerRemoved": true,
+      "nativeExportModified": false
+    },
+    {
+      "file": "first-swap-create-one.mp4",
+      "sha256": "3c23967f3cb83a40cbf6139066562947cb93ef085816dbbb4f2b443f04365eeb",
+      "noSubtitleStream": true,
+      "addedTeachingBannerRemoved": true,
+      "nativeExportModified": false
+    },
+    {
+      "file": "first-swap-animate-one-1.mp4",
+      "sha256": "adec115804cc85c336c5bf1ec5cb2b260f402e160a4547397bbb711cbce25fcf",
+      "noSubtitleStream": true,
+      "addedTeachingBannerRemoved": true,
+      "nativeExportModified": false
+    },
+    {
+      "file": "first-swap-animate-one-2.mp4",
+      "sha256": "36a3dbb8cd80cd812b30ea13df1516218915711ca1efc06977ae0d7789dad22a",
+      "noSubtitleStream": true,
+      "addedTeachingBannerRemoved": true,
+      "nativeExportModified": false
+    },
+    {
+      "file": "first-swap-review-export.mp4",
+      "sha256": "0d5c2a7acb26a62049edbaba555371eae84b1128bcf4a02e63024e16d0e08392",
+      "noSubtitleStream": true,
+      "addedTeachingBannerRemoved": true,
+      "nativeExportModified": false
+    }
+  ],
+  "nativeConceptLabelsAndExportsPreserved": true
+}

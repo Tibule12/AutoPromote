@@ -8,6 +8,14 @@ import numpy as np
 
 
 MAX_STUDIO_ANALYSIS_SECONDS = 15 * 60
+YUNET_MODEL_PATH = Path(__file__).parent / "models/yunet/face_detection_yunet_2023mar.onnx"
+
+
+def create_yunet_face_detector(score_threshold=0.55):
+    """Create an OpenCV YuNet detector when the bundled ONNX model is present."""
+    if not YUNET_MODEL_PATH.is_file() or not hasattr(cv2, "FaceDetectorYN"):
+        return None
+    return cv2.FaceDetectorYN.create(str(YUNET_MODEL_PATH), "", (320, 320), score_threshold, 0.3, 5000)
 
 
 def estimate_picture_window(frame):
@@ -87,10 +95,18 @@ def build_podcast_edit_plan(start, end, cuts, observations):
             "source_visible_bottom_percent": round(float(item.get("pictureBottomPercent", inferred)), 2),
         }
 
+    cut_boundaries = sorted({float(start), *[float(cut) for cut in cuts], float(end)})
+
+    def active_shot_limit(timestamp):
+        return next((boundary for boundary in cut_boundaries if boundary > timestamp + 1e-6), float(end))
+
     last_split = -999.0
+    active_split = None
+    active_split_end = -1.0
     for item in ordered:
         faces = sorted(item.get("faces") or [], key=lambda face: face[2], reverse=True)
-        if len(faces) < 2 or item["time"] - last_split < 30:
+        if len(faces) < 2:
+            active_split = None
             continue
         first, second = faces[:2]
         area_ratio = second[2] / max(first[2], 1e-9)
@@ -98,18 +114,38 @@ def build_podcast_edit_plan(start, end, cuts, observations):
         if (second[2] < .008 or area_ratio < .58 or separation < .24 or
                 any(face[0] < .08 or face[0] > .92 or face[1] > .58
                     for face in (first, second))):
+            active_split = None
             continue
         left, right = sorted((first, second), key=lambda face: face[0])
-        split_suggestions.append({
+        top_pt = {"time": round(float(item["time"]), 3), "x": round(left[0] * 100, 2), "y": round(left[1] * 100, 2)}
+        bot_pt = {"time": round(float(item["time"]), 3), "x": round(right[0] * 100, 2), "y": round(right[1] * 100, 2)}
+        if active_split is not None and float(item["time"]) < active_split_end - 1e-4:
+            active_split["end"] = round(min(active_split_end, float(item["time"]) + 0.5), 3)
+            active_split["top"].setdefault("_kfs", []).append(top_pt)
+            active_split["bottom"].setdefault("_kfs", []).append(bot_pt)
+            continue
+        if item["time"] - last_split < 30:
+            active_split = None
+            continue
+        active_split_end = active_shot_limit(float(item["time"]))
+        suggestion = {
             "start": round(float(item["time"]), 3),
             "end": round(min(float(end), float(item["time"]) + 1.25), 3),
             "reason": "two_clean_foreground_faces",
             "confidence": round(min(1.0, area_ratio), 3),
-            "top": {"x": round(left[0] * 100, 2), "y": round(left[1] * 100, 2), "zoom": 1.45, **visible_padding(item)},
-            "bottom": {"x": round(right[0] * 100, 2), "y": round(right[1] * 100, 2), "zoom": 1.45, **visible_padding(item)},
+            "top": {"x": top_pt["x"], "y": top_pt["y"], "zoom": 1.45, **visible_padding(item), "_kfs": [top_pt]},
+            "bottom": {"x": bot_pt["x"], "y": bot_pt["y"], "zoom": 1.45, **visible_padding(item), "_kfs": [bot_pt]},
             "reviewRequired": True,
-        })
+        }
+        split_suggestions.append(suggestion)
+        active_split = suggestion
         last_split = item["time"]
+
+    for suggestion in split_suggestions:
+        for slot in ("top", "bottom"):
+            kfs = suggestion[slot].pop("_kfs", [])
+            if len(kfs) >= 2:
+                suggestion[slot]["keyframes"] = kfs
 
     # A flattened programme offers nearby full-size shots as editorial
     # cutaway candidates. They are not simultaneous camera feeds and must not
@@ -241,13 +277,14 @@ def track_faces(path, anchors, start=0, end=None, interval=.5, mode="anchored"):
         if not all(math.isfinite(v) for v in (start, end)) or start < 0 or not 0 < end-start <= MAX_STUDIO_ANALYSIS_SECONDS:
             raise ValueError("Analyze between 0 and 15 minutes per request")
         if mode == "source_shots":
-            model = Path(__file__).parent / "models/yunet/face_detection_yunet_2023mar.onnx"
-            if not model.is_file():
+            if not YUNET_MODEL_PATH.is_file():
                 raise RuntimeError("The source-shot face model is unavailable; existing framing is unchanged")
             # A hand or steep head turn can lower confidence at the exact edit
             # frame. Keep those full-size faces, then reject tiny detections by
             # normalized area below instead of using a high confidence cutoff.
-            detector = cv2.FaceDetectorYN.create(str(model), "", (320, 320), .55, .3, 5000)
+            detector = create_yunet_face_detector(0.55)
+            if detector is None:
+                raise RuntimeError("The source-shot face model is unavailable; existing framing is unchanged")
         else:
             detector = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
             if detector.empty():
@@ -365,7 +402,13 @@ def track_faces(path, anchors, start=0, end=None, interval=.5, mode="anchored"):
                     candidates.sort(key=lambda pair: (pair[1][0]-reference[0])**2 + .35*(pair[1][1]-reference[1])**2)
                 selected = candidates[0] if candidates else None
                 if selected and not pending_shot and (selected[1][0]-reference[0])**2 + .35*(selected[1][1]-reference[1])**2 > .12:
-                    selected = None
+                    if mode == "source_shots" and previous is None and not track["keyframes"]:
+                        # Opening shot fallback: anchor bias may reflect default center or an earlier slider position,
+                        # so lock onto the opening shot's dominant foreground face instead of dropping Shot 0.
+                        by_size = sorted(candidates, key=lambda pair: pair[1][2], reverse=True)
+                        selected = by_size[0]
+                    else:
+                        selected = None
                 if not selected:
                     track["missing"].append(round(float(time), 3))
                     continue

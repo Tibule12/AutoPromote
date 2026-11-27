@@ -124,6 +124,7 @@
     "postinstall": "node ../scripts/patch-security-dependencies.js && node ../scripts/patch-brace-expansion-compat.js",
     "start": "node scripts/start-react.js",
     "start:landing": "node scripts/preview-public-homepage.js",
+    "prebuild": "node ../scripts/build-legal-pages.js --check",
     "build": "react-scripts build",
     "format": "prettier --write \"src/**/*.{js,jsx,css}\"",
     "format:check": "prettier --check \"src/**/*.{js,jsx,css}\"",
@@ -132,7 +133,7 @@
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
     "deploy": "git add docs && git commit -m \"Update docs for GitHub Pages\" && git push",
-    "postbuild": "node scripts/verify-welcome-assets.js && node scripts/build-public-pages.js"
+    "postbuild": "node scripts/verify-welcome-assets.js && node scripts/verify-education-assets.js && node scripts/build-public-pages.js"
   },
   "browserslist": {
     "production": [

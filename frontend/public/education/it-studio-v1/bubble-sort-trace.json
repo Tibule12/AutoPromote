@@ -1,0 +1,258 @@
+{
+  "input": [
+    5,
+    1,
+    4,
+    2
+  ],
+  "output": [
+    1,
+    2,
+    4,
+    5
+  ],
+  "steps": [
+    {
+      "pass": 1,
+      "end": 3,
+      "j": 0,
+      "before": [
+        5,
+        1,
+        4,
+        2
+      ],
+      "left": 5,
+      "right": 1,
+      "swap": true,
+      "after": [
+        1,
+        5,
+        4,
+        2
+      ],
+      "comparisons": 1,
+      "swaps": 1
+    },
+    {
+      "pass": 1,
+      "end": 3,
+      "j": 1,
+      "before": [
+        1,
+        5,
+        4,
+        2
+      ],
+      "left": 5,
+      "right": 4,
+      "swap": true,
+      "after": [
+        1,
+        4,
+        5,
+        2
+      ],
+      "comparisons": 2,
+      "swaps": 2
+    },
+    {
+      "pass": 1,
+      "end": 3,
+      "j": 2,
+      "before": [
+        1,
+        4,
+        5,
+        2
+      ],
+      "left": 5,
+      "right": 2,
+      "swap": true,
+      "after": [
+        1,
+        4,
+        2,
+        5
+      ],
+      "comparisons": 3,
+      "swaps": 3
+    },
+    {
+      "pass": 2,
+      "end": 2,
+      "j": 0,
+      "before": [
+        1,
+        4,
+        2,
+        5
+      ],
+      "left": 1,
+      "right": 4,
+      "swap": false,
+      "after": [
+        1,
+        4,
+        2,
+        5
+      ],
+      "comparisons": 4,
+      "swaps": 3
+    },
+    {
+      "pass": 2,
+      "end": 2,
+      "j": 1,
+      "before": [
+        1,
+        4,
+        2,
+        5
+      ],
+      "left": 4,
+      "right": 2,
+      "swap": true,
+      "after": [
+        1,
+        2,
+        4,
+        5
+      ],
+      "comparisons": 5,
+      "swaps": 4
+    },
+    {
+      "pass": 3,
+      "end": 1,
+      "j": 0,
+      "before": [
+        1,
+        2,
+        4,
+        5
+      ],
+      "left": 1,
+      "right": 2,
+      "swap": false,
+      "after": [
+        1,
+        2,
+        4,
+        5
+      ],
+      "comparisons": 6,
+      "swaps": 4
+    }
+  ],
+  "comparisons": 6,
+  "swaps": 4,
+  "duration": 28,
+  "moves": [
+    {
+      "value": 5,
+      "sourceSlot": 0,
+      "destinationSlot": 1,
+      "xStart": 0,
+      "xEnd": 17,
+      "start": 3,
+      "middle": 3.625,
+      "end": 4.25,
+      "yMiddle": -10,
+      "easing": "ease_in_out"
+    },
+    {
+      "value": 1,
+      "sourceSlot": 1,
+      "destinationSlot": 0,
+      "xStart": 0,
+      "xEnd": -17,
+      "start": 3,
+      "middle": 3.625,
+      "end": 4.25,
+      "yMiddle": 10,
+      "easing": "ease_in_out"
+    },
+    {
+      "value": 5,
+      "sourceSlot": 1,
+      "destinationSlot": 2,
+      "xStart": 17,
+      "xEnd": 34,
+      "start": 6,
+      "middle": 6.625,
+      "end": 7.25,
+      "yMiddle": -10,
+      "easing": "ease_in_out"
+    },
+    {
+      "value": 4,
+      "sourceSlot": 2,
+      "destinationSlot": 1,
+      "xStart": 0,
+      "xEnd": -17,
+      "start": 6,
+      "middle": 6.625,
+      "end": 7.25,
+      "yMiddle": 10,
+      "easing": "ease_in_out"
+    },
+    {
+      "value": 5,
+      "sourceSlot": 2,
+      "destinationSlot": 3,
+      "xStart": 34,
+      "xEnd": 51,
+      "start": 9,
+      "middle": 9.625,
+      "end": 10.25,
+      "yMiddle": -10,
+      "easing": "ease_in_out"
+    },
+    {
+      "value": 2,
+      "sourceSlot": 3,
+      "destinationSlot": 2,
+      "xStart": 0,
+      "xEnd": -17,
+      "start": 9,
+      "middle": 9.625,
+      "end": 10.25,
+      "yMiddle": 10,
+      "easing": "ease_in_out"
+    },
+    {
+      "value": 4,
+      "sourceSlot": 1,
+      "destinationSlot": 2,
+      "xStart": -17,
+      "xEnd": 0,
+      "start": 15,
+      "middle": 15.625,
+      "end": 16.25,
+      "yMiddle": -10,
+      "easing": "ease_in_out"
+    },
+    {
+      "value": 2,
+      "sourceSlot": 2,
+      "destinationSlot": 1,
+      "xStart": -17,
+      "xEnd": -34,
+      "start": 15,
+      "middle": 15.625,
+      "end": 16.25,
+      "yMiddle": 10,
+      "easing": "ease_in_out"
+    }
+  ],
+  "slotCentres": [
+    24,
+    41,
+    58,
+    75
+  ],
+  "cardY": 47,
+  "cardWidth": 12,
+  "cardHeight": 16
+}
