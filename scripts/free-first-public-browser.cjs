@@ -10,7 +10,8 @@ const option = (name, fallback) => {const i=process.argv.indexOf(name);return i<
   const origin='https://autopromote.org', source='tmp/free-first-workload-inputs/d563280d6d3f60c275be7900bafb71d4c67bcdc6531b811dcb19b904aeb3c526.mp4';info.origin='https://api.autopromote.org';
   assert.ok(require('../config/free-first-release/activation.json').enabled);
   assert.ok(info.emailVerified&&info.uid);
-  const folder=path.join(directory,'public-browser');if(fs.existsSync(path.join(folder,'browser-evidence.json')))throw Error('Preserve the prior public attempt; reconcile its job before another export');
+  const resume=process.argv.includes('--resume');
+  const folder=path.join(directory,resume?'public-browser-resumed':'public-browser');if(fs.existsSync(path.join(folder,'browser-evidence.json')))throw Error('Preserve the prior public attempt; reconcile its job before another export');
   fs.mkdirSync(folder,{recursive:true});
   const report={scope:'Real public App and ordinary account; approved cloud qualification; no additional publication',checks:[],errors:[],dialogs:[]};
   const browser=await chromium.launch({headless:true,args:['--mute-audio']});
@@ -48,8 +49,13 @@ const option = (name, fallback) => {const i=process.argv.indexOf(name);return i<
     const before=await usage();report.before=before;
     await page.screenshot({path:folder+'/billing-final.png',fullPage:true});
     await page.getByRole('button',{name:'Viral Clip Studio',exact:true}).click();
+    const projectName=option('--project-name','Free-first allowance workflow');
+    if(resume){
+      await page.getByRole('button',{name:projectName,exact:true}).click();
+      report.checks.push({name:'existing-native-project-reused',noRepeatedUpload:true});
+    }else{
     await page.getByLabel('Choose videos for Studio').setInputFiles(source);
-    await page.getByRole('button',{name:'Open Creator Studio',exact:true}).click();
+    await page.getByRole('button',{name:'Open Creator Studio',exact:true}).click({timeout:180000});
     await page.getByRole('button',{name:'Graphics',exact:true}).click();
     await page.getByRole('button',{name:/Headline.*Bold hook copy/}).click();
     const text=page.getByLabel('Title text',{exact:true});await text.fill('Create for free');await text.blur();
@@ -59,12 +65,13 @@ const option = (name, fallback) => {const i=process.argv.indexOf(name);return i<
     assert.equal(await text.inputValue(),'Create for free');
     const show=page.getByRole('button',{name:'Show media',exact:true});if(await show.isVisible())await show.click();
     const details=page.locator('.studio-project-rail__head');if(!await details.evaluate(n=>n.open))await details.locator('summary').click();
-    const projectName=option('--project-name','Free-first allowance workflow');await page.getByLabel('Project name',{exact:true}).fill(projectName);
+    await page.getByLabel('Project name',{exact:true}).fill(projectName);
     await page.getByTestId('studio-save-project').click();
     await page.locator('.studio-project-save-state.is-saved').waitFor();
     const afterEdit=await usage();assert.equal(afterEdit.processing.remaining,before.processing.remaining);
     report.checks.push({name:'free-native-local-edit',sourceUpload:true,titleEdit:true,undoRedo:true,projectSaved:true,noTokensDeducted:true});
     await page.screenshot({path:folder+'/free-edit-timeline.png'});
+    }
     await page.reload();
     await page.getByRole('button',{name:'Viral Clip Studio',exact:true}).click();
     await page.getByRole('button',{name:projectName,exact:true}).click();
@@ -85,7 +92,14 @@ const option = (name, fallback) => {const i=process.argv.indexOf(name);return i<
     let after;
     const exportWait=900;
     assert.ok(Number.isSafeInteger(exportWait)&&exportWait>=45&&exportWait<=900);
-    for(let n=0;n<exportWait;n+=5) {after=await usage();if(after.processing.rollingSpentTokens>before.processing.rollingSpentTokens&&after.processing.activeJobs===0)break;await page.waitForTimeout(5000);}
+    for(let n=0;n<exportWait;n+=5) {
+      after=await usage();
+      if(after.processing.rollingSpentTokens>before.processing.rollingSpentTokens&&after.processing.activeJobs===0)break;
+      const failed=await page.locator('[role=alert]').allTextContents();
+      if(after.processing.activeJobs===0&&failed.some(t=>t.startsWith('Export failed:')))
+        throw Error(failed.find(t=>t.startsWith('Export failed:')));
+      await page.waitForTimeout(5000);
+    }
     report.after=after;
     assert.ok(after.processing.remaining<before.processing.remaining,'actual export reconciles a deduction');
     assert.equal(after.balances.purchasedCredits,before.balances.purchasedCredits,'legacy wallet preserved');

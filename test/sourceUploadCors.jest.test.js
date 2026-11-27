@@ -6,6 +6,20 @@ process.env.FIREBASE_ADMIN_BYPASS = "1";
 const app = require("../src/server");
 
 describe("API CORS preflight", () => {
+  test("the public PayPal webhook reaches payment signature validation before generic platform routes", async () => {
+    const previous = process.env.PAYPAL_WEBHOOK_ID;
+    process.env.PAYPAL_WEBHOOK_ID = "WH-ROUTING-TEST";
+    try {
+      const res = await request(app).post("/api/paypal/webhook").send({}).expect(400);
+      expect(res.body.error).toBe("missing_headers");
+      expect(res.body.missing).toContain("paypal-transmission-sig");
+      const platform = await request(app).post("/api/unknown/webhook").send({}).expect(400);
+      expect(platform.body.error).toBe("unsupported_platform_for_webhook");
+    } finally {
+      if (previous === undefined) delete process.env.PAYPAL_WEBHOOK_ID;
+      else process.env.PAYPAL_WEBHOOK_ID = previous;
+    }
+  });
   test.each(["/api/media/process", "/api/media/render-multicam", "/api/paypal-subscriptions/create-subscription"])(
     "the public browser can send approved-token and deduplication headers to %s",
     async path => {

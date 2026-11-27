@@ -1605,6 +1605,8 @@ try {
     console.log("⚠️ Assistant routes mount failed:", e.message);
   }
   app.use("/api/publishing-destinations", require("./routes/communityPublishingRoutes"));
+  // The generic /:platform/webhook must never consume payment notifications.
+  app.use("/api/paypal", paypalWebhookRoutes);
   // Mount generic platform routes under /api so frontend placeholder endpoints like
   // /api/spotify/auth/start and /api/spotify/status are handled by the generic router.
   try {
@@ -1728,7 +1730,6 @@ try {
     codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req, res, next) => next(),
     paymentsExtendedRoutes
   );
-  app.use("/api/paypal", paypalWebhookRoutes);
   app.use(
     "/api/paypal-subscriptions",
     routeLimiter({ windowHint: "paypal_subscriptions" }),
