@@ -20,8 +20,11 @@ test('caption review and malformed native cues are rejected before a billable ta
 const db = createSandboxDatabase();
 process.env.FREE_FIRST_USAGE_ENABLED = 'true';
 after(async () => { delete process.env.FREE_FIRST_USAGE_ENABLED; await db.terminate(); });
-async function fixture({ funded = true, lost = false, success = true } = {}) {
+async function fixture({ funded = true, lost = false, success = true, render = false } = {}) {
   const uid = 'native-' + crypto.randomUUID(), requestId = crypto.randomUUID();
+  const operation = render ? 'studio.render' : 'audio.transcribe';
+  const route = render ? '/api/media/process' : '/api/media/transcribe';
+  const tokens = render ? 40 : 10;
   const p = { id: 'speech-' + crypto.randomBytes(4).toString('hex'), operation: 'audio.transcribe',
     requestScope: 'existing-native-v1', tokens: 10, maxMicros: 30000, maxSeconds: 360, cpuMilli: 2000,
     memoryBytes: 4 * 1024 ** 3, device: 'cpu', inputMaxBytes: 1024 ** 3, outputMaxBytes: 128 * 1024 ** 2,
@@ -30,10 +33,11 @@ async function fixture({ funded = true, lost = false, success = true } = {}) {
     job: 'projects/autopromote-staging-native/locations/us-central1/jobs/speech',
     image: 'us-docker.pkg.dev/autopromote-staging-native/runtime/native@sha256:' + 'a'.repeat(64),
     serviceAccount: 'native@autopromote-staging-native.iam.gserviceaccount.com', qualificationId: 'qa-' + crypto.randomUUID() };
-  const body = { video_url: 'https://storage.googleapis.com/owned/input.mp4' };
-  const fingerprint = digest({ path: '/api/media/transcribe', body });
+  p.operation = operation; p.tokens = tokens;
+  const body = { video_url: 'https://storage.googleapis.com/owned/input.mp4', ...(render ? {async_mode:true,job_id:'native-'+crypto.randomUUID()} : {}) };
+  const fingerprint = digest({ path: route, body });
   const service = createProcessingService({ db, entitlement: async () => 'free',
-    operations: { ['audio.transcribe@' + p.id]: { tokens: 10, maxMicros: p.maxMicros,
+    operations: { [operation+'@' + p.id]: { tokens, maxMicros: p.maxMicros,
       maxSeconds: p.maxSeconds, resource: 'cpu', retries: 0 } } });
   await service.configure({ enabled: true });
   if (funded) await db.collection('processing_worker_qualifications').doc(p.qualificationId).set({
@@ -66,16 +70,28 @@ async function fixture({ funded = true, lost = false, success = true } = {}) {
   const app = express(); app.use(express.json());
   app.use(createProcessingGuard({ service, authenticate: (req, res, next) => {
     req.user = { uid, claims: { email_verified: true } }; next(); }, adapters: { select: () => adapter } }));
-  app.post('/api/media/transcribe', async (req, res) => {
-    try { const target = 'https://native.invalid/transcribe';
+  app.post(route, async (req, res) => {
+    try { const target = 'https://native.invalid'+(render?'/render-viral-clip':'/transcribe');
       const response = await axios.post(target, req.body, await applicationWorkerConfig(target, req.body));
       res.json(response.data);
     } catch (error) { res.status(error.status || 503).json({ error: error.code || 'worker-pending' }); }
   });
   return { uid, requestId, p, service, adapter, get posts() { return posts; },
-    submit: () => http(app).post('/api/media/transcribe').set('Idempotency-Key', requestId)
-      .set('X-Processing-Tokens-Approved', '10').send(body) };
+    submit: () => http(app).post(route).set('Idempotency-Key', requestId)
+      .set('X-Processing-Tokens-Approved', String(tokens)).send(body) };
 }
+test('funded asynchronous Studio dispatch retains the existing native handoff contract and one execution', async () => {
+  const f = await fixture({render:true}), response = await f.submit();
+  assert.equal(response.status,200);
+  assert.equal(response.body.status,'processing');
+  assert.equal(response.body.mode,'async','existing VideoEditingService uses mode to recognize worker ownership');
+  assert.equal(response.body.job_id,response.body.jobId);
+  assert.equal((await f.service.status(f.uid)).remaining,60);
+  assert.equal(f.posts,1);
+  assert.equal((await f.submit()).status,409);
+  assert.equal(f.posts,1);
+  await f.service.settle(f.uid,f.requestId,{eventId:'fixture-stopped',success:false,actualMicros:16800,stopped:true});
+});
 test('existing native HTTP caller is admitted and settled through one immutable no-retry execution', async () => {
   const f = await fixture(); const response = await f.submit();
   assert.equal(response.status, 200); assert.equal(response.body.segments[0].end, 60);

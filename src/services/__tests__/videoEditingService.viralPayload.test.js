@@ -35,6 +35,15 @@ describe("VideoEditingService Viral Clip payload", () => {
       },
     });
   });
+  it("accepts the native async handoff without requiring a finished file", async () => {
+    mockPost.mockResolvedValue({data:{status:"processing",mode:"async",job_id:"owned-render-handoff"}});
+    const result = await new VideoEditingService().processVideo(
+      "https://storage.example.com/source.mp4", {renderViral:true,viralData:{start_time:0,end_time:60}},
+      "test-user", "owned-render-handoff"
+    );
+    expect(result).toEqual({status:"processing",mode:"async",jobId:"owned-render-handoff"});
+    expect(mockPost).toHaveBeenCalledTimes(1);
+  });
 
   it("forwards Studio caption and speed settings to the Cloud Run worker", async () => {
     const service = new VideoEditingService();

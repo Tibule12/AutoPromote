@@ -57,11 +57,19 @@ const { once } = require("node:events");
     const files = fs
       .readdirSync("test/free-first")
       .filter(f => f.endsWith(".test.cjs"))
+      // These two integration checks use the owner's private retained film and
+      // local Python media environment. Keep them in the full local run; CI
+      // runs the portable accounting/security suite instead of hanging on paths
+      // that do not exist on a GitHub runner. Actual cloud/public qualification
+      // remains a separate mandatory release receipt, never a synthetic claim.
+      .filter(f => !process.argv.includes("--portable") || !["native-output.test.cjs", "storage-transfer.test.cjs"].includes(f))
       .filter(f => !process.argv.includes("--file") || f === process.argv[process.argv.indexOf("--file") + 1])
       .filter(f => !process.argv.includes("--infrastructure-only") || ["infrastructure-waste.test.cjs","storage-transfer.test.cjs"].includes(f))
       .filter(f => !process.argv.includes("--storage-transfer-only") || f === "storage-transfer.test.cjs")
       .map(f => "test/free-first/" + f);
     if (!files.length) throw new Error("No matching local test files");
+    if (process.argv.includes("--portable"))
+      console.log("Portable suite: local native-output and retained-film transfer checks require the owner media environment; excluded explicitly.");
     const args = process.argv.includes("--browser")
       ? ["scripts/free-first-browser.cjs"]
       : ["--test", "--test-concurrency=1", ...files];

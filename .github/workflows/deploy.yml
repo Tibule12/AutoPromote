@@ -57,7 +57,8 @@ jobs:
         run: python3 -m unittest discover -s test/security -p 'rules_publisher_test.py' -v
 
       - name: Verify retention read cache and independent financial fixes locally
-        run: node scripts/test-free-first.cjs
+        timeout-minutes: 10
+        run: node scripts/test-free-first.cjs --portable
 
       - name: Verify existing payment, publishing and Studio workflows
         env:
@@ -75,6 +76,8 @@ jobs:
           src/__tests__/billingService.entitlements.test.js
           test/contentRoutes.schedulingBehavior.jest.test.js
           test/contentSourceUpload.jest.test.js
+          test/sourceUploadCors.jest.test.js
+          src/routes/__tests__/platformWebhook.test.js
           test/promotionTaskQueue.hashing.jest.test.js
           src/__tests__/mediaRoutes.studioSources.test.js
           src/__tests__/mediaRoutes.viralBilling.test.js

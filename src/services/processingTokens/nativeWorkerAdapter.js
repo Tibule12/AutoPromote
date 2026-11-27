@@ -184,7 +184,7 @@ function createNativeWorkerAdapter({ db, profile: p, request, now = Date.now }) 
           if (executionName?.startsWith(p.job + '/executions/')) await bindings.doc(id).update({ executionName });
           if ((['studio.render','multicam.render'].includes(p.operation) || p.operation==='audio.extract') && body.async_mode !== false &&
               !['/render-clip','/render-montage'].includes(endpoint) && !endpoint.startsWith('/preview-'))
-            return { status: 'processing', job_id: nativeJobId, jobId: nativeJobId };
+            return { status: 'processing', mode: 'async', job_id: nativeJobId, jobId: nativeJobId };
           const deadline = now() + (p.maxSeconds + 250) * 1000;
           while (now() < deadline) {
             const outcome = await reconcile({ ...binding, ...(executionName ? { executionName } : {}) }, ctx.service);

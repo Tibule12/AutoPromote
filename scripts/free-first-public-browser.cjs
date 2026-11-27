@@ -11,7 +11,9 @@ const option = (name, fallback) => {const i=process.argv.indexOf(name);return i<
   assert.ok(require('../config/free-first-release/activation.json').enabled);
   assert.ok(info.emailVerified&&info.uid);
   const resume=process.argv.includes('--resume');
-  const folder=path.join(directory,resume?'public-browser-resumed':'public-browser');if(fs.existsSync(path.join(folder,'browser-evidence.json')))throw Error('Preserve the prior public attempt; reconcile its job before another export');
+  const evidenceName=option('--evidence-name',resume?'public-browser-resumed':'public-browser');
+  assert.match(evidenceName,/^public-browser(?:-[a-z0-9]+)*$/);
+  const folder=path.join(directory,evidenceName);if(fs.existsSync(path.join(folder,'browser-evidence.json')))throw Error('Preserve the prior public attempt; reconcile its job before another export');
   fs.mkdirSync(folder,{recursive:true});
   const report={scope:'Real public App and ordinary account; approved cloud qualification; no additional publication',checks:[],errors:[],dialogs:[]};
   const browser=await chromium.launch({headless:true,args:['--mute-audio']});
