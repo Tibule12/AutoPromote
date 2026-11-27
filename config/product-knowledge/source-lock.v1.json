@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "reviewer": "AutoPromote Engineering",
-  "reason": "Reviewed Find Viral Clips vertical sorting and Studio AI Director cut-aware tracking updates",
-  "reviewed_at": "2026-11-27T13:10:21.537Z",
+  "reviewer": "Studio Release",
+  "reason": "Integrate Studio Hollywood VFX, Pro RGBA captions, 4-frame scaling, and AI Director caption template selection with origin/main",
+  "reviewed_at": "2026-11-27T14:03:06.731Z",
   "catalog_sha256": "c09a26f3a093fe05b546f1006e2da1ed4c5f10efb8e49ab84c2fe77a452e29c1",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
-      "sha256": "e6da8289e998ef7b30c0f87c9f0d04ecd9e0957f7cc27da3acc2816241ba39b5"
+      "sha256": "a9a176339c28249e40a8461b405ba0e87fbe73a26510c210430db502c7cec0fa"
     },
     {
       "path": "config/model-runtime/registry.v1.json",
@@ -179,7 +179,7 @@
     },
     {
       "path": "frontend/src/components/StudioSelectiveGradePanel.js",
-      "sha256": "eb0e56364184b7f9d8f3e5628cf316c2c821039ba64346ca1226df46b4b18f56"
+      "sha256": "0f6c5165fb57302b08a0760531345adc7870ca48a0130039f361190c818448e5"
     },
     {
       "path": "frontend/src/components/StudioSubjectMaskControls.js",
@@ -207,7 +207,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "8f9dd6822e0f46ecc2929daa5e3af31264a5580098a7b4521722bbf83f9b42a2"
+      "sha256": "6812566601d2cebd97afaad0d22c8f9a6d7d43418f4402e40325b73327848220"
     },
     {
       "path": "frontend/src/components/ViralScanner.js",
@@ -243,7 +243,7 @@
     },
     {
       "path": "frontend/src/components/studioAutomation.js",
-      "sha256": "80fff1c245c7d04ab502de2e48600a6605f4875dbaf0ee5b6e73e9ff13c2a7ae"
+      "sha256": "0edc9d5ec29dffc2fef3da80fa11d7886a5695a935c4fb91a481540761cc93bf"
     },
     {
       "path": "frontend/src/components/studioBRollPowerhouse.js",
@@ -327,7 +327,7 @@
     },
     {
       "path": "frontend/src/components/studioMaskGeometry.js",
-      "sha256": "441e5df3d6c10e550619cca5068366cdd227c8af155b2112a006ec4f70ab25c0"
+      "sha256": "809603b1d43dba8d1e29096e787012ef43f179d43e85c702bbbd90c513338bdf"
     },
     {
       "path": "frontend/src/components/studioMatteSurface.js",
@@ -351,7 +351,7 @@
     },
     {
       "path": "frontend/src/components/studioMotionProperties.js",
-      "sha256": "fa544dd293aa79bab479cfaea4aed98b2b5ef7c4017dc6b5401b828003105c70"
+      "sha256": "5f2effaa86ddd9de75ba538f41149ecc41a705c20ef03190b6ff133a4c7a24f4"
     },
     {
       "path": "frontend/src/components/studioPreviewBudget.js",
@@ -367,7 +367,7 @@
     },
     {
       "path": "frontend/src/components/studioRenderCompiler.js",
-      "sha256": "020045b82a3539966d584ee89dcdd551f6aff185a62bd85240c9559e2762a98b"
+      "sha256": "bf79a6f2b7bf4ba8e7df4cdef0f56a3b8463088ff69b685ded62989a1de6bf26"
     },
     {
       "path": "frontend/src/components/studioSourcePreview.js",
@@ -403,11 +403,11 @@
     },
     {
       "path": "frontend/src/components/studioWebGLCompositor.js",
-      "sha256": "27320dba6ff6c24bab0a949fd395cf7e6162e54c3ff9873e85ccadb0aeb40fd6"
+      "sha256": "d1a9e39fbad1ee245d2470070ff04f94ffaed1f0a58a754026675962512f091d"
     },
     {
       "path": "frontend/src/components/threeD/Studio3DPanel.js",
-      "sha256": "4122fe03ca112801270d9d58c44be4eabe3dfe5c4976c5d1eb75d5571403c2f0"
+      "sha256": "73650ee7b7e619d39619bd7bd5b6346904f74d0402504c7e7a76b1d85540e982"
     },
     {
       "path": "frontend/src/components/threeD/studio3DModel.js",
@@ -415,7 +415,7 @@
     },
     {
       "path": "frontend/src/components/threeD/studio3DObjects.js",
-      "sha256": "4418801faf183fdd83a2722c7b52cad744a829864ee6018cc1f037b49c260c12"
+      "sha256": "34e3124102c362353d576768b5ea7387750a79316e27b24e1820aa2e1de16b74"
     },
     {
       "path": "frontend/src/components/threeD/studio3DParity.js",
@@ -431,7 +431,7 @@
     },
     {
       "path": "frontend/src/components/viralRenderPayload.js",
-      "sha256": "071a54d082197139294a814c2d2b9d4b8c6730449afe04103b6f39e22b04b3fa"
+      "sha256": "b170b48c96c199ba9a6c3006ff35c6363a614eb8f4c714cb5bf69a38189db4a2"
     },
     {
       "path": "frontend/src/docs/content.js",
@@ -511,7 +511,7 @@
     },
     {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "b650eef562986c455f8f82a34fc615fededb6091d4ce8fd5e92a90631c08abd7"
+      "sha256": "c235326ac11964b33a4d7ea0608b94cf819ef65f67f4f872f3164f5f9e8f6d70"
     },
     {
       "path": "python_media_worker/studio_audio.py",
@@ -523,15 +523,15 @@
     },
     {
       "path": "python_media_worker/studio_composition.py",
-      "sha256": "2f06ff251dc8766153890bcc2ed5e848bd4be56d7ddb7932c8de45c7d7068c1a"
+      "sha256": "00af56610ef3d6ce3cb03e6f56afdeaf8f8ca2e5035b011d122ef15b4644d66b"
     },
     {
       "path": "python_media_worker/studio_image_sources.py",
-      "sha256": "1be008066aadb41bba34b036b066e5c7a0a0a4d63b19f593ed07539b4a630f19"
+      "sha256": "b39522839a9d40fd5818eff4593973ee19adbf048d0d3d3c077a91db52b95622"
     },
     {
       "path": "python_media_worker/studio_layer_motion.py",
-      "sha256": "2ae96e759e33f002de31e8616c4b54ef1355f35701a13025c3083af9ccc3d6b0"
+      "sha256": "1b8823f40606fc91e721b5bf6adfd61bc74728356dd07021c7cc55eaec272d76"
     },
     {
       "path": "python_media_worker/studio_matte_surface.py",
@@ -559,7 +559,7 @@
     },
     {
       "path": "python_media_worker/studio_vfx_plan.py",
-      "sha256": "ac68a49b46db883ba1371660b54776a5aa0e288e488163f10d1bebd65b1643be"
+      "sha256": "863385c46768a9881d6d5231a0cac839ff1d421af4c58d908e519d177d1ef1cd"
     },
     {
       "path": "python_media_worker/studio_watermark_cleanup.py",
@@ -571,7 +571,7 @@
     },
     {
       "path": "python_media_worker/viral_render_contract.py",
-      "sha256": "d54fd0d332584d00b58887194f56569de1234126aab6403bc10daec62c91288a"
+      "sha256": "121fea8ebad1584eaa337a6e4e9586ed34da934dbad3796efbcdf5eed7d5112f"
     },
     {
       "path": "reports/footer-pages-20261021/README.md",
