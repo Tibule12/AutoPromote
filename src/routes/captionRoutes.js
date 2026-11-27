@@ -29,6 +29,7 @@ const freeTierLimiter = rateLimit({
 
 // Middleware to check user plan
 const checkPlanLimits = async (req, res, next) => {
+  if (require('../services/processingTokens/runtime').enabled()) return next();
   try {
     const user = req.user;
 

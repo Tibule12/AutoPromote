@@ -1,0 +1,10 @@
+{
+  "mode": "live",
+  "existingWebhookId": "00R67860MX2800941",
+  "destination": "https://api.autopromote.org/api/paypal/webhook",
+  "updated": true,
+  "requiredEventsPresent": true,
+  "missingEvents": [],
+  "legacyEventsPreserved": true,
+  "chargesCreated": 0
+}

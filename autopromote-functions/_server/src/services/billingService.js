@@ -174,6 +174,7 @@ function buildTesterTier(baseTier) {
 }
 
 function getPlatformPostMonthlyQuota(planId, plan = null, testerAccess = null, billingData = {}) {
+  if (require('./processingTokens/runtime').enabled()) return 0;
   if (testerAccess) return TESTER_PROGRAM.usageLimits.queuedPlatformPosts;
   const normalized = normalizePlanId(planId || "free");
   const defaultPlatformPostQuotas = {

@@ -72,6 +72,11 @@ function usageLimitMiddleware(options = {}) {
       if (!userId) {
         return res.status(401).json({ error: "Unauthorized" });
       }
+      if (require('../services/processingTokens/runtime').enabled()) {
+        // Storage is admitted by the owned byte reservation. Creative work is
+        // admitted by renewable tokens; the retired upload counter adds neither.
+        return next();
+      }
 
       // Check if user has subscription info
       const userDoc = await db.collection("users").doc(userId).get();
@@ -244,6 +249,9 @@ async function getUserUsageStats(userId) {
       tier,
     } = await getEffectiveTierSnapshot(userId, null, userData);
     const isPaidTier = normalizedTier !== "free";
+    if (require('../services/processingTokens/runtime').enabled())
+      return { isPaid: isPaidTier, limit: Infinity, used: 0, remaining: Infinity, monthKey,
+        processingAllowances: true };
 
     // Get upload count for current month
     const usageSnap = await db

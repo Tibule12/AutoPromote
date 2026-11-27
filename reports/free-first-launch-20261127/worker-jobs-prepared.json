@@ -1,0 +1,56 @@
+[
+  {
+    "id": "render-gpu",
+    "job": "projects/autopromote-cc6d3/locations/us-central1/jobs/free-first-render-gpu-bb9460a3",
+    "providerOperation": "projects/autopromote-cc6d3/locations/us-central1/operations/1a0a35b8-1837-499b-9e5e-8dc5ab050e44",
+    "executed": false
+  },
+  {
+    "id": "cam-gpu",
+    "job": "projects/autopromote-cc6d3/locations/us-central1/jobs/free-first-cam-gpu-bb9460a3-native-cam",
+    "providerOperation": "projects/autopromote-cc6d3/locations/us-central1/operations/be5e720b-1a0d-4498-b51c-ca7ea50bf095",
+    "executed": false
+  },
+  {
+    "id": "audio-cpu",
+    "job": "projects/autopromote-cc6d3/locations/us-central1/jobs/free-first-audio-cpu-bb9460a3",
+    "providerOperation": "projects/autopromote-cc6d3/locations/us-central1/operations/7adb6f3f-c035-47d6-a18b-18cd734efeb3",
+    "executed": false
+  },
+  {
+    "id": "speech-cpu",
+    "job": "projects/autopromote-cc6d3/locations/us-central1/jobs/free-first-speech-cpu-b9095637",
+    "providerOperation": "projects/autopromote-cc6d3/locations/us-central1/operations/d0a4825f-59de-4ea8-975c-dca580ec023c",
+    "executed": false
+  },
+  {
+    "id": "finder-cpu",
+    "job": "projects/autopromote-cc6d3/locations/us-central1/jobs/free-first-finder-cpu-b9095637",
+    "providerOperation": "projects/autopromote-cc6d3/locations/us-central1/operations/df7be9a8-35a0-41b2-bb9b-cd57b159a99f",
+    "executed": false
+  },
+  {
+    "id": "render-cpu",
+    "job": "projects/autopromote-cc6d3/locations/us-central1/jobs/free-first-render-cpu-b9095637",
+    "providerOperation": "projects/autopromote-cc6d3/locations/us-central1/operations/e413cc3e-8337-477f-8126-823137c405bd",
+    "executed": false
+  },
+  {
+    "id": "clip-cpu",
+    "job": "projects/autopromote-cc6d3/locations/us-central1/jobs/free-first-clip-cpu-b9095637",
+    "providerOperation": "projects/autopromote-cc6d3/locations/us-central1/operations/661fb85c-b090-4a56-8230-cba75120353e",
+    "executed": false
+  },
+  {
+    "id": "failure-cpu",
+    "job": "projects/autopromote-cc6d3/locations/us-central1/jobs/free-first-failure-cpu-b9095637",
+    "providerOperation": "projects/autopromote-cc6d3/locations/us-central1/operations/7ea20637-5d8e-4851-8114-00b53b613c3e",
+    "executed": false
+  },
+  {
+    "id": "sync-cpu",
+    "job": "projects/autopromote-cc6d3/locations/us-central1/jobs/free-first-sync-cpu-b9095637",
+    "providerOperation": "projects/autopromote-cc6d3/locations/us-central1/operations/31600fb8-06c2-4199-ac66-3ac7e9eab9cf",
+    "executed": false
+  }
+]

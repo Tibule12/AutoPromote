@@ -47,6 +47,14 @@ async function queueAudioExtractionTask({ jobId, videoUrl, outputFormat = "mp3" 
     job_id: jobId,
     async_mode: false,
   };
+  if(require('./processingTokens/runtime').enabled()) {
+    const target=MEDIA_WORKER_URL+'/extract-audio';
+    const body={...payload,async_mode:true};
+    const response=await axios.post(target,body,await require('./unifiedCredits/workerTransport')
+      .applicationWorkerConfig(target,body,{timeout:30000}));
+    return {dispatchMode:'bounded-renewable-job',workerJobId:response.data.job_id||jobId,
+      taskTargetUrl:target};
+  }
 
   if (!MEDIA_WORKER_TASK_QUEUE) {
     const response = await axios.post(

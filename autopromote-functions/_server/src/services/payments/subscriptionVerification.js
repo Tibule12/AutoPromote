@@ -5,10 +5,10 @@ const ALL_SUBSCRIPTION_PLANS = catalog.ALL_SUBSCRIPTION_PLANS || catalog.SUBSCRI
 const { resolvePlan } = catalog;
 const { fail } = require("../unifiedCredits/policy");
 
-function validatePlusPlanDefinition(remote) {
+function validatePlusPlanDefinition(remote, { requireActive = true } = {}) {
   const regular = (remote?.billing_cycles || []).filter(c => c.tenure_type === "REGULAR");
   const c = regular[0], price = c?.pricing_scheme?.fixed_price;
-  if (remote?.status !== "ACTIVE" || regular.length !== 1 || remote.billing_cycles.length !== 1 ||
+  if ((requireActive ? remote?.status !== "ACTIVE" : !['ACTIVE','CREATED','INACTIVE'].includes(remote?.status)) || regular.length !== 1 || remote.billing_cycles.length !== 1 ||
       price?.currency_code !== "USD" || Number(price.value) !== Number(resolvePlan("plus").price) ||
       c.frequency?.interval_unit !== "MONTH" || c.frequency?.interval_count !== 1 ||
       c.sequence !== 1 || c.total_cycles !== 0 || remote.quantity_supported === true ||

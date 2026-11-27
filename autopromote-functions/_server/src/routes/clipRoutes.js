@@ -1440,7 +1440,7 @@ router.post("/auto-generate", authMiddleware, async (req, res) => {
     // Fire-and-forget to Python worker
     const MEDIA_WORKER_URL = process.env.MEDIA_WORKER_URL || "http://127.0.0.1:8000";
     const axios = require("axios");
-    axios
+    await axios
       .post(
         `${MEDIA_WORKER_URL}/auto-generate-clips`,
         {
@@ -1453,7 +1453,12 @@ router.post("/auto-generate", authMiddleware, async (req, res) => {
           target_aspect_ratio: targetAspectRatio,
           template,
         },
-        { timeout: 600000 }
+        await require('../services/unifiedCredits/workerTransport').applicationWorkerConfig(
+          `${MEDIA_WORKER_URL}/auto-generate-clips`, {
+            video_url: videoUrl, job_id:jobId, max_clips:Math.min(Number(maxClips)||5,10),
+            workflow_type:'clip_scanner_v1',caption_style:captionStyle,smart_crop_mode:smartCropMode,
+            target_aspect_ratio:targetAspectRatio,template,
+          }, {timeout:600000})
       )
       .catch(err => {
         console.error(`[ClipRoute] Auto-generate worker call failed: ${err.message}`);

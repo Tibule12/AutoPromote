@@ -97,6 +97,7 @@ function getWorkerErrorDetail(error) {
 }
 
 function shouldTryLocalWorker(error) {
+  if (require('./processingTokens/runtime').enabled()) return false;
   if (!ALLOW_LOCAL_WORKER_FALLBACK) return false;
   if (!LOCAL_MEDIA_WORKER_URL || LOCAL_MEDIA_WORKER_URL === MEDIA_WORKER_URL) return false;
   const status = error.response?.status;
@@ -113,6 +114,7 @@ function shouldTryLocalWorker(error) {
 }
 
 function shouldTryLocalCamCombinerWorker(error) {
+  if (require('./processingTokens/runtime').enabled()) return false;
   if (!ALLOW_LOCAL_WORKER_FALLBACK) return false;
   if (!LOCAL_CAM_COMBINER_WORKER_URL || LOCAL_CAM_COMBINER_WORKER_URL === CAM_COMBINER_WORKER_URL) {
     return false;
@@ -1550,6 +1552,7 @@ class VideoEditingService {
         "/transcribe",
         {
           video_url: videoUrl,
+          job_id: jobId,
           // The worker intentionally validates this endpoint as Dict[str, str].
           // Sending a JSON boolean makes FastAPI reject the whole request with
           // 422 before transcription starts.

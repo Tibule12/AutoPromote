@@ -65,7 +65,8 @@ function selectMediaWorker(endpoint, payload = {}, env = process.env) {
   // Keep the estimate for telemetry; it must not silently send short jobs to CPU.
   const { costRoutingEnabled, boundedBasicRender } = require("./processingTokens/costRouting");
   const economicalCpu = costRoutingEnabled(env) && boundedBasicRender(endpoint, payload, seconds);
-  const useGpu = Boolean(gpu) && !economicalCpu;
+  const boundedDevice = require('./processingTokens/runtime').current()?.cloudRunProfile?.device;
+  const useGpu = boundedDevice ? boundedDevice === 'gpu' : Boolean(gpu) && !economicalCpu;
   return { workerUrl: useGpu ? gpu : cpu, device: useGpu ? "gpu" : "cpu", gpuUrl: gpu,
     reason: economicalCpu ? "qualified_short_cpu" : useGpu ? "gpu_primary" : "gpu_not_configured", estimatedCpuSeconds, sourceSeconds: seconds };
 }
@@ -140,7 +141,7 @@ async function postMediaWorker(endpoint, payload, { timeoutMs = 600000, onRoute,
     route = { ...route, workerUrl: route.gpuUrl, device: "gpu", reason: "cpu_unavailable" };
   const call = async current => {
     await onRoute?.(current);
-    if(needsSelectiveGrading(payload)||needsOriginalSounds(payload)){
+    if(!require('./processingTokens/runtime').current()?.workerTransport && (needsSelectiveGrading(payload)||needsOriginalSounds(payload))){
       const healthTarget=current.workerUrl+'/health';
       const health=await axios.get(healthTarget,await buildWorkerRequestConfig(healthTarget,{timeout:60000}));
       assertSelectiveSupport(payload,health.data);
@@ -170,6 +171,8 @@ async function postMediaWorker(endpoint, payload, { timeoutMs = 600000, onRoute,
 
 async function assertMediaWorkerReady(payload = {}) {
   validateFaceRestorationPlan(payload);
+  if (require('./processingTokens/runtime').current()?.workerTransport)
+    return { ...selectMediaWorker('/render-viral-clip',payload), immutableJobAdmission: true };
   let route = selectMediaWorker("/render-viral-clip", payload);
   const check = async current => {
     const target = current.workerUrl + "/health";

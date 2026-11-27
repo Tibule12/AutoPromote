@@ -121,6 +121,8 @@ async function main() {
       "config/model-runtime/registry.v1.json",
       "config/model-runtime/local-cuda-evaluation.v1.json",
       "config/creative-templates/registry.v1.json",
+      "config/free-first-release/activation.json",
+      "config/free-first-release/worker-profiles.prepared.json",
     ];
     for (const filename of serverContracts)
       await copyRecursive(path.join(repoRoot, filename), path.join(destPkgDir, filename), repoRoot);

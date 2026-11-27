@@ -85,6 +85,8 @@ async function refreshOwnedStudioOutput({ storagePath, userId, jobId, download =
   if (metadata.metadata?.ownerUid !== userId || metadata.metadata?.jobId !== jobId || !Number(metadata.size)) {
     throw new Error("Studio export ownership or content is invalid");
   }
+  const metered = await require('./processingTokens/mediaDelivery').ownedOutputUrl(file,userId,jobId,download);
+  if (metered) return metered;
   const [url] = await file.getSignedUrl({ action: "read", expires: Date.now() + 24 * 3600000,
     ...(download ? { responseDisposition: `attachment; filename="viral_clip_rendered${path.extname(storagePath)}"` } : {}) });
   return url;
@@ -168,7 +170,8 @@ async function persistWorkerBucketOutput({ url, userId, jobId, expectedSha256, l
     if (metadata.metadata?.ownerUid !== userId || metadata.metadata?.jobId !== jobId ||
         metadata.metadata?.sha256 !== expectedSha256 || !Number.isSafeInteger(bytes) || bytes <= 0 || bytes > maximum)
       throw new Error('Existing Studio export identity conflicts with this result');
-    const [signedUrl] = await target.getSignedUrl({action:'read',expires:Date.now()+24*3600000});
+    const metered = await require('./processingTokens/mediaDelivery').ownedOutputUrl(target,userId,jobId);
+    const signedUrl = metered || (await target.getSignedUrl({action:'read',expires:Date.now()+24*3600000}))[0];
     return {url:signedUrl,storagePath,sha256:expectedSha256,bytes,generation:metadata.generation};
   }
   const saved = await existing(); if (saved) return saved;

@@ -1,7 +1,7 @@
-const { db, admin } = require("./firebaseAdmin");
+const { db, admin: _admin } = require("./firebaseAdmin");
 const optimizationService = require("./optimizationService");
-const paypalClient = require("./paypalClient");
-const paypal = require("@paypal/paypal-server-sdk");
+const _paypalClient = require("./paypalClient");
+const _paypal = require("@paypal/paypal-server-sdk");
 const { enqueuePlatformPostTask } = require("./services/promotionTaskQueue");
 
 class PromotionService {
@@ -92,6 +92,8 @@ class PromotionService {
       // Create new promotion schedule in Firestore
       const scheduleRef = db.collection("promotion_schedules").doc();
       const promotionScheduleData = this.buildScheduleRecord(contentId, normalized);
+      if (_scheduleData.qualificationHold === true && /^processing_qualification_/.test(process.env.PROCESSING_LEDGER_NAMESPACE || ''))
+        promotionScheduleData.status = 'qualification_pending';
 
       await require("./services/contentMediaDependency").writeMediaDependency(db, contentId, scheduleRef, promotionScheduleData);
       const newSchedule = { id: scheduleRef.id, ...promotionScheduleData };
@@ -490,16 +492,24 @@ class PromotionService {
    * REAL-TIME SCHEDULER: Process due schedules and dispatch to platforms
    * This bridges the gap between the "Schedules" panel (Db) and "PlatformPoster" (API)
    */
-  async processDueSchedules({ background = false } = {}) {
+  async processDueSchedules({ background = false, scheduleId: exactScheduleId, qualificationHold = false } = {}) {
+    if (qualificationHold && (!exactScheduleId || !/^processing_qualification_/.test(process.env.PROCESSING_LEDGER_NAMESPACE || '')))
+      throw Error('Exact funded qualification schedule required');
     if (background && !await require("./services/backgroundWorkService").hasSchedules()) return 0;
     try {
       // 0. Auto-recover stuck locks from previous crashes
-      await this.recoverStaleLocks();
+      if (!exactScheduleId) await this.recoverStaleLocks();
 
       const now = new Date().toISOString();
       // Fetch pending jobs without a startTime range query so stale legacy records cannot block
       // fresh due schedules and local/dev does not require extra Firestore composite indexes.
-      const pendingSnapshot = await db
+      let pendingSnapshot;
+      if (exactScheduleId) {
+        if (!/^[A-Za-z0-9_-]{1,160}$/.test(exactScheduleId)) throw Error('Invalid schedule identity');
+        const doc = await db.collection('promotion_schedules').doc(exactScheduleId).get();
+        pendingSnapshot = {docs:doc.exists&&doc.data().isActive===true&&
+          (doc.data().status==='pending'||(qualificationHold&&doc.data().status==='qualification_pending'))?[doc]:[]};
+      } else pendingSnapshot = await db
         .collection("promotion_schedules")
         .where("isActive", "==", true)
         .where("status", "==", "pending")
@@ -526,7 +536,7 @@ class PromotionService {
 
           // Recheck eligibility under the lock: a user may have paused or
           // rescheduled this destination after the pending query ran.
-          if (data.status !== "pending" || data.isActive !== true) return null;
+          if ((data.status !== "pending" && !(qualificationHold && data.status === 'qualification_pending')) || data.isActive !== true) return null;
 
           // Skip if it's not due yet (possible due to race/concurrency)
           if (data.startTime && data.startTime > now) return null;
@@ -556,7 +566,7 @@ class PromotionService {
           ).trim();
           const payload = {
             ...platformSettings, // platform options like pageId, commentary, title, media preferences
-            ...(["telegram", "discord"].includes(schedule.platform) ? { scheduleId: schedule.id } : {}),
+            scheduleId: schedule.id,
             ...(platformText ? { message: platformText, text: platformText } : {}),
             // Hashtags might be in optimization data
             hashtagString: schedule.viral_optimization?.hashtags?.join(" ") || "",
@@ -569,6 +579,7 @@ class PromotionService {
             payload: payload,
             reason: "scheduled_event",
             skipIfDuplicate: true,
+            holdForQualification: qualificationHold,
           });
 
           // 3. Handle Result
@@ -704,7 +715,7 @@ class PromotionService {
       // Enqueue real platform posting task
       try {
         const { enqueuePlatformPostTask } = require("./services/promotionTaskQueue");
-        const result = await enqueuePlatformPostTask({
+        const _result = await enqueuePlatformPostTask({
           contentId: schedule.contentId,
           uid: schedule.user_id || schedule.uid || content.userId || content.user_id,
           platform: schedule.platform,

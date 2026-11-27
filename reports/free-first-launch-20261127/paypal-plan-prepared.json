@@ -1,0 +1,14 @@
+{
+  "mode": "live",
+  "productId": "PROD-05E27267HX604950P",
+  "planId": "P-77029123VG7119804NME2GMY",
+  "status": "ACTIVE",
+  "priceUsd": 4.99,
+  "setupFeeUsd": 0,
+  "period": "MONTH",
+  "trial": false,
+  "quantitySupported": false,
+  "autoBillOutstanding": false,
+  "subscriptionsCreated": 0,
+  "buyerCharges": 0
+}

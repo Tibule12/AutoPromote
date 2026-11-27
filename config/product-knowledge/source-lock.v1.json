@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Preserve upstream 0e959fe5b clip/Director changes with renewable launch accounting; exact source review after merge, not paid worker or readiness qualification.",
-  "reviewed_at": "2026-11-27T14:10:36.403Z",
+  "reason": "Preserve documented qualification scope before integrating current released main",
+  "reviewed_at": "2026-11-27T17:23:19.647Z",
   "catalog_sha256": "eecc391b0e634e380f0b393842ba8a83bc3f8c12b6cbd72f46e427a2a634e270",
   "sources": [
     {
@@ -691,7 +691,7 @@
     },
     {
       "path": "src/promotionService.js",
-      "sha256": "b9bdb1621e970c5d0967ff41b84192ae4cb854aba8a134184912dceb4ea37dde"
+      "sha256": "5c314f8a0b324bba1493ced646a890ce39ac31630322b91a421eb69b51fad847"
     },
     {
       "path": "src/routes/platformRoutes.js",
@@ -707,7 +707,7 @@
     },
     {
       "path": "src/server.js",
-      "sha256": "6ad3a26996b3b6e4e935dd7047fab1610a1507fa4a3d6fa8b3cbc76e8a3d3e67"
+      "sha256": "a337fc26f787d9658067b1a71ace16f52905f56ec0eee8ee1caa82367deef5d0"
     },
     {
       "path": "src/services/__tests__/publishedVideoRetention.test.js",
@@ -723,7 +723,7 @@
     },
     {
       "path": "src/services/billingService.js",
-      "sha256": "9c9d3881f2a8571a347e327587fec39e2bad3fbae282aaf0a540046ddc7e62e9"
+      "sha256": "670973ba5e11ced5052cc0d4d8205328c8c2b6036f8abe0c501899cd99ec5788"
     },
     {
       "path": "src/services/clipSelectionSettings.js",
@@ -751,11 +751,11 @@
     },
     {
       "path": "src/services/platformPoster.js",
-      "sha256": "e24769694271e5233d9c932bf738fbf0d8d4864836d904dc98ba948c34e6bf61"
+      "sha256": "77317e213337819a49d51b953c6fef571aaee063049a880af83e3fe5e69485b8"
     },
     {
       "path": "src/services/promotionTaskQueue.js",
-      "sha256": "b53445edda1e2d0f1cd0b537e9f83eb043e4ae608e79483dc36bea368f57589d"
+      "sha256": "8e25e923c45744949d5bcd1359db5ca2ec5c9c7703e48353acb87f7949ce345e"
     },
     {
       "path": "src/services/publishedVideoRetention.js",
@@ -819,11 +819,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "0de96dfa504195b27a338bc1846982e9137f7cc27782c6af97467409910c98d7"
+      "sha256": "bc26d71f58c161c7fb867311fff527b16e3428973e4d9a4ff485068639f02f56"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "633df55d911ed6f58bfb5729c3e8f8b3191c5cce1a015f6415f4ed15a3d6fadf"
+      "sha256": "e50465598b8304b24fb08cfbb0ca992e245c08973ad6aa0450d6976070178998"
     },
     {
       "path": "worker.js",

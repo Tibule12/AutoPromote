@@ -5,7 +5,7 @@ const { db, admin } = require("../firebaseAdmin");
 const { recordTaskCompletion, recordRateLimitEvent } = require("./aggregationService");
 const { getCooldown, noteRateLimit } = require("./rateLimitTracker");
 const notificationEngine = require("./notificationEngine"); // User Notification Integration
-const billingService = require("./billingService"); // Usage Tracking
+const _billingService = require("./billingService"); // Usage Tracking
 // Defer requiring youtubeService and mediaTransform until function call time to avoid circular import issues
 const crypto = require("crypto");
 const { classifyPublishingError } = require("./publishingTaskErrors");
@@ -91,8 +91,9 @@ function getTaskTimestampMs(data, fields = ["processingStartedAt", "updatedAt"])
   return 0;
 }
 
-function isTaskReadyForProcessing(data, nowMs = Date.now()) {
+function isTaskReadyForProcessing(data, nowMs = Date.now(), qualificationClaim = false) {
   if (!data) return false;
+  if (qualificationClaim && data.status === 'qualification_held' && data.qualificationHold === true) return true;
   if (data.status === "queued") {
     const nextAt = data.nextAttemptAt ? Date.parse(data.nextAttemptAt) : nowMs;
     return !Number.isFinite(nextAt) || nextAt <= nowMs;
@@ -160,14 +161,20 @@ async function replaceSignedTask(ref, current, patch) {
   return next;
 }
 
-async function claimReadyTask(ref, taskId) {
+async function claimReadyTask(ref, taskId, qualificationClaim = false) {
   // A query is only a candidate list. Recheck and claim atomically so multiple
   // instances (or an expired global worker lease) cannot publish the same task.
   return db.runTransaction(async transaction => {
     const snapshot = await transaction.get(ref);
     if (!snapshot.exists) return null;
     const current = snapshot.data();
-    if (!isTaskReadyForProcessing(current)) return null;
+    if (qualificationClaim) {
+      if (!/^processing_qualification_/.test(process.env.PROCESSING_LEDGER_NAMESPACE || '')) return null;
+      const allowed = (await transaction.get(db.collection('processing_qualification_publications').doc(taskId))).data();
+      if (!allowed || allowed.userId !== current.uid || allowed.contentId !== current.contentId ||
+          allowed.platform !== 'youtube' || current.platform !== 'youtube' || current.payload?.privacy !== 'private') return null;
+    }
+    if (!isTaskReadyForProcessing(current, Date.now(), qualificationClaim)) return null;
     if (!current._testStub) {
       const { verifySignature } = require("../utils/docSigner");
       if (!verifySignature(current)) return null;
@@ -235,6 +242,35 @@ async function notifyPublishingQuotaBlocked({ uid, platform, contentId, quota, u
   }
 }
 
+async function isLegacyFundedTask(task, taskId) {
+  const cutover = Date.parse(process.env.PROCESSING_LAUNCH_CUTOVER || '');
+  if (!Number.isFinite(cutover) || !require('../utils/docSigner').verifySignature(task)) return false;
+  const digest = require('./unifiedCredits/workerVerification').digest;
+  const ids = [digest(['task',taskId]), ...(task.payload?.scheduleId ? [digest(['schedule',task.payload.scheduleId])] : [])];
+  for (const id of ids) {
+    const saved = (await db.collection('processing_legacy_publications').doc(id).get()).data();
+    if (saved?.userId === task.uid && saved.contentId === task.contentId &&
+        saved.platform === (task.platform || 'youtube') && saved.cutoverAt === process.env.PROCESSING_LAUNCH_CUTOVER)
+      return true;
+  }
+  return false;
+}
+async function deferProcessingBudget(ref, task, error) {
+  if (!require('./processingTokens/runtime').enabled() || ![
+    'CONCURRENT_JOB_LIMIT','GLOBAL_PROCESSING_BUDGET','FREE_PROCESSING_BUDGET',
+    'PROCESSING_ALLOWANCE_REACHED','ROLLING_PROCESSING_BUDGET','CLOUD_PROCESSING_PAUSED'
+  ].includes(error.code)) return null;
+  let until = Date.now() + (error.code === 'CONCURRENT_JOB_LIMIT' ? 60000 : 86400000);
+  if (['PROCESSING_ALLOWANCE_REACHED','ROLLING_PROCESSING_BUDGET'].includes(error.code)) {
+    const status = await require('./processingTokens/runtime').service().status(task.uid);
+    until = Math.max(Date.now() + 60000, Date.parse(error.code === 'ROLLING_PROCESSING_BUDGET'
+      ? status.rollingAvailableAt || status.nextResetAt : status.nextResetAt));
+  }
+  await replaceSignedTask(ref, task, { status: 'queued', nextAttemptAt: new Date(until).toISOString(),
+    processingDeferred: error.code, updatedAt: new Date().toISOString() });
+  return { deferredUntil: until, reason: error.code };
+}
+
 async function enqueueYouTubeUploadTask({
   contentId,
   uid,
@@ -298,13 +334,16 @@ async function enqueueYouTubeUploadTask({
   return { id: ref.id, ...task };
 }
 
-async function processNextYouTubeTask({ background = false } = {}) {
-  require("./processingTokens/runtime").assertDispatch();
+async function processNextYouTubeTask({ background = false, taskId: exactTaskId } = {}) {
   if (background && !await require("./backgroundWorkService").hasTasks("youtube_upload")) return null;
   // Fetch one queued task (simple FIFO by createdAt)
   let snapshot;
   try {
-    snapshot = await db
+    if (exactTaskId) {
+      if (!/^[A-Za-z0-9_-]{1,160}$/.test(exactTaskId)) throw Error('Invalid task identity');
+      const doc = await db.collection('promotion_tasks').doc(exactTaskId).get();
+      snapshot = { empty: !doc.exists, docs: doc.exists && doc.data().type === 'youtube_upload' ? [doc] : [] };
+    } else snapshot = await db
       .collection("promotion_tasks")
       .where("type", "==", "youtube_upload")
       .where("status", "in", ["queued", "processing"])
@@ -365,7 +404,9 @@ async function processNextYouTubeTask({ background = false } = {}) {
 
   try {
     const { uploadVideo } = require("./youtubeService");
-    const outcome = await uploadVideo({
+    const outcome = await require('./processingTokens/publication').withPublication({ uid: task.uid,
+      taskId: task.id, contentId: task.contentId, platform: 'youtube', payload: { title: task.title, fileUrl: task.fileUrl },
+      legacySignedTask: await isLegacyFundedTask(taskData, task.id) }, () => uploadVideo({
       uid: task.uid,
       title: task.title,
       description: task.description,
@@ -373,7 +414,7 @@ async function processNextYouTubeTask({ background = false } = {}) {
       mimeType: "video/mp4",
       contentId: task.contentId,
       shortsMode: task.shortsMode,
-    });
+    }));
 
     try {
       const { recordPlatformPost } = require("./platformPostsService");
@@ -413,6 +454,8 @@ async function processNextYouTubeTask({ background = false } = {}) {
     await recordTaskCompletion("youtube_upload", true);
     return { taskId: task.id, outcome };
   } catch (err) {
+    const deferred = await deferProcessingBudget(taskRef, taskData, err);
+    if (deferred) return { taskId: task.id, ...deferred };
     const attempts = (task.attempts || 0) + 1;
     const classification = classifyError(err);
     const retryable = attempts < MAX_ATTEMPTS && canRetry(classification);
@@ -472,6 +515,7 @@ async function enqueuePlatformPostTask({
   payload = {},
   skipIfDuplicate = true,
   forceRepost = false,
+  holdForQualification = false,
 }) {
   require("./unifiedCredits/application").assertApplicationDatabase(db);
   console.log("[enqueue] called with", { contentId, uid, platform, reason, payload });
@@ -924,7 +968,8 @@ async function enqueuePlatformPostTask({
   const ref = db.collection("promotion_tasks").doc();
   const baseTask = {
     type: "platform_post",
-    status: "queued",
+    status: holdForQualification ? 'qualification_held' : 'queued',
+    ...(holdForQualification ? { qualificationHold: true } : {}),
     platform,
     contentId,
     uid,
@@ -986,13 +1031,17 @@ async function enqueueMediaTransform({ contentId, uid, meta, sourceUrl }) {
   return task;
 }
 
-async function processNextPlatformTask({ background = false } = {}) {
-  require("./processingTokens/runtime").assertDispatch();
+async function processNextPlatformTask({ background = false, taskId: exactTaskId, qualificationClaim = false } = {}) {
+  if (qualificationClaim && !exactTaskId) throw Error('Exact qualification task required');
   if (background && !await require("./backgroundWorkService").hasTasks("platform_post")) return null;
   // Fetch small batch of queued tasks then pick highest priority dynamically (velocity-aware)
   let snapshot;
   try {
-    snapshot = await db
+    if (exactTaskId) {
+      if (!/^[A-Za-z0-9_-]{1,160}$/.test(exactTaskId)) throw Error('Invalid task identity');
+      const doc = await db.collection('promotion_tasks').doc(exactTaskId).get();
+      snapshot = { empty: !doc.exists, docs: doc.exists && doc.data().type === 'platform_post' ? [doc] : [] };
+    } else snapshot = await db
       .collection("promotion_tasks")
       .where("type", "==", "platform_post")
       .where("status", "in", ["queued", "processing"])
@@ -1017,7 +1066,7 @@ async function processNextPlatformTask({ background = false } = {}) {
   let bestScore = -Infinity;
   for (const d of snapshot.docs) {
     const data = d.data();
-    if (!isTaskReadyForProcessing(data, now)) continue; // not ready or fresh processing
+    if (!isTaskReadyForProcessing(data, now, qualificationClaim)) continue; // not ready or fresh processing
     // Dynamic priority heuristic: base 0 + youtube velocity if present on content + random tie breaker
     let priority = 0;
     try {
@@ -1094,7 +1143,7 @@ async function processNextPlatformTask({ background = false } = {}) {
   } catch (e) {
     console.log("[process] signature verification error", e && e.message);
   }
-  taskData = await claimReadyTask(selectedDoc.ref, task.id);
+  taskData = await claimReadyTask(selectedDoc.ref, task.id, qualificationClaim);
   if (!taskData) return null;
   task = { id: selectedDoc.id, ...taskData };
   let lockId = null; // promote to function-scope so catch handlers can access it
@@ -1593,7 +1642,9 @@ async function processNextPlatformTask({ background = false } = {}) {
     } catch (e) {
       /* non-fatal */
     }
-    const simulatedResult = await dispatchPlatformPost({
+    const simulatedResult = await require('./processingTokens/publication').withPublication({ uid: task.uid,
+      taskId: task.id, contentId: task.contentId, platform: task.platform, payload,
+      legacySignedTask: await isLegacyFundedTask(taskData, task.id) }, () => dispatchPlatformPost({
       platform: task.platform,
       contentId: task.contentId,
       payload,
@@ -1607,7 +1658,7 @@ async function processNextPlatformTask({ background = false } = {}) {
           updatedAt: new Date().toISOString(),
         });
       },
-    });
+    }));
     if (!simulatedResult || simulatedResult.success === false) {
       const err = new Error(
         simulatedResult?.error || `Platform post failed for ${task.platform || "unknown"}`
@@ -1749,6 +1800,13 @@ async function processNextPlatformTask({ background = false } = {}) {
     } catch (_) {}
     return { taskId: task.id, outcome: simulatedResult };
   } catch (err) {
+    const deferred = await deferProcessingBudget(selectedDoc.ref, taskData, err);
+    if (deferred) {
+      if (lockId) await require('./platformPostsService').finalizePlatformPostById(lockId, {
+        success: false, outcome: { success: false, error: err.code, notAttempted: true },
+        uid: task.uid, taskId: task.id, payload: task.payload, reason: task.reason });
+      return { taskId: task.id, ...deferred };
+    }
     const attempts = (task.attempts || 0) + 1;
     const classification = classifyError(err);
     if (classification === "rate_limit") {

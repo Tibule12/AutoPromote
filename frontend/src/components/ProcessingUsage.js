@@ -35,7 +35,7 @@ export default function ProcessingUsage({ usage, purchasedCredits, promotionalCr
         {storage.measured
           ? `${(storage.usedBytes / 1073741824).toFixed(2)} GB used`
           : "Usage measurement pending"}{" "}
-        · {(storage.limitBytes / 1073741824).toFixed(0)} GB proposed capacity
+        · {(storage.limitBytes / 1073741824).toFixed(0)} GB {usage.provisional ? 'proposed capacity' : 'capacity'}
       </p>
       {usage.remaining === 0 && (
         <p role="status">

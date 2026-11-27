@@ -150,6 +150,15 @@ async function safeFetch(urlString, fetchFn, opts = {}) {
   if (!v.ok) throw new Error("ssrf_blocked:" + v.reason);
 
   const fetchOptions = Object.assign({}, opts.fetchOptions || {});
+  const publication = require('../services/processingTokens/runtime').current()?.publication;
+  if (publication) {
+    publication.requests++;
+    if (publication.requests > 32) throw Object.assign(new Error('Publication request limit exceeded'),{code:'PUBLICATION_REQUEST_LIMIT'});
+    fetchOptions.signal = fetchOptions.signal
+      ? AbortSignal.any([fetchOptions.signal, publication.signal]) : publication.signal;
+    if (!['GET','HEAD'].includes(String(fetchOptions.method || 'GET').toUpperCase()) &&
+        !/oauth|\/token(?:\?|$|\/)/i.test(urlString)) publication.dispatched = true;
+  }
   if (!("redirect" in fetchOptions)) fetchOptions.redirect = "manual";
 
   const res = await fetchFn(urlString, fetchOptions);

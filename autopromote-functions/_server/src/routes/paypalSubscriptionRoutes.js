@@ -63,6 +63,7 @@ function buildPublicPlan(plan) {
 
   return {
     ...plan,
+    provisional: process.env.FREE_FIRST_USAGE_ENABLED !== 'true',
     features,
     processing: {
       ...plan.processing,

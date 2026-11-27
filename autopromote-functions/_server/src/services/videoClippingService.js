@@ -147,6 +147,12 @@ const buildFindViralQualitySummary = (rawSuggestions, normalizedSuggestions) => 
 });
 
 class VideoClippingService {
+  normalizeFundedAnalysis(result) {
+    const raw=result?.clipSuggestions||result?.scenes||[];
+    const suggestions=prioritizeAndNormalizeSuggestions(raw,Number(result?.durationSeconds||result?.duration||0));
+    return {clipSuggestions:suggestions,qualitySummary:buildFindViralQualitySummary(raw,suggestions),
+      rawCandidatesDetected:raw.length,scenesDetected:suggestions.length,status:"completed",progress:100};
+  }
   /**
    * Start async analysis job
    * @param {string} videoUrl
@@ -208,7 +214,8 @@ class VideoClippingService {
       // Check worker health
       try {
         // Quick check if worker is alive
-        await axios.get(`${MEDIA_WORKER_URL}/status`, { timeout: 2000 });
+        if (!require('./processingTokens/runtime').enabled())
+          await axios.get(`${MEDIA_WORKER_URL}/status`, { timeout: 2000 });
       } catch (e) {
         console.warn("Worker might be sleeping, waking up...");
       }
@@ -219,6 +226,7 @@ class VideoClippingService {
         `${MEDIA_WORKER_URL}/analyze-clips`,
         {
           video_url: videoUrl,
+          job_id: jobId,
           target_aspect_ratio: "9:16",
         },
         {
@@ -276,7 +284,8 @@ class VideoClippingService {
       // No, that's dangerous if multiple users. But for now this is single-tenant local worker.
       // Let's just check status.
       try {
-        const status = await axios.get(`${MEDIA_WORKER_URL}/status`, { timeout: 2000 });
+        const status = require('./processingTokens/runtime').enabled() ? {data:{status:'bounded_jobs'}} :
+          await axios.get(`${MEDIA_WORKER_URL}/status`, { timeout: 2000 });
         if (status.data.status === "busy") {
           console.warn("Worker is busy! Attempting to force reset for user request...");
           await postApplicationWorker(`${MEDIA_WORKER_URL}/reset`);
@@ -426,15 +435,24 @@ class VideoClippingService {
       }
 
       const { output_path } = response.data;
-      if (!output_path || !fs.existsSync(output_path)) {
-        throw new Error("Render failed: Output file missing");
-      }
-
-      // 4. Upload to Firebase Storage
       const bucket = getStorage();
-      const destination = `generated_clips/${userId}/${clipId}_${Date.now()}.mp4`;
-
-      await bucket.upload(output_path, {
+      let destination = response.data.output_storage_path;
+      let publicUrl;
+      const renewable = require('./processingTokens/runtime').current(userId);
+      if (renewable?.workerTransport) {
+        // The bounded worker already delivered the owned private object. Its
+        // filesystem is not shared with Render, and re-uploading it is wasteful.
+        const nativeId = response.data.job_id || response.data.jobId;
+        if (!destination?.startsWith('processed/') || !nativeId)
+          throw new Error('Render failed: owned output receipt missing');
+        publicUrl = await require('./processingTokens/mediaDelivery')
+          .ownedOutputUrl(bucket.file(destination),userId,nativeId);
+        if (!publicUrl) throw new Error('Render failed: output binding missing');
+      } else {
+        if (!output_path || !fs.existsSync(output_path))
+          throw new Error("Render failed: Output file missing");
+        destination = `generated_clips/${userId}/${clipId}_${Date.now()}.mp4`;
+        await bucket.upload(output_path, {
         destination: destination,
         metadata: {
           contentType: "video/mp4",
@@ -444,15 +462,16 @@ class VideoClippingService {
             type: isMontage ? "montage" : "clip",
           },
         },
-      });
+        });
 
       // Get Public URL (valid for long time or make public)
       const fileRef = bucket.file(destination);
       const localCreditContext = require("./unifiedCredits/application").getApplicationContext(userId);
       if (!localCreditContext) await fileRef.makePublic();
-      const publicUrl = localCreditContext
+        publicUrl = localCreditContext
         ? (await fileRef.getSignedUrl({ action: "read", expires: Date.now() + 300000 }))[0]
         : `https://storage.googleapis.com/${bucket.name}/${destination}`;
+      }
 
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + GENERATED_CLIP_RETENTION_DAYS);
@@ -505,7 +524,7 @@ class VideoClippingService {
 
       // 6. Cleanup Local File
       try {
-        fs.unlinkSync(output_path);
+        if (!renewable?.workerTransport) fs.unlinkSync(output_path);
       } catch (e) {
         console.warn("Failed to delete temp file", e);
       }

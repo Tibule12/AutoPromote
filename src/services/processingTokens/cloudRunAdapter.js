@@ -7,12 +7,13 @@ const {fail,integer} = require('../unifiedCredits/policy');
 const runtime = require('./runtime');
 
 function validateProfile(p) {
-  if (p?.operation !== 'multicam.render' || !/^[a-z0-9_-]{1,80}$/.test(p.id || '') ||
+  if (!['multicam.render','studio.render','clips.analyze','audio.transcribe','audio.extract','audio.sync'].includes(p?.operation) || !/^[a-z0-9_-]{1,80}$/.test(p.id || '') ||
       !/^projects\/[a-z0-9-]+\/locations\/[a-z0-9-]+\/jobs\/[a-z0-9-]+$/.test(p.job || '') ||
       !/@sha256:[a-f0-9]{64}$/.test(p.image || '') || !p.serviceAccount ||
       !['cpu','gpu'].includes(p.device) || !/^[a-z0-9_-]{1,100}$/.test(p.qualificationId || ''))
     fail('INVALID_CLOUD_RUN_PROFILE',503);
-  if(p.requestScope!=='manual-two-camera-60s')fail('WORKFLOW_SCOPE_REQUIRED',503);
+  if(!['manual-two-camera-60s','two-camera-60s','existing-native-v1'].includes(p.requestScope))fail('WORKFLOW_SCOPE_REQUIRED',503);
+  if(p.requestScope==='existing-native-v1')integer(p.tokens,'TOKEN_QUOTE',1);
   if(p.device==='gpu'&&(!Number.isSafeInteger(p.gpuCount)||p.gpuCount<1||!p.accelerator))
     fail('GPU_COST_SHAPE_REQUIRED',503);
   for (const name of ['maxMicros','maxSeconds','cpuMilli','memoryBytes','inputMaxBytes','outputMaxBytes','networkMaxBytes','storageMaxByteHours','rateMicrosPerSecond','fixedCostMicros'])
@@ -33,6 +34,46 @@ function assertJob(job,p) {
       (p.device==='gpu'&&t.nodeSelector?.accelerator!==p.accelerator) ||
       !Number.isFinite(Number(String(t.timeout).replace(/s$/,''))) || Number(String(t.timeout).replace(/s$/,''))>p.maxSeconds)
     fail('CLOUD_RUN_PROFILE_DRIFT',503);
+  if(p.requestScope==='existing-native-v1' && !(c.env||[]).some(v=>v.name==='PROCESSING_MAX_SECONDS'&&v.value===String(p.maxSeconds)))
+    fail('CLOUD_RUN_PROFILE_DRIFT',503);
+  if(p.runnerSha256) {
+    const env=Object.fromEntries((c.env||[]).map(v=>[v.name,v.value]));
+    if(c.command?.join()!=='python3'||c.args?.length!==2||c.args[0]!=='-c'||c.args[1]!==p.runnerBootstrap||
+       env.PROCESSING_RUNNER_SHA256!==p.runnerSha256||
+       crypto.createHash('sha256').update(Buffer.from(env.PROCESSING_RUNNER_B64||'','base64')).digest('hex')!==p.runnerSha256)
+      fail('CLOUD_RUN_PROFILE_DRIFT',503);
+  }
+}
+const verifiedImageChildren = new Set();
+async function assertExecutionTemplate(execution, p, request) {
+  const image = execution.template?.containers?.[0]?.image;
+  let template = execution.template;
+  if (image !== p.image) {
+    // Cloud Run resolves a pinned multi-platform index to its immutable Linux
+    // image. Verify that exact child against the hashed registry manifest;
+    // accepting an arbitrary different digest would weaken image admission.
+    const key = p.image + '>' + image;
+    if (!verifiedImageChildren.has(key)) {
+      const match = /^(us-docker\.pkg\.dev)\/(.+)@sha256:([a-f0-9]{64})$/.exec(p.image);
+      if (!match || !image?.startsWith(match[1] + '/' + match[2] + '@sha256:'))
+        fail('CLOUD_RUN_PROFILE_DRIFT',503);
+      const response = await request({method:'GET', retry:false, responseType:'arraybuffer',
+        url:`https://${match[1]}/v2/${match[2]}/manifests/sha256:${match[3]}`,
+        headers:{Accept:'application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.list.v2+json'}});
+      const bytes = Buffer.from(response.data);
+      if (crypto.createHash('sha256').update(bytes).digest('hex') !== match[3])
+        fail('CLOUD_RUN_PROFILE_DRIFT',503);
+      const manifest = JSON.parse(bytes.toString());
+      if (!manifest.manifests?.some(child => child.digest === image.split('@')[1] &&
+          child.platform?.os === 'linux' && child.platform?.architecture === 'amd64'))
+        fail('CLOUD_RUN_PROFILE_DRIFT',503);
+      if (verifiedImageChildren.size > 100) verifiedImageChildren.clear();
+      verifiedImageChildren.add(key);
+    }
+    template = {...template, containers:[{...template.containers[0], image:p.image}]};
+  }
+  assertJob({name:p.job,etag:'execution',template:{taskCount:execution.taskCount,
+    parallelism:1,template}},p);
 }
 function createCloudRunAdapter({db,profile,request,inspectOutput,now=Date.now}) {
   const p=validateProfile(profile),bindings=db.collection('processing_worker_bindings');
@@ -58,7 +99,7 @@ function createCloudRunAdapter({db,profile,request,inspectOutput,now=Date.now}) 
     }
     const c=execution.template?.containers?.[0],env=Object.fromEntries((c?.env||[]).map(v=>[v.name,v.value]));
     assertJob({name:p.job,etag:'authoritative-execution',template:{taskCount:execution.taskCount,parallelism:1,template:execution.template}},p);
-    if(!execution.name?.startsWith(p.job+'/executions/')||execution.job!==p.job||!execution.uid||
+    if(!execution.name?.startsWith(p.job+'/executions/')||![p.job,p.job.split('/').pop()].includes(execution.job)||!execution.uid||
         execution.taskCount!==1||execution.template.maxRetries!==0||c.image!==p.image||
         execution.template.serviceAccount!==p.serviceAccount||env.PROCESSING_BINDING_ID!==binding.id||
         env.PROCESSING_DISPATCH_NONCE!==binding.nonce)fail('WORKER_BINDING_CONFLICT',403);
@@ -143,4 +184,4 @@ function createCloudRunAdapter({db,profile,request,inspectOutput,now=Date.now}) 
     },
   };
 }
-module.exports={createCloudRunAdapter,validateProfile,assertJob};
+module.exports={createCloudRunAdapter,validateProfile,assertJob,assertExecutionTemplate};

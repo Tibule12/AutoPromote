@@ -11,7 +11,7 @@ const OPERATIONS = Object.freeze({
   "audio.extract": { maxMicros: 10000, maxSeconds: 30, resource: "cpu", retries: 0 },
   "audio.sync": { maxMicros: 20000, maxSeconds: 60, resource: "cpu", retries: 0 },
   "captions.generate": { maxMicros: 10000, maxSeconds: 30, resource: "external-api", retries: 0 },
-  "publisher.publish": { maxMicros: 10000, maxSeconds: 60, resource: "network", retries: 0 },
+  "publisher.publish": { tokens: 2, maxMicros: 70000, maxSeconds: 120, resource: "network", retries: 0 },
   "scheduler.dispatch": { maxMicros: 2000, maxSeconds: 10, resource: "cpu", retries: 0 },
   // A 60s native title edit includes source/crop/composite passes. The measured
   // 120s attempt timed out; 240s still fits this unchanged reference reservation

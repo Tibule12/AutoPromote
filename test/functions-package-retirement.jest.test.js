@@ -21,7 +21,8 @@ test("Functions packaging drops obsolete generated routes without touching canon
     fs.writeFileSync(path.join(functions, "user-data-preserved.txt"), "keep");
     const contracts = ["contracts/model-capabilities-v1.json", "contracts/creative-templates-v1.json",
       "config/model-runtime/registry.v1.json", "config/model-runtime/local-cuda-evaluation.v1.json",
-      "config/creative-templates/registry.v1.json"];
+      "config/creative-templates/registry.v1.json", "config/free-first-release/activation.json",
+      "config/free-first-release/worker-profiles.prepared.json"];
     for (const filename of contracts) {
       fs.mkdirSync(path.dirname(path.join(scratch, filename)), { recursive: true });
       fs.copyFileSync(path.resolve(filename), path.join(scratch, filename));

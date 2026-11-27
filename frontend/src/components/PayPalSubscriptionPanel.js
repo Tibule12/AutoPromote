@@ -251,15 +251,16 @@ export default function PayPalSubscriptionPanel({
                   disabled={busy || !user || !plan.purchaseEnabled}
                   onClick={() => subscribe(plan)}
                 >
-                  {plan.purchaseEnabled ? "Choose Plus" : "Proposed · financial validation pending"}
+                  {plan.purchaseEnabled ? "Choose Plus" : plan.purchaseUnavailableReason === 'FUNDED_CAPACITY_UNAVAILABLE'
+                    ? 'Plus capacity is currently full' : plan.provisional ? "Proposed · financial validation pending" : 'Checkout verification in progress'}
                 </button>
               )}
             </article>
           ))}
       </div>
       <p>
-        USD subscription pricing and numerical allowances are provisional until financial
-        validation. Publishing remains subject to each platform’s requirements.
+        {plans.some(plan=>plan.provisional) && 'USD subscription pricing and numerical allowances are provisional until financial validation. '}
+        Publishing remains subject to each platform’s requirements.
       </p>
       {user && (
         <ProcessingUsage

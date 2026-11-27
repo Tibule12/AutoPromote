@@ -27208,33 +27208,14 @@
   },
   "freeFirstFundedLaunch20261127": {
     "date": "2026-11-27",
-    "scope": "Owner-approved funded Free/Plus launch; local accounting/security implementation only.",
+    "scope": "27 November funded Free/Plus continuation: the single live USD4.99 plan is ACTIVE with verified terms and existing webhook events; no buyer charge or subscription deployment has occurred. A fresh ordinary public account passes signup and real email verification. Production ASR, native60s effects/title export and184s Finder plus33.9s clip export pass with owned hash/generation and full video/audio decode. Each paired workflow consumes50 of100 Free tokens. Caption review flags remain; burned captions and independent physical cameras are not qualified. Native accounting now wraps existing CPU/GPU Jobs and Publisher/Scheduler, with one execution, immutable-image and no-retry checks; remaining funded camera/GPU/API/publication/termination and actual public usage/checkout qualification are open. Local101-case financial/security regression,36 existing integration cases and real HTTP Range/video/audio transport pass. Preserve17/9/1/2/0/0, typography13/16, S02/S04/S03, Education, wallets and old publication holds. See reports/free-first-launch-20261127/README.md. Do not enable incomplete integrations.",
     "evidenceRefs": [
-      "reports/free-first-launch-20261127/approval-and-status.json",
-      "reports/free-first-release-20261127/STAGED-RELEASE.md",
-      "reports/free-first-release-20261127/launch-accounting-local.json"
-    ],
-    "localTests": "92 Free/Plus regression, 35 focused prior CI, 17 knowledge and 7 Education preservation cases pass. Provider transports are fixtures; no paid qualification.",
-    "cashAndTokensIndependent": true,
-    "scheduledHoldsDoNotOccupyExecutionSlots": true,
-    "duplicateCheckoutGuard": true,
-    "refundBeforeActivationGuard": true,
-    "productionQualificationRuns": 0,
-    "paidCheckoutExecuted": false,
-    "sandboxRequired": false,
-    "privateYoutubeApprovalReceived": true,
-    "deferredFromLaunch": [
-      "registry cleanup",
-      "broad infrastructure audit",
-      "unrelated Studio development"
-    ],
-    "remaining": [
-      "Complete native CPU/GPU worker and background publishing/scheduling ledger integration.",
-      "Establish resource/network/storage/expenditure bounds and run approved Q1–Q7.",
-      "Read back exact live PayPal terms, perform one authorized checkout and verify its paid grant.",
-      "Deploy matching backend/client/configuration and verify public ordinary Free and Plus flows."
+      "reports/free-first-launch-20261127/README.md",
+      "reports/free-first-launch-20261127/approval-and-status.json"
     ],
     "readinessPromotion": false,
-    "nextTaskId": "S02"
+    "nextTaskId": "S02",
+    "buyerCharged": false,
+    "subscriptionDeployed": false
   }
 }

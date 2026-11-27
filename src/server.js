@@ -1,4 +1,5 @@
 require("dotenv").config(); // Load environment variables from .env file
+require('./services/processingTokens/releaseConfig').applyReleaseConfig();
 const { requestLogPath } = require("./utils/logSanitizer");
 const backgroundActivity = require("./services/backgroundActivityService");
 const backgroundWork = require("./services/backgroundWorkService");
@@ -1341,6 +1342,7 @@ try {
       adapters: require("./services/processingTokens/runtime").adapters,
     })
   );
+  app.use("/api/processing-media", require("./services/processingTokens/mediaDelivery").router());
   app.use("/api/auth", authRoutes);
   if (codeqlLimiter && codeqlLimiter.auth) {
     app.use("/api/auth", codeqlLimiter.auth);

@@ -6,7 +6,15 @@ const DEFAULT_OPENAI_BASE =
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || process.env.OPENAI_KEY || null;
 
 async function request(path, payload = {}, opts = {}) {
-  require("./processingTokens/runtime").assertDispatch();
+  const processing = require("./processingTokens/runtime");
+  processing.assertDispatch();
+  if (processing.enabled() && !opts.processingBound) {
+    const context = processing.current();
+    if (!context?.aiRequest) throw Object.assign(new Error('BOUNDED_EXTERNAL_API_ADAPTER_REQUIRED'),
+      { code: 'BOUNDED_EXTERNAL_API_ADAPTER_REQUIRED', status: 503 });
+    return context.aiRequest(payload, bounded => request(path, bounded, { ...opts, processingBound: true,
+      timeout: Math.min(opts.timeout || 90000, 90000), signal: opts.signal || AbortSignal.timeout(90000) }));
+  }
   if (!OPENAI_API_KEY) throw new Error("OpenAI API key not configured.");
   const url = `${DEFAULT_OPENAI_BASE}${path}`;
   const headers = Object.assign({ Authorization: `Bearer ${OPENAI_API_KEY}` }, opts.headers || {});
@@ -33,6 +41,9 @@ async function chatCompletions(params = {}, meta = {}) {
 
 async function audioTranscriptions(formData, meta = {}) {
   require("./processingTokens/runtime").assertDispatch();
+  if (require('./processingTokens/runtime').enabled())
+    throw Object.assign(new Error('Use the existing bounded native transcription worker'),
+      {code:'BOUNDED_EXTERNAL_API_ADAPTER_REQUIRED',status:503});
   if (!OPENAI_API_KEY) throw new Error("OpenAI API key not configured.");
   const url = `${DEFAULT_OPENAI_BASE}/v1/audio/transcriptions`;
   const headers = Object.assign(

@@ -37,13 +37,19 @@ function createProcessingService({
   operations,
   entitlement,
   plans = processingPlan,
+  namespace = 'processing',
 }) {
+  if (!/^processing(?:_qualification_[a-z0-9_]+)?$/.test(namespace)) fail('INVALID_LEDGER_NAMESPACE', 503);
   const caps = { ...DEFAULT_LIMITS, ...limits };
   Object.entries(caps).forEach(([name, value]) => integer(value, name, 1));
-  const ref = (collection, id) => db.collection(`processing_${collection}`).doc(id);
+  const ref = (collection, id) => db.collection(`${namespace}_${collection}`).doc(id);
   const account = uid => ref("accounts", key(identifier(uid)));
   const control = ref("control", "global");
   const job = (uid, requestId) => ref("jobs", key(identifier(uid), identifier(requestId)));
+  const priced = (operation, profileId) => ({
+    ...quote(profileId ? `${operation}@${identifier(profileId)}` : operation, operations),
+    operation, ...(profileId ? { profileId } : {}),
+  });
   async function tier(tx, uid) {
     if (entitlement) return entitlement(tx, uid);
     const [billing, user] = await tx.getAll(
@@ -128,7 +134,7 @@ function createProcessingService({
       },
       activeJobs: a.active,
       localEditingAvailable: true,
-      provisional: true,
+      provisional: !require('../../../config/free-first-release/activation.json').enabled,
       rollingAvailableAt: a.history.some(e => e.tokens > 0)
         ? new Date(Math.min(...a.history.filter(e => e.tokens > 0).map(e => e.at)) + 30 * DAY).toISOString()
         : null,
@@ -144,7 +150,7 @@ function createProcessingService({
     // missing counter into zero while an old reservation is still unsettled.
     let rows = [];
     if (g.reservedMicros) {
-      const snapshot = await tx.get(db.collection('processing_jobs')
+      const snapshot = await tx.get(db.collection(`${namespace}_jobs`)
         .where('state', 'in', ['reserved', 'started']).limit(5001));
       if (snapshot.size > 5000) fail('CASH_HOLD_MIGRATION_REQUIRED', 503);
       rows = snapshot.docs.map(doc => doc.data());
@@ -172,7 +178,8 @@ function createProcessingService({
     };
   }
   return {
-    quote: operation => quote(operation, operations),
+    jobCollectionName: `${namespace}_jobs`,
+    quote: priced,
     async purchaseCapacity(requiredMicros) {
       integer(requiredMicros, "PURCHASE_CAPACITY", 1);
       const g = (await control.get()).data();
@@ -293,16 +300,21 @@ function createProcessingService({
         return r;
       });
     },
-    async reserve(uid, { operation, requestId, fingerprint, approvedTokens, notBefore = 0 }) {
+    async reserve(uid, { operation, profileId, requestId, fingerprint, approvedTokens, notBefore = 0, legacyCashOnly = false }) {
       identifier(fingerprint);
       integer(notBefore, "DISPATCH_TIME");
-      const q = quote(operation, operations);
+      const q = priced(operation, profileId);
+      if (legacyCashOnly) {
+        if (operation !== 'publisher.publish') fail('INVALID_LEGACY_OBLIGATION', 403);
+        q.tokens = 0;
+        q.tokenPricing = 'fixed-v1';
+      }
       if (approvedTokens !== q.tokens) fail("PROCESSING_ESTIMATE_REQUIRED", 409);
       return db.runTransaction(async tx => {
         const { a, g, existing, time, fresh } = await load(tx, uid, requestId);
         if (notBefore > time + 30 * DAY) fail("SCHEDULE_OUTSIDE_BUDGET_WINDOW", 409);
         if (existing) {
-          if (existing.operation !== operation || existing.fingerprint !== fingerprint ||
+          if (existing.operation !== operation || existing.profileId !== profileId || Boolean(existing.legacyCashOnly) !== legacyCashOnly || existing.fingerprint !== fingerprint ||
               (existing.notBefore || 0) !== notBefore)
             fail("IDEMPOTENCY_CONFLICT", 409);
           return { ...existing, duplicate: true }; // Caller must never dispatch a duplicate.
@@ -355,6 +367,8 @@ function createProcessingService({
           userId: uid,
           requestId,
           operation,
+          ...(profileId ? { profileId } : {}),
+          ...(legacyCashOnly ? { legacyCashOnly: true } : {}),
           fingerprint,
           tokens: q.tokens,
           tokenPricing: q.tokenPricing,

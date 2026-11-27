@@ -1,6 +1,6 @@
 {
   "date": "2026-11-27",
-  "status": "approved-not-executed",
+  "status": "funded-qualification-in-progress",
   "qualificationMaximumUsd": 5,
   "liveCheckoutCount": 1,
   "liveCheckoutAmountUsd": 4.99,
@@ -29,8 +29,10 @@
     "title": "AutoPromote Free/Plus qualification \u2014 private test"
   },
   "productionDeletionAuthorized": false,
-  "incrementalPaidQualificationRuns": 0,
+  "incrementalPaidQualificationRuns": 16,
   "liveCheckoutsExecuted": 0,
-  "plusPlanCreated": false,
-  "subscriptionLaunchDeployed": false
+  "plusPlanCreated": true,
+  "subscriptionLaunchDeployed": false,
+  "plusPlanStatus": "ACTIVE",
+  "plusPlanActivated": true
 }

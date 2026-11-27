@@ -152,8 +152,10 @@ async function ensureFreshTokens(oauth2Client, connectionData, uid) {
 async function downloadVideoToTempFile(fileUrl) {
   // Protect against SSRF by validating the URL before fetching.
   // Also enforce a sane maximum download size (configurable via env).
-  const MAX_BYTES = parseInt(process.env.YT_MAX_VIDEO_BYTES || "524288000", 10); // 500MB default
-  const res = await safeFetch(fileUrl, fetch, { requireHttps: true });
+  const publication = require('./processingTokens/runtime').current()?.publication;
+  const MAX_BYTES = (publication ? Math.floor(publication.maxBytes / 2) : 0) || parseInt(process.env.YT_MAX_VIDEO_BYTES || "524288000", 10); // 500MB default
+  if (publication) publication.dispatched = true;
+  const res = await safeFetch(fileUrl, fetch, { requireHttps: true, fetchOptions: { signal: publication?.signal } });
   if (!res || !res.ok) throw new Error("Failed to download video asset");
   const lenHeader = res.headers && res.headers.get && res.headers.get("content-length");
   if (lenHeader) {
@@ -168,6 +170,7 @@ async function downloadVideoToTempFile(fileUrl) {
   const counter = new Transform({
     transform(chunk, _encoding, callback) {
       downloadedBytes += chunk.length;
+      if (publication) publication.bytes += chunk.length;
       if (downloadedBytes > MAX_BYTES) {
         callback(new Error("Downloaded video exceeds maximum allowed size"));
         return;
@@ -224,6 +227,10 @@ async function uploadVideo({
   skipIfDuplicate = true,
   payload = {},
 }) {
+  const processing = require('./processingTokens/runtime');
+  if (processing.enabled() && !processing.current()?.publication)
+    return require('./processingTokens/publication').withPublication({ uid, contentId, platform: 'youtube',
+      payload: { title, description, fileUrl: fileUrl || videoUrl, ...payload } }, () => uploadVideo(arguments[0]));
   // Support legacy callers that pass `videoUrl` instead of `fileUrl`
   if (!fileUrl && typeof videoUrl === "string") fileUrl = videoUrl;
   if (!uid) throw new Error("uid required");
@@ -396,8 +403,17 @@ async function uploadVideo({
           selfDeclaredMadeForKids,
         },
       },
-      media: { mimeType, body: fs.createReadStream(videoAsset.path) },
-    });
+      media: { mimeType, body: require('./processingTokens/runtime').current()?.publication
+        ? fs.createReadStream(videoAsset.path).pipe(new Transform({ transform(chunk, encoding, callback) {
+          const budget = require('./processingTokens/runtime').current()?.publication;
+          if (budget) {
+            budget.bytes += chunk.length;
+            if (budget.bytes > budget.maxBytes) return callback(new Error('Publication transfer limit exceeded'));
+          }
+          callback(null, chunk);
+        } })) : fs.createReadStream(videoAsset.path) },
+    }, require('./processingTokens/runtime').current()?.publication ? { retry: false, timeout: 90000,
+      signal: require('./processingTokens/runtime').current().publication.signal } : undefined);
   } finally {
     await videoAsset.cleanup();
   }

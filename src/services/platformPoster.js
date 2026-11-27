@@ -342,6 +342,9 @@ async function postToYouTubeHandler(args) {
       tags: payload.tags || payload.hashtags,
       contentId,
       payload, // Pass full payload for advanced options (sponsorships, kids)
+      optimizeMetadata: payload.optimizeMetadata !== false,
+      forceReupload: payload.forceReupload === true,
+      skipIfDuplicate: payload.skipIfDuplicate !== false,
     });
 
     if (res.success) {
@@ -378,7 +381,16 @@ async function dispatchPlatformPost({
   submissionReceipt,
   onSubmissionAccepted,
 }) {
+  const processing = require('./processingTokens/runtime');
+  if (processing.enabled() && !processing.current()?.publication)
+    return require('./processingTokens/publication').withPublication({ uid, contentId, platform, payload },
+      () => dispatchPlatformPost(arguments[0]));
   require("./processingTokens/runtime").assertDispatch();
+  if (platform !== 'youtube' && processing.current()?.publication?.prepareMedia) {
+    payload = { ...payload };
+    for (const key of ['url','mediaUrl','fileUrl','videoUrl'])
+      if (payload[key]) payload[key] = await processing.current().publication.prepareMedia(payload[key]);
+  }
   console.log(
     `[PlatformPoster] 🚀 Dispatching post to ${platform} for content ${contentId}. Reason: ${reason}`
   );

@@ -1,3 +1,4 @@
+import { installProcessingFetch } from './utils/processingFetch';
 import React from "react";
 import ReactDOM from "react-dom/client";
 import initSentry, { Sentry } from "./sentryClient";
@@ -65,3 +66,5 @@ window.addEventListener("unhandledrejection", event => {
     frontendLog("error", reason.message || "unhandledrejection", { reason });
   } catch (e) {}
 });
+
+installProcessingFetch();

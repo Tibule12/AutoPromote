@@ -1,0 +1,30 @@
+{
+  "attempt": "Q2-EXPORT",
+  "status": "completed",
+  "bytes": 5250719,
+  "sha256": "3d45720e35fa5a10ffd561487ae02fea40d931166231c853953513f4b3df35cd",
+  "generation": "1795797108328299",
+  "durationSeconds": 33.899675,
+  "streams": [
+    {
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 608,
+      "height": 1080,
+      "r_frame_rate": "30/1"
+    },
+    {
+      "codec_name": "aac",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 2,
+      "r_frame_rate": "0/0"
+    }
+  ],
+  "fullDecodePassed": true,
+  "cloudOutputMeasured": true,
+  "actualCloudInvoiceUsd": null,
+  "costBasis": "Cloud Run allocation/rate envelope; not an invoice",
+  "captionBurnQualified": false,
+  "creativeApproval": false
+}

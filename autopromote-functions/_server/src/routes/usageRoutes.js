@@ -118,9 +118,12 @@ router.post("/storage/complete", authMiddleware, async (req, res) => {
 });
 router.post("/processing/quote", authMiddleware, async (req, res) => {
   try {
+    const runtime=require('../services/processingTokens/runtime');
+    const service=runtime.service();
+    const adapter=runtime.adapters.select?.(req.body.operation,{path:req.body.path,body:req.body.requestBody||{}});
     res.json({
       success: true,
-      estimate: require("../services/processingTokens/runtime").service().quote(req.body.operation),
+      estimate: service.quote(req.body.operation,adapter?.profileId),
     });
   } catch (error) {
     res.status(error.status || 400).json({ error: error.code || "QUOTE_UNAVAILABLE" });

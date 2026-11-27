@@ -1,0 +1,10 @@
+{
+  "enabled": false,
+  "plusPurchasesEnabled": false,
+  "paypalPlanId": "P-77029123VG7119804NME2GMY",
+  "cutoverAt": null,
+  "dailyMicros": 2000000,
+  "monthlyMicros": 10000000,
+  "apiDailyMicros": 50000,
+  "maxActive": 1
+}

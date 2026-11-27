@@ -231,6 +231,7 @@ const postToWorker = async (
     return await axios.post(primaryUrl, payload, requestConfig);
   } catch (error) {
     const canFallback =
+      !require('./services/processingTokens/runtime').enabled() &&
       ALLOW_LOCAL_WORKER_FALLBACK &&
       localWorkerUrl &&
       localWorkerUrl !== primaryWorkerUrl &&
@@ -2098,6 +2099,17 @@ router.get("/multicam/worker-readiness", async (req, res) => {
   }
 
   try {
+    if (require('./services/processingTokens/runtime').enabled()) {
+      const profile = require('./services/processingTokens/runtime').profiles()
+        .find(value => value.operation === 'multicam.render');
+      const receipt = profile && (await admin.firestore().collection('processing_worker_qualifications')
+        .doc(profile.qualificationId).get()).data();
+      if (!receipt?.approved || receipt.kind === 'funded-qualification' ||
+          Date.parse(receipt.expiresAt) <= Date.now())
+        return res.status(503).json({success:false, message:'Cam processing is temporarily unavailable. Your project is preserved.'});
+      return res.json({success:true, localFallbackEnabled:false,
+        worker:{status:'ready', dispatch:'bounded-job', device:profile.device}});
+    }
     const response = await getFromCamCombinerWorker("/health", 120000);
     res.json({
       success: true,
@@ -3068,6 +3080,9 @@ router.get("/render-jobs/:jobId/download-url", async (req, res) => {
     if (!resolved) return;
 
     const filename = getSafeMulticamDownloadName(resolved.jobId);
+    const bounded = await require('./services/processingTokens/mediaDelivery')
+      .ownedOutputUrl(resolved.file, req.user?.uid || req.userId, resolved.jobId, true);
+    if (bounded) return res.json({success:true, downloadUrl:bounded, filename});
     const signedUrlExpiresAt = Date.now() + 15 * 60 * 1000;
     const [downloadUrl] = await resolved.file.getSignedUrl({
       version: "v4",
@@ -3099,6 +3114,10 @@ router.get("/render-jobs/:jobId/download", async (req, res) => {
   try {
     const resolved = await resolveOwnedMulticamMaster(req, res);
     if (!resolved) return;
+
+    const bounded = await require('./services/processingTokens/mediaDelivery')
+      .ownedOutputUrl(resolved.file, req.user?.uid || req.userId, resolved.jobId, true);
+    if (bounded) return res.redirect(302, bounded);
 
     const [metadata] = await resolved.file.getMetadata();
     const filename = getSafeMulticamDownloadName(resolved.jobId);
