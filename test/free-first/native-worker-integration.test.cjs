@@ -89,9 +89,12 @@ test('missing funded authorization cannot start production processing and releas
 test('lost run response is discovered without another run POST and provider failure restores tokens only', async () => {
   const f = await fixture({ lost: true, success: false }); assert.equal((await f.submit()).status, 503);
   assert.equal((await f.service.status(f.uid)).activeJobs, 1);
+  const binding=(await db.collection('processing_worker_bindings').doc(digest([f.uid,f.requestId])).get()).data();
+  await db.collection('video_edits').doc(binding.nativeJobId).update({status:'processing'});
   await f.adapter.reconcilePending(f.service, f.uid);
   const status = await f.service.status(f.uid); assert.equal(status.activeJobs, 0); assert.equal(status.remaining, 100);
   assert.equal(f.posts, 1);
+  assert.equal((await db.collection('video_edits').doc(binding.nativeJobId).get()).data().status,'failed');
 });
 test('API envelope preserves requested output limits and rejects extra choices, tools or unpriced models', () => {
   const input = { model: 'gpt-4o-mini', messages: [{ role: 'user', content: 'Write one caption' }], max_tokens: 500 };

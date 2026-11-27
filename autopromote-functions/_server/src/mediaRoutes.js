@@ -1585,6 +1585,48 @@ router.post("/track-studio-faces", requireTesterEditingFeature("audioExtract"), 
   }
 });
 
+// Route: POST /api/media/analyze-caption-safety
+router.post("/analyze-caption-safety", requireTesterEditingFeature("audioExtract"), admitMediaTransfer, upload.single("file"), async (req, res) => {
+  let temporaryFile;
+  try {
+    let segments = [];
+    try {
+      segments = typeof req.body?.segments === "string" ? JSON.parse(req.body.segments) : Array.isArray(req.body?.segments) ? req.body.segments : [];
+    } catch (_) {
+      return res.status(400).json({ error: "Invalid caption segments payload" });
+    }
+    let videoUrl = String(req.body?.videoUrl || req.body?.video_url || "").trim();
+    if (!videoUrl && req.file) {
+      temporaryFile = admin.storage().bucket().file(`temp_tracking/${req.user.uid}/${uuidv4()}_caption_safe.mp4`);
+      await streamPipeline(fs.createReadStream(temporarySourcePath(req.file.path)), temporaryFile.createWriteStream({
+        resumable: true, metadata: { contentType: req.file.mimetype },
+      }));
+      const [signed] = await temporaryFile.getSignedUrl({ action: "read", expires: Date.now() + 15 * 60 * 1000 });
+      videoUrl = signed;
+    }
+    if (!videoUrl) {
+      return res.status(400).json({ error: "Upload a source video or supply videoUrl for face/body caption analysis." });
+    }
+    const response = await postToMediaWorker("/analyze-caption-safety", {
+      video_url: videoUrl,
+      segments,
+      style_name: String(req.body?.styleName || req.body?.style_name || "word_pill"),
+      caption_scale: Number(req.body?.captionScale || req.body?.caption_scale || 1.0),
+      preferred_mode: String(req.body?.preferredMode || req.body?.preferred_mode || "smart_safe"),
+      aspect: req.body?.aspect || null,
+      crop_x: Number(req.body?.cropX ?? req.body?.crop_x ?? 50),
+      crop_y: Number(req.body?.cropY ?? req.body?.crop_y ?? 50),
+    }, 300000);
+    return res.json(response.data);
+  } catch (error) {
+    return res.status(error.response?.status === 422 ? 422 : 500).json({
+      error: error.response?.data?.detail || "Caption safety analysis failed. Existing placement unchanged.",
+    });
+  } finally {
+    if (temporaryFile) await temporaryFile.delete().catch(() => {});
+  }
+});
+
 // Handles file upload -> Firebase Storage -> Python Worker -> Returns Captions
 router.post(
   "/transcribe-source",

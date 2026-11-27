@@ -16,7 +16,7 @@ function checkoutOrigins({ returnUrl, cancelUrl }, env = process.env) {
 }
 async function assertPurchaseCapacity(service, env = process.env) {
   // Enough funded headroom for at least the largest approved useful workflow.
-  const required = Number(env.PLUS_PURCHASE_CAPACITY_MICROS || 1070000);
+  const required = Number(env.PLUS_PURCHASE_CAPACITY_MICROS || 1100000);
   integer(required, "PURCHASE_CAPACITY", 1);
   if (!(await service.purchaseCapacity(required)).available)
     fail("FUNDED_CAPACITY_UNAVAILABLE", 503);

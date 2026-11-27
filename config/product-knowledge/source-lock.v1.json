@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Merge current released Studio capabilities while preserving funded subscription accounting and readiness limits",
-  "reviewed_at": "2026-11-27T17:24:10.266Z",
+  "reason": "Qualified funded launch evidence and coordinated activation without creative readiness promotion",
+  "reviewed_at": "2026-11-27T17:55:47.487Z",
   "catalog_sha256": "eecc391b0e634e380f0b393842ba8a83bc3f8c12b6cbd72f46e427a2a634e270",
   "sources": [
     {
@@ -819,11 +819,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "bc26d71f58c161c7fb867311fff527b16e3428973e4d9a4ff485068639f02f56"
+      "sha256": "7be3af919a13b7000e031ea28d5919708b7fe1f3d82f98e6af9b125babf9bcdd"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "e50465598b8304b24fb08cfbb0ca992e245c08973ad6aa0450d6976070178998"
+      "sha256": "a5d07ccfba8deb983ac82b9ce52dd39974dd1b92e45c0630fae3071feb303ef4"
     },
     {
       "path": "worker.js",

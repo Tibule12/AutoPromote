@@ -5,6 +5,7 @@ import { API_BASE_URL } from "../config";
 import ProcessingUsage from "./ProcessingUsage";
 import { startVisiblePoller } from "../utils/visiblePoller";
 import offers from "../config/subscriptionOffers.json";
+import { paypalSubscriptionReturn, clearPaypalSubscriptionReturn } from '../utils/paypalReturn';
 import "./PayPalSubscriptionPanel.css";
 import "./BillingContrast.css";
 const api = path => `${API_BASE_URL || ""}${path}`;
@@ -124,7 +125,7 @@ export default function PayPalSubscriptionPanel({
     }
   };
   useEffect(() => {
-    const subscriptionId = new URLSearchParams(window.location.search).get("subscription_id");
+    const subscriptionId = paypalSubscriptionReturn(window.location);
     if (!user || !subscriptionId) return;
     let live = true;
     const key = `${user.uid}:${subscriptionId}:${verificationAttempt}`;
@@ -149,9 +150,7 @@ export default function PayPalSubscriptionPanel({
         setNotice("Payment verified. Your increased allowance is ready.");
         setVerificationPending(false);
         setRefreshRevision(value => value + 1);
-        const location = new URL(window.location.href);
-        location.searchParams.delete("subscription_id");
-        window.history.replaceState(window.history.state, "", location.pathname + location.search + location.hash);
+        window.history.replaceState(window.history.state, "", clearPaypalSubscriptionReturn(window.location.href));
         upgradeCallback.current?.();
       }
     }).catch(error => {

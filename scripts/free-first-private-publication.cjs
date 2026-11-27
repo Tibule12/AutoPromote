@@ -11,6 +11,8 @@ process.env.PROCESSING_BUDGET_LIMITS_JSON=JSON.stringify({dailyMicros:5000000,mo
  freeDailyMicros:5000000,apiDailyMicros:50000,maxActive:1,maxActiveUser:1});
 const {db,storage}=require('../src/firebaseAdmin');
 const approved=require('../reports/free-first-launch-20261127/approval-and-status.json').privateYoutubeTests;
+let lock;
+const lockPath=path.join(PRIVATE,'Q6-controller.lock');
 function decode(value){
  if(value&&typeof value==='object'){
   if(Array.isArray(value.o))return Object.fromEntries(value.o.map(x=>[x.k,decode(x.v)]));
@@ -33,6 +35,7 @@ function identity(value){
  return null;
 }
 async function main(){
+ lock=fs.openSync(lockPath,'wx',0o600);fs.writeFileSync(lock,String(process.pid));
  if(!approved.approved||approved.uploads!==2||approved.visibility!=='private')throw Error('Exact private publication approval required');
  const uid=identity(JSON.parse(fs.readFileSync('/home/tibule12/.local/share/autopromote-qa/studio-video-sync-20261121/final-session.private.json')));
  if(!uid)throw Error('Retained connected owner identity unavailable');
@@ -144,4 +147,5 @@ async function main(){
    publishingExecutedByThisCommand:publishing,createdVideoIds:[state.immediate.videoId,state.scheduled.videoId].filter(Boolean)}));
  await db.terminate();
 }
-main().catch(error=>{console.error(error.code||error.message);process.exitCode=1;});
+main().catch(error=>{console.error(error.code||error.message);process.exitCode=1;})
+ .finally(()=>{if(lock!==undefined){fs.closeSync(lock);fs.unlinkSync(lockPath);}});

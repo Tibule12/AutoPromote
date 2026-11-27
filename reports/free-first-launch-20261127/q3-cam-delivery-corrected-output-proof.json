@@ -1,0 +1,30 @@
+{
+  "attempt": "Q3-CAM-DELIVERY-CORRECTED",
+  "status": "completed",
+  "bytes": 76534829,
+  "sha256": "63f79b6a412d44e22a566a31f65b345db8694ced3b3fa046479a594557f6452b",
+  "generation": "1795800101085086",
+  "durationSeconds": 60,
+  "streams": [
+    {
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 1920,
+      "height": 1080,
+      "r_frame_rate": "30/1"
+    },
+    {
+      "codec_name": "aac",
+      "codec_type": "audio",
+      "sample_rate": "48000",
+      "channels": 2,
+      "r_frame_rate": "0/0"
+    }
+  ],
+  "fullDecodePassed": true,
+  "cloudOutputMeasured": true,
+  "actualCloudInvoiceUsd": null,
+  "costBasis": "Cloud Run allocation/rate envelope; not an invoice",
+  "captionBurnQualified": false,
+  "creativeApproval": false
+}

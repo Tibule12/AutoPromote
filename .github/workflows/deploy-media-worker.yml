@@ -6,8 +6,11 @@ on:
     branches:
       - main
     paths:
-      - .github/workflows/deploy-media-worker.yml
+      # Workflow-only edits remain deployable through workflow_dispatch.
       - python_media_worker/**
+      # The renewable launcher is injected into pinned Jobs and does not alter
+      # the serving native image. Avoid an unnecessary CPU/GPU image rebuild.
+      - '!python_media_worker/renewable_native_job_runner.py'
       - scripts/verify-gpu-media-worker.py
 
 permissions:

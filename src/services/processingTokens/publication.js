@@ -20,10 +20,15 @@ function installPublicationTransport() {
     return config;
   });
 }
-async function withPublication({ uid, taskId, contentId, platform, payload, legacySignedTask = false }, publish) {
+async function withPublication({ uid, taskId, contentId, platform, payload, legacySignedTask = false,
+  verifyAccount = async id => {
+    const account=await require('../../firebaseAdmin').admin.auth().getUser(id);
+    return account.emailVerified===true && account.disabled!==true;
+  } }, publish) {
   if (!runtime.enabled() || runtime.current()?.publication) return publish();
   installPublicationTransport();
   if (!uid || !contentId) fail('PUBLICATION_OWNER_REQUIRED', 403);
+  if(!legacySignedTask && !await verifyAccount(uid))fail('VERIFIED_ACCOUNT_REQUIRED',403);
   const service = runtime.service();
   const requestId = 'publication-' + (taskId || digest([uid, platform, contentId, payload]));
   const fingerprint = digest({ uid, contentId, platform, payload });

@@ -4,7 +4,7 @@
     "name": "AutoPromote Free",
     "price": 0,
     "currency": "USD",
-    "provisional": true,
+    "provisional": false,
     "features": {
       "monthlyCredits": 0,
       "uploads": 20,
@@ -27,7 +27,7 @@
     "name": "AutoPromote Plus",
     "price": 4.99,
     "currency": "USD",
-    "provisional": true,
+    "provisional": false,
     "features": {
       "monthlyCredits": 0,
       "uploads": 80,

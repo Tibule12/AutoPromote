@@ -26,10 +26,10 @@ def profiles():
     configs = {
         'speech-cpu': ('audio.transcribe', 10, 2, 4, 360, 30000, 44, cpu),
         'finder-cpu': ('clips.analyze', 20, 4, 8, 600, 80000, 88, cpu),
-        'render-cpu': ('studio.render', 40, 4, 8, 600, 130000, 88, cpu),
-        'clip-cpu': ('studio.render', 30, 4, 8, 360, 100000, 88, cpu),
-        'render-gpu': ('studio.render', 40, 20, 80, 600, 810000, 886, gpu),
-        'cam-gpu': ('multicam.render', 60, 20, 80, 900, 1070000, 886, cam),
+        'render-cpu': ('studio.render', 40, 4, 8, 600, 150000, 88, cpu),
+        'clip-cpu': ('studio.render', 30, 4, 8, 360, 130000, 88, cpu),
+        'render-gpu': ('studio.render', 40, 20, 80, 600, 850000, 886, gpu),
+        'cam-gpu': ('multicam.render', 60, 20, 80, 900, 1100000, 886, cam),
         'failure-cpu': ('studio.render', 30, 4, 8, 360, 60000, 88, cpu),
         'audio-cpu': ('audio.extract', 5, 2, 4, 360, 30000, 44, cpu),
         'sync-cpu': ('audio.sync', 10, 4, 8, 600, 80000, 88, cam),
@@ -45,7 +45,7 @@ def profiles():
             'maxMicros': maximum, 'maxSeconds': seconds, 'cpuMilli': cpus * 1000,
             'memoryBytes': memory * 1024 ** 3, 'inputMaxBytes': 1024 ** 3,
             'outputMaxBytes': 128 * 1024 ** 2, 'networkMaxBytes': 256 * 1024 ** 2,
-            'storageMaxByteHours': 1024 ** 3 * 144, 'rateMicrosPerSecond': rate,
+            'storageMaxByteHours': 1024 ** 3 * 144, 'deliveryMaxBytes':256*1024**2, 'rateMicrosPerSecond': rate,
             # Includes the conservative 250s startup/shutdown reserve and the
             # remaining capped network/storage/control allocation. Not an invoice.
             'fixedCostMicros': maximum - seconds * rate,

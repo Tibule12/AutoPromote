@@ -9,7 +9,7 @@
     "serviceAccount": "341498038874-compute@developer.gserviceaccount.com",
     "device": "gpu",
     "qualificationId": "free-first-render-gpu-bb9460a32b80",
-    "maxMicros": 810000,
+    "maxMicros": 850000,
     "maxSeconds": 600,
     "cpuMilli": 20000,
     "memoryBytes": 85899345920,
@@ -18,11 +18,12 @@
     "networkMaxBytes": 268435456,
     "storageMaxByteHours": 154618822656,
     "rateMicrosPerSecond": 886,
-    "fixedCostMicros": 278400,
+    "fixedCostMicros": 318400,
     "runnerSha256": "bb9460a32b80a605f31e7407101facbb03cc05a918553ec6dfee94ad72174f61",
     "runnerBootstrap": "import base64,hashlib,os; b=base64.b64decode(os.environ['PROCESSING_RUNNER_B64']); assert hashlib.sha256(b).hexdigest()==os.environ['PROCESSING_RUNNER_SHA256']; exec(compile(b,'renewable_native_job_runner.py','exec'))",
     "gpuCount": 1,
-    "accelerator": "nvidia-rtx-pro-6000"
+    "accelerator": "nvidia-rtx-pro-6000",
+    "deliveryMaxBytes": 268435456
   },
   {
     "id": "cam-gpu",
@@ -34,7 +35,7 @@
     "serviceAccount": "cam-combiner-job@autopromote-cc6d3.iam.gserviceaccount.com",
     "device": "gpu",
     "qualificationId": "free-first-cam-gpu-bb9460a32b80",
-    "maxMicros": 1070000,
+    "maxMicros": 1100000,
     "maxSeconds": 900,
     "cpuMilli": 20000,
     "memoryBytes": 85899345920,
@@ -43,11 +44,12 @@
     "networkMaxBytes": 268435456,
     "storageMaxByteHours": 154618822656,
     "rateMicrosPerSecond": 886,
-    "fixedCostMicros": 272600,
+    "fixedCostMicros": 302600,
     "runnerSha256": "bb9460a32b80a605f31e7407101facbb03cc05a918553ec6dfee94ad72174f61",
     "runnerBootstrap": "import base64,hashlib,os; b=base64.b64decode(os.environ['PROCESSING_RUNNER_B64']); assert hashlib.sha256(b).hexdigest()==os.environ['PROCESSING_RUNNER_SHA256']; exec(compile(b,'renewable_native_job_runner.py','exec'))",
     "gpuCount": 1,
-    "accelerator": "nvidia-rtx-pro-6000"
+    "accelerator": "nvidia-rtx-pro-6000",
+    "deliveryMaxBytes": 268435456
   },
   {
     "id": "audio-cpu",
@@ -128,7 +130,7 @@
     "serviceAccount": "341498038874-compute@developer.gserviceaccount.com",
     "device": "cpu",
     "qualificationId": "free-first-render-cpu-b90956371c05",
-    "maxMicros": 130000,
+    "maxMicros": 150000,
     "maxSeconds": 600,
     "cpuMilli": 4000,
     "memoryBytes": 8589934592,
@@ -137,9 +139,10 @@
     "networkMaxBytes": 268435456,
     "storageMaxByteHours": 154618822656,
     "rateMicrosPerSecond": 88,
-    "fixedCostMicros": 77200,
+    "fixedCostMicros": 97200,
     "runnerSha256": "b90956371c0577ba3ce5ef2607f2c61f9c82724ea6ebfa176a6482dee63557e6",
-    "runnerBootstrap": "import base64,hashlib,os; b=base64.b64decode(os.environ['PROCESSING_RUNNER_B64']); assert hashlib.sha256(b).hexdigest()==os.environ['PROCESSING_RUNNER_SHA256']; exec(compile(b,'renewable_native_job_runner.py','exec'))"
+    "runnerBootstrap": "import base64,hashlib,os; b=base64.b64decode(os.environ['PROCESSING_RUNNER_B64']); assert hashlib.sha256(b).hexdigest()==os.environ['PROCESSING_RUNNER_SHA256']; exec(compile(b,'renewable_native_job_runner.py','exec'))",
+    "deliveryMaxBytes": 268435456
   },
   {
     "id": "clip-cpu",
@@ -151,7 +154,7 @@
     "serviceAccount": "341498038874-compute@developer.gserviceaccount.com",
     "device": "cpu",
     "qualificationId": "free-first-clip-cpu-b90956371c05",
-    "maxMicros": 100000,
+    "maxMicros": 130000,
     "maxSeconds": 360,
     "cpuMilli": 4000,
     "memoryBytes": 8589934592,
@@ -160,9 +163,10 @@
     "networkMaxBytes": 268435456,
     "storageMaxByteHours": 154618822656,
     "rateMicrosPerSecond": 88,
-    "fixedCostMicros": 68320,
+    "fixedCostMicros": 98320,
     "runnerSha256": "b90956371c0577ba3ce5ef2607f2c61f9c82724ea6ebfa176a6482dee63557e6",
-    "runnerBootstrap": "import base64,hashlib,os; b=base64.b64decode(os.environ['PROCESSING_RUNNER_B64']); assert hashlib.sha256(b).hexdigest()==os.environ['PROCESSING_RUNNER_SHA256']; exec(compile(b,'renewable_native_job_runner.py','exec'))"
+    "runnerBootstrap": "import base64,hashlib,os; b=base64.b64decode(os.environ['PROCESSING_RUNNER_B64']); assert hashlib.sha256(b).hexdigest()==os.environ['PROCESSING_RUNNER_SHA256']; exec(compile(b,'renewable_native_job_runner.py','exec'))",
+    "deliveryMaxBytes": 268435456
   },
   {
     "id": "failure-cpu",

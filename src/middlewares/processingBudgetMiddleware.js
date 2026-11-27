@@ -23,7 +23,7 @@ function cloudOperation(path) {
 }
 function createProcessingGuard({ service, authenticate, adapters = {} }) {
   return (req, res, next) => {
-    if (runtime.enabled() && req.method === 'GET' && /^\/api\/(?:media\/(?:jobs|render-jobs)\/|clips\/analysis\/)/.test(req.path))
+    if (runtime.enabled() && req.method === 'GET' && /^\/api\/(?:media\/(?:jobs|status|render-jobs)\/|clips\/analysis\/)/.test(req.path))
       return authenticate(req,res,async()=>{
         try { await runtime.reconcilePending(req.userId || req.user?.uid); return next(); }
         catch(error) { return res.status(error.status||503).json({error:error.code||'PROCESSING_RECONCILIATION_PENDING'}); }

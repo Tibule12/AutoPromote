@@ -25,6 +25,7 @@ const axios = require('axios');
 const profiles = require('../config/free-first-release/worker-profiles.prepared.json');
 const expectedStages = {
   'Q1-ASR': ['speech-cpu', 'audio.transcribe', '/api/media/transcribe', '/transcribe', 'Q1'],
+  'Q1-AUDIO': ['audio-cpu','audio.extract','/api/media/extract-audio','/extract-audio','Q1'],
   'Q1-EXPORT': ['render-cpu','studio.render','/api/media/process','/render-viral-clip','Q1'],
   'Q2-FIND': ['finder-cpu','clips.analyze','/api/media/analyze','/analyze-clips','Q2'],
   'Q2-EXPORT': ['clip-cpu','studio.render','/api/media/render-clip','/render-clip','Q2'],
@@ -111,6 +112,9 @@ async function main() {
     const binding=(await db.collection('processing_worker_bindings').doc(digest([saved.uid,saved.requestId])).get()).data();
     if(stage==='Q7-FAIL' && process.argv.includes('--replay')){
       if(binding?.state!=='settled'||binding.success!==false)throw Error('Terminal failed execution must be settled before replay');
+      await adapter.reconcileBinding(binding,service);
+      const nativeTerminal=(await db.collection('video_edits').doc(saved.nativeJobId).get()).data();
+      if(!['failed','cancelled'].includes(nativeTerminal?.status))throw Error('Native UI must observe the provider termination');
       if(!fs.existsSync(path.join(PRIVATE,'Q7-cancellation.private.json')))throw Error('Actual cancellation receipt required');
       const terminal=(await request({method:'GET',url:'https://run.googleapis.com/v2/'+binding.executionName})).data;
       if(terminal.cancelledCount!==1)throw Error('Provider-confirmed cancelled task required');
@@ -125,6 +129,7 @@ async function main() {
       if(response.status!==409||same.length!==1)throw Error('Fresh-controller replay did not prove a single execution');
       fs.writeFileSync(path.join(ROOT,'reports/free-first-launch-20261127/q7-termination-replay-proof.json'),
         JSON.stringify({providerTerminated:true,freshControllerReplayHttp:response.status,matchingExecutions:same.length,
+          nativeTerminalVisible:true,
           userTokensRestored:(await service.status(saved.uid)).remaining===100,physicalHostLossInjected:false,
           estimatedMicros:binding.actualMicros,actualInvoiceUsd:null},null,2)+'\n');
     }
@@ -160,6 +165,7 @@ async function main() {
   const sourceRecord = await source(workflow==='Q2'?'tmp/free-first-workloads-20261126/episode-180s.mp4':shortFile);
   let body;
   if(stage==='Q1-ASR') body={video_url:sourceRecord.url,translate_to_english:'false',source_language:'auto'};
+  if(stage==='Q1-AUDIO') body={video_url:sourceRecord.url,output_format:'mp3',async_mode:true};
   if(stage==='Q2-FIND') body={video_url:sourceRecord.url,source_duration_seconds:184,max_clips:3};
   if(stage==='Q2-EXPORT') {
     const finder=JSON.parse(fs.readFileSync(path.join(PRIVATE,'Q2-FIND.execution.private.json')));
@@ -245,6 +251,8 @@ async function main() {
   app.use(createProcessingGuard({service,adapters:{select:()=>adapter},authenticate:(req,res,next)=>{
     req.user={uid,claims:{email_verified:true}};req.userId=uid;next(); }}));
   app.post(route,async(req,res)=>{try{
+    if(stage==='Q1-AUDIO')return res.json(await require('../src/services/mediaWorkerTaskQueue').queueAudioExtractionTask({
+      jobId:req.body.job_id,videoUrl:req.body.video_url,outputFormat:'mp3'}));
     const target='https://native.invalid'+endpoint;
     const output=await axios.post(target,req.body,await applicationWorkerConfig(target,req.body));res.json(output.data);
   }catch(error){res.status(error.status||503).json({error:error.code||'PROCESSING_PENDING'});}});

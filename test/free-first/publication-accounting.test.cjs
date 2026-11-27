@@ -19,12 +19,18 @@ runtime.service=()=>service;
 after(async()=>{runtime.service=original;delete process.env.FREE_FIRST_USAGE_ENABLED;
   if(previous)require.cache[id]=previous;else delete require.cache[id];await db.terminate();});
 function fixture(){return{uid:'publish-'+crypto.randomUUID(),taskId:crypto.randomUUID(),contentId:crypto.randomUUID(),
+  verifyAccount:async()=>true,
   platform:'youtube',payload:{title:'Private approved qualification',privacy:'private'}};}
 test('ordinary publication uses renewable tokens once, replays its receipt and never repeats the provider mutation',async()=>{
  await service.configure({enabled:true});const f=fixture();let calls=0;
  const publish=async()=>{calls++;const p=runtime.current().publication;p.dispatched=true;p.bytes=26797595*2;return{success:true,videoId:'private-video-fixture'};};
  await withPublication(f,publish);await withPublication(f,publish);
  assert.equal(calls,1);const status=await service.status(f.uid);assert.equal(status.remaining,98);assert.equal(status.rollingSpentTokens,2);assert.equal(status.activeJobs,0);
+});
+test('a new unverified or disabled account cannot start background paid publishing',async()=>{
+ const f=fixture();let calls=0;
+ await assert.rejects(withPublication({...f,verifyAccount:async()=>false},async()=>{calls++;}),{code:'VERIFIED_ACCOUNT_REQUIRED'});
+ assert.equal(calls,0);assert.equal((await service.status(f.uid)).remaining,100);
 });
 test('uncertain provider response restores user tokens, keeps the maximum cash expense and refuses blind resubmission',async()=>{
  const f=fixture();let calls=0;

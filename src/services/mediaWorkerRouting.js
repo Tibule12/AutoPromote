@@ -210,6 +210,17 @@ async function assertMediaWorkerReady(payload = {}) {
 }
 
 async function mediaWorkerHealth(sourceDurationSeconds) {
+  const accounting=require('./processingTokens/runtime');
+  if(accounting.enabled()) {
+    const profile=accounting.profiles().find(p=>p.operation==='clips.analyze');
+    const receipt=profile&&(await require('../firebaseAdmin').db.collection('processing_worker_qualifications')
+      .doc(profile.qualificationId).get()).data();
+    if(!receipt?.approved||receipt.kind==='funded-qualification'||
+        receipt.profileDigest!==require('./unifiedCredits/workerVerification').digest(profile)||
+        !Number.isFinite(Date.parse(receipt.expiresAt))||Date.parse(receipt.expiresAt)<=Date.now())
+      throw Object.assign(new Error('Processing qualification is unavailable'),{code:'PRODUCTION_QUALIFICATION_REQUIRED',status:503});
+    return {data:{status:'ok',dispatch:'bounded-job',device:profile.device}};
+  }
   const route = selectMediaWorker("/analyze-clips", { source_duration_seconds: Number(sourceDurationSeconds) || 0 });
   const urls = [...new Set([route.workerUrl,
     route.device === "gpu" ? (process.env.MEDIA_WORKER_URL || DEFAULT_CPU).replace(/\/$/, "") : route.gpuUrl].filter(Boolean))];

@@ -50,22 +50,24 @@ async function reserveBytes(id, bytes) {
     fail('TRANSFER_ALLOWANCE_REACHED', 429);
   }
 }
-async function createBudget(id, userId, maxBytes) {
+async function createBudget(id, userId, maxBytes, allowIncrease = false) {
   const db = require('../../firebaseAdmin').db;
   const ref = db.collection('processing_transfer_budgets').doc(id);
   await db.runTransaction(async tx => {
     const previous = await tx.get(ref);
     if (previous.exists) {
-      if (previous.data().userId !== userId || previous.data().maxBytes !== maxBytes)
+      if (previous.data().userId !== userId || (previous.data().maxBytes !== maxBytes &&
+          !(allowIncrease && previous.data().maxBytes < maxBytes)))
         fail('TRANSFER_BINDING_CONFLICT', 403);
+      if(allowIncrease && previous.data().maxBytes < maxBytes) tx.update(ref,{maxBytes});
       return;
     }
     tx.create(ref, { userId, maxBytes, usedBytes: 0, expiresAt: Date.now() + 6 * 86400000 });
   });
 }
-async function urlFor(file, { budgetId, userId, maxBytes = 128 * 1024 ** 2, download = false }) {
+async function urlFor(file, { budgetId, userId, maxBytes = 256 * 1024 ** 2, download = false, allowIncrease = false }) {
   const [meta] = await file.getMetadata();
-  await createBudget(budgetId, userId, maxBytes);
+  await createBudget(budgetId, userId, maxBytes, allowIncrease);
   const payload = Buffer.from(JSON.stringify({ id: budgetId, uid: userId, bucket: file.bucket.name,
     path: file.name, generation: String(meta.generation), size: Number(meta.size), type: meta.contentType,
     attachment: download, exp: Date.now() + 6 * 86400000 })).toString('base64url');
@@ -77,7 +79,7 @@ async function ownedOutputUrl(file, userId, jobId, download = false) {
   const job = (await require('../../firebaseAdmin').db.collection('video_edits').doc(jobId).get()).data();
   if (!job?.processingBindingId) return null;
   if (job.userId !== userId) fail('SOURCE_FORBIDDEN', 403);
-  return urlFor(file, { budgetId: job.processingBindingId, userId, download });
+  return urlFor(file, { budgetId: job.processingBindingId, userId, download, allowIncrease:true });
 }
 function router() {
   const express = require('express');

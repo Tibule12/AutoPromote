@@ -9,14 +9,14 @@ async function main(){
  const apply=process.argv.includes('--apply');const candidates=[];
  for(const[kind,collection]of [['task','promotion_tasks'],['schedule','promotion_schedules']]){
   let query=db.collection(collection);
-  if(kind==='task')query=query.where('status','in',['queued','processing','paused','held']);
+  if(kind==='task')query=query.where('status','in',['queued','processing','paused','held','blocked','pending','awaiting_approval','approval_required','on_hold','scheduled']);
   else query=query.where('isActive','==',true);
   let last;
   do{
    let page=query.orderBy('__name__').limit(200);if(last)page=page.startAfter(last);
    const results=await page.get();
    for(const doc of results.docs){const value=doc.data();
-    if(value.qualificationOnly||value.qualificationHold)continue;
+    if(value.qualificationOnly||value.qualificationHold||doc.createTime.toMillis()>Date.parse(cutoverAt))continue;
     const userId=value.uid||value.user_id||value.userId,contentId=value.contentId;
     if(!userId||!contentId)continue;
     if(kind==='task'&&!require('../src/utils/docSigner').verifySignature(value))continue;

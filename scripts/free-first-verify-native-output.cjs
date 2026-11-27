@@ -17,7 +17,7 @@ async function main(){
  if(metadata.metadata?.autopromoteJobId!==receipt.nativeJobId||metadata.metadata?.ownerUid!==receipt.uid||
     Number(metadata.size)>128*1024**2||Number(metadata.size)<=0)throw Error('Output metadata binding mismatch');
  const directory=path.join(PRIVATE,'completed-outputs');fs.mkdirSync(directory,{recursive:true,mode:0o700});
- const filename=path.join(directory,attempt+'.mp4');
+ const filename=path.join(directory,attempt+path.extname(object));
  if(!fs.existsSync(filename)){
   const [url]=await file.getSignedUrl({action:'read',expires:Date.now()+10*60000,queryParams:{generation:String(metadata.generation)}});
   const response=await fetch(url,{signal:AbortSignal.timeout(90000),redirect:'error'});

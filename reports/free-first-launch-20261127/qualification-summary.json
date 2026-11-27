@@ -1,0 +1,52 @@
+{
+  "status": "Q1-Q7-qualified",
+  "cloudExecutionCount": 18,
+  "cloudQualificationMaximumUsd": 5,
+  "estimatedCashUsd": 2.818021,
+  "reservedCashUsd": 0,
+  "activeExecutions": 0,
+  "actualCloudInvoiceUsd": null,
+  "costBasis": "Conservative allocation, elapsed-time and transfer estimates; API tokens reported by provider. No attributed invoice available.",
+  "publisherAccountVerified": true,
+  "privatePublications": [
+    {
+      "kind": "immediate",
+      "videoId": "IEWJCBCyekw",
+      "channelId": "UCJX_wX24AWulqbPznjcQyWA",
+      "visibility": "private",
+      "duration": "PT1M1S",
+      "verifiedAt": "2026-11-27T17:33:23.099Z"
+    },
+    {
+      "kind": "scheduled",
+      "videoId": "5ZEyI4UQKqI",
+      "channelId": "UCJX_wX24AWulqbPznjcQyWA",
+      "visibility": "private",
+      "duration": "PT1M1S",
+      "verifiedAt": "2026-11-27T17:33:23.374Z"
+    }
+  ],
+  "paymentCheckoutPrepared": true,
+  "buyerCharges": 0,
+  "subscriptionArchitectureDeployed": false,
+  "globalProductionLimits": {
+    "dailyUsd": 2,
+    "monthlyUsd": 10,
+    "externalAiDailyUsd": 0.05,
+    "concurrentPaidExecutions": 1
+  },
+  "free": {
+    "tokens": 100,
+    "resetHours": 144,
+    "rolling30DayTokens": 500
+  },
+  "plus": {
+    "monthlyUsd": 4.99,
+    "tokens": 500,
+    "resetHours": 24,
+    "rolling30DayTokens": 2000
+  },
+  "balancesChanged": 0,
+  "legacyAgreementsChanged": 0,
+  "resourceDeletions": 0
+}

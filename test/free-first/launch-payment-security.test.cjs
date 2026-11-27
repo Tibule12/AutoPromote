@@ -43,5 +43,5 @@ test('checkout callbacks are bound to the configured pricing origin and purchase
  assert.equal(checkoutOrigins({},env).returnUrl,'https://autopromote.org/pricing');
  for(const returnUrl of ['https://evil.example/pricing','https://autopromote.org@evil.example/pricing','//evil.example/pricing','https://autopromote.org/pricing?redirect=https://evil.example','https://autopromote.org/pricing#access'])assert.throws(()=>checkoutOrigins({returnUrl},env));
  await assert.rejects(assertPurchaseCapacity({purchaseCapacity:async()=>({available:false})}),{code:'FUNDED_CAPACITY_UNAVAILABLE'});
- await assertPurchaseCapacity({purchaseCapacity:async value=>({available:value===1070000})});
+ await assertPurchaseCapacity({purchaseCapacity:async value=>({available:value===1100000})});
 });

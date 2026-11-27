@@ -1,0 +1,10 @@
+{
+  "providerTerminated": true,
+  "freshControllerReplayHttp": 409,
+  "matchingExecutions": 1,
+  "nativeTerminalVisible": true,
+  "userTokensRestored": true,
+  "physicalHostLossInjected": false,
+  "estimatedMicros": 37875,
+  "actualInvoiceUsd": null
+}

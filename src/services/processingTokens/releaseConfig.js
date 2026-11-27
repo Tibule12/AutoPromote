@@ -1,6 +1,7 @@
 // Coordinated release configuration. A Render dashboard/API key is unnecessary
 // for these nonsecret values; the existing merchant credentials remain private.
 function applyReleaseConfig(env = process.env) {
+  if(env.NODE_ENV==='test'||env.FIRESTORE_EMULATOR_HOST)return false;
   const release = require('../../../config/free-first-release/activation.json');
   if (!release.enabled) return false;
   const profiles = require('../../../config/free-first-release/worker-profiles.prepared.json');

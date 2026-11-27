@@ -1,0 +1,1345 @@
+{
+  "status": "completed",
+  "duration": 60,
+  "outputBytes": 76534829,
+  "derivedCameraFixtures": true,
+  "independentPhysicalCaptureQualified": false,
+  "receiptKeys": [
+    "render_segments",
+    "trusted_sync_contract",
+    "switches",
+    "local_thumbnail_url",
+    "director_audio",
+    "render_tier",
+    "manifest_url",
+    "manifest_storage_path",
+    "visual_source_auditability",
+    "render_checkpoint",
+    "fast_composite",
+    "thumbnail",
+    "output_url",
+    "render_receipt",
+    "layout_contract_audit",
+    "continuous_sync_anchors",
+    "pre_caption_sync_audit",
+    "firebase_output_url",
+    "director_layout_repair",
+    "brand_watermark",
+    "final_quality_gate",
+    "pre_sync_clap",
+    "render_segment_merge",
+    "status",
+    "director_truth_repair",
+    "thumbnail_url",
+    "visual_proxy",
+    "captions",
+    "segments",
+    "duration",
+    "post_render_sync_audit",
+    "thumbnail_path",
+    "expires_at",
+    "retention_days",
+    "director_latency_repair",
+    "thumbnail_storage_path",
+    "firebase_thumbnail_url",
+    "output_storage_path",
+    "render_tier_profile",
+    "director_truth_audit",
+    "trusted_director_channel_map",
+    "expiresAt",
+    "color_match",
+    "director_latency_audit",
+    "job_id",
+    "output_path",
+    "performance_timing",
+    "local_output_url",
+    "sync_preflight"
+  ],
+  "audits": {
+    "render_segments": [
+      {
+        "editorial_decision_score": 0.92,
+        "audio_decision_reliable": true,
+        "editorial_switch_allowed": true,
+        "raw_audio_leader_camera_id": "cam2",
+        "editorial_reaction_story_value": 0,
+        "editorial_decision_reason": "earned_active_speaker_handoff",
+        "audio_decision_reason": "strong_isolated_audio_owner",
+        "audio_leader_activity": 0.7417,
+        "source_start": 0,
+        "source_end": 38,
+        "timeline_start": 0,
+        "audio_leader_camera_id": "cam2",
+        "layout_mode": "cut",
+        "editorial_decision_threshold": 0.66,
+        "audio_leader_gap": 1.1237,
+        "layout_reason": "active_speaker_with_reaction:opening_backfilled_to_first_reliable_owner:strong_isolated_audio_owner",
+        "director_score": 0.5059,
+        "timeline_end": 38,
+        "audio_second_activity": 0.3934,
+        "camera_id": "cam2",
+        "layout_confidence": 0.7417,
+        "editorial_active_speaker_value": 0.92,
+        "secondary_camera_id": "cam1",
+        "director_channel_camera_ids": [
+          "cam1",
+          "cam2"
+        ],
+        "ranked_sources": [
+          {
+            "current_audio_activity": 0.69,
+            "visual_speaking_confidence": 0,
+            "score": 0.5059,
+            "upcoming_audio_activity": 0.8062,
+            "visual_speaking_score": 0,
+            "camera_id": "cam2",
+            "audio_db": -16.562,
+            "visual_score": 0,
+            "audio_activity": 0.7417
+          },
+          {
+            "current_audio_activity": 0.3934,
+            "visual_speaking_confidence": 0,
+            "score": 0.181,
+            "upcoming_audio_activity": 0.2674,
+            "visual_speaking_score": 0,
+            "camera_id": "cam1",
+            "audio_db": -36.789,
+            "visual_score": 0,
+            "audio_activity": 0.3934
+          }
+        ]
+      },
+      {
+        "editorial_decision_score": 1,
+        "audio_decision_reliable": true,
+        "editorial_switch_allowed": true,
+        "raw_audio_leader_camera_id": "cam2",
+        "editorial_reaction_story_value": 0,
+        "editorial_decision_reason": "initial_or_stay",
+        "audio_decision_reason": "strong_isolated_audio_owner",
+        "audio_leader_activity": 0.7364,
+        "source_start": 38,
+        "source_end": 49.25,
+        "timeline_start": 38,
+        "audio_leader_camera_id": "cam2",
+        "layout_mode": "cut",
+        "editorial_decision_threshold": 0,
+        "audio_leader_gap": 0.7618,
+        "layout_reason": "reaction_overlay_disabled:earned_reaction_accent|accent_release",
+        "director_score": 0.4575,
+        "timeline_end": 49.25,
+        "audio_second_activity": 0.7426,
+        "camera_id": "cam2",
+        "layout_confidence": 0,
+        "secondary_camera_id": null,
+        "editorial_active_speaker_value": 1,
+        "render_merged_segment_count": 2,
+        "director_channel_camera_ids": [
+          "cam1",
+          "cam2"
+        ],
+        "ranked_sources": [
+          {
+            "current_audio_activity": 0.7364,
+            "visual_speaking_confidence": 0,
+            "score": 0.4575,
+            "upcoming_audio_activity": 0.7273,
+            "visual_speaking_score": 0,
+            "camera_id": "cam2",
+            "audio_db": -17.329,
+            "visual_score": 0,
+            "audio_activity": 0.7364
+          },
+          {
+            "current_audio_activity": 0.2807,
+            "visual_speaking_confidence": 0,
+            "score": 0.2447,
+            "upcoming_audio_activity": 0.8072,
+            "visual_speaking_score": 0,
+            "camera_id": "cam1",
+            "audio_db": -31.041,
+            "visual_score": 0,
+            "audio_activity": 0.7426
+          }
+        ]
+      },
+      {
+        "editorial_decision_score": 0.92,
+        "audio_decision_reliable": true,
+        "editorial_switch_allowed": true,
+        "raw_audio_leader_camera_id": "cam1",
+        "editorial_reaction_story_value": 0,
+        "editorial_decision_reason": "earned_active_speaker_handoff",
+        "audio_decision_reason": "sustained_isolated_handoff",
+        "audio_leader_activity": 1,
+        "source_start": 49.25,
+        "source_end": 57.498,
+        "timeline_start": 49.25,
+        "audio_leader_camera_id": "cam1",
+        "layout_mode": "cut",
+        "editorial_decision_threshold": 0.58,
+        "audio_leader_gap": 0.972,
+        "layout_reason": "sustained_isolated_handoff",
+        "director_score": 0.52,
+        "timeline_end": 57.5,
+        "audio_second_activity": 0.028,
+        "camera_id": "cam1",
+        "layout_confidence": 1,
+        "editorial_active_speaker_value": 0.92,
+        "secondary_camera_id": null,
+        "director_channel_camera_ids": [
+          "cam1",
+          "cam2"
+        ],
+        "ranked_sources": [
+          {
+            "current_audio_activity": 1,
+            "visual_speaking_confidence": 0,
+            "score": 0.52,
+            "upcoming_audio_activity": 1,
+            "visual_speaking_score": 0,
+            "camera_id": "cam1",
+            "audio_db": -24.982,
+            "visual_score": 0,
+            "audio_activity": 1
+          },
+          {
+            "current_audio_activity": 0.028,
+            "visual_speaking_confidence": 0,
+            "score": 0.09,
+            "upcoming_audio_activity": 0.0047,
+            "visual_speaking_score": 0,
+            "camera_id": "cam2",
+            "audio_db": -25.106,
+            "visual_score": 0,
+            "audio_activity": 0.028
+          }
+        ]
+      },
+      {
+        "editorial_decision_score": 0.92,
+        "audio_decision_reliable": true,
+        "editorial_switch_allowed": true,
+        "raw_audio_leader_camera_id": "cam2",
+        "editorial_reaction_story_value": 0,
+        "editorial_decision_reason": "earned_active_speaker_handoff",
+        "audio_decision_reason": "sustained_isolated_handoff",
+        "audio_leader_activity": 0.8146,
+        "source_start": 57.5,
+        "source_end": 60,
+        "timeline_start": 57.5,
+        "audio_leader_camera_id": "cam2",
+        "layout_mode": "cut",
+        "editorial_decision_threshold": 0.58,
+        "audio_leader_gap": 1.3137,
+        "layout_reason": "sustained_isolated_handoff",
+        "director_score": 0.5111,
+        "timeline_end": 60,
+        "audio_second_activity": 0.154,
+        "camera_id": "cam2",
+        "layout_confidence": 0.8146,
+        "editorial_active_speaker_value": 0.92,
+        "secondary_camera_id": null,
+        "director_channel_camera_ids": [
+          "cam1",
+          "cam2"
+        ],
+        "ranked_sources": [
+          {
+            "current_audio_activity": 0.8146,
+            "visual_speaking_confidence": 0,
+            "score": 0.5111,
+            "upcoming_audio_activity": 0.8146,
+            "visual_speaking_score": 0,
+            "camera_id": "cam2",
+            "audio_db": -16.47,
+            "visual_score": 0,
+            "audio_activity": 0.8146
+          },
+          {
+            "current_audio_activity": 0.154,
+            "visual_speaking_confidence": 0,
+            "score": 0.1256,
+            "upcoming_audio_activity": 0.154,
+            "visual_speaking_score": 0,
+            "camera_id": "cam1",
+            "audio_db": -40.116,
+            "visual_score": 0,
+            "audio_activity": 0.154
+          }
+        ]
+      }
+    ],
+    "trusted_sync_contract": {
+      "reason": "sync_contract_trusted",
+      "trusted": true,
+      "contract_id": "sync-preflight-004c372f773fbf847fc7950e",
+      "timeline_window": {
+        "start": 0,
+        "end": 60
+      },
+      "source_sync": {
+        "cam1": {
+          "sync_rate": 0.999575181,
+          "offset_seconds": -0.018292
+        },
+        "cam2": {
+          "sync_rate": 1,
+          "offset_seconds": 0
+        }
+      },
+      "status": "trusted"
+    },
+    "switches": [
+      {
+        "layout_mode": "cut",
+        "start_time": 0,
+        "camera_id": "cam2"
+      },
+      {
+        "layout_mode": "cut",
+        "start_time": 49.25,
+        "camera_id": "cam1"
+      },
+      {
+        "layout_mode": "cut",
+        "start_time": 57.5,
+        "camera_id": "cam2"
+      }
+    ],
+    "director_audio": {
+      "analysis_duration_seconds": 60,
+      "external_anchor_seconds": 0,
+      "mapping_method": "auto_correlate_external_channels_to_camera_scratch_audio",
+      "assigned_source_count": 2,
+      "channel_camera_ids": [
+        "cam1",
+        "cam2"
+      ],
+      "method": "external_stereo_channel_rms",
+      "decode_duration_seconds": 61,
+      "auto_mapping": {
+        "channel_for_source": [
+          0,
+          1
+        ],
+        "mapped_camera_ids": [
+          "cam1",
+          "cam2"
+        ],
+        "mapping_confidence_margin_required": 0.12,
+        "score": 2.18528,
+        "method": "auto_correlate_external_channels_to_camera_scratch_audio",
+        "default_camera_ids": [
+          "cam1",
+          "cam2"
+        ],
+        "runner_up_score": 0.33223,
+        "score_margin": 1.85305,
+        "mapping_confident": true,
+        "pairs": [
+          {
+            "correlation": 0.99556,
+            "mae": 0.02295,
+            "channel_index": 0,
+            "active_overlap": 0.42178,
+            "score": 1.07716,
+            "camera_id": "cam1"
+          },
+          {
+            "correlation": 0.99986,
+            "mae": 0.00496,
+            "channel_index": 1,
+            "active_overlap": 0.54428,
+            "score": 1.10812,
+            "camera_id": "cam2"
+          }
+        ]
+      },
+      "segment_duration_seconds": 0.25,
+      "status": "active"
+    },
+    "visual_source_auditability": {
+      "mode": "rendered_visual_must_match_auditable_camera_timeline",
+      "unsafe_sources": [],
+      "allow_unauditable_visual_proxy": false,
+      "status": "safe"
+    },
+    "layout_contract_audit": {
+      "issue_count": 0,
+      "pip_geometry_samples": [],
+      "issues": [],
+      "checked_segments": 5,
+      "status": "passed"
+    },
+    "continuous_sync_anchors": {
+      "active_camera_count": 2,
+      "anchor_interval_seconds": 120,
+      "min_correlation": 0.25,
+      "word_anchor_status": "Whisper word timestamps are available in the pipeline; this pass uses audio correlation for frame-accurate anchor measurement.",
+      "preflight_seeded_checkpoint_count": 0,
+      "dense_drift_checkpoint_count": 0,
+      "enabled": true,
+      "mode": "piecewise_5_minute_anchors",
+      "cameras": {
+        "cam1": {
+          "max_shift_seconds": 1,
+          "accepted_anchor_count": 2,
+          "camera_label": "cam1",
+          "camera_id": "cam1",
+          "active": true,
+          "anchors": [
+            {
+              "corrected_timeline_seconds": 0.004,
+              "estimated_residual_seconds": 0.004,
+              "audio_audit_source_position_seconds": 0.018,
+              "correction_reason": "already_within_sync_tolerance",
+              "checkpoint_index": 0,
+              "timeline_relative_seconds": 0,
+              "abs_residual_seconds": 0.004,
+              "timeline_absolute_seconds": 0,
+              "source_position_method": "offset_sync_rate",
+              "status": "accepted",
+              "source_position_seconds": 0.018,
+              "correction_applied": false,
+              "correlation": 0.343,
+              "word_anchor": {
+                "note": "Whisper word timestamps can identify the spoken word; correlation supplies sample-accurate trim correction.",
+                "status": "guarded_by_audio_correlation"
+              },
+              "external_audio_position_seconds": 0
+            },
+            {
+              "corrected_timeline_seconds": 51.4964,
+              "estimated_residual_seconds": -0.0036,
+              "audio_audit_source_position_seconds": 51.496,
+              "correction_reason": "already_within_sync_tolerance",
+              "checkpoint_index": 1,
+              "timeline_relative_seconds": 51.5,
+              "abs_residual_seconds": 0.0036,
+              "timeline_absolute_seconds": 51.5,
+              "source_position_method": "offset_sync_rate",
+              "status": "accepted",
+              "source_position_seconds": 51.496,
+              "correction_applied": false,
+              "correlation": 0.6749,
+              "word_anchor": {
+                "note": "Whisper word timestamps can identify the spoken word; correlation supplies sample-accurate trim correction.",
+                "status": "guarded_by_audio_correlation"
+              },
+              "external_audio_position_seconds": 51.5
+            }
+          ],
+          "status": "active"
+        },
+        "cam2": {
+          "max_shift_seconds": 1,
+          "accepted_anchor_count": 2,
+          "camera_label": "cam2",
+          "camera_id": "cam2",
+          "active": true,
+          "anchors": [
+            {
+              "corrected_timeline_seconds": 0,
+              "estimated_residual_seconds": 0,
+              "audio_audit_source_position_seconds": 0,
+              "correction_reason": "already_within_sync_tolerance",
+              "checkpoint_index": 0,
+              "timeline_relative_seconds": 0,
+              "abs_residual_seconds": 0,
+              "timeline_absolute_seconds": 0,
+              "source_position_method": "offset_sync_rate",
+              "status": "accepted",
+              "source_position_seconds": 0,
+              "correction_applied": false,
+              "correlation": 0.9955,
+              "word_anchor": {
+                "note": "Whisper word timestamps can identify the spoken word; correlation supplies sample-accurate trim correction.",
+                "status": "guarded_by_audio_correlation"
+              },
+              "external_audio_position_seconds": 0
+            },
+            {
+              "corrected_timeline_seconds": 51.5,
+              "estimated_residual_seconds": 0,
+              "audio_audit_source_position_seconds": 51.5,
+              "correction_reason": "already_within_sync_tolerance",
+              "checkpoint_index": 1,
+              "timeline_relative_seconds": 51.5,
+              "abs_residual_seconds": 0,
+              "timeline_absolute_seconds": 51.5,
+              "source_position_method": "offset_sync_rate",
+              "status": "accepted",
+              "source_position_seconds": 51.5,
+              "correction_applied": false,
+              "correlation": 0.9698,
+              "word_anchor": {
+                "note": "Whisper word timestamps can identify the spoken word; correlation supplies sample-accurate trim correction.",
+                "status": "guarded_by_audio_correlation"
+              },
+              "external_audio_position_seconds": 51.5
+            }
+          ],
+          "status": "active"
+        }
+      },
+      "max_accepted_residual_seconds": 0.08,
+      "checkpoints_relative_seconds": [
+        0,
+        51.5
+      ],
+      "cache_hit": false,
+      "protected_drift_zones": {
+        "first_minutes": 4,
+        "final_minutes": 2,
+        "strategy": "5-minute cadence plus early and final guard anchors"
+      },
+      "sample_seconds": 8,
+      "dense_drift_source_count": 0,
+      "status": "active"
+    },
+    "pre_caption_sync_audit": {
+      "timeline_duration_seconds": 60,
+      "max_sample_gap_seconds": 17.5,
+      "avg_correlation": 0.7903,
+      "enabled": true,
+      "max_abs_residual_seconds": 0.01,
+      "samples": [
+        {
+          "sample_duration_seconds": 8,
+          "camera_label": "cam2",
+          "estimated_residual_seconds": 0,
+          "segment_index": 0,
+          "role": "primary",
+          "duration_seconds": 38,
+          "output_start_seconds": 0,
+          "abs_residual_seconds": 0,
+          "audio_audit_source_start_seconds": 0,
+          "status": "ok",
+          "sample_position": "start",
+          "camera_id": "cam2",
+          "source_start_seconds": 0,
+          "correlation": 0.9952
+        },
+        {
+          "sample_duration_seconds": 8,
+          "camera_label": "cam2",
+          "estimated_residual_seconds": 0,
+          "segment_index": 0,
+          "role": "primary",
+          "duration_seconds": 20.5,
+          "output_start_seconds": 17.5,
+          "abs_residual_seconds": 0,
+          "audio_audit_source_start_seconds": 17.5,
+          "status": "ok",
+          "sample_position": "middle",
+          "camera_id": "cam2",
+          "source_start_seconds": 17.5,
+          "correlation": 0.9918
+        },
+        {
+          "sample_duration_seconds": 3,
+          "camera_label": "cam2",
+          "estimated_residual_seconds": 0,
+          "segment_index": 0,
+          "role": "primary",
+          "duration_seconds": 3.25,
+          "output_start_seconds": 34.75,
+          "abs_residual_seconds": 0,
+          "audio_audit_source_start_seconds": 34.75,
+          "status": "ok",
+          "sample_position": "end",
+          "camera_id": "cam2",
+          "source_start_seconds": 34.75,
+          "correlation": 0.9955
+        },
+        {
+          "sample_duration_seconds": 8,
+          "camera_label": "cam1",
+          "estimated_residual_seconds": 0,
+          "segment_index": 0,
+          "role": "secondary",
+          "duration_seconds": 38,
+          "output_start_seconds": 0,
+          "abs_residual_seconds": 0,
+          "audio_audit_source_start_seconds": 0.014001,
+          "status": "ok",
+          "sample_position": "start",
+          "camera_id": "cam1",
+          "source_start_seconds": 0.014001118611678616,
+          "correlation": 0.3441
+        },
+        {
+          "sample_duration_seconds": 8,
+          "camera_label": "cam1",
+          "estimated_residual_seconds": 0.003,
+          "segment_index": 0,
+          "role": "secondary",
+          "duration_seconds": 20.5,
+          "output_start_seconds": 17.5,
+          "abs_residual_seconds": 0.003,
+          "audio_audit_source_start_seconds": 17.509107,
+          "status": "ok",
+          "sample_position": "middle",
+          "camera_id": "cam1",
+          "source_start_seconds": 17.50910719251773,
+          "correlation": 0.3253
+        },
+        {
+          "sample_duration_seconds": 3,
+          "camera_label": "cam1",
+          "estimated_residual_seconds": -0.01,
+          "segment_index": 0,
+          "role": "secondary",
+          "duration_seconds": 3.25,
+          "output_start_seconds": 34.75,
+          "abs_residual_seconds": 0.01,
+          "audio_audit_source_start_seconds": 34.754283,
+          "status": "ok",
+          "sample_position": "end",
+          "camera_id": "cam1",
+          "source_start_seconds": 34.7542831796537,
+          "correlation": 0.3384
+        },
+        {
+          "sample_duration_seconds": 8,
+          "camera_label": "cam2",
+          "estimated_residual_seconds": 0,
+          "segment_index": 1,
+          "role": "primary",
+          "duration_seconds": 11.25,
+          "output_start_seconds": 38,
+          "abs_residual_seconds": 0,
+          "audio_audit_source_start_seconds": 38,
+          "status": "ok",
+          "sample_position": "start",
+          "camera_id": "cam2",
+          "source_start_seconds": 38,
+          "correlation": 0.9931
+        },
+        {
+          "sample_duration_seconds": 3,
+          "camera_label": "cam2",
+          "estimated_residual_seconds": 0,
+          "segment_index": 1,
+          "role": "primary",
+          "duration_seconds": 3.25,
+          "output_start_seconds": 46,
+          "abs_residual_seconds": 0,
+          "audio_audit_source_start_seconds": 46,
+          "status": "ok",
+          "sample_position": "end",
+          "camera_id": "cam2",
+          "source_start_seconds": 46,
+          "correlation": 0.9957
+        },
+        {
+          "sample_duration_seconds": 8,
+          "camera_label": "cam1",
+          "estimated_residual_seconds": 0,
+          "segment_index": 2,
+          "role": "primary",
+          "duration_seconds": 8.25,
+          "output_start_seconds": 49.25,
+          "abs_residual_seconds": 0,
+          "audio_audit_source_start_seconds": 49.25,
+          "status": "ok",
+          "sample_position": "start",
+          "camera_id": "cam1",
+          "source_start_seconds": 49.25,
+          "correlation": 0.846
+        },
+        {
+          "sample_duration_seconds": 3,
+          "camera_label": "cam1",
+          "estimated_residual_seconds": -0.001,
+          "segment_index": 2,
+          "role": "primary",
+          "duration_seconds": 3.25,
+          "output_start_seconds": 54.25,
+          "abs_residual_seconds": 0.001,
+          "audio_audit_source_start_seconds": 54.248788,
+          "status": "ok",
+          "sample_position": "end",
+          "camera_id": "cam1",
+          "source_start_seconds": 54.24878787878788,
+          "correlation": 0.8709
+        },
+        {
+          "sample_duration_seconds": 2.25,
+          "camera_label": "cam2",
+          "estimated_residual_seconds": 0,
+          "segment_index": 3,
+          "role": "primary",
+          "duration_seconds": 2.5,
+          "output_start_seconds": 57.5,
+          "abs_residual_seconds": 0,
+          "audio_audit_source_start_seconds": 57.5,
+          "status": "ok",
+          "sample_position": "start",
+          "camera_id": "cam2",
+          "source_start_seconds": 57.5,
+          "correlation": 0.9969
+        }
+      ],
+      "usable_sample_count": 11,
+      "thresholds": {
+        "min_correlation": 0.25,
+        "min_coverage_ratio": 0.6,
+        "unsafe_seconds": 0.2,
+        "sample_seconds": 8,
+        "max_sample_gap_seconds": 90,
+        "good_seconds": 0.08
+      },
+      "sample_coverage_ratio": 1,
+      "dense_time_coverage": false,
+      "sample_count": 11,
+      "min_usable_sample_count": 4,
+      "min_dense_usable_sample_count": 120,
+      "candidate_sample_count": 11,
+      "min_usable_sample_policy": "short_proof_quorum",
+      "status": "good"
+    },
+    "pre_sync_clap": null,
+    "segments": [
+      {
+        "editorial_decision_score": 0.92,
+        "audio_decision_reliable": true,
+        "editorial_switch_allowed": true,
+        "raw_audio_leader_camera_id": "cam2",
+        "editorial_reaction_story_value": 0,
+        "editorial_decision_reason": "earned_active_speaker_handoff",
+        "audio_decision_reason": "strong_isolated_audio_owner",
+        "audio_leader_activity": 0.7417,
+        "source_start": 0,
+        "source_end": 38,
+        "timeline_start": 0,
+        "audio_leader_camera_id": "cam2",
+        "layout_mode": "cut",
+        "editorial_decision_threshold": 0.66,
+        "audio_leader_gap": 1.1237,
+        "layout_reason": "active_speaker_with_reaction:opening_backfilled_to_first_reliable_owner:strong_isolated_audio_owner",
+        "director_score": 0.5059,
+        "timeline_end": 38,
+        "audio_second_activity": 0.3934,
+        "camera_id": "cam2",
+        "layout_confidence": 0.7417,
+        "editorial_active_speaker_value": 0.92,
+        "secondary_camera_id": "cam1",
+        "director_channel_camera_ids": [
+          "cam1",
+          "cam2"
+        ],
+        "ranked_sources": [
+          {
+            "current_audio_activity": 0.69,
+            "visual_speaking_confidence": 0,
+            "score": 0.5059,
+            "upcoming_audio_activity": 0.8062,
+            "visual_speaking_score": 0,
+            "camera_id": "cam2",
+            "audio_db": -16.562,
+            "visual_score": 0,
+            "audio_activity": 0.7417
+          },
+          {
+            "current_audio_activity": 0.3934,
+            "visual_speaking_confidence": 0,
+            "score": 0.181,
+            "upcoming_audio_activity": 0.2674,
+            "visual_speaking_score": 0,
+            "camera_id": "cam1",
+            "audio_db": -36.789,
+            "visual_score": 0,
+            "audio_activity": 0.3934
+          }
+        ]
+      },
+      {
+        "editorial_decision_score": 1,
+        "audio_decision_reliable": true,
+        "editorial_switch_allowed": true,
+        "raw_audio_leader_camera_id": "cam2",
+        "editorial_reaction_story_value": 0,
+        "editorial_decision_reason": "initial_or_stay",
+        "audio_decision_reason": "strong_isolated_audio_owner",
+        "audio_leader_activity": 0.7364,
+        "source_start": 38,
+        "source_end": 42,
+        "timeline_start": 38,
+        "audio_leader_camera_id": "cam2",
+        "layout_mode": "cut",
+        "editorial_decision_threshold": 0,
+        "audio_leader_gap": 0.7618,
+        "layout_reason": "reaction_overlay_disabled:earned_reaction_accent",
+        "director_score": 0.4575,
+        "timeline_end": 42,
+        "audio_second_activity": 0.7426,
+        "camera_id": "cam2",
+        "layout_confidence": 0,
+        "editorial_active_speaker_value": 1,
+        "secondary_camera_id": null,
+        "director_channel_camera_ids": [
+          "cam1",
+          "cam2"
+        ],
+        "ranked_sources": [
+          {
+            "current_audio_activity": 0.7364,
+            "visual_speaking_confidence": 0,
+            "score": 0.4575,
+            "upcoming_audio_activity": 0.7273,
+            "visual_speaking_score": 0,
+            "camera_id": "cam2",
+            "audio_db": -17.329,
+            "visual_score": 0,
+            "audio_activity": 0.7364
+          },
+          {
+            "current_audio_activity": 0.2807,
+            "visual_speaking_confidence": 0,
+            "score": 0.2447,
+            "upcoming_audio_activity": 0.8072,
+            "visual_speaking_score": 0,
+            "camera_id": "cam1",
+            "audio_db": -31.041,
+            "visual_score": 0,
+            "audio_activity": 0.7426
+          }
+        ]
+      },
+      {
+        "editorial_decision_score": 1,
+        "audio_decision_reliable": true,
+        "editorial_switch_allowed": true,
+        "raw_audio_leader_camera_id": "cam2",
+        "editorial_reaction_story_value": 0,
+        "editorial_decision_reason": "initial_or_stay",
+        "audio_decision_reason": "strong_isolated_audio_owner",
+        "audio_leader_activity": 0.7364,
+        "source_start": 42,
+        "source_end": 49.25,
+        "timeline_start": 42,
+        "audio_leader_camera_id": "cam2",
+        "layout_mode": "cut",
+        "editorial_decision_threshold": 0,
+        "audio_leader_gap": 0.7618,
+        "layout_reason": "accent_release",
+        "director_score": 0.4575,
+        "timeline_end": 49.25,
+        "audio_second_activity": 0.7426,
+        "camera_id": "cam2",
+        "layout_confidence": 0,
+        "editorial_active_speaker_value": 1,
+        "secondary_camera_id": null,
+        "director_channel_camera_ids": [
+          "cam1",
+          "cam2"
+        ],
+        "ranked_sources": [
+          {
+            "current_audio_activity": 0.7364,
+            "visual_speaking_confidence": 0,
+            "score": 0.4575,
+            "upcoming_audio_activity": 0.7273,
+            "visual_speaking_score": 0,
+            "camera_id": "cam2",
+            "audio_db": -17.329,
+            "visual_score": 0,
+            "audio_activity": 0.7364
+          },
+          {
+            "current_audio_activity": 0.2807,
+            "visual_speaking_confidence": 0,
+            "score": 0.2447,
+            "upcoming_audio_activity": 0.8072,
+            "visual_speaking_score": 0,
+            "camera_id": "cam1",
+            "audio_db": -31.041,
+            "visual_score": 0,
+            "audio_activity": 0.7426
+          }
+        ]
+      },
+      {
+        "editorial_decision_score": 0.92,
+        "audio_decision_reliable": true,
+        "editorial_switch_allowed": true,
+        "raw_audio_leader_camera_id": "cam1",
+        "editorial_reaction_story_value": 0,
+        "editorial_decision_reason": "earned_active_speaker_handoff",
+        "audio_decision_reason": "sustained_isolated_handoff",
+        "audio_leader_activity": 1,
+        "source_start": 49.25,
+        "source_end": 57.498,
+        "timeline_start": 49.25,
+        "audio_leader_camera_id": "cam1",
+        "layout_mode": "cut",
+        "editorial_decision_threshold": 0.58,
+        "audio_leader_gap": 0.972,
+        "layout_reason": "sustained_isolated_handoff",
+        "director_score": 0.52,
+        "timeline_end": 57.5,
+        "audio_second_activity": 0.028,
+        "camera_id": "cam1",
+        "layout_confidence": 1,
+        "editorial_active_speaker_value": 0.92,
+        "secondary_camera_id": null,
+        "director_channel_camera_ids": [
+          "cam1",
+          "cam2"
+        ],
+        "ranked_sources": [
+          {
+            "current_audio_activity": 1,
+            "visual_speaking_confidence": 0,
+            "score": 0.52,
+            "upcoming_audio_activity": 1,
+            "visual_speaking_score": 0,
+            "camera_id": "cam1",
+            "audio_db": -24.982,
+            "visual_score": 0,
+            "audio_activity": 1
+          },
+          {
+            "current_audio_activity": 0.028,
+            "visual_speaking_confidence": 0,
+            "score": 0.09,
+            "upcoming_audio_activity": 0.0047,
+            "visual_speaking_score": 0,
+            "camera_id": "cam2",
+            "audio_db": -25.106,
+            "visual_score": 0,
+            "audio_activity": 0.028
+          }
+        ]
+      },
+      {
+        "editorial_decision_score": 0.92,
+        "audio_decision_reliable": true,
+        "editorial_switch_allowed": true,
+        "raw_audio_leader_camera_id": "cam2",
+        "editorial_reaction_story_value": 0,
+        "editorial_decision_reason": "earned_active_speaker_handoff",
+        "audio_decision_reason": "sustained_isolated_handoff",
+        "audio_leader_activity": 0.8146,
+        "source_start": 57.5,
+        "source_end": 60,
+        "timeline_start": 57.5,
+        "audio_leader_camera_id": "cam2",
+        "layout_mode": "cut",
+        "editorial_decision_threshold": 0.58,
+        "audio_leader_gap": 1.3137,
+        "layout_reason": "sustained_isolated_handoff",
+        "director_score": 0.5111,
+        "timeline_end": 60,
+        "audio_second_activity": 0.154,
+        "camera_id": "cam2",
+        "layout_confidence": 0.8146,
+        "editorial_active_speaker_value": 0.92,
+        "secondary_camera_id": null,
+        "director_channel_camera_ids": [
+          "cam1",
+          "cam2"
+        ],
+        "ranked_sources": [
+          {
+            "current_audio_activity": 0.8146,
+            "visual_speaking_confidence": 0,
+            "score": 0.5111,
+            "upcoming_audio_activity": 0.8146,
+            "visual_speaking_score": 0,
+            "camera_id": "cam2",
+            "audio_db": -16.47,
+            "visual_score": 0,
+            "audio_activity": 0.8146
+          },
+          {
+            "current_audio_activity": 0.154,
+            "visual_speaking_confidence": 0,
+            "score": 0.1256,
+            "upcoming_audio_activity": 0.154,
+            "visual_speaking_score": 0,
+            "camera_id": "cam1",
+            "audio_db": -40.116,
+            "visual_score": 0,
+            "audio_activity": 0.154
+          }
+        ]
+      }
+    ],
+    "post_render_sync_audit": {
+      "timeline_duration_seconds": 60,
+      "max_sample_gap_seconds": 17.5,
+      "avg_correlation": 0.7903,
+      "enabled": true,
+      "max_abs_residual_seconds": 0.01,
+      "reused_reason": "caption_and_branding_filters_copy_audio",
+      "samples": [
+        {
+          "sample_duration_seconds": 8,
+          "camera_label": "cam2",
+          "estimated_residual_seconds": 0,
+          "segment_index": 0,
+          "role": "primary",
+          "duration_seconds": 38,
+          "output_start_seconds": 0,
+          "abs_residual_seconds": 0,
+          "reused": true,
+          "audio_audit_source_start_seconds": 0,
+          "status": "ok",
+          "sample_position": "start",
+          "camera_id": "cam2",
+          "source_start_seconds": 0,
+          "correlation": 0.9952
+        },
+        {
+          "sample_duration_seconds": 8,
+          "camera_label": "cam2",
+          "estimated_residual_seconds": 0,
+          "segment_index": 0,
+          "role": "primary",
+          "duration_seconds": 20.5,
+          "output_start_seconds": 17.5,
+          "abs_residual_seconds": 0,
+          "reused": true,
+          "audio_audit_source_start_seconds": 17.5,
+          "status": "ok",
+          "sample_position": "middle",
+          "camera_id": "cam2",
+          "source_start_seconds": 17.5,
+          "correlation": 0.9918
+        },
+        {
+          "sample_duration_seconds": 3,
+          "camera_label": "cam2",
+          "estimated_residual_seconds": 0,
+          "segment_index": 0,
+          "role": "primary",
+          "duration_seconds": 3.25,
+          "output_start_seconds": 34.75,
+          "abs_residual_seconds": 0,
+          "reused": true,
+          "audio_audit_source_start_seconds": 34.75,
+          "status": "ok",
+          "sample_position": "end",
+          "camera_id": "cam2",
+          "source_start_seconds": 34.75,
+          "correlation": 0.9955
+        },
+        {
+          "sample_duration_seconds": 8,
+          "camera_label": "cam1",
+          "estimated_residual_seconds": 0,
+          "segment_index": 0,
+          "role": "secondary",
+          "duration_seconds": 38,
+          "output_start_seconds": 0,
+          "abs_residual_seconds": 0,
+          "reused": true,
+          "audio_audit_source_start_seconds": 0.014001,
+          "status": "ok",
+          "sample_position": "start",
+          "camera_id": "cam1",
+          "source_start_seconds": 0.014001118611678616,
+          "correlation": 0.3441
+        },
+        {
+          "sample_duration_seconds": 8,
+          "camera_label": "cam1",
+          "estimated_residual_seconds": 0.003,
+          "segment_index": 0,
+          "role": "secondary",
+          "duration_seconds": 20.5,
+          "output_start_seconds": 17.5,
+          "abs_residual_seconds": 0.003,
+          "reused": true,
+          "audio_audit_source_start_seconds": 17.509107,
+          "status": "ok",
+          "sample_position": "middle",
+          "camera_id": "cam1",
+          "source_start_seconds": 17.50910719251773,
+          "correlation": 0.3253
+        },
+        {
+          "sample_duration_seconds": 3,
+          "camera_label": "cam1",
+          "estimated_residual_seconds": -0.01,
+          "segment_index": 0,
+          "role": "secondary",
+          "duration_seconds": 3.25,
+          "output_start_seconds": 34.75,
+          "abs_residual_seconds": 0.01,
+          "reused": true,
+          "audio_audit_source_start_seconds": 34.754283,
+          "status": "ok",
+          "sample_position": "end",
+          "camera_id": "cam1",
+          "source_start_seconds": 34.7542831796537,
+          "correlation": 0.3384
+        },
+        {
+          "sample_duration_seconds": 8,
+          "camera_label": "cam2",
+          "estimated_residual_seconds": 0,
+          "segment_index": 1,
+          "role": "primary",
+          "duration_seconds": 11.25,
+          "output_start_seconds": 38,
+          "abs_residual_seconds": 0,
+          "reused": true,
+          "audio_audit_source_start_seconds": 38,
+          "status": "ok",
+          "sample_position": "start",
+          "camera_id": "cam2",
+          "source_start_seconds": 38,
+          "correlation": 0.9931
+        },
+        {
+          "sample_duration_seconds": 3,
+          "camera_label": "cam2",
+          "estimated_residual_seconds": 0,
+          "segment_index": 1,
+          "role": "primary",
+          "duration_seconds": 3.25,
+          "output_start_seconds": 46,
+          "abs_residual_seconds": 0,
+          "reused": true,
+          "audio_audit_source_start_seconds": 46,
+          "status": "ok",
+          "sample_position": "end",
+          "camera_id": "cam2",
+          "source_start_seconds": 46,
+          "correlation": 0.9957
+        },
+        {
+          "sample_duration_seconds": 8,
+          "camera_label": "cam1",
+          "estimated_residual_seconds": 0,
+          "segment_index": 2,
+          "role": "primary",
+          "duration_seconds": 8.25,
+          "output_start_seconds": 49.25,
+          "abs_residual_seconds": 0,
+          "reused": true,
+          "audio_audit_source_start_seconds": 49.25,
+          "status": "ok",
+          "sample_position": "start",
+          "camera_id": "cam1",
+          "source_start_seconds": 49.25,
+          "correlation": 0.846
+        },
+        {
+          "sample_duration_seconds": 3,
+          "camera_label": "cam1",
+          "estimated_residual_seconds": -0.001,
+          "segment_index": 2,
+          "role": "primary",
+          "duration_seconds": 3.25,
+          "output_start_seconds": 54.25,
+          "abs_residual_seconds": 0.001,
+          "reused": true,
+          "audio_audit_source_start_seconds": 54.248788,
+          "status": "ok",
+          "sample_position": "end",
+          "camera_id": "cam1",
+          "source_start_seconds": 54.24878787878788,
+          "correlation": 0.8709
+        },
+        {
+          "sample_duration_seconds": 2.25,
+          "camera_label": "cam2",
+          "estimated_residual_seconds": 0,
+          "segment_index": 3,
+          "role": "primary",
+          "duration_seconds": 2.5,
+          "output_start_seconds": 57.5,
+          "abs_residual_seconds": 0,
+          "reused": true,
+          "audio_audit_source_start_seconds": 57.5,
+          "status": "ok",
+          "sample_position": "start",
+          "camera_id": "cam2",
+          "source_start_seconds": 57.5,
+          "correlation": 0.9969
+        }
+      ],
+      "audio_timing_preserved": true,
+      "usable_sample_count": 11,
+      "thresholds": {
+        "min_correlation": 0.25,
+        "min_coverage_ratio": 0.6,
+        "unsafe_seconds": 0.2,
+        "sample_seconds": 8,
+        "max_sample_gap_seconds": 90,
+        "good_seconds": 0.08
+      },
+      "sample_coverage_ratio": 1,
+      "dense_time_coverage": false,
+      "sample_count": 11,
+      "min_usable_sample_count": 4,
+      "reused_from": "pre_caption_sync_audit",
+      "min_dense_usable_sample_count": 120,
+      "candidate_sample_count": 11,
+      "min_usable_sample_policy": "short_proof_quorum",
+      "status": "good"
+    },
+    "director_truth_audit": {
+      "issue_count": 0,
+      "issues": [],
+      "checked_segments": 5,
+      "status": "passed"
+    },
+    "director_latency_audit": {
+      "all_issues": [],
+      "issue_count": 0,
+      "thresholds": {
+        "max_latency_seconds": 1,
+        "min_gap": 0.14,
+        "min_activity": 0.34,
+        "min_run_duration_seconds": 0.75
+      },
+      "checked_runs": 22,
+      "issue_report_limit": 50,
+      "issues_truncated": false,
+      "issues": [],
+      "status": "passed"
+    },
+    "performance_timing": {
+      "duration_seconds": 60,
+      "fast_composite": false,
+      "checkpointing": {
+        "checkpoint_seconds": 300,
+        "restored_count": 0,
+        "enabled": false,
+        "checkpoint_count": 0
+      },
+      "segment_count": 5,
+      "elapsed_seconds": 40.637,
+      "source_count": 2,
+      "render_tier": "premium",
+      "started_at_epoch_seconds": 1795800060.472,
+      "stages": [
+        {
+          "pre_sync_clap_status": "not_requested",
+          "source_count": 2,
+          "source_prepare_concurrency": 2,
+          "elapsed_seconds": 3.654,
+          "stage": "prepare_sources"
+        },
+        {
+          "correction_count": 0,
+          "elapsed_seconds": 2.899,
+          "status": "good",
+          "stage": "preflight_sync"
+        },
+        {
+          "mode": "audio_first_external_channels",
+          "source_activity_cache_misses": 0,
+          "source_activity_cache_hits": 2,
+          "source_count": 2,
+          "director_audio_status": "active",
+          "elapsed_seconds": 1.307,
+          "stage": "director_scoring"
+        },
+        {
+          "segment_count": 4,
+          "director_segment_count": 5,
+          "segment_render_concurrency": 2,
+          "rendered_segment_count": 4,
+          "render_segment_merge": {
+            "render_segment_count": 4,
+            "merge_count": 1,
+            "status": "active",
+            "input_segment_count": 5
+          },
+          "stage": "render_video_segments",
+          "checkpointing_enabled": false,
+          "elapsed_seconds": 24.194,
+          "fast_composite": false,
+          "layout_summary": {
+            "cut": 5
+          },
+          "checkpoint_count": 0
+        },
+        {
+          "part_count": 4,
+          "checkpointing_enabled": false,
+          "elapsed_seconds": 0.162,
+          "mode": "stream_copy",
+          "stage": "stitch_video_parts"
+        },
+        {
+          "elapsed_seconds": 2.37,
+          "stage": "mux_audio_master",
+          "audio_source": "external_clean_audio"
+        },
+        {
+          "sync_status": "good",
+          "max_abs_residual_seconds": 0.01,
+          "elapsed_seconds": 2.411,
+          "stage": "pre_caption_sync_audit"
+        },
+        {
+          "elapsed_seconds": 0,
+          "captions_status": "disabled_by_request",
+          "branding_status": "disabled_by_request",
+          "stage": "captions_branding"
+        },
+        {
+          "sync_status": "good",
+          "max_abs_residual_seconds": 0.01,
+          "audio_timing_preserved": true,
+          "elapsed_seconds": 0.062,
+          "stage": "post_render_audit",
+          "reused_from": "pre_caption_sync_audit"
+        },
+        {
+          "elapsed_seconds": 0,
+          "status": "disabled_by_request",
+          "stage": "thumbnail"
+        },
+        {
+          "firebase_upload_enabled": true,
+          "elapsed_seconds": 1.155,
+          "stage": "publish_outputs",
+          "output_size_bytes": 76534829
+        }
+      ],
+      "render_segment_count": 4,
+      "render_segment_merge": {
+        "input_segment_count": 5,
+        "render_segment_count": 4,
+        "merge_count": 1,
+        "status": "active"
+      }
+    },
+    "sync_preflight": {
+      "cameras": {},
+      "cache_hit": true,
+      "proof_reuse": "signed_server_sync_preflight_v1",
+      "trusted_sync_contract": {
+        "reason": "sync_contract_trusted",
+        "trusted": true,
+        "contract_id": "sync-preflight-004c372f773fbf847fc7950e",
+        "timeline_window": {
+          "start": 0,
+          "end": 60
+        },
+        "source_sync": {
+          "cam1": {
+            "sync_rate": 0.999575181,
+            "offset_seconds": -0.018292
+          },
+          "cam2": {
+            "sync_rate": 1,
+            "offset_seconds": 0
+          }
+        },
+        "status": "trusted"
+      },
+      "status": "good"
+    }
+  }
+}

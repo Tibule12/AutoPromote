@@ -1,0 +1,78 @@
+{
+  "provisioned": true,
+  "profiles": [
+    {
+      "id": "render-gpu",
+      "image": "gcr.io/autopromote-cc6d3/media-worker-gpu@sha256:950d08ac402f7d9e541b73599e5298edae13782256195e6e8010c459c831fbba",
+      "tokens": 40,
+      "maximumUsd": 0.85,
+      "qualifiedStage": "Q4-FX",
+      "runnerSha256": "bb9460a32b80a605f31e7407101facbb03cc05a918553ec6dfee94ad72174f61"
+    },
+    {
+      "id": "cam-gpu",
+      "image": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-gpu@sha256:61a2c7c2d96e79eb6ade532ab54f3bc44352702dd5b7c06a79780e530c6d7812",
+      "tokens": 60,
+      "maximumUsd": 1.1,
+      "qualifiedStage": "Q3-CAM-DELIVERY-CORRECTED",
+      "runnerSha256": "bb9460a32b80a605f31e7407101facbb03cc05a918553ec6dfee94ad72174f61"
+    },
+    {
+      "id": "audio-cpu",
+      "image": "gcr.io/autopromote-cc6d3/media-worker-v1@sha256:c58cfca90868dfbbf03b4cfde699acb44202e194a19930814a974b82706c77be",
+      "tokens": 5,
+      "maximumUsd": 0.03,
+      "qualifiedStage": "Q1-AUDIO",
+      "runnerSha256": "bb9460a32b80a605f31e7407101facbb03cc05a918553ec6dfee94ad72174f61"
+    },
+    {
+      "id": "speech-cpu",
+      "image": "gcr.io/autopromote-cc6d3/media-worker-v1@sha256:c58cfca90868dfbbf03b4cfde699acb44202e194a19930814a974b82706c77be",
+      "tokens": 10,
+      "maximumUsd": 0.03,
+      "qualifiedStage": "Q1-ASR",
+      "runnerSha256": "b90956371c0577ba3ce5ef2607f2c61f9c82724ea6ebfa176a6482dee63557e6"
+    },
+    {
+      "id": "finder-cpu",
+      "image": "gcr.io/autopromote-cc6d3/media-worker-v1@sha256:c58cfca90868dfbbf03b4cfde699acb44202e194a19930814a974b82706c77be",
+      "tokens": 20,
+      "maximumUsd": 0.08,
+      "qualifiedStage": "Q2-FIND",
+      "runnerSha256": "b90956371c0577ba3ce5ef2607f2c61f9c82724ea6ebfa176a6482dee63557e6"
+    },
+    {
+      "id": "render-cpu",
+      "image": "gcr.io/autopromote-cc6d3/media-worker-v1@sha256:c58cfca90868dfbbf03b4cfde699acb44202e194a19930814a974b82706c77be",
+      "tokens": 40,
+      "maximumUsd": 0.15,
+      "qualifiedStage": "Q1-EXPORT-caption-track-export",
+      "runnerSha256": "b90956371c0577ba3ce5ef2607f2c61f9c82724ea6ebfa176a6482dee63557e6"
+    },
+    {
+      "id": "clip-cpu",
+      "image": "gcr.io/autopromote-cc6d3/media-worker-v1@sha256:c58cfca90868dfbbf03b4cfde699acb44202e194a19930814a974b82706c77be",
+      "tokens": 30,
+      "maximumUsd": 0.13,
+      "qualifiedStage": "Q2-EXPORT",
+      "runnerSha256": "b90956371c0577ba3ce5ef2607f2c61f9c82724ea6ebfa176a6482dee63557e6"
+    },
+    {
+      "id": "sync-cpu",
+      "image": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-gpu@sha256:61a2c7c2d96e79eb6ade532ab54f3bc44352702dd5b7c06a79780e530c6d7812",
+      "tokens": 10,
+      "maximumUsd": 0.08,
+      "qualifiedStage": "Q3-PREFLIGHT-RANGE",
+      "runnerSha256": "b90956371c0577ba3ce5ef2607f2c61f9c82724ea6ebfa176a6482dee63557e6"
+    }
+  ],
+  "dailyUsd": 2,
+  "monthlyUsd": 10,
+  "externalAiDailyUsd": 0.05,
+  "maximumConcurrentExecutions": 1,
+  "customerBalancesModified": 0,
+  "legacyAgreementsModified": 0,
+  "productionResourcesDeleted": 0,
+  "publicPurchasesEnabled": false,
+  "physicalHostLossInjected": false
+}

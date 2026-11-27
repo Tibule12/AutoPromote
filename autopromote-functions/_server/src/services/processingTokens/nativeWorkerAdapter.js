@@ -61,7 +61,14 @@ function createNativeWorkerAdapter({ db, profile: p, request, now = Date.now }) 
     return found[0];
   }
   async function reconcile(binding, service) {
-    if (binding.state === 'settled') return binding.result;
+    if (binding.state === 'settled') {
+      if(binding.success===false)await db.runTransaction(async tx=>{
+        const ref=db.collection('video_edits').doc(binding.nativeJobId),native=(await tx.get(ref)).data();
+        if(native?.processingBindingId===binding.id&&!['failed','cancelled'].includes(native.status))
+          tx.update(ref,{status:'failed',stage:'failed',processingError:'The bounded worker stopped before successful completion'});
+      });
+      return {success:binding.success,result:binding.result};
+    }
     const execution = await executionFor(binding);
     if (!execution) return null;
     await require('./cloudRunAdapter').assertExecutionTemplate(execution,p,request);
@@ -75,6 +82,9 @@ function createNativeWorkerAdapter({ db, profile: p, request, now = Date.now }) 
         (execution.succeededCount || 0) + (execution.failedCount || 0) + (execution.cancelledCount || 0) !== 1) return null;
     const native = (await db.collection('video_edits').doc(binding.nativeJobId).get()).data();
     let success = execution.succeededCount === 1 && native?.userId === binding.userId && native.status === 'completed';
+    if(!success && native?.processingBindingId===binding.id && !['failed','cancelled'].includes(native.status))
+      await db.collection('video_edits').doc(binding.nativeJobId).update({status:'failed',stage:'failed',
+        processingError:'The bounded worker stopped before successful completion'});
     if (binding.endpoint === '/analyze-clips') {
       const analysis = db.collection('clip_analyses').doc(binding.nativeJobId);
       const saved = (await analysis.get()).data();
