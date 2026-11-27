@@ -8,6 +8,7 @@ const {
   getUploadLimitForPlan,
   getPlatformLimitForPlan,
 } = require("../config/subscriptionPlans");
+const { TESTER_PROGRAM, getActiveTesterAccess } = require("../config/testerProgram");
 
 const FREE_PLAN = resolvePlan("free");
 const PREMIUM_PLAN = resolvePlan("premium");
@@ -32,7 +33,7 @@ const TIERS = {
       global_distribution: false, // Block "Publish Everywhere"
       multicam: false,
     },
-    features: ["organic_upload", "basic_analytics"],
+    features: ["organic_upload"],
   },
   BASIC: {
     id: "basic", // Legacy ID
@@ -51,7 +52,7 @@ const TIERS = {
       global_distribution: true,
       multicam: true,
     },
-    features: ["organic_upload", "basic_analytics", "bot_views", "multi_platform"],
+    features: ["organic_upload", "bot_views", "multi_platform"],
   },
   PREMIUM: {
     id: "premium", // Matches PayPal Plan
@@ -70,7 +71,7 @@ const TIERS = {
       global_distribution: true,
       multicam: true,
     },
-    features: ["organic_upload", "basic_analytics", "bot_views", "multi_platform"],
+    features: ["organic_upload", "bot_views", "multi_platform"],
   },
   PRO: {
     id: "pro",
@@ -91,7 +92,6 @@ const TIERS = {
     },
     features: [
       "organic_upload",
-      "advanced_analytics",
       "priority_scheduling",
       "all_bot_tools",
       "global_distribution",
@@ -117,7 +117,6 @@ const TIERS = {
     },
     features: [
       "organic_upload",
-      "advanced_analytics",
       "priority_scheduling",
       "all_bot_tools",
       "global_distribution",
@@ -135,7 +134,29 @@ const FEATURE_PRICES = {
   processing_fee_percent: 0.0,
 };
 
-function getPlatformPostMonthlyQuota(planId, plan = null) {
+const { effectiveUploadLimit } = require("./uploadAllowance");
+
+function buildTesterTier(baseTier) {
+  return {
+    ...baseTier,
+    monthly_upload_cap: TESTER_PROGRAM.usageLimits.uploads,
+    monthly_ai_cap: 30,
+    monthly_bot_cap: 0,
+    platform_limit: TESTER_PROGRAM.usageLimits.connectedPlatforms,
+    allowed_features: {
+      organic_upload: true,
+      bot_boost: false,
+      repost_boost: false,
+      share_boost: false,
+      global_distribution: true,
+      multicam: true,
+    },
+    features: ["organic_upload", "multi_platform", "multicam"],
+  };
+}
+
+function getPlatformPostMonthlyQuota(planId, plan = null, testerAccess = null, billingData = {}) {
+  if (testerAccess) return TESTER_PROGRAM.usageLimits.queuedPlatformPosts;
   const normalized = normalizePlanId(planId || "free");
   const defaultPlatformPostQuotas = {
     free: 10,
@@ -145,13 +166,18 @@ function getPlatformPostMonthlyQuota(planId, plan = null) {
     enterprise: 2000,
   };
   const envKey = `PLATFORM_POST_MONTHLY_QUOTA_${String(normalized).toUpperCase()}`;
-  return (
+  const base = (
     parseInt(process.env[envKey] || "", 10) ||
     parseInt(process.env.PLATFORM_POST_MONTHLY_QUOTA || "", 10) ||
     defaultPlatformPostQuotas[normalized] ||
-    (plan && plan.features ? Number(plan.features.wolfHuntTasks) : 0) ||
+    (plan && plan.features ? Number(plan.features.monthlyPromotions) : 0) ||
     0
   );
+  // Only server-owned billing data can raise one account's publishing capacity.
+  const allowance = billingData?.publishingAllowance?.monthlyLimit;
+  return Number.isInteger(allowance) && allowance >= 1 && allowance <= 10000
+    ? Math.max(base, allowance)
+    : base;
 }
 
 async function resolveEffectiveTierId(userId, billingData, userData) {
@@ -169,6 +195,13 @@ async function resolveEffectiveTierId(userId, billingData, userData) {
   );
 
   const now = Date.now();
+  const testerAccess = getActiveTesterAccess(safeUser, now);
+  if (testerAccess) {
+    const testerTier = normalizePlanId(testerAccess.planId || "pro");
+    const planRank = { free: 0, plus: 1, premium: 2, pro: 3, enterprise: 4 };
+    return planRank[billingTier] > planRank[testerTier] ? billingTier : testerTier;
+  }
+
   const normalizedStatus = String(safeUser.subscriptionStatus || safeBilling.status || "")
     .trim()
     .toLowerCase();
@@ -191,19 +224,27 @@ async function resolveEffectiveTierId(userId, billingData, userData) {
     "external_missing",
   ].includes(normalizedStatus);
 
-  if (isCancelledState) {
-    return "free";
+  if (billingTier === "plus" || userTier === "plus") {
+    const grant = safeBilling.administrativeGrant;
+    const adminGrant = grant?.authorized === true && grant.grantedBy &&
+      (!grant.expiresAt || Date.parse(grant.expiresAt) > now);
+    if (!adminGrant && (safeBilling.paymentVerified !== true || !hasFutureExpiry ||
+        !["active", "cancelled", "canceled"].includes(normalizedStatus))) return "free";
   }
+  if (["cancelled", "canceled"].includes(normalizedStatus) && hasFutureExpiry) {
+    return billingTier !== "free" ? billingTier : userTier;
+  }
+  if (isCancelledState) return "free";
 
   if (normalizedStatus === "active") {
-    if (isExpired) return billingTier !== "free" ? billingTier : "free";
+    if (isExpired) return "free";
     if (billingTier !== "free") return billingTier;
     if (hasFutureExpiry && userTier !== "free") return userTier;
     return "free";
   }
 
   if (isExpired) {
-    return billingTier !== "free" ? billingTier : "free";
+    return "free";
   }
 
   if (!normalizedStatus) {
@@ -244,34 +285,22 @@ async function getEffectiveTierSnapshot(userId, providedBillingData, providedUse
   }
 
   const tierId = await resolveEffectiveTierId(userId, billingData, userData);
-  const tier = TIERS[tierId.toUpperCase()] || TIERS.FREE;
-
-  try {
-    const normalizedStatus = String(
-      (userData && userData.subscriptionStatus) || (billingData && billingData.status) || ""
-    )
-      .trim()
-      .toLowerCase();
-    const expiry =
-      (userData && (userData.subscriptionPeriodEnd || userData.subscriptionExpiresAt)) ||
-      (billingData && (billingData.expiresAt || billingData.nextBillingDate)) ||
-      "none";
-    const billingTier = normalizePlanId((billingData && billingData.tier) || "free");
-    const userTier = normalizePlanId(
-      (userData &&
-        (userData.subscriptionTier || (userData.subscription && userData.subscription.planId))) ||
-        "free"
-    );
-    console.debug(
-      `[entitlement] uid=${userId} status=${normalizedStatus || "none"} expiry=${expiry} billingTier=${billingTier} userTier=${userTier} effectiveTier=${tierId}`
-    );
-  } catch (_) {}
+  const baseTier = TIERS[tierId.toUpperCase()] || TIERS.FREE;
+  const testerAccess = getActiveTesterAccess(userData);
+  const selectedTier = testerAccess ? buildTesterTier(baseTier) : baseTier;
+  const tier = { ...selectedTier,
+    monthly_upload_cap: effectiveUploadLimit(selectedTier.monthly_upload_cap, billingData) };
 
   return {
     tierId,
     tier,
     userData: userData || {},
     billingData: billingData || { tier: "free" },
+    accessSource: testerAccess ? "tester_program" : "subscription",
+    testerAccess,
+    status: testerAccess
+      ? "promotional"
+      : String(userData?.subscriptionStatus || billingData?.status || "inactive"),
   };
 }
 
@@ -279,6 +308,8 @@ async function getEffectiveTierSnapshot(userId, providedBillingData, providedUse
  * Calculate the charge for a specific upload based on user tier and content intent
  */
 async function calculateCreatorCharge(userId, intent, _featuresSelected = []) {
+  if (require("./unifiedCredits/application").getApplicationContext(userId))
+    return { amount: 0, requiresPayment: false, sharedWallet: true };
   // 1. Get User Tier & Usage
   const userRef = db.collection("users").doc(userId);
   const userSnap = await userRef.get();
@@ -289,7 +320,11 @@ async function calculateCreatorCharge(userId, intent, _featuresSelected = []) {
   const billingData = billingSnap.data() || { tier: "free", uploads_this_month: 0 };
 
   const userTierId = await resolveEffectiveTierId(userId, billingData, userData);
-  const userTier = TIERS[userTierId.toUpperCase()] || TIERS.FREE;
+  const baseTier = TIERS[userTierId.toUpperCase()] || TIERS.FREE;
+  const testerAccess = getActiveTesterAccess(userData);
+  const selectedTier = testerAccess ? buildTesterTier(baseTier) : baseTier;
+  const userTier = { ...selectedTier,
+    monthly_upload_cap: effectiveUploadLimit(selectedTier.monthly_upload_cap, billingData) };
 
   // 2. Check Upload Caps (for Organic/Commercial)
   const used = billingData.uploads_this_month || 0;
@@ -404,12 +439,7 @@ async function checkPlatformLimit(userId, platformCount) {
  * Prevents free users from connecting more platforms than their tier allows.
  */
 async function checkConnectionLimit(userId, platform) {
-  const billingDocRef = db.collection("user_billing").doc(userId);
-  const billingSnap = await billingDocRef.get();
-  const billingData = billingSnap.data() || { tier: "free" };
-
-  const userTierId = await resolveEffectiveTierId(userId, billingData);
-  const userTier = TIERS[userTierId.toUpperCase()] || TIERS.FREE;
+  const { tier: userTier } = await getEffectiveTierSnapshot(userId);
   const limit = userTier.platform_limit || 1;
 
   // No limit for this tier
@@ -448,8 +478,7 @@ async function checkAILimit(userId) {
   const billingSnap = await billingDocRef.get();
   const billingData = billingSnap.data() || { tier: "free", ai_usage_this_month: 0 };
 
-  const userTierId = await resolveEffectiveTierId(userId, billingData);
-  const userTier = TIERS[userTierId.toUpperCase()] || TIERS.FREE;
+  const { tier: userTier } = await getEffectiveTierSnapshot(userId, billingData);
 
   // Cap check
   if ((billingData.ai_usage_this_month || 0) >= (userTier.monthly_ai_cap || 0)) {
@@ -483,8 +512,10 @@ async function checkBotEntitlement(userId, featureName) {
   const billingSnap = await billingDocRef.get();
   const billingData = billingSnap.data() || { tier: "free", bot_actions_used: 0 };
 
-  const userTierId = await resolveEffectiveTierId(userId, billingData);
-  const userTier = TIERS[userTierId.toUpperCase()] || TIERS.FREE;
+  const { tierId: userTierId, tier: userTier } = await getEffectiveTierSnapshot(
+    userId,
+    billingData
+  );
 
   // 2. feature Gating (Strict Boolean)
   // If the tier explicitly disallows this feature (e.g. "repost_boost" is false for starter)

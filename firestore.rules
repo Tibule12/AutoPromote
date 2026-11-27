@@ -69,7 +69,9 @@ service cloud.firestore {
       allow update: if isOwner(userId) &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(editableProfileFields());
       // A profile delete would also delete protected financial and subscription fields.
-      allow delete: if isAdmin() || isServiceAccount();
+      // Profiles also contain balances and paid entitlements. Account deletion
+      // must use the authenticated server flow so financial history survives.
+      allow delete: if false;
     }
 
     // Users can read/write their own content
@@ -224,9 +226,15 @@ service cloud.firestore {
     // Rules are additive: explicitly exclude server model collections from
     // this broad admin rule so a client cannot forge evidence or free capacity.
     match /{collection}/{document=**} {
-      allow read, write: if !(collection in ['studio_model_capability_jobs',
+      allow read: if !collection.matches('processing_.*') && collection != 'paypal_subscription_claims' && !(collection in ['studio_model_capability_jobs',
         'studio_model_capability_artifacts', 'studio_model_capability_capacity',
         'studio_subject_vfx_jobs','studio_subject_vfx_requests','studio_subject_vfx_capacity'])
+        && (isAdmin() || isServiceAccount());
+      allow write: if !collection.matches('processing_.*') && !collection.matches('credits_v2_.*') &&
+        !(collection in ['users', 'user_billing', 'user_subscriptions', 'subscription_intents',
+          'subscription_events', 'paypal_subscription_claims', 'studio_model_capability_jobs',
+          'studio_model_capability_artifacts', 'studio_model_capability_capacity',
+          'studio_subject_vfx_jobs','studio_subject_vfx_requests','studio_subject_vfx_capacity'])
         && (isAdmin() || isServiceAccount());
     }
   }

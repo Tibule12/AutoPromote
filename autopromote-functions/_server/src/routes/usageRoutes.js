@@ -24,7 +24,7 @@ function buildPricingTiers() {
       period: "month",
       limits: {
         uploads: plan.features?.uploads,
-        promotions: Number(plan.features?.wolfHuntTasks) || 0,
+        promotions: Number(plan.features?.monthlyPromotions) || 0,
         platforms: plan.features?.platformLimit,
         analytics: plan.features?.analytics || "basic",
         support: plan.features?.support || "Self-serve",
@@ -32,7 +32,6 @@ function buildPricingTiers() {
       features: [
         formatLimitValue(plan.features?.uploads, "content uploads per month"),
         formatLimitValue(plan.features?.platformLimit, "connected platforms"),
-        `${Number(plan.features?.wolfHuntTasks) || 0} mission opportunities per month`,
         `${plan.features?.analytics || "Basic"} analytics`,
         `${plan.features?.support || "Self-serve"} support`,
       ],
@@ -76,103 +75,14 @@ router.get("/stats", authMiddleware, async (req, res) => {
  * POST /api/usage/upgrade
  * Upgrade user to premium (placeholder for payment integration)
  */
-router.post("/upgrade", authMiddleware, async (req, res) => {
-  try {
-    const userId = req.userId || req.user?.uid;
-
-    if (!userId) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-
-    const { tier, paymentMethodId } = req.body;
-    const normalizedTier = normalizePlanId(tier);
-
-    // Validate tier
-    const validTiers = ["premium", "pro"];
-    if (!normalizedTier || !validTiers.includes(normalizedTier)) {
-      return res.status(400).json({
-        error: "Invalid tier",
-        message: "Please select a valid subscription tier: premium or pro",
-      });
-    }
-
-    const plan = resolvePlan(normalizedTier);
-    const now = new Date().toISOString();
-    const periodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-
-    // TODO: Integrate with Stripe or payment processor
-    // For now, just update the user's subscription status
-
-    const userRef = db.collection("users").doc(userId);
-    await userRef.set(
-      {
-        subscriptionTier: normalizedTier,
-        subscriptionStatus: "active",
-        subscriptionPeriodEnd: periodEnd,
-        subscriptionExpiresAt: periodEnd,
-        isPaid: true,
-        unlimited: false,
-        features: plan.features,
-        upgradedAt: now,
-        paymentMethod: paymentMethodId ? "stripe" : "manual",
-      },
-      { merge: true }
-    );
-
-    await db.collection("user_billing").doc(userId).set(
-      {
-        tier: normalizedTier,
-        status: "active",
-        expiresAt: periodEnd,
-        nextBillingDate: periodEnd,
-        updatedAt: now,
-      },
-      { merge: true }
-    );
-
-    await db
-      .collection("user_subscriptions")
-      .doc(userId)
-      .set(
-        {
-          userId,
-          tier: normalizedTier,
-          tierId: normalizedTier,
-          planId: normalizedTier,
-          planName: plan.name,
-          status: "active",
-          amount: Number(plan.price) || 0,
-          currency: "USD",
-          currentPeriodEnd: periodEnd,
-          nextBillingDate: periodEnd,
-          updatedAt: now,
-        },
-        { merge: true }
-      );
-
-    // Log subscription event
-    await db.collection("subscription_events").add({
-      userId,
-      type: "upgrade",
-      tier: normalizedTier,
-      timestamp: now,
-      paymentMethodId: paymentMethodId || null,
+router.post("/upgrade", authMiddleware, (_req, res) => {
+  res
+    .status(410)
+    .json({
+      error: "VERIFIED_PAYMENT_REQUIRED",
+      message: "Subscriptions require server-verified payment. Use the billing page.",
+      billingUrl: "/pricing",
     });
-
-    res.json({
-      success: true,
-      message: `Successfully upgraded to ${plan.name}`,
-      subscription: {
-        tier: normalizedTier,
-        tierName: plan.name,
-        unlimited: false,
-        upgradedAt: now,
-      },
-    });
-  } catch (error) {
-    console.error("[usageRoutes] Error upgrading:", error);
-    res.status(500).json({ error: "Failed to upgrade subscription" });
-  }
 });
 
 /**
