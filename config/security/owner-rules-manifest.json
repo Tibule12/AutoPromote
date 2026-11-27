@@ -2,8 +2,8 @@
   "project": "autopromote-cc6d3",
   "scope": "Owner-scoped Rules with mandatory verified email; publish only after verified repaired backend",
   "sources": {
-    "config/security/firestore.owner-scoped.rules": "a6f2ddfe1a3d4f48d15b91d7e112736cb45e235bdd68dc01259d451682823deb",
+    "config/security/firestore.owner-scoped.rules": "6bc785fb6d2ef3b3b5439dd037a08d19d5c750a79d578de6afe35961e5253dac",
     "config/security/storage.owner-scoped.rules": "b362e56ed1980cc781b051299e57838c61e66923083809fc844625c2ea6c52a3"
   },
-  "validation": "99 profile/authority/packaging tests and 11 coordinated Firestore/Storage emulator tests passed; actual App email-action/automatic-session browser flow passed"
+  "validation": "Independent seven-case real-emulator release check plus 99 existing profile/authority/packaging/isolation cases pass. Broad admin writes to financial evidence and profile deletion are denied; IAM server accounting is preserved."
 }

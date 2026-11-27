@@ -1,16 +1,22 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import "./LiveLogViewer.css"; // Reuse Admin Terminal CSS
 import { db, auth } from "../firebaseClient";
 import { collection, query, where, orderBy, limit, onSnapshot } from "firebase/firestore";
+import AuthContext from "../contexts/AuthContext";
+import { startVisibleSubscription } from "../utils/visibleSubscription";
 
 const UserLiveLogViewer = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const logsEndRef = useRef(null);
+  const uid = useContext(AuthContext)?.user?.uid || auth.currentUser?.uid;
+  const seen = useRef(new Set());
 
   useEffect(() => {
-    if (!auth.currentUser) return;
-    const uid = auth.currentUser.uid;
+    if (!uid) return;
+    seen.current.clear();
+    setLogs([]);
+    const subscribe = () => {
 
     // 1. Listen to Content Uploads
     const qContent = query(
@@ -40,6 +46,7 @@ const UserLiveLogViewer = () => {
       snap.docChanges().forEach(change => {
         if (change.type === "added") {
           addLog({
+            record: change.doc.ref.path,
             type: "upload",
             message: `📹 Content Uploaded: ${change.doc.data().title || "Untitled"}`,
             ts: change.doc.data().createdAt,
@@ -53,6 +60,7 @@ const UserLiveLogViewer = () => {
         if (change.type === "added") {
           const data = change.doc.data();
           addLog({
+            record: change.doc.ref.path,
             type: "info",
             message: `🔔 ${data.title || "Notification"}: ${data.message || ""}`,
             ts: data.createdAt,
@@ -70,6 +78,7 @@ const UserLiveLogViewer = () => {
           const isPositive = amount > 0;
 
           addLog({
+            record: change.doc.ref.path,
             type: isPositive ? "revenue" : "credit", // Green for income, Gold for spend
             message: `${isPositive ? "💰 Received" : "💎 Spent"} ${Math.abs(amount)} ${symbol} (${data.description || "Transaction"})`,
             ts: data.createdAt,
@@ -97,9 +106,17 @@ const UserLiveLogViewer = () => {
       unsubTrans();
       clearInterval(interval);
     };
-  }, []);
+    };
+    return startVisibleSubscription(subscribe);
+  }, [uid]);
 
   const addLog = newLog => {
+    if (newLog.record) {
+      const key = `${newLog.record}:${newLog.message}`;
+      if (seen.current.has(key)) return;
+      seen.current.add(key);
+      if (seen.current.size > 100) seen.current.delete(seen.current.values().next().value);
+    }
     setLogs(prev => {
       // Avoid duplicates if possible (simple check)
       const exists = prev.some(

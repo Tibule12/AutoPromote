@@ -1,6 +1,4 @@
 const express = require("express");
-const crypto = require("crypto");
-const https = require("https");
 const router = express.Router();
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
 const paypalPublicLimiter = rateLimiter({
@@ -75,123 +73,6 @@ async function getAccessToken() {
   const json = await res.json();
   __tokenCache = { token: json.access_token, expiresAt: now + json.expires_in * 1000 };
   return __tokenCache.token;
-}
-
-function extractPayPalNextBillingDate(paypalSub) {
-  return (
-    paypalSub?.billing_info?.next_billing_time ||
-    paypalSub?.billing_info?.cycle_executions?.find(cycle => cycle?.next_billing_time)
-      ?.next_billing_time ||
-    paypalSub?.next_billing_time ||
-    null
-  );
-}
-
-function findInternalPlanIdByPayPalPlanId(paypalPlanId) {
-  if (!paypalPlanId) return null;
-  try {
-    const { SUBSCRIPTION_PLANS } = require("../config/subscriptionPlans");
-    const match = Object.values(SUBSCRIPTION_PLANS).find(plan => {
-      const configuredId = plan.paypalPlanIdEnv ? process.env[plan.paypalPlanIdEnv] : null;
-      return configuredId && configuredId === paypalPlanId;
-    });
-    return match ? match.id : null;
-  } catch (_) {
-    return null;
-  }
-}
-
-function inferMonthlyPeriodStart(nextBillingDate, fallback) {
-  if (!nextBillingDate) return fallback || null;
-  const nextDate = new Date(nextBillingDate);
-  if (Number.isNaN(nextDate.getTime())) return fallback || null;
-  const periodStart = new Date(nextDate);
-  periodStart.setMonth(periodStart.getMonth() - 1);
-  return periodStart.toISOString();
-}
-
-async function fetchSubscriptionDetails(subscriptionId) {
-  if (!subscriptionId || !fetchFn) return null;
-  const access = await getAccessToken();
-  const base =
-    process.env.PAYPAL_MODE === "live"
-      ? "https://api-m.paypal.com"
-      : "https://api-m.sandbox.paypal.com";
-  const res = await safeFetch(base + `/v1/billing/subscriptions/${subscriptionId}`, fetchFn, {
-    fetchOptions: {
-      method: "GET",
-      headers: { Authorization: `Bearer ${access}` },
-    },
-    requireHttps: true,
-    allowHosts: ["api-m.paypal.com", "api-m.sandbox.paypal.com"],
-  });
-  if (!res.ok) return null;
-  return await res.json().catch(() => null);
-}
-
-async function refreshSubscriptionDatesFromPayPal(subscriptionId) {
-  if (!subscriptionId) return null;
-
-  const subsQuery = await db
-    .collection("user_subscriptions")
-    .where("paypalSubscriptionId", "==", subscriptionId)
-    .limit(1)
-    .get();
-  if (subsQuery.empty) return null;
-
-  const subDoc = subsQuery.docs[0];
-  const data = subDoc.data() || {};
-  const userId = data.userId;
-  if (!userId) return null;
-
-  const paypalSub = await fetchSubscriptionDetails(subscriptionId);
-  if (!paypalSub) return null;
-
-  const nextBillingDate = extractPayPalNextBillingDate(paypalSub) || data.nextBillingDate || null;
-  const remoteStatus = String(paypalSub.status || data.status || "active").toLowerCase();
-  const planId = findInternalPlanIdByPayPalPlanId(paypalSub.plan_id) || data.planId || "free";
-  const nowIso = new Date().toISOString();
-  const subscriptionPeriodStart = inferMonthlyPeriodStart(nextBillingDate, data.periodStart);
-
-  await subDoc.ref.set(
-    {
-      planId,
-      status: remoteStatus,
-      nextBillingDate,
-      periodStart: subscriptionPeriodStart,
-      updatedAt: nowIso,
-    },
-    { merge: true }
-  );
-
-  await db
-    .collection("users")
-    .doc(userId)
-    .set(
-      {
-        subscriptionTier: planId,
-        subscriptionStatus: remoteStatus,
-        subscriptionPeriodStart,
-        subscriptionPeriodEnd: nextBillingDate,
-        paypalSubscriptionId: subscriptionId,
-        isPaid: remoteStatus === "active" || remoteStatus === "approved",
-        updatedAt: nowIso,
-      },
-      { merge: true }
-    );
-
-  await db.collection("user_billing").doc(userId).set(
-    {
-      tier: planId,
-      status: remoteStatus,
-      nextBillingDate,
-      paypalSubscriptionId: subscriptionId,
-      updatedAt: nowIso,
-    },
-    { merge: true }
-  );
-
-  return { userId, nextBillingDate, status: remoteStatus };
 }
 
 async function createOrder({ amount, currency = "USD", internalId, userId }) {
@@ -303,58 +184,6 @@ router.get("/debug/status", authMiddleware, paypalPublicLimiter, async (req, res
   });
 });
 
-// Simple in-memory cert cache (expires after TTL)
-const certCache = new Map();
-const CERT_TTL_MS = parseInt(process.env.PAYPAL_CERT_TTL_MS || "3600000", 10);
-
-function fetchCert(certUrl) {
-  return new Promise((resolve, reject) => {
-    try {
-      if (!/^https:\/\//i.test(certUrl)) return reject(new Error("invalid_cert_url"));
-      const u = new URL(certUrl);
-      const allowedHosts = [
-        "api-m.paypal.com",
-        "api-m.sandbox.paypal.com",
-        "www.paypal.com",
-        "payments.paypal.com",
-      ];
-      if (!allowedHosts.includes(u.hostname)) return reject(new Error("invalid_cert_host"));
-    } catch (e) {
-      return reject(new Error("invalid_cert_url"));
-    }
-    const cached = certCache.get(certUrl);
-    const now = Date.now();
-    if (cached && cached.expiresAt > now) return resolve(cached.pem);
-    https
-      .get(certUrl, res => {
-        if (res.statusCode !== 200) return reject(new Error("cert_http_" + res.statusCode));
-        let data = "";
-        res.on("data", c => (data += c));
-        res.on("end", () => {
-          certCache.set(certUrl, { pem: data, expiresAt: now + CERT_TTL_MS });
-          resolve(data);
-        });
-      })
-      .on("error", reject);
-  });
-}
-
-function verifyRSASignature({ signature, sigBase, certPem, algorithm }) {
-  try {
-    if (!signature || !sigBase || !certPem) return false;
-    const algo = (algorithm || "SHA256withRSA").toUpperCase();
-    let digest = "sha256";
-    if (algo.includes("SHA512")) digest = "sha512";
-    const verifier = crypto.createVerify(digest.toUpperCase());
-    verifier.update(sigBase, "utf8");
-    verifier.end();
-    const sigBuf = Buffer.from(signature, "base64");
-    return verifier.verify(certPem, sigBuf);
-  } catch (e) {
-    return false;
-  }
-}
-
 function rawBodyBuffer(req, _res, buf) {
   req.rawBody = buf;
 }
@@ -385,42 +214,22 @@ router.post(
     if (missing.length)
       return res.status(400).json({ ok: false, error: "missing_headers", missing });
 
-    // Construct expected signature base: transmissionId|transmissionTime|webhookId|sha256(body)
-    let computed;
-    let sigBase;
+    // Verify with PayPal's authoritative endpoint; the former SHA-256/HMAC
+    // development verifier did not implement PayPal's signature protocol.
     let verified = false;
-    let verificationMode = "none";
+    const verificationMode = "paypal-api";
     try {
-      const bodyHash = crypto
-        .createHash("sha256")
-        .update(req.rawBody || Buffer.from(JSON.stringify(event), "utf8"))
-        .digest("hex");
-      sigBase = `${transmissionId}|${transmissionTime}|${webhookId}|${bodyHash}`;
-      if (process.env.PAYPAL_WEBHOOK_SECRET) {
-        computed = crypto
-          .createHmac("sha256", process.env.PAYPAL_WEBHOOK_SECRET)
-          .update(sigBase)
-          .digest("base64");
-        verificationMode = "hmac-dev";
-        verified = timingSafeEq(computed, transmissionSig);
-      } else if (certUrl) {
-        verificationMode = "rsa-cert";
-        try {
-          const pem = await fetchCert(certUrl);
-          verified = verifyRSASignature({
-            signature: transmissionSig,
-            sigBase,
-            certPem: pem,
-            algorithm: authAlgo,
-          });
-        } catch (ce) {
-          verificationMode = "rsa-cert-error";
+      verified = await require("../services/payments/subscriptionVerification").verifyPayPalWebhook(
+        {
+          headers: req.headers,
+          event,
+          webhookId,
+          accessToken: await getAccessToken(),
+          fetchImpl: fetchFn,
         }
-      } else {
-        verificationMode = "no-verification";
-      }
-    } catch (e) {
-      return res.status(400).json({ ok: false, error: "sig_compute_failed", detail: e.message });
+      );
+    } catch (_) {
+      return res.status(503).json({ ok: false, error: "verification_unavailable" });
     }
 
     // Persist minimal log regardless (auditable trail), avoid logging secrets in plain text
@@ -461,7 +270,7 @@ router.post(
           event.resource.supplementary_data &&
           event.resource.supplementary_data.related_ids &&
           event.resource.supplementary_data.related_ids.order_id;
-        await db.collection("payment_events").add({
+        await db.collection("payment_events").doc(event.id).set({
           provider: "paypal",
           type: event.event_type,
           amount,
@@ -485,199 +294,99 @@ router.post(
         }
       }
 
-      // Handle subscription activations and renewal/state refreshes
+      // Every activation/renewal reads the current agreement and verifies payment.
       if (
-        event.event_type === "BILLING.SUBSCRIPTION.ACTIVATED" ||
-        event.event_type === "BILLING.SUBSCRIPTION.UPDATED" ||
-        event.event_type === "BILLING.SUBSCRIPTION.RE-ACTIVATED" ||
-        event.event_type === "PAYMENT.SALE.COMPLETED" ||
-        event.event_type === "BILLING.SUBSCRIPTION.PAYMENT.COMPLETED"
+        [
+          "BILLING.SUBSCRIPTION.ACTIVATED",
+          "BILLING.SUBSCRIPTION.UPDATED",
+          "BILLING.SUBSCRIPTION.RE-ACTIVATED",
+          "PAYMENT.SALE.COMPLETED",
+          "BILLING.SUBSCRIPTION.PAYMENT.COMPLETED",
+        ].includes(event.event_type)
       ) {
+        const resource = event.resource || {};
         const subscriptionId =
-          event.resource &&
-          (event.resource.id ||
-            event.resource.subscription_id ||
-            event.resource.billing_agreement_id ||
-            event.resource?.supplementary_data?.related_ids?.subscription_id);
-        if (subscriptionId) {
-          try {
-            const intentDoc = await db.collection("subscription_intents").doc(subscriptionId).get();
-            if (intentDoc.exists) {
-              const intent = intentDoc.data();
-              const userId = intent.userId;
-              const planId = intent.planId;
-              const planName = intent.planName || planId;
-              const amount = intent.amount || 0;
-
-              // Update users document
-              try {
-                await db
-                  .collection("users")
-                  .doc(userId)
-                  .update({
-                    subscriptionTier: planId,
-                    subscriptionStatus: "active",
-                    paypalSubscriptionId: subscriptionId,
-                    subscriptionStartedAt: new Date().toISOString(),
-                    subscriptionPeriodStart: new Date().toISOString(),
-                    subscriptionPeriodEnd: new Date(
-                      Date.now() + 30 * 24 * 60 * 60 * 1000
-                    ).toISOString(),
-                    isPaid: true,
-                    updatedAt: new Date().toISOString(),
-                  });
-              } catch (e) {}
-
-              try {
-                await db
-                  .collection("user_billing")
-                  .doc(userId)
-                  .set(
-                    {
-                      tier: planId,
-                      status: "active",
-                      nextBillingDate: new Date(
-                        Date.now() + 30 * 24 * 60 * 60 * 1000
-                      ).toISOString(),
-                      updatedAt: new Date().toISOString(),
-                    },
-                    { merge: true }
-                  );
-              } catch (e) {}
-
-              // Create or update user_subscriptions doc
-              try {
-                await db
-                  .collection("user_subscriptions")
-                  .doc(userId)
-                  .set(
-                    {
-                      userId,
-                      planId,
-                      planName,
-                      paypalSubscriptionId: subscriptionId,
-                      status: "active",
-                      amount,
-                      currency: "USD",
-                      billingCycle: "monthly",
-                      startDate: new Date().toISOString(),
-                      nextBillingDate: new Date(
-                        Date.now() + 30 * 24 * 60 * 60 * 1000
-                      ).toISOString(),
-                      createdAt: new Date().toISOString(),
-                      updatedAt: new Date().toISOString(),
-                    },
-                    { merge: true }
-                  );
-              } catch (e) {}
-
-              // Mark intent activated
-              try {
-                await db
-                  .collection("subscription_intents")
-                  .doc(subscriptionId)
-                  .update({ status: "activated", activatedAt: new Date().toISOString() });
-              } catch (e) {}
-
-              // Log subscription event
-              try {
-                await db.collection("subscription_events").add({
-                  userId,
-                  type: "subscription_activated",
-                  planId,
-                  paypalSubscriptionId: subscriptionId,
-                  amount,
-                  timestamp: new Date().toISOString(),
-                });
-              } catch (e) {}
-            } else {
-              await refreshSubscriptionDatesFromPayPal(subscriptionId);
-            }
-            await refreshSubscriptionDatesFromPayPal(subscriptionId);
-          } catch (e) {
-            console.error("[PayPal webhook] Activation handling error:", e);
+          resource.billing_agreement_id ||
+          resource.subscription_id ||
+          resource.supplementary_data?.related_ids?.subscription_id ||
+          resource.id;
+        if (subscriptionId && /^I-[A-Z0-9]+$/i.test(subscriptionId)) {
+          const intentDoc = await db.collection("subscription_intents").doc(subscriptionId).get();
+          const intent = intentDoc.data();
+          if (intent?.userId) {
+            const base =
+              process.env.PAYPAL_MODE === "live"
+                ? "https://api-m.paypal.com"
+                : "https://api-m.sandbox.paypal.com";
+            const read = await fetchFn(
+              base + "/v1/billing/subscriptions/" + encodeURIComponent(subscriptionId),
+              {
+                headers: { Authorization: "Bearer " + (await getAccessToken()) },
+                signal: AbortSignal.timeout(15000),
+              }
+            );
+            if (!read.ok) throw Error("paypal_read_failed");
+            const remote = await read.json();
+            await require("../services/payments/subscriptionVerification").persistVerifiedSubscription(
+              {
+                db,
+                userId: intent.userId,
+                subscriptionId,
+                paypalSub: remote,
+                intent,
+              }
+            );
           }
         }
       }
 
       if (
-        event.event_type === "BILLING.SUBSCRIPTION.CANCELLED" ||
-        event.event_type === "BILLING.SUBSCRIPTION.SUSPENDED"
+        [
+          "BILLING.SUBSCRIPTION.CANCELLED",
+          "BILLING.SUBSCRIPTION.SUSPENDED",
+          "BILLING.SUBSCRIPTION.EXPIRED",
+        ].includes(event.event_type)
       ) {
-        const subscriptionId =
-          event.resource && (event.resource.id || event.resource.subscription_id);
-        if (subscriptionId) {
-          try {
-            const subsQuery = await db
-              .collection("user_subscriptions")
-              .where("paypalSubscriptionId", "==", subscriptionId)
-              .limit(1)
-              .get();
-            if (!subsQuery.empty) {
-              subsQuery.forEach(doc => {
-                const data = doc.data() || {};
-                const userId = data.userId;
-                const expiresAt =
-                  data.nextBillingDate ||
-                  data.expiresAt ||
-                  new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-                doc.ref
-                  .update({
-                    status: "cancelled",
-                    cancelledAt: new Date().toISOString(),
-                    expiresAt,
-                    updatedAt: new Date().toISOString(),
-                  })
-                  .catch(() => {});
-                if (userId) {
-                  db.collection("users")
-                    .doc(userId)
-                    .update({
-                      subscriptionTier: "free",
-                      subscriptionStatus: "cancelled",
-                      subscriptionCancelledAt: new Date().toISOString(),
-                      subscriptionExpiresAt: new Date().toISOString(),
-                      subscriptionPeriodEnd: new Date().toISOString(),
-                      isPaid: false,
-                      unlimited: false,
-                      features: require("../config/subscriptionPlans").SUBSCRIPTION_PLANS.free
-                        .features,
-                      updatedAt: new Date().toISOString(),
-                    })
-                    .catch(() => {});
-                  db.collection("user_billing")
-                    .doc(userId)
-                    .set(
-                      {
-                        tier: "free",
-                        status: "cancelled",
-                        expiresAt: new Date().toISOString(),
-                        nextBillingDate: null,
-                        updatedAt: new Date().toISOString(),
-                      },
-                      { merge: true }
-                    )
-                    .catch(() => {});
-                }
-              });
-            }
-          } catch (e) {
-            console.error("[PayPal webhook] Cancellation handling error:", e);
+        const subscriptionId = event.resource?.id || event.resource?.subscription_id;
+        if (!/^I-[A-Z0-9]+$/i.test(subscriptionId || "")) throw Error("invalid_subscription");
+        const subscriptions = await db
+          .collection("user_subscriptions")
+          .where("paypalSubscriptionId", "==", subscriptionId)
+          .limit(1)
+          .get();
+        const base =
+          process.env.PAYPAL_MODE === "live"
+            ? "https://api-m.paypal.com"
+            : "https://api-m.sandbox.paypal.com";
+        const read = await fetchFn(
+          base + "/v1/billing/subscriptions/" + encodeURIComponent(subscriptionId),
+          {
+            headers: { Authorization: "Bearer " + (await getAccessToken()) },
+            signal: AbortSignal.timeout(15000),
           }
+        );
+        if (!read.ok) throw Error("paypal_read_failed");
+        const remote = await read.json();
+        // Read current provider state so a delayed cancellation cannot revoke a reactivated agreement.
+        if (["CANCELLED", "SUSPENDED", "EXPIRED"].includes(remote.status)) {
+          for (const doc of subscriptions.docs)
+            await require("../services/payments/subscriptionVerification").persistSubscriptionEnd({
+              db,
+              userId: doc.data().userId || doc.id,
+              subscriptionId,
+              status: remote.status,
+              eventId: event.id,
+            });
         }
       }
-    } catch (_) {}
+    } catch (error) {
+      return res
+        .status(error.status || 503)
+        .json({ ok: false, error: error.code || "subscription_reconciliation_failed" });
+    }
 
     return res.json({ ok: true, received: true, verified, mode: verificationMode });
   }
 );
-
-function timingSafeEq(a, b) {
-  if (!a || !b) return false;
-  const buffA = Buffer.from(a);
-  const buffB = Buffer.from(b);
-  if (buffA.length !== buffB.length) return false;
-  return crypto.timingSafeEqual(buffA, buffB);
-}
 
 module.exports = router;

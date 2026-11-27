@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Preserve exactly the declared device education records during guest-session cleanup; account tokens still clear",
-  "reviewed_at": "2026-11-25T11:41:54.445Z",
+  "reason": "Final independent infrastructure and legacy payment-security release, signed-in existing-plan Studio/help, unchanged public welcome and guarded financial-only Rules delta.",
+  "reviewed_at": "2026-11-27T03:57:04.842Z",
   "catalog_sha256": "c09a26f3a093fe05b546f1006e2da1ed4c5f10efb8e49ab84c2fe77a452e29c1",
   "sources": [
     {
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "1439670e68fa50d006246770f0714d64af8ab8af770a6f055d84d1ab82bf1ca8"
+      "sha256": "a9487649a594838cae3126c5055360d88f52657fd09816d31e10c6efbf74c7d7"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -443,7 +443,7 @@
     },
     {
       "path": "frontend/src/education/EducationPage.js",
-      "sha256": "57691588d10c822cecfef172a41965746ae9cd0fb789fb5bd8e745bbdf3234df"
+      "sha256": "081fd1116242329e03b50004e0029ce5aa33adeb003a4423113d2e0d67298890"
     },
     {
       "path": "frontend/src/education/EducationStudioGuide.js",
@@ -703,7 +703,7 @@
     },
     {
       "path": "src/server.js",
-      "sha256": "4b17e1bf2b33ab6bc661e4281d392405c94a775be193773eae05b40a3adb71eb"
+      "sha256": "198fae653cb1075b95bb6f54c9b9c1e7a66361f51edb5a0734ad3f01bc3a3338"
     },
     {
       "path": "src/services/__tests__/publishedVideoRetention.test.js",
@@ -711,7 +711,7 @@
     },
     {
       "path": "src/services/backgroundActivityService.js",
-      "sha256": "2164c9b32536bf0fe963cbbc65700c1a3c7560ce51e92f84387b7cab5b2d3657"
+      "sha256": "7a7eb00d9ea76333bfe1f6b265be25c4525b9bf7e4266e0fe9b3db983170ad7b"
     },
     {
       "path": "src/services/backgroundWorkService.js",
@@ -719,7 +719,7 @@
     },
     {
       "path": "src/services/billingService.js",
-      "sha256": "95b510e2ba1304b742d8a4974024534abd98f7becd6e300ca31768d58e09ccb3"
+      "sha256": "6c5e311af62b51e6c8e7161b0befbb7e853e775480a50e05417a16bad6ef8f23"
     },
     {
       "path": "src/services/clipSelectionSettings.js",
@@ -755,7 +755,7 @@
     },
     {
       "path": "src/services/publishedVideoRetention.js",
-      "sha256": "76f82f5cfc7a9e52eaadcb18625cee51cd1b97855f204ab1eb64a4695db6f081"
+      "sha256": "2a2bc1bd0b87ce550af0bf3814bc909ce3a234a4ed27a160d555a14c49690593"
     },
     {
       "path": "src/services/publishingIntent.js",
@@ -815,11 +815,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "ca3f1a70734fd4384ec711c3fd7556c6c67eb5e8d2cd8fd33783343896bb2058"
+      "sha256": "9dfdd0466fea9e1c7603056e4f408cb07fcad3382be6dfd8258de8dd4d4edbe5"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "9eb6b6ed5de4995f85ca83bc21190ed1c4ef370c3e60db9221e619fcae359ad6"
+      "sha256": "ec7b4f5c99b959d109fe1cb42bb0c7087fb264f483aa42b7d6e662ffaa41ebf9"
     },
     {
       "path": "worker.js",

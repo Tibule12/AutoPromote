@@ -685,6 +685,22 @@
         "docs/EDUCATION-ARCHITECTURE.md"
       ],
       "reason": "Three additional real HTML/browser and native Studio lessons expand the private CAT review hub to six lessons, twelve videos and twelve PDFs. Exact recipes, exercises, technical checks and scoped cold/source/output recovery are retained. Teacher review, independent recreation, broader coverage and production release remain pending; no readiness promotion."
+    },
+    {
+      "feature_id": "publishing.schedule",
+      "documentation_impact": [
+        "DEPENDENCIES",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "src/server.js",
+        "src/services/publishedVideoRetention.js",
+        "src/services/storageCleanupService.js",
+        "src/services/billingService.js"
+      ],
+      "reason": "Independent production release candidate reduces redundant retention/diagnostic work and hardens verified legacy payments without changing public plans, creative tools, scheduling semantics, customer balances or enabling renewable processing. Existing deletion dependencies and readiness limitations remain."
     }
   ]
 }
