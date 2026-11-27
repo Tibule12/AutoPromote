@@ -513,26 +513,22 @@ def rgb_blend_filter(mode):
     return f"blend=all_mode={mode}"
 
 
-def blend_layer_block(block, input_label, output_label, mode, width, height, duration, prefix, time_window=None, frame_rate=30):
+def blend_layer_block(block, input_label, output_label, mode, width, height, duration, prefix, time_window=None, frame_rate=30, *, linear_light=False, light_wrap=None, screen_replace=None):
     mode = str(mode or "normal")
     if mode not in BLEND_MODES:
         raise ValueError(f"Studio blend mode {mode!r} is not implemented for export")
-    if mode == "normal":
+    has_wrap = isinstance(light_wrap, dict) and bool(light_wrap.get("enabled")) and float(light_wrap.get("intensity", 0.45) or 0) > 0.005
+    has_glare = isinstance(screen_replace, dict) and bool(screen_replace.get("enabled")) and float(screen_replace.get("glare_preserve", 0.35) or 0) > 0.005
+    if mode == "normal" and not linear_light and not has_wrap and not has_glare:
         return list(block)
     if not block or width <= 0 or height <= 0 or duration <= 0:
         raise ValueError("Invalid Studio blend layer geometry")
     if time_window is not None and (len(time_window) != 2 or
             not all(math.isfinite(value) for value in time_window) or time_window[1] <= time_window[0]):
         raise ValueError("Invalid Studio blend time window")
-    blend_filter = luminosity_filter(width, time_window) if mode == 'luminosity' else rgb_blend_filter(mode)
-    if time_window and mode != 'luminosity':
-        blend_filter += f":enable='between(t,{time_window[0]:.3f},{time_window[1]:.3f})'"
     names = {name: f"{prefix}_{name}" for name in
              ["blank", "foreground", "color", "alpha_in", "alpha", "base", "base_color", "base_alpha_in", "base_alpha",
               "base_rgb", "keep", "rgb", "front_rgb", "front_opaque", "blended", "weighted", "effective", "effective_rgb", "rgba"]}
-    # Draw this same ordinary layer block on a transparent canvas. Keep its
-    # own timing, geometry, motion, masks and opacity; do not blend in YUV or
-    # let the mode modify the layer alpha.
     result = [f"[{input_label}]split=2[{names['keep']}][{names['base']}];",
               f"color=c=black:s={int(width)}x{int(height)}:r={float(frame_rate):.9f}:d={float(duration):.6f},"
               f"format=rgba,colorchannelmixer=aa=0[{names['blank']}];"]
@@ -544,15 +540,75 @@ def blend_layer_block(block, input_label, output_label, mode, width, height, dur
         f"[{names['base']}]format=rgba,split=2[{names['base_color']}][{names['base_alpha_in']}];",
         f"[{names['base_alpha_in']}]alphaextract[{names['base_alpha']}];",
         f"[{names['base_color']}]format=gbrp[{names['base_rgb']}];",
-        f"[{names['color']}]format=gbrp,split=2[{names['rgb']}][{names['front_rgb']}];",
-        f"[{names['base_rgb']}][{names['rgb']}]{blend_filter}[{names['blended']}];",
-        # CSS blend color is (1-backdropAlpha)*foreground + backdropAlpha*blend.
-        # A transparent isolated parent must not turn Multiply children black.
+        f"[{names['color']}]format=gbrp[{names['front_rgb']}_raw];",
+    ])
+    base_rgb_lbl = names["base_rgb"]
+    front_rgb_lbl = f"{names['front_rgb']}_raw"
+    alpha_lbl = names["alpha"]
+    if has_wrap:
+        wrap_sigma = max(1.0, min(60.0, float(light_wrap.get("radius", 14.0) or 14.0)))
+        wrap_intensity = max(0.0, min(1.0, float(light_wrap.get("intensity", 0.45) or 0.45)))
+        result.extend([
+            f"[{base_rgb_lbl}]split=2[{base_rgb_lbl}_keep][{base_rgb_lbl}_wsrc];",
+            f"[{base_rgb_lbl}_wsrc]gblur=sigma={wrap_sigma:.2f}:steps=2[{base_rgb_lbl}_wblur];",
+            f"[{alpha_lbl}]split=2[{alpha_lbl}_keep][{alpha_lbl}_winv];",
+            f"[{alpha_lbl}_winv]negate,gblur=sigma={wrap_sigma:.2f}:steps=2,lut=c0='val*{wrap_intensity:.4f}',format=gray[{alpha_lbl}_wmask];",
+            f"[{front_rgb_lbl}]split=2[{front_rgb_lbl}_orig][{front_rgb_lbl}_scrbase];",
+            f"[{front_rgb_lbl}_scrbase][{base_rgb_lbl}_wblur]blend=all_mode=screen[{front_rgb_lbl}_wrapped];",
+            f"[{front_rgb_lbl}_orig][{front_rgb_lbl}_wrapped][{alpha_lbl}_wmask]maskedmerge[{front_rgb_lbl}_lw];",
+        ])
+        base_rgb_lbl = f"{base_rgb_lbl}_keep"
+        front_rgb_lbl = f"{front_rgb_lbl}_lw"
+        alpha_lbl = f"{alpha_lbl}_keep"
+
+    if has_glare:
+        glare_amt = max(0.0, min(1.0, float(screen_replace.get("glare_preserve", 0.35) or 0.35)))
+        result.extend([
+            f"[{base_rgb_lbl}]split=2[{base_rgb_lbl}_gk][{base_rgb_lbl}_gsrc];",
+            f"[{base_rgb_lbl}_gsrc]lutrgb=r='clip((val-166)*2.865*{glare_amt:.4f},0,255)':g='clip((val-166)*2.865*{glare_amt:.4f},0,255)':b='clip((val-166)*2.865*{glare_amt:.4f},0,255)'[{base_rgb_lbl}_glare];",
+            f"[{front_rgb_lbl}][{base_rgb_lbl}_glare]blend=all_mode=screen[{front_rgb_lbl}_sr];",
+        ])
+        base_rgb_lbl = f"{base_rgb_lbl}_gk"
+        front_rgb_lbl = f"{front_rgb_lbl}_sr"
+
+    if linear_light:
+        result.extend([
+            f"[{base_rgb_lbl}]lutrgb=r='255*pow(val/255,2.2)':g='255*pow(val/255,2.2)':b='255*pow(val/255,2.2)'[{base_rgb_lbl}_lin];",
+            f"[{front_rgb_lbl}]lutrgb=r='255*pow(val/255,2.2)':g='255*pow(val/255,2.2)':b='255*pow(val/255,2.2)'[{front_rgb_lbl}_lin];",
+        ])
+        base_rgb_lbl = f"{base_rgb_lbl}_lin"
+        front_rgb_lbl = f"{front_rgb_lbl}_lin"
+
+    result.append(f"[{front_rgb_lbl}]split=2[{names['rgb']}][{names['front_rgb']}];")
+    if mode == "normal":
+        if linear_light:
+            result.extend([
+                f"[{alpha_lbl}]split=2[{alpha_lbl}_m][{alpha_lbl}_o];",
+                f"[{base_rgb_lbl}][{names['rgb']}][{alpha_lbl}_m]maskedmerge,lutrgb=r='255*pow(val/255,0.454545)':g='255*pow(val/255,0.454545)':b='255*pow(val/255,0.454545)'[{names['effective_rgb']}];",
+                f"[{names['base_alpha']}]nullsink;[{names['front_rgb']}]nullsink;",
+                f"[{names['effective_rgb']}][{alpha_lbl}_o]alphamerge[{names['rgba']}];",
+                f"[{names['keep']}][{names['rgba']}]overlay=0:0:eof_action=pass:repeatlast=0:format=auto[{output_label}];",
+            ])
+        else:
+            result.extend([
+                f"[{base_rgb_lbl}]nullsink;[{names['base_alpha']}]nullsink;[{names['rgb']}]nullsink;",
+                f"[{names['front_rgb']}][{alpha_lbl}]alphamerge[{names['rgba']}];",
+                f"[{names['keep']}][{names['rgba']}]overlay=0:0:eof_action=pass:repeatlast=0:format=auto[{output_label}];",
+            ])
+        return result
+
+    blend_filter = luminosity_filter(width, time_window) if mode == 'luminosity' else rgb_blend_filter(mode)
+    if time_window and mode != 'luminosity':
+        blend_filter += f":enable='between(t,{time_window[0]:.3f},{time_window[1]:.3f})'"
+    linear_back = ",lutrgb=r='255*pow(val/255,0.454545)':g='255*pow(val/255,0.454545)':b='255*pow(val/255,0.454545)'" if linear_light else ""
+    linear_front = "lutrgb=r='255*pow(val/255,0.454545)':g='255*pow(val/255,0.454545)':b='255*pow(val/255,0.454545)'," if linear_light else ""
+    result.extend([
+        f"[{base_rgb_lbl}][{names['rgb']}]{blend_filter}{linear_back}[{names['blended']}];",
         f"[{names['blended']}][{names['base_alpha']}]alphamerge[{names['weighted']}];",
-        f"[{names['front_rgb']}]format=rgba[{names['front_opaque']}];",
+        f"[{names['front_rgb']}]{linear_front}format=rgba[{names['front_opaque']}];",
         f"[{names['front_opaque']}][{names['weighted']}]overlay=0:0:format=auto:eof_action=pass:repeatlast=0[{names['effective']}];",
         f"[{names['effective']}]format=gbrp[{names['effective_rgb']}];",
-        f"[{names['effective_rgb']}][{names['alpha']}]alphamerge[{names['rgba']}];",
+        f"[{names['effective_rgb']}][{alpha_lbl}]alphamerge[{names['rgba']}];",
         f"[{names['keep']}][{names['rgba']}]overlay=0:0:eof_action=pass:repeatlast=0:format=auto[{output_label}];",
     ])
     return result

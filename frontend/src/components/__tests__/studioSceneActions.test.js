@@ -103,3 +103,31 @@ test('unsupported scene media fit rejects without partial mutation',()=>{
  const state=snapshot(),before=JSON.stringify(state),plan=buildStudioEvidenceScenePlan(state,'media',2);plan.actions[0].mediaFit='stretch';
  expect(()=>executeStudioSceneActions(plan,state,factory())).toThrow('Scene media fit');expect(JSON.stringify(state)).toBe(before);
 });
+
+test('caption_treatment applies validated Director caption style, placement, Smart Safe toggle, and accent atomically', () => {
+  const state = snapshot();
+  const before = JSON.stringify(state);
+  const plan = buildStudioEvidenceScenePlan(state, 'media', 2);
+  plan.actions.push({
+    type: 'caption_treatment',
+    captionStyle: 'editorial_duo',
+    captionPosition: 'side_by_side',
+    captionAvoidSubjects: true,
+    captionAccent: '#3db3ff',
+    reason: 'Dialogue video detected',
+  });
+  const result = executeStudioSceneActions(plan, state, factory());
+  expect(result.captionStyle).toBe('editorial_duo');
+  expect(result.captionPosition).toBe('side_by_side');
+  expect(result.captionAvoidSubjects).toBe(true);
+  expect(result.captionDirection).toEqual({
+    captionStyle: 'editorial_duo',
+    captionPosition: 'side_by_side',
+    captionAvoidSubjects: true,
+    captionAccent: '#3db3ff',
+    reason: 'Dialogue video detected',
+  });
+  expect(JSON.stringify(state)).toBe(before);
+  plan.actions[plan.actions.length - 1].captionStyle = 'non_existent_style';
+  expect(() => executeStudioSceneActions(plan, state, factory())).toThrow('supported Studio caption template');
+});

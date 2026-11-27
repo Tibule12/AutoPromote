@@ -111,9 +111,15 @@ import {
   buildCaptionRenderPreviewChunks,
   getCaptionPreviewStyles,
   getCaptionPreviewOutputClock,
+  getCaptionStyleHighlightHex,
   resolveActiveWordTimingState,
   sliceTypewriterWord,
 } from "./studioCaptionPreviewStyle";
+import { analyzeCaptionSegmentsFaceAndBodySafety } from "./studioCaptionSafety";
+import {
+  recommendDirectorCaptionTemplate,
+  sampleVideoTelemetryForDirectorCaption,
+} from "./studioDirectorCaptions";
 import { studioOverlayBelongsToClip } from "./studioOverlayBinding";
 import { trackClipWorkflowEvent } from "../utils/clipWorkflowAnalytics";
 import { playMediaSafely } from "../utils/mediaPlayback";
@@ -276,6 +282,8 @@ import {
   compileStudioFinishForRender,
   compileStudioCompositionForRender,
 } from "./studioRenderCompiler";
+import { applySkyReplacementRgba } from "./studioEnvironmentVfx";
+import { applyOpticalCameraPassRgba } from "./studioOpticalVfx";
 import { detectAudioBeats } from "./flowEditUtils";
 import {
   analyzeAudioBufferBeats,
@@ -303,6 +311,7 @@ import {
 } from "./audio/audioRemixModel";
 import {
   applyStudioMediaGain,
+  applyStudioMediaPan,
   ensureAudioRemixPreview,
   disposeAudioRemixPreview,
   unlockAudioRemixContext,
@@ -372,6 +381,12 @@ const getOverlayMaskClipPath = overlay => {
     return cropX || cropY ? `inset(${cropY}% ${cropX}% ${cropY}% ${cropX}%)` : undefined;
   }
   if (overlay.mask.shape === "ellipse") return "ellipse(48% 48% at 50% 50%)";
+  if (overlay.mask.shape === "diamond") return `polygon(50% ${cropY}%, ${100 - cropX}% 50%, 50% ${100 - cropY}%, ${cropX}% 50%)`;
+  if (overlay.mask.shape === "inset") {
+    const ix = cropX || 10;
+    const iy = cropY || 10;
+    return `inset(${iy}% ${ix}% ${iy}% ${ix}% round ${Number(overlay.mask.radius ?? 6)}%)`;
+  }
   if (overlay.mask.shape === "polygon") {
     return overlay.mask.path || "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)";
   }
@@ -396,7 +411,12 @@ const CAPTION_SPEAKER_OPTIONS = [
 ];
 
 const CAPTION_PLACEMENT_OPTIONS = [
+  { value: "smart_safe", label: "Smart Safe · Avoid faces & bodies" },
   { value: "auto", label: "Auto safe region" },
+  { value: "creative", label: "Template Stage (Auto zones)" },
+  { value: "side_by_side", label: "Side by Side · Split" },
+  { value: "side_left", label: "Left side column" },
+  { value: "side_right", label: "Right side column" },
   { value: "shoulder_left", label: "Left shoulder" },
   { value: "shoulder_right", label: "Right shoulder" },
   { value: "background_left", label: "Background wall · left" },
@@ -415,32 +435,32 @@ const CAPTION_PLACEMENT_OPTIONS = [
 ];
 
 const CAPTION_STYLE_OPTIONS = [
-  ["word_pill", "Word Pill", "Rounded active-word pill badge on bold Inter type"],
-  ["spring_slam", "Spring Slam", "Oversized Inter Black overshoot with subtle word tilt"],
-  ["neon_bloom", "Neon Bloom", "Soft multi-pass radial halo around glowing Inter type"],
-  ["editorial_duo", "Editorial Duo", "Uppercase Inter SemiBold paired with italic Serif accent"],
-  ["kinetic_bar", "Kinetic Bar", "Frosted dark pill + animated underline progress bar"],
-  ["rainbow", "Rainbow Flow", "Every spoken word carries the colour beat"],
-  ["watch_me", "Watch Me", "Dims the sentence and makes the live word command the frame"],
-  ["wall_type", "Wall Type", "Low-profile typography for open background space"],
-  ["story_pop", "Story Pop", "Editorial card + semantic accent"],
-  ["bold_pop", "Bold Pop", "Punchy active-word scale"],
-  ["karaoke", "Karaoke", "Progressive spoken-word fill"],
-  ["glow", "Neon Glow", "Electric multi-pass neon bloom on Inter Black"],
-  ["bounce", "Bounce", "True Y-axis word hop with squash settle"],
-  ["minimal", "Minimal", "Quiet premium subtitle"],
-  ["headline", "Big Headline", "Oversized uppercase Inter Black spring slam"],
-  ["boxed", "Subtitle Card", "Broadcast-style readable card"],
-  ["comic", "Comic Punch", "High-stroke Inter Black social energy"],
-  ["gradient", "Gradient Pop", "Vivid active-word pill pop on Inter ExtraBold"],
-  ["typewriter", "Typewriter", "Dark badge + true character-by-character typing cursor"],
-  ["editorial", "Editorial Serif", "Elegant documentary voice"],
-  ["sticker", "Sticker Stack", "Cream cutout sticker badge + angled shadow"],
-  ["marker", "Marker Swipe", "Highlighter brush swipe under live spoken word"],
-  ["glass", "Glass Caption", "Rounded frosted translucent Inter SemiBold glass card"],
-  ["newsroom", "News Flash", "Crimson urgent broadcast pill badge"],
-  ["luxury", "Luxury Quote", "Refined fashion-film typography"],
-  ["retro", "Retro Tape", "Warm analogue poster hop"],
+  ["word_pill", "Word Pill", "Rounded active-word pill badge on bold Inter type", "LOWER HERO"],
+  ["editorial_duo", "Editorial Duo", "Left ↔ Right side-by-side split stack + italic Serif", "SIDE SPLIT"],
+  ["wall_type", "Wall Type", "Wide upper-wall backdrop header integrated over open air", "WALL BACKDROP"],
+  ["story_pop", "Story Pop", "Choreographed 5-zone jump across shoulders, wall & lower", "MULTI-ZONE"],
+  ["spring_slam", "Spring Slam", "Two-tier stacked Inter Black overshoot with micro tilt", "2-TIER STACK"],
+  ["watch_me", "Watch Me", "Alternating side spotlight stack that dims surrounding copy", "SIDE SPOTLIGHT"],
+  ["sticker", "Sticker Stack", "Playful corner-jumping cream cutouts + angled shadow", "COLLAGE CORNERS"],
+  ["retro", "Retro Tape", "Angled top-left corner cassette poster stack", "TILT CORNER"],
+  ["luxury", "Luxury Quote", "Right-margin champagne italic serif vertical stack", "RIGHT MARGIN"],
+  ["newsroom", "News Flash", "Top broadcast crimson badge framing speaker cleanly", "TOP BROADCAST"],
+  ["rainbow", "Rainbow Flow", "Every spoken word carries colour & waves across zones", "COLOR WAVE"],
+  ["marker", "Marker Swipe", "Alternating shoulder-to-lower highlighter brush swipe", "BRUSH SWIPE"],
+  ["neon_bloom", "Neon Bloom", "Soft multi-pass neon aura around crisp white Inter Black", "NEON HALO"],
+  ["kinetic_bar", "Kinetic Bar", "Frosted dark pill + animated underline progress bar", "LOWER BAR"],
+  ["typewriter", "Typewriter", "Dark badge + true character-by-character typing cursor", "TERMINAL"],
+  ["glass", "Glass Caption", "Rounded frosted translucent Inter SemiBold glass card", "FROSTED GLASS"],
+  ["editorial", "Editorial Serif", "Lower-left documentary serif anchor", "LOWER LEFT"],
+  ["bold_pop", "Bold Pop", "Punchy active-word scale", "LOWER POP"],
+  ["karaoke", "Karaoke", "Progressive yellow-swept spoken-word fill", "KARAOKE"],
+  ["glow", "Neon Glow", "Electric multi-pass neon bloom on Inter Black", "ELECTRIC"],
+  ["bounce", "Bounce", "True Y-axis word hop with squash settle", "Y-AXIS HOP"],
+  ["minimal", "Minimal", "Quiet premium subtitle", "SUBTITLE"],
+  ["headline", "Big Headline", "Oversized uppercase two-tier Inter Black slam", "HEADLINE"],
+  ["boxed", "Subtitle Card", "Broadcast-style readable card", "CAPTION BOX"],
+  ["comic", "Comic Punch", "High-stroke Inter Black comic yellow energy", "COMIC"],
+  ["gradient", "Gradient Pop", "Vivid rose-violet pill pop on Inter ExtraBold", "VIVID PILL"],
 ];
 
 const CAPTION_ACCENT_OPTIONS = [
@@ -460,7 +480,7 @@ const normalizeCaptionDefaultPlacement = value => ({
   middle: "middle_center",
   lower: "bottom_center",
   bottom: "bottom_center",
-}[String(value || "").trim().toLowerCase()] || String(value || "bottom_center"));
+}[String(value || "").trim().toLowerCase()] || String(value || "creative"));
 
 const CAPTION_ICON_OPTIONS = [
   { value: "auto", glyph: "✨", label: "Auto reaction" },
@@ -1877,6 +1897,11 @@ const normalizeCaptionSegments = segments =>
           : "",
         captionX: clampNumber(segment?.captionX ?? segment?.caption_x, 5, 95, 50),
         captionY: clampNumber(segment?.captionY ?? segment?.caption_y, 5, 95, 82),
+        ...(segment?.captionSafety && typeof segment.captionSafety === "object"
+          ? { captionSafety: segment.captionSafety }
+          : segment?.caption_safety && typeof segment.caption_safety === "object"
+            ? { captionSafety: segment.caption_safety }
+            : {}),
         reviewRequired:
           Boolean(segment?.reviewRequired ?? segment?.review_required) ||
           speaker === "unknown" ||
@@ -2149,21 +2174,95 @@ const getTimedCaptionPreviewState = ({ segments, sourceTime, clipStartTime = 0, 
   };
 };
 
-const resolveCaptionStoryPreviewTreatment = (segment, fallbackPosition = "lower") => {
+const CREATIVE_STAGE_STYLE_ZONES = {
+  wall_type: { mode: "background_center", tilt: 0, stacked: false },
+  editorial_duo: { mode: "side_by_side", tilt: 0, stacked: true },
+  watch_me: { mode: "side_alternate", tilt: 0, stacked: true },
+  story_pop: { mode: "multi_zone_story", tilt: 0, stacked: true },
+  luxury: { mode: "right_editorial", tilt: 0, stacked: true },
+  newsroom: { mode: "top_center", tilt: 0, stacked: false },
+  retro: { mode: "top_left", tilt: -2.5, stacked: true },
+  sticker: { mode: "collage_corners", tilt: -2.0, stacked: true },
+  rainbow: { mode: "wave_zones", tilt: 0, stacked: true },
+  marker: { mode: "marker_alternate", tilt: 0, stacked: true },
+  editorial: { mode: "bottom_left", tilt: 0, stacked: true },
+  spring_slam: { mode: "bottom_center", tilt: 0, stacked: true },
+  headline: { mode: "bottom_center", tilt: 0, stacked: true },
+};
+
+const resolveCaptionStoryPreviewTreatment = (
+  segment,
+  fallbackPosition = "creative",
+  styleName = "bold_pop",
+  segmentIndex = 0,
+  segmentCount = 1
+) => {
   const text = normalizePlainText(segment?.text).toLowerCase();
+  const styleKey = normalizePlainText(styleName || "bold_pop").toLowerCase();
   const requestedPlacement = normalizePlainText(segment?.captionPlacement || "auto").toLowerCase();
   let concept = "story";
-  let placement = CAPTION_PLACEMENT_OPTIONS.some(
-    option => option.value === fallbackPosition && !["auto", "custom"].includes(option.value)
-  )
-    ? fallbackPosition
-    : {
-      top: "top_left",
-      center: "middle_left",
-      middle: "middle_left",
-      lower: "bottom_center",
-      bottom: "bottom_center",
-      }[fallbackPosition] || "bottom_center";
+  const speakerRaw = normalizePlainText(segment?.speaker || segment?.speakerLabel || "").toLowerCase();
+  const pickSideSplitZone = () => {
+    if (/(guest|speaker b|speaker_b)/.test(speakerRaw) || speakerRaw === "b" || speakerRaw === "2") {
+      return "side_right";
+    }
+    if (/(host|speaker a|speaker_a)/.test(speakerRaw) || speakerRaw === "a" || speakerRaw === "1") {
+      if (segmentCount > 1 && segmentIndex % 2 === 1) return "side_right";
+      return "side_left";
+    }
+    return segmentIndex % 2 === 0 ? "side_left" : "side_right";
+  };
+
+  let placement = "bottom_center";
+  let tiltDeg = 0;
+  let stacked = false;
+  const normalizedFallback = normalizePlainText(fallbackPosition || "creative").toLowerCase();
+
+  if (["creative", "template_stage"].includes(normalizedFallback) && CREATIVE_STAGE_STYLE_ZONES[styleKey]) {
+    const stage = CREATIVE_STAGE_STYLE_ZONES[styleKey];
+    stacked = stage.stacked;
+    tiltDeg = stage.tilt || 0;
+    if (stage.mode === "side_by_side") {
+      placement = pickSideSplitZone();
+    } else if (stage.mode === "side_alternate") {
+      placement = segmentIndex % 2 === 0 ? "side_left" : "side_right";
+    } else if (stage.mode === "multi_zone_story") {
+      placement = ["bottom_center", "shoulder_left", "shoulder_right", "background_center", "bottom_center"][segmentIndex % 5];
+    } else if (stage.mode === "right_editorial") {
+      placement = segmentIndex % 2 === 0 ? "middle_right" : "top_right";
+    } else if (stage.mode === "collage_corners") {
+      const seq = [
+        ["top_left", -2.5],
+        ["shoulder_right", 2.2],
+        ["bottom_center", 0],
+        ["background_left", -2.0],
+      ];
+      [placement, tiltDeg] = seq[segmentIndex % 4];
+    } else if (stage.mode === "wave_zones") {
+      placement = ["background_left", "bottom_center", "shoulder_right"][segmentIndex % 3];
+    } else if (stage.mode === "marker_alternate") {
+      placement = segmentIndex % 2 === 0 ? "shoulder_left" : "bottom_center";
+    } else {
+      placement = stage.mode;
+    }
+  } else if (normalizedFallback === "side_by_side") {
+    placement = pickSideSplitZone();
+    stacked = true;
+  } else {
+    placement = CAPTION_PLACEMENT_OPTIONS.some(
+      option => option.value === normalizedFallback && !["auto", "custom", "creative", "side_by_side"].includes(option.value)
+    )
+      ? normalizedFallback
+      : {
+        top: "top_left",
+        center: "middle_left",
+        middle: "middle_left",
+        lower: "bottom_center",
+        bottom: "bottom_center",
+        creative: "bottom_center",
+        template_stage: "bottom_center",
+        }[normalizedFallback] || "bottom_center";
+  }
 
   if (/facebook|scroll|timeline|online/.test(text)) {
     concept = "phone";
@@ -2175,8 +2274,24 @@ const resolveCaptionStoryPreviewTreatment = (segment, fallbackPosition = "lower"
     concept = "music";
   }
 
-  if (CAPTION_PLACEMENT_OPTIONS.some(option => option.value === requestedPlacement)) {
-    placement = requestedPlacement === "auto" ? placement : requestedPlacement;
+  if (
+    CAPTION_PLACEMENT_OPTIONS.some(option => option.value === requestedPlacement) &&
+    !["auto", "smart_safe", "face_safe", "auto_safe"].includes(requestedPlacement)
+  ) {
+    if (requestedPlacement === "side_by_side") {
+      placement = pickSideSplitZone();
+      stacked = true;
+    } else {
+      placement = requestedPlacement;
+    }
+  }
+  const customXVal = clampNumber(segment?.captionX, 5, 95, 50);
+  if ([
+    "shoulder_left", "shoulder_right", "side_left", "side_right",
+    "background_left", "background_right", "middle_left", "middle_right",
+    "top_left", "top_right", "bottom_left", "bottom_right",
+  ].includes(placement) || (placement === "custom" && (customXVal <= 34 || customXVal >= 66))) {
+    stacked = true;
   }
 
   const accents = {
@@ -2184,10 +2299,16 @@ const resolveCaptionStoryPreviewTreatment = (segment, fallbackPosition = "lower"
     music: "#ff6ba8",
     place: "#ffe86c",
     payoff: "#a6f598",
-    story: "#ffb33d",
   };
   const requestedIcon = normalizePlainText(segment?.captionIcon || "auto").toLowerCase();
-  const iconConcept = requestedIcon && requestedIcon !== "auto" ? requestedIcon : concept;
+  const iconConcept =
+    requestedIcon && requestedIcon !== "auto"
+      ? requestedIcon
+      : concept !== "story"
+        ? concept
+        : styleKey === "story_pop"
+          ? "story"
+          : "none";
   const icons = {
     laugh: "☼",
     fire: "♨",
@@ -2208,10 +2329,12 @@ const resolveCaptionStoryPreviewTreatment = (segment, fallbackPosition = "lower"
 
   return {
     placement,
+    stacked,
+    tiltDeg,
     accent: /^#[0-9a-f]{6}$/i.test(String(segment?.captionAccent || ""))
       ? segment.captionAccent
-      : accents[concept] || accents.story,
-    icon: icons[iconConcept] ?? icons.story,
+      : accents[concept] || getCaptionStyleHighlightHex(styleKey, "#ffb33d"),
+    icon: icons[iconConcept] ?? (requestedIcon && requestedIcon !== "auto" ? icons.story : ""),
     x: clampNumber(segment?.captionX, 5, 95, 50),
     y: clampNumber(segment?.captionY, 5, 95, 82),
   };
@@ -3107,7 +3230,10 @@ const ViralClipStudio = ({
   const [proTimingMode, setProTimingMode] = useState("forward");
   const [freezeHoldSeconds, setFreezeHoldSeconds] = useState(1.5);
   const [opticalFlowSlowMo, setOpticalFlowSlowMo] = useState(false);
-  const [captionPosition, setCaptionPosition] = useState("bottom_center");
+  const [captionPosition, setCaptionPosition] = useState("creative");
+  const [captionAvoidSubjects, setCaptionAvoidSubjects] = useState(false);
+  const [captionSafetyStatus, setCaptionSafetyStatus] = useState("idle");
+  const [captionSafetyMessage, setCaptionSafetyMessage] = useState("");
   const [captionScale, setCaptionScale] = useState(1);
   const [captionTextOverride, setCaptionTextOverride] = useState("");
   const [captionCoverageMode, setCaptionCoverageMode] = useState("full");
@@ -3379,6 +3505,7 @@ const ViralClipStudio = ({
   const musicPreviewAudioContextRef = useRef(null);
   const musicPreviewGainNodeRef = useRef(null);
   const musicPreviewDuckGainNodeRef = useRef(null);
+  const musicPreviewPannerNodeRef = useRef(null);
   const preparedVoiceBusRef = useRef(null);
   const preparedDialogueBusRef = useRef(null);
   const preparedDialogueClockRef = useRef(null);
@@ -3564,11 +3691,18 @@ const ViralClipStudio = ({
       const audioContext = soundEffectAudioContextRef.current || new AudioContextCtor();
       const gainNode = audioContext.createGain();
       const duckGainNode = audioContext.createGain();
+      const pannerNode = typeof audioContext.createStereoPanner === "function" ? audioContext.createStereoPanner() : null;
       gainNode.connect(duckGainNode);
-      duckGainNode.connect(audioContext.destination);
+      if (pannerNode) {
+        duckGainNode.connect(pannerNode);
+        pannerNode.connect(audioContext.destination);
+      } else {
+        duckGainNode.connect(audioContext.destination);
+      }
       musicPreviewAudioContextRef.current = audioContext;
       musicPreviewGainNodeRef.current = gainNode;
       musicPreviewDuckGainNodeRef.current = duckGainNode;
+      musicPreviewPannerNodeRef.current = pannerNode;
     }
 
     return musicPreviewAudioContextRef.current;
@@ -3577,6 +3711,10 @@ const ViralClipStudio = ({
   const syncMusicPreviewGain = (programmeTime = getPreviewTimelineTime(videoRef.current?.currentTime || 0)) => {
     const gainNode = musicPreviewGainNodeRef.current;
     if (!gainNode) return;
+    if (musicPreviewPannerNodeRef.current?.pan) {
+      const musicPan = Math.max(-100, Math.min(100, Number(trackStates?.music?.pan || 0))) / 100;
+      musicPreviewPannerNodeRef.current.pan.value = musicPan;
+    }
     if (!(musicTrack?.ducking && musicTrack.duckingMode === "speech") && musicPreviewDuckGainNodeRef.current)
       musicPreviewDuckGainNodeRef.current.gain.value = 1;
     const preparedDuck = preparedSpeechDuckRef.current;
@@ -3767,6 +3905,7 @@ const ViralClipStudio = ({
     autoCaptions,
     captionStyle,
     captionPosition,
+    captionAvoidSubjects,
     captionScale,
     captionTextOverride,
     captionCoverageMode,
@@ -4478,6 +4617,9 @@ const ViralClipStudio = ({
     setAutoCaptions(!!snapshot.autoCaptions);
     setCaptionStyle(snapshot.captionStyle || "bold_pop");
     setCaptionPosition(normalizeCaptionDefaultPlacement(snapshot.captionPosition));
+    setCaptionAvoidSubjects(Boolean(snapshot.captionAvoidSubjects));
+    setCaptionSafetyStatus("idle");
+    setCaptionSafetyMessage("");
     setCaptionScale(Number(snapshot.captionScale ?? 1));
     setCaptionTextOverride(snapshot.captionTextOverride || "");
     setCaptionCoverageMode(snapshot.captionCoverageMode === "selected" ? "selected" : "full");
@@ -7505,7 +7647,14 @@ const ViralClipStudio = ({
       clampAudioControl(effect.volume, 0, 1, 0.8) *
       (previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1)) * automationGain;
     const gain = audioContext.createGain();
-    gain.connect(audioContext.destination);
+    const sfxPanner = typeof audioContext.createStereoPanner === "function" ? audioContext.createStereoPanner() : null;
+    if (sfxPanner) {
+      sfxPanner.pan.value = Math.max(-100, Math.min(100, Number(trackStates?.sfx?.pan || 0))) / 100;
+      gain.connect(sfxPanner);
+      sfxPanner.connect(audioContext.destination);
+    } else {
+      gain.connect(audioContext.destination);
+    }
 
     const registerNode = node => {
       soundEffectNodesRef.current.add(node);
@@ -8362,6 +8511,10 @@ const ViralClipStudio = ({
   const precisionPreviewGrade = useMemo(() => finishPreviewIsLive && effectiveFinishFx.precisionGrade
     ? buildPrecisionGrade(effectiveFinishFx) : null, [finishPreviewIsLive, effectiveFinishFx]);
   const advancedColorCube = useMemo(() => buildAdvancedColorCube(advancedColor), [advancedColor]);
+  const advancedColorWebGLCube = useMemo(
+    () => buildAdvancedColorCube({ ...(advancedColor || {}), qualifier: null }),
+    [advancedColor]
+  );
   const finishZoom = finishPreviewIsLive ? Math.max(1, Number(effectiveFinishFx.zoom || 1)) : 1;
   const finishTransformOrigin =
     effectiveFinishFx.zoomAnchor === "left"
@@ -8668,8 +8821,14 @@ const ViralClipStudio = ({
     : -1;
   const captionStoryPreviewTreatment =
     captionPreviewSegmentIndex >= 0
-      ? resolveCaptionStoryPreviewTreatment(captionPreviewState.currentChunk, captionPosition)
-      : null;
+      ? resolveCaptionStoryPreviewTreatment(
+          captionPreviewState.currentChunk,
+          captionPosition,
+          captionStyle,
+          captionPreviewSegmentIndex,
+          normalizedTimedCaptionSegments.length || 1
+        )
+      : resolveCaptionStoryPreviewTreatment(null, captionPosition, captionStyle, 0, 1);
   const captionPreviewTimeMap = previewOutputTimeMap;
   const captionRenderPreviewStyles = getCaptionPreviewStyles(
     captionStyle, captionScale, captionStoryPreviewTreatment?.accent || "#ffb33d",
@@ -9526,6 +9685,121 @@ const ViralClipStudio = ({
   }, [projectId, currentTimelineClip?.id, currentTimelineClip?.sourceStoragePath, currentTimelineClip?.startRequest, currentTimelineClip?.endRequest,
     selectedClip?.start, selectedClip?.end, effectiveSmartCropMode, reframeAspect, speakerTrackZoom]);
 
+  const runSmartSafeCaptionPlacement = async ({
+    preferredMode = captionPosition,
+    targetSegments = null,
+    styleName = captionStyle,
+  } = {}) => {
+    const segmentsToAnalyze = normalizeCaptionSegments(targetSegments || captionSegmentsRef.current);
+    if (!segmentsToAnalyze.length) {
+      setCaptionSafetyStatus("idle");
+      setCaptionSafetyMessage("Add or import captions first, then scan video to dodge faces & bodies.");
+      return null;
+    }
+    setCaptionSafetyStatus("processing");
+    setCaptionSafetyMessage("Scanning faces, heads & bodies across each caption cue…");
+    try {
+      const source = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
+      const activeVideo =
+        [!renderedOutputUrl ? videoRef.current : null, beforeVideoRef.current].find(
+          media => media && media.videoWidth > 0 && media.videoHeight > 0
+        ) || videoRef.current;
+      const sourceFile = currentTimelineClip?.file || selectedClip?.file || null;
+      const token = await getMediaAuthToken().catch(() => "");
+      const result = await analyzeCaptionSegmentsFaceAndBodySafety({
+        apiBaseUrl: API_BASE_URL,
+        authToken: token,
+        sourceFile,
+        sourceUrl: source,
+        videoElement: activeVideo,
+        segments: segmentsToAnalyze,
+        styleName,
+        captionScale,
+        preferredMode: preferredMode || "smart_safe",
+        aspect: reframeAspect,
+        cropX: activeReframePosition?.x ?? 50,
+        cropY: activeReframePosition?.y ?? 50,
+      });
+      if (Array.isArray(result?.segments) && result.segments.length) {
+        setCaptionSegments(previous => {
+          const byId = new Map(result.segments.map(seg => [String(seg.id), seg]));
+          return previous.map((seg, idx) => {
+            const matched = byId.get(String(seg.id)) || result.segments[idx];
+            if (!matched) return seg;
+            return {
+              ...seg,
+              captionPlacement: matched.captionPlacement || seg.captionPlacement,
+              captionX: matched.captionX ?? seg.captionX,
+              captionY: matched.captionY ?? seg.captionY,
+              captionSafety: matched.captionSafety || seg.captionSafety,
+            };
+          });
+        });
+        setCaptionSafetyStatus("ready");
+        const s = result.summary || {};
+        setCaptionSafetyMessage(
+          `Safe zones applied across ${s.cuesAnalyzed || result.segments.length} cues (${
+            s.zeroFaceOverlapCues ?? result.segments.length
+          } clear of faces · ${s.facesDetectedCues || 0} speaker cues · ${s.engine || "pixel-scan"}).`
+        );
+      } else {
+        setCaptionSafetyStatus("ready");
+        setCaptionSafetyMessage("Load video frames first to run face/body safety scan.");
+      }
+      return result;
+    } catch (error) {
+      setCaptionSafetyStatus("error");
+      setCaptionSafetyMessage(error?.message || "Could not analyze frames for faces; keeping current placement.");
+      return null;
+    }
+  };
+
+  const applyDirectorRecommendedCaption = async () => {
+    const activeVideo =
+      [!renderedOutputUrl ? videoRef.current : null, beforeVideoRef.current].find(
+        media => media && media.videoWidth > 0 && media.videoHeight > 0
+      ) || videoRef.current;
+    const sampled = sampleVideoTelemetryForDirectorCaption(activeVideo);
+    const recommendation = recommendDirectorCaptionTemplate({
+      telemetry: sampled ? [sampled] : null,
+      brief: selectedClip?.hookText || selectedClip?.reason || creativeIntent || "",
+      lookId: finishFx?.preset || "auto",
+      reframeAspect,
+      smartCropMode: effectiveSmartCropMode,
+      speakerStackCameraCount,
+      captionSegments: captionSegmentsRef.current,
+      soundEffects,
+      creativeIntent,
+      pacingLevel,
+      contentProfile,
+    });
+    const currentSegments = normalizeCaptionSegments(captionSegmentsRef.current);
+    const updatedSegments = recommendation.captionAccent
+      ? currentSegments.map(item => ({ ...item, captionAccent: recommendation.captionAccent }))
+      : currentSegments;
+    flushSync(() => {
+      setCaptionStyle(recommendation.captionStyle);
+      setCaptionPosition(recommendation.captionPosition);
+      setCaptionAvoidSubjects(Boolean(recommendation.captionAvoidSubjects));
+      setAutoCaptions(true);
+      setComparisonMode("after");
+      if (recommendation.captionAccent && updatedSegments.length) {
+        setCaptionSegments(updatedSegments);
+      }
+    });
+    if (updatedSegments.length) {
+      await runSmartSafeCaptionPlacement({
+        preferredMode: recommendation.captionPosition,
+        styleName: recommendation.captionStyle,
+        targetSegments: updatedSegments,
+      });
+    }
+    setCaptionSafetyMessage(
+      `✨ AI Director selected "${recommendation.label}" (${recommendation.captionPosition}): ${recommendation.reason}`
+    );
+    return recommendation;
+  };
+
   const focusCaptionSegmentsForReview = segments => {
     const normalizedSegments = normalizeCaptionSegments(segments);
     const target = timeline.reduce((match, clip, index) => {
@@ -10340,9 +10614,33 @@ const ViralClipStudio = ({
       if (next.finishFx) replaceFinishFx(next.finishFx);
       if (next.advancedColor) setAdvancedColor(next.advancedColor);
       if (Array.isArray(next.finishKeyframes)) setFinishKeyframes(next.finishKeyframes);
+      if (next.captionDirection) {
+        setCaptionStyle(next.captionDirection.captionStyle);
+        setCaptionPosition(next.captionDirection.captionPosition || 'smart_safe');
+        setCaptionAvoidSubjects(next.captionDirection.captionAvoidSubjects !== false);
+        setAutoCaptions(true);
+        if (next.captionDirection.captionAccent) {
+          setCaptionSegments(prev =>
+            Array.isArray(prev)
+              ? prev.map(item => ({ ...item, captionAccent: next.captionDirection.captionAccent }))
+              : prev
+          );
+        }
+        if (next.captionDirection.reason) {
+          setCaptionSafetyMessage(
+            `✨ AI Director applied "${next.captionDirection.captionStyle}": ${next.captionDirection.reason}`
+          );
+        }
+      }
       setComparisonMode('after');
       setPreviewFinishedFile(false);
     });
+    if (next.captionDirection && normalizeCaptionSegments(captionSegmentsRef.current).length) {
+      void runSmartSafeCaptionPlacement({
+        preferredMode: next.captionDirection.captionPosition || 'smart_safe',
+        styleName: next.captionDirection.captionStyle,
+      });
+    }
     setStudioActionMessage('Reviewed cinematic scene applied as editable layers, grades and motion keys.');
   };
 
@@ -11255,7 +11553,22 @@ const ViralClipStudio = ({
       toast("Cuts are already locked to musical beats", { icon: "🎵" });
       return;
     }
-    setTimeline(result.updatedTimeline);
+    const nextSnapshot = { ...cutHistoryBaseline, timeline: result.updatedTimeline };
+    const nextDocument = cutHistoryBaseline.studioDocument
+      ? reconcileStudioDocument({
+          snapshot: nextSnapshot,
+          projectId,
+          storedDocument: cutHistoryBaseline.studioDocument,
+        })
+      : null;
+    if (nextDocument) {
+      applyLinkedCommandSnapshot({
+        snapshot: { ...nextSnapshot, studioDocument: nextDocument },
+        document: nextDocument,
+      });
+    } else {
+      setTimeline(result.updatedTimeline);
+    }
     setStudioActionMessage(`🎵 Aligned ${result.cutsAligned} sequence cuts to nearest music beat transients.`);
     toast.success(`🎵 Aligned ${result.cutsAligned} cuts to music beats!`);
   };
@@ -13103,7 +13416,7 @@ const ViralClipStudio = ({
     setDualExportOutputs(null);
     const exportEditState = getEditorSnapshot();
     const {
-      autoCaptions, captionStyle, captionPosition, captionScale, captionTextOverride, captionCoverageMode,
+      autoCaptions, captionStyle, captionPosition, captionAvoidSubjects, captionScale, captionTextOverride, captionCoverageMode,
       captionSegments, translateCaptionsToEnglish, advancedColor, smartCrop, smartCropMode,
       reframeAspect, speakerTrackZoom, speakerStackFraming, speakerStackOffsets, speakerStackLayout,
       speakerFocusCuts, reframeModeCuts, reframeKeyframes, motionKeyframes, finishKeyframes,
@@ -13668,6 +13981,10 @@ const ViralClipStudio = ({
         autoCaptions,
         captionReviewCopy,
         captionCoverageMode,
+        captionAvoidSubjects: Boolean(
+          captionAvoidSubjects ||
+            ["smart_safe", "face_safe", "auto_safe"].includes(String(captionPosition || "").toLowerCase())
+        ),
         captionStyle,
         captionPosition,
         captionScale,
@@ -14152,6 +14469,7 @@ const ViralClipStudio = ({
     autoCaptions,
     captionStyle,
     captionPosition,
+    captionAvoidSubjects,
     captionScale,
     captionTextOverride,
     captionCoverageMode,
@@ -15474,6 +15792,33 @@ const ViralClipStudio = ({
         context.fillRect(0, 0, canvasWidth, canvasHeight);
         context.restore();
       }
+      if (finishPreviewIsLive && effectiveFinishFx?.skyReplace?.enabled && effectiveFinishFx.skyReplace.preset && effectiveFinishFx.skyReplace.preset !== "none") {
+        try {
+          const skyPixels = context.getImageData(0, 0, canvasWidth, canvasHeight);
+          applySkyReplacementRgba(skyPixels.data, canvasWidth, canvasHeight, {
+            preset: effectiveFinishFx.skyReplace.preset,
+            horizonPct: Number(effectiveFinishFx.skyReplace.horizonPct ?? 64),
+            threshold: Number(effectiveFinishFx.skyReplace.threshold ?? 0.48),
+            softness: Number(effectiveFinishFx.skyReplace.softness ?? 0.22),
+            blend: Number(effectiveFinishFx.skyReplace.blend ?? 0.92),
+            temperatureMatch: Number(effectiveFinishFx.skyReplace.tempMatch ?? 0.32),
+            time: frameOutputTime,
+          });
+          context.putImageData(skyPixels, 0, 0);
+        } catch (_e) {}
+      }
+      if (
+        finishPreviewIsLive &&
+        (Math.abs(Number(effectiveFinishFx?.lensDistortion || 0)) > 0.005 ||
+          Number(effectiveFinishFx?.rackFocus || 0) > 0.01 ||
+          Number(effectiveFinishFx?.atmosphericHaze || 0) > 0.005)
+      ) {
+        try {
+          const optPixels = context.getImageData(0, 0, canvasWidth, canvasHeight);
+          applyOpticalCameraPassRgba(optPixels.data, canvasWidth, canvasHeight, effectiveFinishFx, rasterScale);
+          context.putImageData(optPixels, 0, 0);
+        } catch (_e) {}
+      }
       const gradeMaskSource=finishPreviewIsLive?(advancedColor?.maskSourceNodeId||effectiveFinishFx?.maskSourceNodeId):null;
       const gradeMaskOriginal=gradeMaskSource?captureStudioGradeSurface(context):null;
       const blendNodeGrade=(nodeId,original,invert=false)=>blendStudioNodeMask(context,original,nodeId,{overlays,keys:previewMotionKeyframes,mainTransform,time:frameOutputTime,width:canvasWidth,height:canvasHeight,evaluatePose:evaluateWorldLayerPose,paintSurface:paintStudioNodeSurface,parsePolygon:parseStudioMaskPolygon,invert});
@@ -15501,9 +15846,9 @@ const ViralClipStudio = ({
             width: canvasWidth,
             height: canvasHeight,
             grade: precisionPreviewGrade ? effectiveFinishFx : null,
-            cube: finishPreviewIsLive ? advancedColorCube : null,
+            cube: finishPreviewIsLive ? advancedColorWebGLCube : null,
             // This canonical cube already includes the imported LUT strength,
-            // curves and HSL. Apply it once, as the final-render compiler does.
+            // curves and HSL (without qualifier, which runs in the WebGL2 pass).
             lutIntensity: 1,
             vignetteAmount: precisionPreviewGrade && pausedRaster ? effectiveFinishFx.vignette : 0,
             powerWindow: finishPreviewIsLive ? advancedColor?.powerWindow : null,
@@ -15549,7 +15894,7 @@ const ViralClipStudio = ({
         }
       }
       if(gradeMaskSource)blendNodeGrade(gradeMaskSource,gradeMaskOriginal,!!advancedColor?.maskInvert);
-      if(finishPreviewIsLive&&!needsSecondaryShader&&(Number(effectiveFinishFx.filmGrain)>.005||Number(effectiveFinishFx.chromaticAberration)>.005)){
+      if(finishPreviewIsLive&&!usedWebGL&&(Number(effectiveFinishFx.filmGrain)>.005||Number(effectiveFinishFx.chromaticAberration)>.005)){
         const pixels=context.getImageData(0,0,canvasWidth,canvasHeight);
         applyStudioFinishTexture(pixels.data,canvasWidth,canvasHeight,effectiveFinishFx,frameOutputTime,exportSettings.fps,rasterScale);
         context.putImageData(pixels,0,0);
@@ -15676,16 +16021,71 @@ const ViralClipStudio = ({
           }
         };
         const getFreezeSourceCanvas = (fx, targetW, targetH) => {
-          const fTime = Number(fx.params?.freezeTime ?? fx.startTime ?? 0);
-          const key = `${fx.id}:${fTime.toFixed(2)}:${targetW}x${targetH}`;
+          const fTime = Math.max(0, Number(fx.params?.freezeTime ?? fx.startTime ?? 0));
+          const clipSrc = currentTimelineClip?.url || videoUrl || "";
+          const key = `${fx.id}:${fTime.toFixed(2)}:${clipSrc}:${targetW}x${targetH}`;
           const existing = freezeFrameCacheRef.current.get(key);
-          if (existing) return existing;
-          const snap = document.createElement("canvas");
-          snap.width = targetW;
-          snap.height = targetH;
-          snap.getContext("2d").drawImage(paintCanvas, 0, 0, targetW, targetH);
-          freezeFrameCacheRef.current.set(key, snap);
-          return snap;
+          if (existing?.exact && existing.canvas) return existing.canvas;
+          if (Math.abs(frameOutputTime - fTime) <= 0.08) {
+            const snap = existing?.canvas || document.createElement("canvas");
+            snap.width = targetW;
+            snap.height = targetH;
+            snap.getContext("2d").drawImage(paintCanvas, 0, 0, targetW, targetH);
+            freezeFrameCacheRef.current.set(key, { canvas: snap, exact: true, pending: false });
+            return snap;
+          }
+          if (!existing?.pending && clipSrc && typeof document !== "undefined") {
+            const tempSnap = existing?.canvas || document.createElement("canvas");
+            tempSnap.width = targetW;
+            tempSnap.height = targetH;
+            tempSnap.getContext("2d").drawImage(paintCanvas, 0, 0, targetW, targetH);
+            const entry = { canvas: tempSnap, exact: false, pending: true };
+            freezeFrameCacheRef.current.set(key, entry);
+            try {
+              const probeVideo = document.createElement("video");
+              probeVideo.muted = true;
+              probeVideo.playsInline = true;
+              probeVideo.crossOrigin = "anonymous";
+              applySafeMediaSource(probeVideo, clipSrc);
+              const targetClipWindow = currentTimelineClip ? getTimelineClipWindow(currentTimelineClip) : { start: 0, duration: fTime + 1 };
+              const seekTarget = Math.max(0, Number(targetClipWindow.start || 0) + Math.max(0, fTime));
+              const finishSeek = () => {
+                try {
+                  if (probeVideo.videoWidth > 0 && probeVideo.videoHeight > 0) {
+                    const exactCanvas = document.createElement("canvas");
+                    exactCanvas.width = targetW;
+                    exactCanvas.height = targetH;
+                    exactCanvas.getContext("2d").drawImage(probeVideo, 0, 0, targetW, targetH);
+                    freezeFrameCacheRef.current.set(key, { canvas: exactCanvas, exact: true, pending: false });
+                    window.requestAnimationFrame?.(() => paintProgrammeFrame());
+                  } else {
+                    entry.pending = false;
+                  }
+                } catch (_) {
+                  entry.pending = false;
+                }
+              };
+              probeVideo.addEventListener("seeked", finishSeek, { once: true });
+              probeVideo.addEventListener("loadedmetadata", () => {
+                try {
+                  probeVideo.currentTime = Math.min(seekTarget, Math.max(0, (probeVideo.duration || seekTarget) - 0.01));
+                } catch (_) {
+                  entry.pending = false;
+                }
+              }, { once: true });
+              probeVideo.addEventListener("error", () => { entry.pending = false; }, { once: true });
+              probeVideo.load?.();
+            } catch (_) {
+              entry.pending = false;
+            }
+            return tempSnap;
+          }
+          if (existing?.canvas) return existing.canvas;
+          const fallback = document.createElement("canvas");
+          fallback.width = targetW;
+          fallback.height = targetH;
+          fallback.getContext("2d").drawImage(paintCanvas, 0, 0, targetW, targetH);
+          return fallback;
         };
         renderCreativeEffectsToCanvas(
           context,
@@ -15778,14 +16178,17 @@ const ViralClipStudio = ({
     const resizeProgramme = () => {
       programmeBounds = canvas.getBoundingClientRect();
       if (phoneFrameRef.current) {
-        phoneFrameRef.current.style.setProperty("--caption-programme-width",
-          `${phoneFrameRef.current.clientWidth}px`);
-        phoneFrameRef.current.style.setProperty("--title-programme-height",
-          `${phoneFrameRef.current.clientHeight}px`);
-        phoneFrameRef.current.style.setProperty("--title-preview-scale",
-          String(phoneFrameRef.current.clientHeight / 720));
-        phoneFrameRef.current.style.setProperty("--title-layout-width",
-          `${720 * phoneFrameRef.current.clientWidth / Math.max(1, phoneFrameRef.current.clientHeight)}px`);
+        const cw = Math.max(1, phoneFrameRef.current.clientWidth);
+        const ch = Math.max(1, phoneFrameRef.current.clientHeight);
+        const aspectRatio = cw / ch;
+        const aspectCaptionScale =
+          aspectRatio >= 1.15 ? 0.84 : aspectRatio >= 0.88 ? 0.80 : aspectRatio >= 0.72 ? 0.84 : 0.90;
+        const captionRefDim = Math.round(Math.min(cw, ch) * aspectCaptionScale);
+        phoneFrameRef.current.style.setProperty("--caption-programme-width", `${cw}px`);
+        phoneFrameRef.current.style.setProperty("--caption-programme-ref-dim", `${captionRefDim}px`);
+        phoneFrameRef.current.style.setProperty("--title-programme-height", `${ch}px`);
+        phoneFrameRef.current.style.setProperty("--title-preview-scale", String(ch / 720));
+        phoneFrameRef.current.style.setProperty("--title-layout-width", `${(720 * cw) / ch}px`);
       }
       if (transport && phoneFrameRef.current?.parentElement) {
         phoneFrameRef.current.parentElement.style.setProperty("--transport-space",
@@ -15854,6 +16257,7 @@ const ViralClipStudio = ({
     framedSoloRasterEnabled,
     compiledAdjustmentGrades,
     advancedColorCube,
+    advancedColorWebGLCube,
     finishPreviewIsLive,
     previewProgrammePosition,
     reframeKeyframes,
@@ -16173,6 +16577,7 @@ const ViralClipStudio = ({
     const applyAudio = (muted, vol) => {
       if (video.muted !== muted) video.muted = muted;
       applyStudioMediaGain(video, vol);
+      applyStudioMediaPan(video, trackStates?.originalAudio?.pan ?? 0);
     };
 
     if (anyMuteMain) {
@@ -17328,9 +17733,11 @@ const ViralClipStudio = ({
       if(!allowTimelineTimingEdit('video')||!allowTimelineTimingEdit('originalAudio'))return;
       if(timeline.length<2){setStudioActionMessage('Split or add a second clip, then apply a transition to their cut.');return;}
       const position=getCutPlayheadPosition(),left=Math.min(position?.index??activeTimelineIndex,timeline.length-2);
-      const transition=['clean_cut','soft_dip','energy_flash'].includes(creatorPreview.transition)?creatorPreview.transition:'soft_dip';
-      const clips=timeline.map((clip,index)=>index===left?{...clip,transitionOut:transition,transitionDuration:.18}
-        :index===left+1?{...clip,transitionIn:transition,transitionDuration:.18}:clip);
+      const allowedIds = JOIN_TRANSITIONS.map(t => t.id).filter(id => id !== "auto");
+      const transition = allowedIds.includes(creatorPreview.transition) ? creatorPreview.transition : "soft_dip";
+      const td = ["clean_cut", "soft_dip", "energy_flash"].includes(transition) ? 0.18 : 0.35;
+      const clips=timeline.map((clip,index)=>index===left?{...clip,transitionOut:transition,transitionDuration:td}
+        :index===left+1?{...clip,transitionIn:transition,transitionDuration:td}:clip);
       commitCreatorProjectEdit({timeline:clips},'Cut transition');return;
     }
     const freeze=['micro_freeze','reaction_punch'].includes(effect);
@@ -21281,28 +21688,22 @@ const ViralClipStudio = ({
                             captionStoryPreviewTreatment
                               ? `caption-placement-${captionStoryPreviewTreatment.placement}`
                               : `caption-position-${captionPosition}`
-                          } caption-style-${captionStyle || "classic"}`}
+                          } caption-style-${captionStyle || "classic"} ${
+                            captionStoryPreviewTreatment?.stacked ? "is-caption-stacked" : ""
+                          }`}
                           data-testid="live-caption-preview"
                           data-caption-render-style={captionStyle}
+                          data-caption-placement={captionStoryPreviewTreatment?.placement || captionPosition}
                           style={{
                             zIndex: Math.max(480, 100 + compositionEntries.length),
                             "--caption-preview-scale": 1,
+                            "--caption-stage-tilt": `${captionStoryPreviewTreatment?.tiltDeg || 0}deg`,
                             "--caption-story-accent":
                               captionStoryPreviewTreatment?.accent || "#ffb33d",
                             "--caption-custom-x": `${captionStoryPreviewTreatment?.x ?? 50}%`,
                             "--caption-custom-y": `${captionStoryPreviewTreatment?.y ?? 82}%`,
-                            "--caption-custom-shift-x":
-                              (captionStoryPreviewTreatment?.x ?? 50) <= 33
-                                ? "0%"
-                                : (captionStoryPreviewTreatment?.x ?? 50) >= 67
-                                  ? "-100%"
-                                  : "-50%",
-                            "--caption-custom-shift-y":
-                              (captionStoryPreviewTreatment?.y ?? 82) <= 33
-                                ? "0%"
-                                : (captionStoryPreviewTreatment?.y ?? 82) >= 67
-                                  ? "-100%"
-                                  : "-50%",
+                            "--caption-custom-shift-x": `${-(captionStoryPreviewTreatment?.x ?? 50)}%`,
+                            "--caption-custom-shift-y": `${-(captionStoryPreviewTreatment?.y ?? 82)}%`,
                           }}
                         >
                           <div className="caption-preview-pill caption-preview-pill-active" style={captionRenderPreviewStyles.pill}>
@@ -25197,6 +25598,258 @@ const ViralClipStudio = ({
                     />
                   </label>
 
+                  <div className="inspector-field">
+                    <span>Stage mode</span>
+                    <small>Templates automatically place words across the wall, side columns, corners and lower third.</small>
+                    <div className="caption-stage-quickbar" role="group" aria-label="Caption stage mode">
+                      {[
+                        ["smart_safe", "🛡 Smart safe"],
+                        ["creative", "✨ Template stage"],
+                        ["side_by_side", "↔ Side by side"],
+                        ["background_center", "🖼 Studio wall"],
+                        ["bottom_center", "⬇ Bottom"],
+                      ].map(([value, label]) => {
+                        const isActive =
+                          value === "creative"
+                            ? captionPosition === "creative" || captionPosition === "auto" || captionPosition === "template_stage"
+                            : value === "bottom_center"
+                            ? captionPosition === "bottom_center" || captionPosition === "lower"
+                            : value === "smart_safe"
+                            ? captionPosition === "smart_safe" || captionPosition === "face_safe"
+                            : captionPosition === value;
+                        return (
+                          <button
+                            key={value}
+                            type="button"
+                            className={isActive ? "is-active" : ""}
+                            aria-pressed={isActive}
+                            onClick={() => {
+                              setCaptionPosition(value);
+                              if (value === "smart_safe") {
+                                setCaptionAvoidSubjects(true);
+                                void runSmartSafeCaptionPlacement({ preferredMode: "smart_safe" });
+                              }
+                              setAutoCaptions(true);
+                              setComparisonMode("after");
+                            }}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="caption-smart-safe-bar">
+                      <button
+                        type="button"
+                        data-testid="director-pick-caption-btn"
+                        disabled={captionSafetyStatus === "processing"}
+                        onClick={() => void applyDirectorRecommendedCaption()}
+                      >
+                        ✨ AI Director picks template for this video
+                      </button>
+                      <button
+                        type="button"
+                        data-testid="smart-safe-captions-btn"
+                        disabled={captionSafetyStatus === "processing"}
+                        onClick={() => {
+                          setCaptionAvoidSubjects(true);
+                          setAutoCaptions(true);
+                          setComparisonMode("after");
+                          void runSmartSafeCaptionPlacement({
+                            preferredMode: captionPosition || "smart_safe",
+                          });
+                        }}
+                      >
+                        {captionSafetyStatus === "processing"
+                          ? "Scanning faces & bodies across cues…"
+                          : "🛡 Auto-place captions around faces & bodies"}
+                      </button>
+                      <label className="inspector-toggle-row">
+                        <span>
+                          <b>Avoid faces & bodies on render</b>
+                          <small>Checks final video frames with AI face + silhouette detection before export.</small>
+                        </span>
+                        <input
+                          type="checkbox"
+                          aria-label="Avoid faces and bodies on render"
+                          checked={captionAvoidSubjects || captionPosition === "smart_safe"}
+                          onChange={event => {
+                            const checked = event.target.checked;
+                            setCaptionAvoidSubjects(checked);
+                            if (checked && captionSegments.length) {
+                              void runSmartSafeCaptionPlacement({
+                                preferredMode: captionPosition || "smart_safe",
+                              });
+                            }
+                          }}
+                        />
+                      </label>
+                      {captionSafetyMessage ? (
+                        <p
+                          className="caption-smart-safe-status"
+                          data-testid="smart-safe-captions-status"
+                          role="status"
+                        >
+                          {captionSafetyMessage}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <div className="inspector-field">
+                    <span>Creator style</span>
+                    <div className="inspector-choice-grid caption-style-grid">
+                      {CAPTION_STYLE_OPTIONS.map(([value, label, helper, zoneBadge]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          aria-label={label}
+                          className={`caption-style-option caption-style-option-${value} ${
+                            captionStyle === value ? "is-active" : ""
+                          }`}
+                          aria-pressed={captionStyle === value}
+                          onClick={() => {
+                            setCaptionStyle(value);
+                            if (captionPosition === "bottom_center" || captionPosition === "lower") {
+                              setCaptionPosition("creative");
+                            }
+                            setAutoCaptions(true);
+                            setComparisonMode("after");
+                            if (!captionPreviewState?.currentChunk) {
+                              focusCaptionSegmentsForReview(captionSegments);
+                            }
+                          }}
+                        >
+                          <span className="caption-style-swatch" aria-hidden="true">
+                            <i>Aa</i>
+                            <b>WORD</b>
+                          </span>
+                          <span className="caption-style-option-copy">
+                            <span className="caption-style-option-title-row">
+                              <strong>{label}</strong>
+                              {zoneBadge ? <span className="caption-style-zone-badge">{zoneBadge}</span> : null}
+                            </span>
+                            <small>{helper}</small>
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="inspector-field">
+                    <span>Default placement</span>
+                    <small>Each transcript line can override this at its own timestamp.</small>
+                    <div className="caption-placement-grid" role="group" aria-label="Default caption placement">
+                      {[
+                        ["top_left", "↖"], ["top_center", "↑"], ["top_right", "↗"],
+                        ["middle_left", "←"], ["middle_center", "•"], ["middle_right", "→"],
+                        ["bottom_left", "↙"], ["bottom_center", "↓"], ["bottom_right", "↘"],
+                      ].map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          className={captionPosition === value ? "is-active" : ""}
+                          aria-pressed={captionPosition === value}
+                          aria-label={CAPTION_PLACEMENT_OPTIONS.find(option => option.value === value)?.label}
+                          onClick={() => setCaptionPosition(value)}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="caption-stage-zone-grid" role="group" aria-label="Creative caption zones">
+                      {[
+                        ["side_by_side", "↔", "Side by side"],
+                        ["shoulder_left", "↙", "Left shoulder"],
+                        ["shoulder_right", "↘", "Right shoulder"],
+                        ["background_left", "◧", "Wall left"],
+                        ["background_center", "▣", "Wall centre"],
+                        ["background_right", "◨", "Wall right"],
+                      ].map(([value, icon, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          className={captionPosition === value ? "is-active" : ""}
+                          aria-pressed={captionPosition === value}
+                          aria-label={label}
+                          onClick={() => setCaptionPosition(value)}
+                        >
+                          <b aria-hidden="true">{icon}</b>
+                          <span>{label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="inspector-field">
+                    <span>Behind-subject depth captions</span>
+                    <small>Place speech-synced typography behind a masked person or object inside Composite.</small>
+                    <button
+                      type="button"
+                      className="studio-secondary-btn"
+                      data-testid="captions-to-subject-vfx"
+                      onClick={() => {
+                        setStudioInspectorTab("composite");
+                        setActiveCreativeTool("composite");
+                        setStudioActionMessage(
+                          "Select a subject point and click Sync speech captions behind subject to place captions behind your person or object."
+                        );
+                        window.requestAnimationFrame(() => {
+                          document.querySelector(".studio-subject-vfx")?.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start",
+                          });
+                        });
+                      }}
+                    >
+                      Put captions behind person or object →
+                    </button>
+                  </div>
+
+                  <div className="inspector-field">
+                    <span>Quick accent palette</span>
+                    <div className="caption-accent-palette" role="group" aria-label="Caption accent palette">
+                      {CAPTION_ACCENT_OPTIONS.map(([color, label]) => (
+                        <button
+                          key={color}
+                          type="button"
+                          aria-label={label}
+                          title={label}
+                          style={{ "--caption-swatch": color }}
+                          onClick={() => setCaptionSegments(previous => previous.map(item => ({ ...item, captionAccent: color })))}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <label className="inspector-range">
+                    <span>
+                      <b>Caption size</b>
+                      <strong>{Math.round(captionScale * 100)}%</strong>
+                    </span>
+                    <input
+                      type="range"
+                      min={0.8}
+                      max={1.35}
+                      step={0.05}
+                      value={captionScale}
+                      onChange={event => setCaptionScale(Number(event.target.value))}
+                    />
+                  </label>
+
+                  <button
+                    type="button"
+                    className="inspector-primary-action"
+                    onClick={() => {
+                      setAutoCaptions(true);
+                      setComparisonMode("after");
+                      previewHookSegment(false);
+                      setStudioActionMessage("Captions are live in the After preview.");
+                    }}
+                  >
+                    CC Preview Captions
+                  </button>
+
                   <label className="inspector-select-field">
                     <span>Caption coverage</span>
                     <select aria-label="Caption coverage" value={captionCoverageMode}
@@ -25350,8 +26003,10 @@ const ViralClipStudio = ({
                     )}
                   </label>
 
-                  <div className="inspector-field caption-script-draft" data-testid="caption-script-draft">
-                    <span>Song lyrics or full script</span>
+                  <details className="inspector-field caption-script-draft" data-testid="caption-script-draft">
+                    <summary style={{ cursor: "pointer", fontWeight: 700, marginBottom: "6px" }}>
+                      Song lyrics or full script (paste &amp; spread across clip)
+                    </summary>
                     <small>
                       Paste the words one line at a time. Studio spreads them across this clip as
                       editable timing drafts; listen and check each line before export.
@@ -25446,7 +26101,7 @@ const ViralClipStudio = ({
                       A sound cue describes the music. It does not invent lyrics when speech
                       recognition cannot hear reliable words.
                     </small>
-                  </div>
+                  </details>
 
                   <div className="caption-segment-editor" data-testid="caption-segment-editor">
                     {captionSegments.length ? <div className="inspector-field" aria-label="Bulk caption controls">
@@ -26018,145 +26673,6 @@ const ViralClipStudio = ({
                       </p>
                     )}
                   </div>
-
-                  <div className="inspector-field">
-                    <span>Creator style</span>
-                    <div className="inspector-choice-grid caption-style-grid">
-                      {CAPTION_STYLE_OPTIONS.map(([value, label, helper]) => (
-                        <button
-                          key={value}
-                          type="button"
-                          aria-label={label}
-                          className={`caption-style-option caption-style-option-${value} ${
-                            captionStyle === value ? "is-active" : ""
-                          }`}
-                          aria-pressed={captionStyle === value}
-                          onClick={() => {
-                            setCaptionStyle(value);
-                            setAutoCaptions(true);
-                            setComparisonMode("after");
-                            focusCaptionSegmentsForReview(captionSegments);
-                          }}
-                        >
-                          <span className="caption-style-swatch" aria-hidden="true">
-                            <i>Aa</i>
-                            <b>WORD</b>
-                          </span>
-                          <span className="caption-style-option-copy">
-                            <strong>{label}</strong>
-                            <small>{helper}</small>
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="inspector-field">
-                    <span>Default placement</span>
-                    <small>Each transcript line can override this at its own timestamp.</small>
-                    <div className="caption-placement-grid" role="group" aria-label="Default caption placement">
-                      {[
-                        ["top_left", "↖"], ["top_center", "↑"], ["top_right", "↗"],
-                        ["middle_left", "←"], ["middle_center", "•"], ["middle_right", "→"],
-                        ["bottom_left", "↙"], ["bottom_center", "↓"], ["bottom_right", "↘"],
-                      ].map(([value, label]) => (
-                        <button
-                          key={value}
-                          type="button"
-                          className={captionPosition === value ? "is-active" : ""}
-                          aria-pressed={captionPosition === value}
-                          aria-label={CAPTION_PLACEMENT_OPTIONS.find(option => option.value === value)?.label}
-                          onClick={() => setCaptionPosition(value)}
-                        >
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="caption-stage-zone-grid" role="group" aria-label="Creative caption zones">
-                      {[
-                        ["shoulder_left", "↙", "Left shoulder"],
-                        ["shoulder_right", "↘", "Right shoulder"],
-                        ["background_left", "◧", "Wall left"],
-                        ["background_center", "▣", "Wall centre"],
-                        ["background_right", "◨", "Wall right"],
-                      ].map(([value, icon, label]) => (
-                        <button
-                          key={value}
-                          type="button"
-                          className={captionPosition === value ? "is-active" : ""}
-                          aria-pressed={captionPosition === value}
-                          aria-label={label}
-                          onClick={() => setCaptionPosition(value)}
-                        >
-                          <b aria-hidden="true">{icon}</b>
-                          <span>{label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="inspector-field">
-                    <span>Behind-subject depth captions</span>
-                    <small>Place speech-synced typography behind a masked person or object inside Composite.</small>
-                    <button
-                      type="button"
-                      className="studio-secondary-btn"
-                      data-testid="captions-to-subject-vfx"
-                      onClick={() => {
-                        setStudioInspectorTab("composite");
-                        setActiveCreativeTool("composite");
-                        setStudioActionMessage(
-                          "Select a subject point and click Sync speech captions behind subject to place captions behind your person or object."
-                        );
-                      }}
-                    >
-                      Put captions behind person or object →
-                    </button>
-                  </div>
-
-                  <div className="inspector-field">
-                    <span>Quick accent palette</span>
-                    <div className="caption-accent-palette" role="group" aria-label="Caption accent palette">
-                      {CAPTION_ACCENT_OPTIONS.map(([color, label]) => (
-                        <button
-                          key={color}
-                          type="button"
-                          aria-label={label}
-                          title={label}
-                          style={{ "--caption-swatch": color }}
-                          onClick={() => setCaptionSegments(previous => previous.map(item => ({ ...item, captionAccent: color })))}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  <label className="inspector-range">
-                    <span>
-                      <b>Caption size</b>
-                      <strong>{Math.round(captionScale * 100)}%</strong>
-                    </span>
-                    <input
-                      type="range"
-                      min={0.8}
-                      max={1.35}
-                      step={0.05}
-                      value={captionScale}
-                      onChange={event => setCaptionScale(Number(event.target.value))}
-                    />
-                  </label>
-
-                  <button
-                    type="button"
-                    className="inspector-primary-action"
-                    onClick={() => {
-                      setAutoCaptions(true);
-                      setComparisonMode("after");
-                      previewHookSegment(false);
-                      setStudioActionMessage("Captions are live in the After preview.");
-                    }}
-                  >
-                    CC Preview Captions
-                  </button>
                 </div>
               ) : null}
 
@@ -26784,6 +27300,7 @@ const ViralClipStudio = ({
                     onSelect={setSelectedThreeDId}
                     playhead={previewTimelineTime}
                     duration={outputTimelineDuration}
+                    videoRef={videoRef}
                     onSeek={time => seekLiveEditTimelineItem(time, "motion")}
                     onUploadAsset={uploadThreeDAsset}
                     onGeneratePreview={generateThreeDPreview}

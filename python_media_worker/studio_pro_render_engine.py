@@ -194,8 +194,11 @@ def build_film_emulation_filter(fx: Mapping[str, Any]) -> str:
     if halation > 1.0:
         sigma = round(2.0 + (halation / 100.0) * 8.0, 2)
         stages.append(
-            f"split[h_base][h_glow];"
-            f"[h_glow]gblur=sigma={sigma}:steps=2[h_blur];"
+            f"format=gbrp,split[h_base][h_glow];"
+            f"[h_glow]lutrgb=r='if(gt(val,165),(val-165)*2.4,0)':"
+            f"g='if(gt(val,165),(val-165)*0.82,0)':"
+            f"b='if(gt(val,165),(val-165)*0.29,0)',"
+            f"gblur=sigma={sigma}:steps=2[h_blur];"
             f"[h_base][h_blur]blend=all_mode=screen:all_opacity={round(halation / 220.0, 3)}"
         )
 
@@ -315,6 +318,20 @@ def write_hsl_qualifier_cube(
     hue_shift = _clamp(qualifier.get("hueShift", 0.0), -0.5, 0.5, 0.0)
     sat_scale = _clamp(qualifier.get("saturation", 1.0), 0.0, 2.5, 1.0)
     gain_scale = _clamp(qualifier.get("gain", 1.0), 0.2, 2.5, 1.0)
+    exposure_stops = _clamp(qualifier.get("exposureStops", 0.0), -2.5, 2.5, 0.0)
+    temperature = _clamp(qualifier.get("temperature", 0.0), -1.0, 1.0, 0.0)
+    desat_outside = _clamp(qualifier.get("desaturateOutside", 0.0), 0.0, 1.0, 0.0)
+    colorize_strength = _clamp(qualifier.get("colorizeStrength", 0.0), 0.0, 1.0, 0.0)
+    colorize_hsl = None
+    raw_colorize = qualifier.get("colorizeColor")
+    if isinstance(raw_colorize, str) and len(raw_colorize) == 7 and raw_colorize.startswith("#"):
+        try:
+            cr = int(raw_colorize[1:3], 16) / 255.0
+            cg = int(raw_colorize[3:5], 16) / 255.0
+            cb = int(raw_colorize[5:7], 16) / 255.0
+            colorize_hsl = _rgb_to_hsl(cr, cg, cb)
+        except ValueError:
+            colorize_hsl = None
 
     lines = [
         f"LUT_3D_SIZE {dim}",
@@ -322,6 +339,7 @@ def write_hsl_qualifier_cube(
         "DOMAIN_MAX 1 1 1",
     ]
     denom = float(dim - 1)
+    exp_scale = (2.0 ** exposure_stops) * gain_scale
     for b_idx in range(dim):
         b = b_idx / denom
         for g_idx in range(dim):
@@ -344,15 +362,38 @@ def write_hsl_qualifier_cube(
                 if show_matte:
                     out_r = out_g = out_b = mask
                 else:
-                    sh = (h + hue_shift) % 1.0
-                    ss = _clamp(s * sat_scale, 0.0, 1.0, s)
-                    qr, qg, qb = _hsl_to_rgb(sh, ss, l_val)
-                    qr = _clamp(qr * gain_scale, 0.0, 1.0, qr)
-                    qg = _clamp(qg * gain_scale, 0.0, 1.0, qg)
-                    qb = _clamp(qb * gain_scale, 0.0, 1.0, qb)
-                    out_r = r + (qr - r) * mask
-                    out_g = g + (qg - g) * mask
-                    out_b = b + (qb - b) * mask
+                    tr, tg, tb = r, g, b
+                    if exposure_stops != 0.0 or gain_scale != 1.0 or temperature != 0.0:
+                        tr = _clamp(tr * exp_scale * (1.0 + temperature * 0.14), 0.0, 1.0, tr)
+                        tg = _clamp(tg * exp_scale, 0.0, 1.0, tg)
+                        tb = _clamp(tb * exp_scale * (1.0 - temperature * 0.14), 0.0, 1.0, tb)
+                    if hue_shift != 0.0 or sat_scale != 1.0 or (colorize_hsl is not None and colorize_strength > 0.0):
+                        th, ts, tl = _rgb_to_hsl(tr, tg, tb)
+                        th = (th + hue_shift) % 1.0
+                        ts = _clamp(ts * sat_scale, 0.0, 1.0, ts)
+                        if colorize_hsl is not None and colorize_strength > 0.0:
+                            dh = colorize_hsl[0] - th
+                            if dh > 0.5:
+                                dh -= 1.0
+                            elif dh < -0.5:
+                                dh += 1.0
+                            th = (th + dh * colorize_strength) % 1.0
+                            ts = _clamp(
+                                ts * (1.0 - colorize_strength) + max(ts, colorize_hsl[1]) * colorize_strength,
+                                0.0,
+                                1.0,
+                                ts,
+                            )
+                        tr, tg, tb = _hsl_to_rgb(th, ts, tl)
+                    or_val, og_val, ob_val = r, g, b
+                    if desat_outside > 0.0:
+                        out_luma = 0.2126 * r + 0.7152 * g + 0.0722 * b
+                        or_val = r * (1.0 - desat_outside) + out_luma * desat_outside
+                        og_val = g * (1.0 - desat_outside) + out_luma * desat_outside
+                        ob_val = b * (1.0 - desat_outside) + out_luma * desat_outside
+                    out_r = _clamp(or_val * (1.0 - mask) + tr * mask, 0.0, 1.0, r)
+                    out_g = _clamp(og_val * (1.0 - mask) + tg * mask, 0.0, 1.0, g)
+                    out_b = _clamp(ob_val * (1.0 - mask) + tb * mask, 0.0, 1.0, b)
                 lines.append(f"{out_r:.7f} {out_g:.7f} {out_b:.7f}")
 
     with open(destination, "w", encoding="ascii") as handle:
@@ -417,6 +458,50 @@ def build_power_window_filter(window: Mapping[str, Any], prefix: str = "pw_") ->
         f"[{prefix}yuva][{prefix}mask]alphamerge[{prefix}alpha];"
         f"[{prefix}base][{prefix}alpha]overlay=shortest=1:format=auto"
     )
+
+
+def build_optical_camera_finish_filter(texture: Mapping[str, Any], label_prefix: str = "") -> str:
+    """Build FFmpeg camera optical lens distortion, rack-focus bokeh, and atmospheric depth haze."""
+    if not isinstance(texture, Mapping):
+        return ""
+    k1 = _clamp(texture.get("lens_distortion", 0.0), -0.5, 0.5, 0.0)
+    rack = _clamp(texture.get("rack_focus", 0.0), 0.0, 1.0, 0.0)
+    focus_dist = _clamp(texture.get("focus_distance", 0.5), 0.0, 1.0, 0.5)
+    haze = _clamp(texture.get("atmospheric_haze", 0.0), 0.0, 1.0, 0.0)
+    haze_hex = str(texture.get("haze_color") or "#cbd5e1").strip().lstrip("#")
+    try:
+        hr, hg, hb = (int(haze_hex[0:2], 16), int(haze_hex[2:4], 16), int(haze_hex[4:6], 16)) if len(haze_hex) == 6 else (203, 213, 225)
+    except ValueError:
+        hr, hg, hb = (203, 213, 225)
+
+    parts = []
+    if abs(k1) > 0.005:
+        k2 = k1 * 0.25
+        parts.append(f"format=gbrp,lenscorrection=k1={k1:.4f}:k2={k2:.4f}")
+    if rack > 0.01:
+        sigma = round(1.8 + rack * 10.5, 2)
+        parts.append(
+            f"format=gbrp,split=3[{label_prefix}rf_base][{label_prefix}rf_src][{label_prefix}rf_ref];"
+            f"[{label_prefix}rf_src]gblur=sigma={sigma}:steps=2[{label_prefix}rf_blur];"
+            f"[{label_prefix}rf_ref]scale=64:64,geq="
+            f"r='255*min(1,{rack:.4f}*pow(min(1,abs(Y/63.0-{focus_dist:.4f})*2.2),2))':"
+            f"g='255*min(1,{rack:.4f}*pow(min(1,abs(Y/63.0-{focus_dist:.4f})*2.2),2))':"
+            f"b='255*min(1,{rack:.4f}*pow(min(1,abs(Y/63.0-{focus_dist:.4f})*2.2),2))'[{label_prefix}rf_small];"
+            f"[{label_prefix}rf_small][{label_prefix}rf_base]scale2ref[{label_prefix}rf_mask][{label_prefix}rf_base2];"
+            f"[{label_prefix}rf_base2][{label_prefix}rf_blur][{label_prefix}rf_mask]maskedmerge"
+        )
+    if haze > 0.005:
+        mist_a = haze * 0.65
+        parts.append(
+            f"format=gbrp,split=2[{label_prefix}hz_base][{label_prefix}hz_ref];"
+            f"[{label_prefix}hz_ref]scale=64:64,geq="
+            f"r='{hr}*{mist_a:.4f}*pow(max(0,1-(Y/63.0)*0.85),1.35)':"
+            f"g='{hg}*{mist_a:.4f}*pow(max(0,1-(Y/63.0)*0.85),1.35)':"
+            f"b='{hb}*{mist_a:.4f}*pow(max(0,1-(Y/63.0)*0.85),1.35)'[{label_prefix}hz_small];"
+            f"[{label_prefix}hz_small][{label_prefix}hz_base]scale2ref[{label_prefix}hz_mist][{label_prefix}hz_base2];"
+            f"[{label_prefix}hz_base2][{label_prefix}hz_mist]blend=all_mode=screen"
+        )
+    return ",".join(parts)
 
 
 def build_audio_master_loudnorm_filter(

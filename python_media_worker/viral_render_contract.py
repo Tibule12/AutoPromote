@@ -11,7 +11,62 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional
 
 MIN_SPEED_RATE = 0.5
 MAX_SPEED_RATE = 2.0
-SUPPORTED_JOIN_TRANSITIONS = {"clean_cut", "soft_dip", "energy_flash"}
+XFADE_FFMPEG_MAP = {
+    "dissolve": "fade",
+    "cross_dissolve": "fade",
+    "blur_morph": "fade",
+    "film_dip": "fadeblack",
+    "whip_pan": "smoothleft",
+    "zoom_push": "circleopen",
+    "luma_wipe": "wipeleft",
+    "wipe_left": "wipeleft",
+    "smooth_left": "smoothleft",
+    "radial": "radial",
+    "xfade": "fade",
+}
+SUPPORTED_JOIN_TRANSITIONS = {"clean_cut", "soft_dip", "energy_flash", *XFADE_FFMPEG_MAP.keys()}
+
+
+def build_studio_xfade_sequence_filter(
+    segment_durations: List[float],
+    transitions: List[Optional[str]],
+    transition_durations: List[float],
+    has_audio: bool = False,
+) -> Optional[Dict[str, Any]]:
+    """Build overlapping NLE xfade/acrossfade filter_complex when cross-clip transitions are authored."""
+    n = len(segment_durations)
+    if n < 2:
+        return None
+    has_overlap = any(str(t or "").strip().lower() in XFADE_FFMPEG_MAP for t in transitions[1:])
+    if not has_overlap:
+        return None
+    v_filters: List[str] = []
+    a_filters: List[str] = []
+    cur_v = "0:v"
+    cur_a = "0:a"
+    cur_dur = max(0.1, float(segment_durations[0]))
+    for idx in range(1, n):
+        seg_dur = max(0.1, float(segment_durations[idx]))
+        t_name = str(transitions[idx] or "dissolve").strip().lower()
+        xf_mode = XFADE_FFMPEG_MAP.get(t_name, "fade")
+        req_td = float(transition_durations[idx] or 0.35)
+        td = max(0.1, min(req_td, cur_dur * 0.42, seg_dur * 0.42))
+        offset = max(0.0, cur_dur - td)
+        out_v = f"vx_{idx}" if idx < n - 1 else "v_xfade"
+        v_filters.append(f"[{cur_v}][{idx}:v]xfade=transition={xf_mode}:duration={td:.4f}:offset={offset:.4f}[{out_v}]")
+        cur_v = out_v
+        if has_audio:
+            out_a = f"ax_{idx}" if idx < n - 1 else "a_xfade"
+            a_filters.append(f"[{cur_a}][{idx}:a]acrossfade=d={td:.4f}:c1=tri:c2=tri[{out_a}]")
+            cur_a = out_a
+        cur_dur = cur_dur + seg_dur - td
+    filter_parts = v_filters + a_filters
+    return {
+        "filter_complex": ";".join(filter_parts),
+        "video_label": "v_xfade",
+        "audio_label": "a_xfade" if has_audio else None,
+        "output_duration": cur_dur,
+    }
 
 
 def append_studio_caption_filter(filter_chain, input_label, ass_path, fonts_path):
@@ -428,7 +483,12 @@ def build_caption_override_transcript(text: Any, duration: Any) -> Dict[str, Lis
 def _extract_aligned_word_timings(
     item: Any, expected_words: List[str], seg_start: float, seg_end: float
 ) -> Optional[List[Dict[str, Any]]]:
-    raw_words = _read(item, "words", default=None)
+    raw_words = None
+    for field_name in ("words", "word_timings", "wordTimings"):
+        candidate = _read(item, field_name, default=None)
+        if isinstance(candidate, list) and candidate:
+            raw_words = candidate
+            break
     if not isinstance(raw_words, list) or len(raw_words) != len(expected_words) or not expected_words:
         return None
     normalized_words = []

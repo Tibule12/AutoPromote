@@ -25,6 +25,15 @@ import { buildBeatSyncedGradePulses, normalizeFinishKeyframes } from './studioFi
 import { STUDIO_EXPORT_BLEND_MODES } from './studioBlendModes';
 import { normalizeStudio3DScene } from './threeD/studio3DModel';
 import { SOUND_EFFECT_PRESETS } from './motion/soundDesign';
+import captionRenderStyles from './studioCaptionRenderStyles.json';
+
+const VALID_CAPTION_STYLE_IDS = new Set(Object.keys(captionRenderStyles || {}));
+const VALID_CAPTION_PLACEMENTS = new Set([
+  'smart_safe', 'side_by_side', 'creative', 'auto',
+  'bottom_center', 'top_center', 'background_center', 'background_left', 'background_right',
+  'side_left', 'side_right', 'shoulder_left', 'shoulder_right',
+  'top_left', 'top_right', 'bottom_left', 'bottom_right', 'custom',
+]);
 
 const only = (value, fields) => {
   if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).some(k => !fields.includes(k)))
@@ -61,6 +70,7 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
   const adjustmentLayers = [...(snapshot.adjustmentLayers || [])];
   const soundEffects = [...(snapshot.soundEffects || [])];
   let touchedSound = false;
+  let captionDirection = null;
   const compositionOrder = [...(snapshot.compositionOrder || snapshot.overlays.map(o => o.id))];
   const ids = new Map();
   const target = id => id === 'main-video' ? id : ids.get(id) || (overlays.some(layer => layer.id === id) ? id : null);
@@ -72,9 +82,31 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
     return legacy[property] || [field.min, field.max];
   };
   for (const action of plan.actions) {
-    only(action, ['type', 'id', 'name', 'startTime', 'duration', 'transform', 'text', 'sourceMediaId', 'sourceStart', 'mediaFit', 'perspective', 'mask', 'motionDrivers', 'targetId', 'parentId', 'matteSourceId', 'mode', 'keys', 'grade', 'advancedColor', 'beatSyncPulses', 'beats', 'beforeId', 'property', 'sourceId', 'port', 'driver', 'style', 'scene', 'bRollLayoutPreset', 'bRollAudioPreset', 'bRollLookPreset', 'motionBlur', 'textAnimator', 'textAnimatorPreset', 'textProgress', 'color', 'fontWeight', 'textAlign', 'strokeColor', 'strokeWidth', 'width', 'height', 'tone', 'volume', 'fadeIn', 'fadeOut']);
+    only(action, ['type', 'id', 'name', 'startTime', 'duration', 'transform', 'text', 'sourceMediaId', 'sourceStart', 'mediaFit', 'perspective', 'mask', 'motionDrivers', 'targetId', 'parentId', 'matteSourceId', 'mode', 'keys', 'grade', 'advancedColor', 'beatSyncPulses', 'beats', 'beforeId', 'property', 'sourceId', 'port', 'driver', 'style', 'scene', 'bRollLayoutPreset', 'bRollAudioPreset', 'bRollLookPreset', 'motionBlur', 'textAnimator', 'textAnimatorPreset', 'textProgress', 'color', 'fontWeight', 'textAlign', 'strokeColor', 'strokeWidth', 'width', 'height', 'tone', 'volume', 'fadeIn', 'fadeOut', 'captionStyle', 'captionPosition', 'captionAvoidSubjects', 'captionAccent', 'reason']);
     const type = action.type;
     if (action.height !== undefined && type !== 'media_plane') throw Error('Explicit scene height applies to media planes only.');
+    if (type === 'caption_treatment') {
+      only(action, ['type', 'captionStyle', 'captionPosition', 'captionAvoidSubjects', 'captionAccent', 'reason']);
+      const styleKey = String(action.captionStyle || '').trim();
+      if (!VALID_CAPTION_STYLE_IDS.has(styleKey)) throw Error('Choose a supported Studio caption template.');
+      const posKey = String(action.captionPosition || 'smart_safe').trim();
+      if (!VALID_CAPTION_PLACEMENTS.has(posKey)) throw Error('Choose a supported caption placement.');
+      if (
+        action.captionAccent !== undefined &&
+        action.captionAccent !== '' &&
+        !/^#[a-f0-9]{6}$/i.test(String(action.captionAccent))
+      ) {
+        throw Error('Choose a valid hex accent colour for captions.');
+      }
+      captionDirection = {
+        captionStyle: styleKey,
+        captionPosition: posKey,
+        captionAvoidSubjects: action.captionAvoidSubjects !== false,
+        ...(action.captionAccent ? { captionAccent: String(action.captionAccent).toLowerCase() } : {}),
+        ...(action.reason ? { reason: String(action.reason).slice(0, 280) } : {}),
+      };
+      continue;
+    }
     if (type === 'sound_cue') {
       only(action, ['type', 'id', 'name', 'startTime', 'duration', 'tone', 'volume', 'fadeIn', 'fadeOut']);
       string(action.id); string(action.name, 100);
@@ -346,6 +378,14 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
     motionKeyframes,
     adjustmentLayers,
     ...(touchedSound ? { soundEffects } : {}),
+    ...(captionDirection
+      ? {
+          captionDirection,
+          captionStyle: captionDirection.captionStyle,
+          captionPosition: captionDirection.captionPosition,
+          captionAvoidSubjects: captionDirection.captionAvoidSubjects,
+        }
+      : {}),
     compositionOrder,
   };
   const document = reconcileStudioDocument({ snapshot: next, projectId: doc.projectId, storedDocument: doc });

@@ -141,8 +141,11 @@ export function hasAdvancedGrade(advanced = {}) {
   const lutObj = advanced.lutData || advanced.lut;
   const intensity = Number(advanced.lutIntensity ?? 100);
   const hasCst = Boolean(advanced.cameraProfile && advanced.cameraProfile !== "rec709");
+  const ro = advanced.rgbOffsets || {};
+  const hasRgbOffsets = ["rLift", "gLift", "bLift"].some(k => Number(ro[k] || 0) !== 0)
+    || ["rGain", "gGain", "bGain"].some(k => ro[k] !== undefined && Number(ro[k]) !== 1);
   return (
-    hasCst || Boolean(advanced.recolor?.enabled) ||
+    hasCst || hasRgbOffsets || Boolean(advanced.recolor?.enabled) ||
     (!!lutObj && intensity > 0) ||
     [...Object.values(advanced.curve || {}), ...Object.values(advanced.hsl || {})].some(
       value => Number(value) !== 0
@@ -150,6 +153,25 @@ export function hasAdvancedGrade(advanced = {}) {
     Boolean(advanced.qualifier?.enabled) ||
     hasRevitalizerGrade(advanced.revitalizer)
   );
+}
+
+export function exportColorCubeText(cube, title = "AutoPromote Studio LUT") {
+  if (!cube || !Number.isInteger(cube.size) || !Array.isArray(cube.data)) {
+    throw new Error("A valid 3D cube is required to export a .cube LUT.");
+  }
+  const n = cube.size;
+  const dMin = Array.isArray(cube.domainMin) && cube.domainMin.length === 3 ? cube.domainMin : [0, 0, 0];
+  const dMax = Array.isArray(cube.domainMax) && cube.domainMax.length === 3 ? cube.domainMax : [1, 1, 1];
+  const lines = [
+    `TITLE "${String(title || cube.title || "AutoPromote Studio").replace(/"/g, "")}"`,
+    `LUT_3D_SIZE ${n}`,
+    `DOMAIN_MIN ${dMin.join(" ")}`,
+    `DOMAIN_MAX ${dMax.join(" ")}`,
+  ];
+  for (let i = 0; i < cube.data.length; i += 3) {
+    lines.push(`${Number(cube.data[i]).toFixed(6)} ${Number(cube.data[i + 1]).toFixed(6)} ${Number(cube.data[i + 2]).toFixed(6)}`);
+  }
+  return lines.join("\n") + "\n";
 }
 
 export function buildAdvancedColorCube(advanced = {}, size = 33) {
@@ -175,6 +197,13 @@ export function buildAdvancedColorCube(advanced = {}, size = 33) {
     cameraProfile && cameraProfile !== "rec709" && !isLegacyCstLut
       ? buildColorSpaceTransformCube(cameraProfile, "rec709", 17)
       : null;
+  const ro = advanced.rgbOffsets || {};
+  const rLift = clamp(Number(ro.rLift ?? 0) || 0, -0.25, 0.25);
+  const gLift = clamp(Number(ro.gLift ?? 0) || 0, -0.25, 0.25);
+  const bLift = clamp(Number(ro.bLift ?? 0) || 0, -0.25, 0.25);
+  const rGain = clamp(Number(ro.rGain ?? 1) || 1, 0.5, 1.5);
+  const gGain = clamp(Number(ro.gGain ?? 1) || 1, 0.5, 1.5);
+  const bGain = clamp(Number(ro.bGain ?? 1) || 1, 0.5, 1.5);
   const hasRev = hasRevitalizerGrade(advanced.revitalizer);
   const hasQual = Boolean(advanced.qualifier?.enabled);
 
@@ -183,7 +212,11 @@ export function buildAdvancedColorCube(advanced = {}, size = 33) {
     if (cameraCstCube) {
       baseRgb = sampleColorCube(cameraCstCube, baseRgb[0], baseRgb[1], baseRgb[2]);
     }
-    let rgb = [curve(baseRgb[0]), curve(baseRgb[1]), curve(baseRgb[2])];
+    let rgb = [
+      clamp(curve(baseRgb[0]) * rGain + rLift),
+      clamp(curve(baseRgb[1]) * gGain + gLift),
+      clamp(curve(baseRgb[2]) * bGain + bLift),
+    ];
     const high = Math.max(...rgb), low = Math.min(...rgb), delta = high-low;
     let light = (high+low)/2, sat = delta === 0 ? 0 : delta/(1-Math.abs(2*light-1));
     let angle = delta === 0 ? 0 : high === rgb[0] ? ((rgb[1]-rgb[2])/delta)%6 : high === rgb[1] ? (rgb[2]-rgb[0])/delta+2 : (rgb[0]-rgb[1])/delta+4;

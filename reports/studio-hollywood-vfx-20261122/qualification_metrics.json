@@ -1,0 +1,128 @@
+{
+  "test_a": {
+    "probe": {
+      "size_bytes": 40914,
+      "duration": 2.4,
+      "streams": [
+        {
+          "type": "video",
+          "codec": "h264",
+          "w": 640,
+          "h": 360,
+          "fps": "15/1",
+          "sample_rate": null,
+          "channels": null
+        },
+        {
+          "type": "audio",
+          "codec": "aac",
+          "w": null,
+          "h": null,
+          "fps": "0/0",
+          "sample_rate": "44100",
+          "channels": 1
+        }
+      ]
+    },
+    "frames": [
+      "reports/studio-hollywood-vfx-20261122/frames/test_a_t0.png",
+      "reports/studio-hollywood-vfx-20261122/frames/test_a_t1.png",
+      "reports/studio-hollywood-vfx-20261122/frames/test_a_t2.png"
+    ]
+  },
+  "test_b": {
+    "probe": {
+      "size_bytes": 63948,
+      "duration": 2.4,
+      "streams": [
+        {
+          "type": "video",
+          "codec": "h264",
+          "w": 640,
+          "h": 360,
+          "fps": "15/1",
+          "sample_rate": null,
+          "channels": null
+        },
+        {
+          "type": "audio",
+          "codec": "aac",
+          "w": null,
+          "h": null,
+          "fps": "0/0",
+          "sample_rate": "44100",
+          "channels": 1
+        }
+      ]
+    },
+    "frames": [
+      "reports/studio-hollywood-vfx-20261122/frames/test_b_t0.png",
+      "reports/studio-hollywood-vfx-20261122/frames/test_b_t1.png",
+      "reports/studio-hollywood-vfx-20261122/frames/test_b_t2.png"
+    ],
+    "tracked_corners_samples": 12,
+    "cam_keys": 12
+  },
+  "test_c": {
+    "probe": {
+      "size_bytes": 261702,
+      "duration": 2.4,
+      "streams": [
+        {
+          "type": "video",
+          "codec": "h264",
+          "w": 640,
+          "h": 360,
+          "fps": "15/1",
+          "sample_rate": null,
+          "channels": null
+        },
+        {
+          "type": "audio",
+          "codec": "aac",
+          "w": null,
+          "h": null,
+          "fps": "0/0",
+          "sample_rate": "44100",
+          "channels": 1
+        }
+      ]
+    },
+    "frames": [
+      "reports/studio-hollywood-vfx-20261122/frames/test_c_t0.png",
+      "reports/studio-hollywood-vfx-20261122/frames/test_c_t1.png",
+      "reports/studio-hollywood-vfx-20261122/frames/test_c_t2.png"
+    ]
+  },
+  "test_d": {
+    "probe": {
+      "size_bytes": 460429,
+      "duration": 4.0,
+      "streams": [
+        {
+          "type": "video",
+          "codec": "h264",
+          "w": 640,
+          "h": 360,
+          "fps": "15/1",
+          "sample_rate": null,
+          "channels": null
+        },
+        {
+          "type": "audio",
+          "codec": "aac",
+          "w": null,
+          "h": null,
+          "fps": "0/0",
+          "sample_rate": "96000",
+          "channels": 1
+        }
+      ]
+    },
+    "frames": [
+      "reports/studio-hollywood-vfx-20261122/frames/test_d_t0.png",
+      "reports/studio-hollywood-vfx-20261122/frames/test_d_t1.png",
+      "reports/studio-hollywood-vfx-20261122/frames/test_d_t2.png"
+    ]
+  }
+}

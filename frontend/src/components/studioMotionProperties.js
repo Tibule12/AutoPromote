@@ -26,6 +26,14 @@ export const studioMotionPropertiesForTarget = target => (target?.isCreativeEffe
   : [...STUDIO_MOTION_PROPERTIES.filter(property => (!property.perspectiveOnly || !!target?.perspective) && (!property.textAnimatorOnly || !!target?.textAnimator) && (!property.vectorOnly || !!target?.vectorShape) &&
     (!property.mediaOnly || target?.id === 'main-video' || ['image', 'video'].includes(target?.type))),
     ...(target?.perspective ? PLANE_CORNER_CHANNELS : []),
+    ...(target?.id!=='main-video'&&['image','video'].includes(target?.type)&&target?.chromaKey?.enabled
+      ? [
+          { id: 'keySimilarity', label: 'Key similarity', min: 0.02, max: 1, step: 0.01 },
+          { id: 'keySmoothness', label: 'Key smoothness', min: 0, max: 1, step: 0.01 },
+          { id: 'keySpill', label: 'Key spill', min: 0, max: 1, step: 0.01 },
+          { id: 'keyChoke', label: 'Key choke', min: -20, max: 20, step: 1 },
+        ]
+      : []),
     ...(target?.id!=='main-video'&&['image','video'].includes(target?.type)&&target?.mask?.enabled&&target.mask.shape==='polygon'
       ? parseStudioMaskPolygon(target.mask.path).flatMap((_,index)=>['X','Y'].map(axis=>({id:`maskPoint${index}${axis}`,
         label:`Mask point ${index+1} ${axis}`,min:-100,max:200,step:.1,maskPoint:true}))) : [])];

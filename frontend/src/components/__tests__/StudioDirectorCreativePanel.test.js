@@ -433,4 +433,30 @@ test('8-Track Omniscient Masterpiece preset choreographs 3D VFX + B-Roll Portal 
   expect(applied.actions.some(a => a.type === 'title' && a.textAnimatorPreset)).toBe(true);
   expect(applied.actions.some(a => a.type === 'media_plane' && a.bRollLayoutPreset === 'circle_portal')).toBe(true);
   expect(applied.graphics.layers.some(l => l.vectorShape?.version === 2)).toBe(true);
+  expect(applied.actions.some(a => a.type === 'caption_treatment' && a.captionAvoidSubjects === true)).toBe(true);
+});
+
+test('Director recommends a video-aware caption template during review and lets creator customize before applying', async () => {
+  const onApply = jest.fn().mockResolvedValue();
+  render(<StudioDirectorCreativePanel getSnapshot={state} onApply={onApply} />);
+  fireEvent.change(screen.getByLabelText('Director creative brief'), {
+    target: { value: 'Neon cyberpunk night showcase with bold punchy visuals' },
+  });
+  fireEvent.change(screen.getByTestId('director-look-select'), {
+    target: { value: 'neon_cyber' },
+  });
+  fireEvent.click(screen.getByTestId('director-choreograph-btn'));
+  await screen.findByTestId('director-caption-recommendation');
+  const select = screen.getByTestId('director-caption-style-select');
+  expect(select.value).toBe('neon_bloom');
+  expect(screen.getByTestId('director-caption-reason').textContent).toMatch(/Neon Bloom/i);
+  fireEvent.change(select, { target: { value: 'editorial_duo' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Apply Director edit' }));
+  await waitFor(() => expect(onApply).toHaveBeenCalledTimes(1));
+  const captionAction = onApply.mock.calls[0][0].actions.find(a => a.type === 'caption_treatment');
+  expect(captionAction).toMatchObject({
+    type: 'caption_treatment',
+    captionStyle: 'editorial_duo',
+    captionAvoidSubjects: true,
+  });
 });

@@ -77,6 +77,11 @@ uniform int u_qualShowMatte;
 uniform float u_qualHueShift;
 uniform float u_qualSaturation;
 uniform float u_qualGain;
+uniform float u_qualExposureStops;
+uniform float u_qualTemperature;
+uniform vec3 u_qualColorizeColor;
+uniform float u_qualColorizeStrength;
+uniform float u_qualDesatOutside;
 
 uniform float u_halation;
 uniform float u_chromaticAberration;
@@ -234,11 +239,30 @@ void main() {
     if (u_qualShowMatte == 1) {
       color = vec3(qMask);
     } else {
-      vec3 hsl = rgbToHsl(color);
+      float qExp = pow(2.0, u_qualExposureStops) * u_qualGain;
+      vec3 qLinear = clamp(vec3(
+        color.r * qExp * (1.0 + u_qualTemperature * 0.14),
+        color.g * qExp,
+        color.b * qExp * (1.0 - u_qualTemperature * 0.14)
+      ), 0.0, 1.0);
+      vec3 hsl = rgbToHsl(qLinear);
       hsl.x = fract(hsl.x + u_qualHueShift);
       hsl.y = clamp(hsl.y * u_qualSaturation, 0.0, 1.0);
-      vec3 qualRgb = clamp(hslToRgb(hsl) * u_qualGain, 0.0, 1.0);
-      color = mix(color, qualRgb, qMask);
+      if (u_qualColorizeStrength > 0.0001) {
+        vec3 targetHsl = rgbToHsl(u_qualColorizeColor);
+        float dh = targetHsl.x - hsl.x;
+        if (dh > 0.5) dh -= 1.0;
+        if (dh < -0.5) dh += 1.0;
+        hsl.x = fract(hsl.x + dh * u_qualColorizeStrength);
+        hsl.y = clamp(mix(hsl.y, max(hsl.y, targetHsl.y), u_qualColorizeStrength), 0.0, 1.0);
+      }
+      vec3 qualRgb = clamp(hslToRgb(hsl), 0.0, 1.0);
+      vec3 outRgb = color;
+      if (u_qualDesatOutside > 0.0001) {
+        float outLuma = dot(color, vec3(0.2126, 0.7152, 0.0722));
+        outRgb = mix(color, vec3(outLuma), u_qualDesatOutside);
+      }
+      color = mix(outRgb, qualRgb, qMask);
     }
   }
 
@@ -693,8 +717,23 @@ export function createStudioWebGLCompositor(outputCanvas = null) {
     gl.uniform1i(gl.getUniformLocation(gradeProgram, "u_qualInvert"), qual?.invert ? 1 : 0);
     gl.uniform1i(gl.getUniformLocation(gradeProgram, "u_qualShowMatte"), qual?.showMatte ? 1 : 0);
     gl.uniform1f(gl.getUniformLocation(gradeProgram, "u_qualHueShift"), clamp(qual?.hueShift ?? 0, -0.5, 0.5));
-    gl.uniform1f(gl.getUniformLocation(gradeProgram, "u_qualSaturation"), clamp(qual?.saturation ?? 1, 0, 2));
-    gl.uniform1f(gl.getUniformLocation(gradeProgram, "u_qualGain"), clamp(qual?.gain ?? 1, 0.4, 2));
+    gl.uniform1f(gl.getUniformLocation(gradeProgram, "u_qualSaturation"), clamp(qual?.saturation ?? 1, 0, 2.5));
+    gl.uniform1f(gl.getUniformLocation(gradeProgram, "u_qualGain"), clamp(qual?.gain ?? 1, 0.2, 2.5));
+    gl.uniform1f(gl.getUniformLocation(gradeProgram, "u_qualExposureStops"), clamp(qual?.exposureStops ?? 0, -2.5, 2.5));
+    gl.uniform1f(gl.getUniformLocation(gradeProgram, "u_qualTemperature"), clamp(qual?.temperature ?? 0, -1, 1));
+    const colHex = typeof qual?.colorizeColor === "string" && /^#[\da-f]{6}$/i.test(qual.colorizeColor)
+      ? [
+          parseInt(qual.colorizeColor.slice(1, 3), 16) / 255,
+          parseInt(qual.colorizeColor.slice(3, 5), 16) / 255,
+          parseInt(qual.colorizeColor.slice(5, 7), 16) / 255,
+        ]
+      : [1, 0, 0];
+    gl.uniform3f(gl.getUniformLocation(gradeProgram, "u_qualColorizeColor"), colHex[0], colHex[1], colHex[2]);
+    gl.uniform1f(
+      gl.getUniformLocation(gradeProgram, "u_qualColorizeStrength"),
+      qual?.colorizeColor ? clamp(qual?.colorizeStrength ?? 0, 0, 1) : 0
+    );
+    gl.uniform1f(gl.getUniformLocation(gradeProgram, "u_qualDesatOutside"), clamp(qual?.desaturateOutside ?? 0, 0, 1));
 
     gl.uniform1f(gl.getUniformLocation(gradeProgram, "u_halation"), clamp(textureEffects?.halation ?? 0, 0, 1));
     gl.uniform1f(gl.getUniformLocation(gradeProgram, "u_chromaticAberration"), clamp(textureEffects?.chromaticAberration ?? 0, 0, 1));

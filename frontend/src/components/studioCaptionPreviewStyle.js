@@ -46,7 +46,18 @@ export const captionAssColor = value => {
   return `rgba(${red}, ${green}, ${blue}, ${Number((1 - alpha / 255).toFixed(4))})`;
 };
 
-const widthUnit = ratio => `calc(var(--caption-programme-width, 320px) * ${ratio})`;
+export const getCaptionStyleHighlightHex = (styleName, fallback = "#ffb33d") => {
+  const raw = styles[styleName]?.highlight_color;
+  if (!raw) return fallback;
+  const hex = String(raw).replace(/^&H/i, "").replace(/&$/, "").padStart(8, "0");
+  if (!/^[0-9a-f]{8}$/i.test(hex)) return fallback;
+  const b = hex.slice(2, 4);
+  const g = hex.slice(4, 6);
+  const r = hex.slice(6, 8);
+  return `#${r}${g}${b}`.toLowerCase();
+};
+
+const widthUnit = ratio => `calc(var(--caption-programme-ref-dim, var(--caption-programme-width, 320px)) * ${ratio})`;
 
 const extractAlignedSegmentWordTimings = (segment, expectedWords) => {
   if (!segment || !Array.isArray(expectedWords) || !expectedWords.length) return null;
@@ -145,10 +156,12 @@ export const getCaptionPreviewStyles = (
   // Convert using the exact bundled face instead of assuming equal units.
   const metric = fontMetrics[style.fontname]?.[style.bold ? "700" : "400"];
   const sizeRatio = metric?.cssSizePerAssSize || 1;
-  // The existing ASS fade treatment has no per-word emphasis. Its icon run
-  // restores the base text colour; without an icon it uses the cue accent.
+  // Keep minimal's exact existing contract while letting editorial, luxury, and
+  // wall_type stay readable primary ink with crisp active-word emphasis.
   const textColor =
-    style.animation === "fade_word" && !hasIcon ? accent : captionAssColor(style.primary_color);
+    resolvedStyleKey === "minimal" && style.animation === "fade_word" && !hasIcon
+      ? accent
+      : captionAssColor(style.primary_color);
   const clock =
     outputClock ||
     (chunk && [time, chunk.start, chunk.end].every(Number.isFinite) ? { ...chunk, time } : null);
@@ -177,24 +190,31 @@ export const getCaptionPreviewStyles = (
   let pillBackdrop = "none";
 
   if (isGlassCard) {
-    pillBackground = "rgba(14, 20, 29, 0.72)";
-    pillBorder = "1px solid rgba(255, 255, 255, 0.22)";
-    pillRadius = widthUnit(14 / 1080);
+    pillBackground = "linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(14, 22, 36, 0.66))";
+    pillBorder = "1px solid rgba(255, 255, 255, 0.36)";
+    pillRadius = widthUnit(15 / 1080);
     pillPadding = `${widthUnit(8 / 1080)} ${widthUnit(16 / 1080)}`;
-    pillShadow = "0 10px 28px rgba(0, 0, 0, 0.36)";
-    pillBackdrop = "blur(8px)";
+    pillShadow = "0 14px 32px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.4)";
+    pillBackdrop = "blur(16px) saturate(1.3)";
   } else if (isKineticBar) {
-    pillBackground = "rgba(12, 16, 22, 0.78)";
-    pillBorder = `1px solid ${accent}44`;
+    pillBackground = "linear-gradient(160deg, rgba(16, 22, 34, 0.84), rgba(10, 14, 22, 0.78))";
+    pillBorder = `1px solid ${accent}55`;
     pillRadius = widthUnit(14 / 1080);
     pillPadding = `${widthUnit(8 / 1080)} ${widthUnit(16 / 1080)} ${widthUnit(11 / 1080)}`;
-    pillShadow = "0 8px 22px rgba(0, 0, 0, 0.32)";
+    pillShadow = "0 10px 26px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.14)";
+    pillBackdrop = "blur(12px)";
   } else if (isTypewriter) {
     pillBackground = "rgba(11, 17, 24, 0.84)";
     pillBorder = `1px solid ${accent}88`;
     pillRadius = widthUnit(10 / 1080);
     pillPadding = `${widthUnit(6 / 1080)} ${widthUnit(14 / 1080)}`;
     pillShadow = "0 6px 18px rgba(0, 0, 0, 0.36)";
+    pillBackdrop = "blur(10px)";
+  } else if (resolvedStyleKey === "wall_type") {
+    pillBackground = "transparent";
+    pillBorder = 0;
+    pillRadius = 0;
+    pillPadding = `0 ${widthUnit(8 / 1080)} 0 ${widthUnit(14 / 1080)}`;
   }
 
   let wordTextShadow = card
@@ -211,10 +231,21 @@ export const getCaptionPreviewStyles = (
 
   let activeWordStyle = {
     display: "inline-block",
-    color: resolvedStyleKey === "marker" || anim === "fade_word" ? textColor : accent,
-    transform: ["scale_pop", "story_pop", "focus_cut", "rainbow_words"].includes(anim)
-      ? "scale(1.15)"
-      : "none",
+    color:
+      resolvedStyleKey === "marker" || (anim === "fade_word" && resolvedStyleKey === "minimal")
+        ? textColor
+        : accent,
+    ...( ["scale_pop", "story_pop", "focus_cut", "rainbow_words"].includes(anim)
+      ? {
+          margin: `0 ${widthUnit(6 / 1080)}`,
+          transform: "scale(1.15)",
+        }
+      : anim === "fade_word" && resolvedStyleKey !== "minimal"
+        ? {
+            margin: `0 ${widthUnit(3 / 1080)}`,
+            transform: "scale(1.05)",
+          }
+        : { transform: "none" } ),
   };
 
   if (anim === "active_pill") {
@@ -223,33 +254,37 @@ export const getCaptionPreviewStyles = (
       display: "inline-block",
       color: isNewsroom ? "#ffffff" : "#0b0d13",
       background: isNewsroom ? "#d91a25" : accent,
-      padding: `${widthUnit(2 / 1080)} ${widthUnit(12 / 1080)}`,
+      padding: `${widthUnit(3 / 1080)} ${widthUnit(14 / 1080)}`,
       borderRadius: widthUnit(14 / 1080),
-      transform: "scale(1.06)",
+      transform: "scale(1.08)",
       textShadow: "none",
       WebkitTextStroke: 0,
-      boxShadow: "0 4px 16px rgba(0, 0, 0, 0.35)",
+      boxShadow: isNewsroom
+        ? "0 6px 18px rgba(217, 26, 37, 0.45)"
+        : `0 6px 22px ${accent}66, inset 0 1px 0 rgba(255, 255, 255, 0.42)`,
     };
   } else if (anim === "sticker_pill") {
     activeWordStyle = {
       display: "inline-block",
-      color: accent,
+      color: "#14101c",
       background: "#f8fbfd",
-      padding: `${widthUnit(2 / 1080)} ${widthUnit(12 / 1080)}`,
-      borderRadius: widthUnit(12 / 1080),
-      transform: "scale(1.08) rotate(-1.5deg)",
+      border: `${widthUnit(3 / 1080)} solid ${accent}`,
+      padding: `${widthUnit(2 / 1080)} ${widthUnit(13 / 1080)}`,
+      borderRadius: widthUnit(13 / 1080),
+      transform: "scale(1.09) rotate(-2deg)",
+      margin: `0 ${widthUnit(4 / 1080)}`,
       textShadow: "none",
       WebkitTextStroke: 0,
-      boxShadow: "0 4px 0 #140e0a",
+      boxShadow: `4px 4px 0 ${accent}, 6px 6px 0 #140e0a`,
     };
   } else if (anim === "marker_swipe") {
     activeWordStyle = {
       display: "inline-block",
       color: "#121110",
-      background: `linear-gradient(180deg, transparent 20%, ${accent} 20% 94%, transparent 94%)`,
-      padding: `0 ${widthUnit(10 / 1080)}`,
-      borderRadius: widthUnit(6 / 1080),
-      transform: "scale(1.04)",
+      background: `linear-gradient(180deg, transparent 8%, ${accent} 8% 94%, transparent 94%)`,
+      padding: `0 ${widthUnit(11 / 1080)}`,
+      borderRadius: widthUnit(7 / 1080),
+      transform: "scale(1.05)",
       textShadow: "none",
       WebkitTextStroke: 0,
     };
@@ -259,13 +294,15 @@ export const getCaptionPreviewStyles = (
       color: accent,
       borderBottom: `${widthUnit(5 / 1080)} solid ${accent}`,
       paddingBottom: widthUnit(2 / 1080),
+      textShadow: `0 0 ${widthUnit(14 / 1080)} ${accent}66`,
       transform: "none",
     };
   } else if (isNeonBloom) {
     activeWordStyle = {
       display: "inline-block",
       color: "#ffffff",
-      textShadow: `0 0 ${widthUnit(6 / 1080)} #ffffff, 0 0 ${widthUnit(18 / 1080)} ${accent}, 0 0 ${widthUnit(36 / 1080)} ${accent}`,
+      margin: `0 ${widthUnit(6 / 1080)}`,
+      textShadow: `0 0 ${widthUnit(6 / 1080)} #ffffff, 0 0 ${widthUnit(18 / 1080)} ${accent}, 0 0 ${widthUnit(36 / 1080)} ${accent}, 0 0 ${widthUnit(52 / 1080)} ${accent}`,
       transform: "scale(1.12)",
     };
   } else if (isSpringPop) {
@@ -281,6 +318,8 @@ export const getCaptionPreviewStyles = (
     activeWordStyle = {
       display: "inline-block",
       color: accent,
+      margin: `0 ${widthUnit(4 / 1080)}`,
+      textShadow: `0 4px 16px ${accent}55`,
       transform: `scale(${springScale.toFixed(3)}) rotate(${tiltDeg.toFixed(2)}deg)`,
     };
   } else if (isVerticalBounce) {
@@ -289,17 +328,20 @@ export const getCaptionPreviewStyles = (
     activeWordStyle = {
       display: "inline-block",
       color: accent,
+      margin: `0 ${widthUnit(4 / 1080)}`,
       transform: `translateY(${widthUnit((-hopPx) / 1080)}) scale(1.12)`,
     };
   } else if (isEditorialDuo) {
     activeWordStyle = {
       display: "inline-block",
-      fontFamily: '"DejaVu Serif", Georgia, serif',
+      fontFamily: '"DejaVu Serif", "Noto Serif", Georgia, serif',
       fontStyle: "italic",
       fontWeight: 700,
       textTransform: "none",
       color: accent,
-      transform: "scale(1.12)",
+      margin: `0 ${widthUnit(12 / 1080)}`,
+      textShadow: `0 4px 18px ${accent}66`,
+      transform: "scale(1.22)",
     };
   } else if (isTypewriter) {
     activeWordStyle = {

@@ -157,6 +157,12 @@ export const buildMotionAutomationStyle = (keyframes, time, fallback = {}) => {
         interpolateAutomationValue({keyframes,property:`planeCorner${i}${j?'Y':'X'}`,time,fallback:v})))},
       ...Object.fromEntries(fallback.perspective.corners.flatMap((p,i)=>p.map((v,j)=>
         [`planeCorner${i}${j?'Y':'X'}`,interpolateAutomationValue({keyframes,property:`planeCorner${i}${j?'Y':'X'}`,time,fallback:v})]))) } : {}),
+    ...(fallback.chromaKey?.enabled ? {
+      keySimilarity: clamp(interpolateAutomationValue({ keyframes, property: "keySimilarity", time, fallback: fallback.chromaKey.similarity ?? 0.32 }), 0.02, 1),
+      keySmoothness: clamp(interpolateAutomationValue({ keyframes, property: "keySmoothness", time, fallback: fallback.chromaKey.smoothness ?? 0.14 }), 0, 1),
+      keySpill: clamp(interpolateAutomationValue({ keyframes, property: "keySpill", time, fallback: fallback.chromaKey.spillSuppression ?? fallback.chromaKey.spill ?? 0.48 }), 0, 1),
+      keyChoke: clamp(interpolateAutomationValue({ keyframes, property: "keyChoke", time, fallback: fallback.chromaKey.choke ?? 0 }), -20, 20),
+    } : {}),
     ...(fallback.textAnimator ? { textProgress: clamp(interpolateAutomationValue({ keyframes, property: "textProgress", time, fallback: fallback.textProgress ?? 100 }), 0, 100) } : {}),
     ...(fallback.vectorShape ? Object.fromEntries(['strokeStart', 'strokeEnd', 'strokeOffset'].map(property => [property,
       clamp(interpolateAutomationValue({ keyframes, property, time,

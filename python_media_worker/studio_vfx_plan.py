@@ -15,7 +15,7 @@ import tempfile
 import time
 
 import numpy as np
-from PIL import Image, ImageColor, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
+from PIL import Image, ImageChops, ImageColor, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
 
 try:
     from .studio_subject_matte import CachedSubjectMatte, canonical_hash, sha256, video_geometry
@@ -127,6 +127,8 @@ def validate_plan(plan, cache):
                 area=sum(p[0]*points[(i+1)%len(points)][1]-points[(i+1)%len(points)][0]*p[1] for i,p in enumerate(points))
                 if abs(area)<.000001:raise ValueError("Matte path must have nonzero area")
         if kind == "background_replace" and "reveal_seconds" in effect:base.add("reveal_seconds")
+        if kind == "screen_replace":
+            base.update(key for key in ("glare_preserve", "occlude_subject") if key in effect)
         if kind == "background_replace":base.update(key for key in ("surface_corners","asset_crop") if key in effect)
         if kind == "text_behind":base.update(key for key in TEXT_BEHIND_OPTIONAL_FIELDS if key in effect)
         if kind == "foreground_refine":
@@ -240,6 +242,10 @@ def validate_plan(plan, cache):
         if kind == "screen_replace":
             if not isinstance(effect["asset_id"], str) or len(effect["asset_id"]) > 100 or not isinstance(effect["corners"], list) or len(effect["corners"]) != 4:
                 raise ValueError("Screen replacement requires an approved asset ID and four corners")
+            if "glare_preserve" in effect:
+                bounded(effect["glare_preserve"], 0, 1)
+            if "occlude_subject" in effect and type(effect["occlude_subject"]) is not bool:
+                raise ValueError("Screen occlusion switch must be boolean")
             for point in effect["corners"]:
                 if not isinstance(point, list) or len(point) != 2: raise ValueError("Invalid screen corner")
                 bounded(point[0], 0, cache.manifest["width"] - 1)
@@ -786,15 +792,32 @@ class VfxFrameRenderer:
                 left, top = (enlarged.width - width) // 2, (enlarged.height - height) // 2
                 background = enlarged.crop((left, top, left + width, top + height))
             if effect["type"] == "screen_replace":
-                import cv2
-                asset = np.array(self.assets[effect["id"]])
-                source = np.float32([[0, 0], [asset.shape[1] - 1, 0], [asset.shape[1] - 1, asset.shape[0] - 1], [0, asset.shape[0] - 1]])
-                corners = np.float32(effect["corners"])
-                if not cv2.isContourConvex(corners.reshape(-1, 1, 2)) or abs(cv2.contourArea(corners)) < 100:
+                asset_rgba = self.assets[effect["id"]]
+                corners_list = [[float(px), float(py)] for px, py in effect["corners"]]
+                # Validate convex quad using pure Shoelace / cross signs (zero cv2 dependency)
+                crosses = []
+                for ci in range(4):
+                    ax, ay = corners_list[ci]
+                    bx, by = corners_list[(ci + 1) % 4]
+                    cx, cy = corners_list[(ci + 2) % 4]
+                    crosses.append((bx - ax) * (cy - by) - (by - ay) * (cx - bx))
+                area = abs(0.5 * sum(corners_list[i][0] * corners_list[(i + 1) % 4][1] - corners_list[(i + 1) % 4][0] * corners_list[i][1] for i in range(4)))
+                same_sign = all(c > 0 for c in crosses) or all(c < 0 for c in crosses)
+                if not same_sign or area < 100:
                     raise ValueError("Screen corners must form a convex nonempty quadrilateral")
-                matrix = cv2.getPerspectiveTransform(source, corners)
-                projected = cv2.warpPerspective(asset, matrix, (width, height), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
-                background.alpha_composite(Image.fromarray(projected))
+                try:
+                    import cv2
+                    asset = np.array(asset_rgba)
+                    source = np.float32([[0, 0], [asset.shape[1] - 1, 0], [asset.shape[1] - 1, asset.shape[0] - 1], [0, asset.shape[0] - 1]])
+                    matrix = cv2.getPerspectiveTransform(source, np.float32(corners_list))
+                    projected_arr = cv2.warpPerspective(asset, matrix, (width, height), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
+                except ImportError:
+                    projected_arr = warp_screen_quad_pil(asset_rgba, (width, height), corners_list)
+
+                glare_preserve = float(effect.get("glare_preserve", 0.35))
+                if glare_preserve > 0.005:
+                    projected_arr = apply_screen_glare_to_warped(projected_arr, background, glare_preserve=glare_preserve)
+                background.alpha_composite(Image.fromarray(projected_arr, mode="RGBA"))
         for effect in active:
             layer = Image.new("RGBA", (width, height))
             draw = ImageDraw.Draw(layer)
@@ -979,6 +1002,40 @@ def render_vfx(source, matte, plan, output, encoder="auto", asset_resolver=None,
     target.with_suffix(".receipt.json").write_text(json.dumps(receipt, indent=2))
     print(json.dumps({"event": "vfx_render_complete", **{key: receipt[key] for key in ("encoder", "frames", "elapsed_seconds", "pixel_sha256")}}), flush=True)
     return receipt
+
+
+def warp_screen_quad_pil(asset_rgba, size, corners_list):
+    width, height = int(size[0]), int(size[1])
+    sw, sh = asset_rgba.size
+    dst_pts = [[float(px), float(py)] for px, py in corners_list]
+    src_pts = [[0.0, 0.0], [sw - 1.0, 0.0], [sw - 1.0, sh - 1.0], [0.0, sh - 1.0]]
+    a_rows = []
+    for (x, y), (u, v) in zip(dst_pts, src_pts):
+        a_rows.append([x, y, 1, 0, 0, 0, -u * x, -u * y, u])
+        a_rows.append([0, 0, 0, x, y, 1, -v * x, -v * y, v])
+    m = np.asarray(a_rows, dtype=np.float64)
+    coeffs = np.linalg.solve(m[:, :8], m[:, 8])
+    projected_pil = asset_rgba.convert("RGBa").transform((width, height), Image.Transform.PERSPECTIVE, tuple(coeffs), Image.Resampling.BILINEAR).convert("RGBA")
+    quad_mask = Image.new("L", (width, height), 0)
+    ImageDraw.Draw(quad_mask).polygon([tuple(pt) for pt in dst_pts], fill=255)
+    projected_pil.putalpha(ImageChops.multiply(projected_pil.getchannel("A"), quad_mask))
+    return np.asarray(projected_pil, dtype=np.uint8).copy()
+
+
+def apply_screen_glare_to_warped(projected_arr, background_img, glare_preserve=0.35):
+    glare_amt = float(glare_preserve)
+    if glare_amt <= 0.005:
+        return projected_arr
+    bg_rgb = np.asarray(background_img.convert("RGB"), dtype=np.float32) / 255.0
+    bg_lum = 0.2126 * bg_rgb[:, :, 0] + 0.7152 * bg_rgb[:, :, 1] + 0.0722 * bg_rgb[:, :, 2]
+    hi = np.clip((bg_lum - 0.65) / 0.35, 0.0, 1.0)[:, :, None] * glare_amt
+    p_rgb = projected_arr[:, :, :3].astype(np.float32) / 255.0
+    glare = np.clip(bg_rgb * hi, 0.0, 1.0)
+    screened = 1.0 - (1.0 - p_rgb) * (1.0 - glare)
+    has_a = projected_arr[:, :, 3:4] > 0
+    out = projected_arr.copy()
+    out[:, :, :3] = np.where(has_a, np.clip(np.rint(screened * 255.0), 0, 255).astype(np.uint8), projected_arr[:, :, :3])
+    return out
 
 
 def main():

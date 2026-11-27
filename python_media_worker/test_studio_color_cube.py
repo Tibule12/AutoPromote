@@ -7,19 +7,41 @@ import numpy as np
 from studio_color_cube import write_color_cube
 
 
+def _run_color_cube_node(body: str, source: np.ndarray) -> dict:
+    components = Path(__file__).resolve().parents[1] / "frontend/src/components"
+    module = components / "studioColorCube.js"
+    science = components / "studioColorScience.js"
+    script = (
+        "const fs=require('fs');(async()=>{"
+        "const s='data:text/javascript;base64,'+fs.readFileSync(process.argv[2]).toString('base64');"
+        "const src=fs.readFileSync(process.argv[1],'utf8')"
+        ".replace(/from\\s+[\"']\\.\\/studioColorScience(?:\\.js)?[\"']/g,`from \"${s}\"`);"
+        "const m=await import('data:text/javascript;base64,'+Buffer.from(src).toString('base64'));"
+        "const p=new Uint8ClampedArray(JSON.parse(fs.readFileSync(0,'utf8')));"
+        f"{body}"
+        "process.stdout.write(JSON.stringify({cube,pixels:[...p]}));"
+        "})();"
+    )
+    return json.loads(
+        subprocess.run(
+            ["node", "-e", script, str(module), str(science)],
+            input=json.dumps(source.flatten().tolist()).encode(),
+            capture_output=True,
+            check=True,
+        ).stdout
+    )
+
+
 class StudioColorCubeTests(unittest.TestCase):
     def test_real_browser_curve_hsl_lut_and_ffmpeg_pixels_match(self):
         source = np.random.default_rng(12).integers(0, 256, (16, 32, 4), dtype=np.uint8)
         source[:, :, 3] = 255
-        module = Path(__file__).resolve().parents[1] / "frontend/src/components/studioColorCube.js"
-        script = """const fs=require('fs');(async()=>{
-          const m=await import('data:text/javascript;base64,'+fs.readFileSync(process.argv[1]).toString('base64'));
-          const p=new Uint8ClampedArray(JSON.parse(fs.readFileSync(0,'utf8')));
-          const lut={size:2,data:[0,0,.05, .95,.02,0, 0,.95,.05, 1,1,.05, .05,0,1, .9,.05,1, 0,1,1, 1,.98,.95]};
-          const cube=m.buildAdvancedColorCube({curve:{shadows:12,midtones:-5,highlights:4},hsl:{hue:5,saturation:7,luminance:2},lutData:lut,lutIntensity:35});
-          m.applyColorCube(p,cube);process.stdout.write(JSON.stringify({cube,pixels:[...p]}));})();"""
-        browser = json.loads(subprocess.run(["node", "-e", script, str(module)],
-            input=json.dumps(source.flatten().tolist()).encode(), capture_output=True, check=True).stdout)
+        browser = _run_color_cube_node(
+            "const lut={size:2,data:[0,0,.05, .95,.02,0, 0,.95,.05, 1,1,.05, .05,0,1, .9,.05,1, 0,1,1, 1,.98,.95]};"
+            "const cube=m.buildAdvancedColorCube({curve:{shadows:12,midtones:-5,highlights:4},hsl:{hue:5,saturation:7,luminance:2},lutData:lut,lutIntensity:35});"
+            "m.applyColorCube(p,cube);",
+            source,
+        )
         with tempfile.TemporaryDirectory(prefix="studio-cube-pixels-") as temp:
             path = write_color_cube(browser["cube"], Path(temp)/"grade.cube")
             result = subprocess.run(["ffmpeg", "-v", "error", "-f", "rawvideo", "-pixel_format", "rgba",
@@ -33,15 +55,12 @@ class StudioColorCubeTests(unittest.TestCase):
     def test_procedural_cinema_3d_lut_and_fractional_curve_match_ffmpeg(self):
         source = np.random.default_rng(42).integers(0, 256, (16, 32, 4), dtype=np.uint8)
         source[:, :, 3] = 255
-        module = Path(__file__).resolve().parents[1] / "frontend/src/components/studioColorCube.js"
-        script = """const fs=require('fs');(async()=>{
-          const m=await import('data:text/javascript;base64,'+fs.readFileSync(process.argv[1]).toString('base64'));
-          const p=new Uint8ClampedArray(JSON.parse(fs.readFileSync(0,'utf8')));
-          const lut=m.buildProceduralColorCube('kodak_2383', 17);
-          const cube=m.buildAdvancedColorCube({curve:{shadows:-0.1,midtones:0.06,highlights:0.08},hsl:{hue:8,saturation:1.08,luminance:0.03},lut,lutIntensity:0.85});
-          m.applyColorCube(p,cube);process.stdout.write(JSON.stringify({cube,pixels:[...p]}));})();"""
-        browser = json.loads(subprocess.run(["node", "-e", script, str(module)],
-            input=json.dumps(source.flatten().tolist()).encode(), capture_output=True, check=True).stdout)
+        browser = _run_color_cube_node(
+            "const lut=m.buildProceduralColorCube('kodak_2383', 17);"
+            "const cube=m.buildAdvancedColorCube({curve:{shadows:-0.1,midtones:0.06,highlights:0.08},hsl:{hue:8,saturation:1.08,luminance:0.03},lut,lutIntensity:0.85});"
+            "m.applyColorCube(p,cube);",
+            source,
+        )
         with tempfile.TemporaryDirectory(prefix="studio-proc-cube-") as temp:
             path = write_color_cube(browser["cube"], Path(temp)/"kodak_2383.cube")
             result = subprocess.run(["ffmpeg", "-v", "error", "-f", "rawvideo", "-pixel_format", "rgba",

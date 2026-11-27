@@ -1,0 +1,829 @@
+{
+  "uxMetrics": {
+    "beforeImport": {
+      "panelScrollHeight": 3031,
+      "panelClientHeight": 3031,
+      "styleGridOffsetFromPanelTop": 684
+    },
+    "afterImport": {
+      "rowsCreated": 5,
+      "panelScrollHeight": 3688,
+      "panelClientHeight": 3688,
+      "styleGridOffsetFromPanelTop": 684,
+      "visibleCaptionText": "Hello my lovely viewers at"
+    },
+    "smartSafeAudit": {
+      "cue1": {
+        "placement": "custom",
+        "status": "Safe zones applied across 5 cues (5 clear of faces · 3 speaker cues · browser-canvas-skin-silhouette)."
+      },
+      "cue4": {
+        "placement": "custom"
+      }
+    },
+    "sideBySideQuickbarPlacement": "custom",
+    "afterBehindSubjectJumpTab": "unknown"
+  },
+  "previewSnapshots": {
+    "word_pill": {
+      "text": "Hello my lovely viewers at",
+      "placement": "bottom_center",
+      "stacked": false,
+      "tiltCssVar": "0deg",
+      "pillFont": "\"Studio Caption Inter ExtraBold\", sans-serif / 37.7117px",
+      "pillBg": "rgba(0, 0, 0, 0)",
+      "previewBox": {
+        "leftPct": 6,
+        "topPct": 77,
+        "widthPct": 88,
+        "heightPx": 48
+      },
+      "hasStoryIcon": false,
+      "activeWordText": "lovely",
+      "words": [
+        {
+          "text": "Hello",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(20, 10, 13) 0px 0px 2.85185px",
+          "transform": "none"
+        },
+        {
+          "text": "my",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(20, 10, 13) 0px 0px 2.85185px",
+          "transform": "none"
+        },
+        {
+          "text": "lovely",
+          "active": true,
+          "color": "rgb(11, 13, 19)",
+          "bg": "rgb(255, 179, 61)",
+          "textShadow": "none",
+          "transform": "matrix(1.08, 0, 0, 1.08, 0, 0)"
+        },
+        {
+          "text": "viewers",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(20, 10, 13) 0px 0px 2.85185px",
+          "transform": "none"
+        },
+        {
+          "text": "at",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(20, 10, 13) 0px 0px 2.85185px",
+          "transform": "none"
+        }
+      ]
+    },
+    "editorial_duo_left": {
+      "text": "HELLO MY lovely VIEWERS AT",
+      "placement": "side_left",
+      "stacked": true,
+      "tiltCssVar": "0deg",
+      "pillFont": "\"Studio Caption Inter SemiBold\", sans-serif / 34.1762px",
+      "pillBg": "rgba(0, 0, 0, 0)",
+      "previewBox": {
+        "leftPct": 5,
+        "topPct": 33,
+        "widthPct": 32,
+        "heightPx": 127
+      },
+      "hasStoryIcon": false,
+      "activeWordText": "lovely",
+      "words": [
+        {
+          "text": "Hello",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgba(0, 0, 0, 0.592) 0px 0px 2.13889px",
+          "transform": "none"
+        },
+        {
+          "text": "my",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgba(0, 0, 0, 0.592) 0px 0px 2.13889px",
+          "transform": "none"
+        },
+        {
+          "text": "lovely",
+          "active": true,
+          "color": "rgb(255, 179, 61)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgba(255, 179, 61, 0.4) 0px 4px 18px",
+          "transform": "matrix(1.22, 0, 0, 1.22, 0, 0)"
+        },
+        {
+          "text": "viewers",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgba(0, 0, 0, 0.592) 0px 0px 2.13889px",
+          "transform": "none"
+        },
+        {
+          "text": "at",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgba(0, 0, 0, 0.592) 0px 0px 2.13889px",
+          "transform": "none"
+        }
+      ]
+    },
+    "editorial_duo_right": {
+      "text": "IT HAS truly BEEN A",
+      "placement": "side_right",
+      "stacked": true,
+      "tiltCssVar": "0deg",
+      "pillFont": "\"Studio Caption Inter SemiBold\", sans-serif / 34.1762px",
+      "pillBg": "rgba(0, 0, 0, 0)",
+      "previewBox": {
+        "leftPct": 63,
+        "topPct": 38,
+        "widthPct": 32,
+        "heightPx": 85
+      },
+      "hasStoryIcon": false,
+      "activeWordText": "truly",
+      "words": [
+        {
+          "text": "It",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgba(0, 0, 0, 0.592) 0px 0px 2.13889px",
+          "transform": "none"
+        },
+        {
+          "text": "has",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgba(0, 0, 0, 0.592) 0px 0px 2.13889px",
+          "transform": "none"
+        },
+        {
+          "text": "truly",
+          "active": true,
+          "color": "rgb(255, 179, 61)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgba(255, 179, 61, 0.4) 0px 4px 18px",
+          "transform": "matrix(1.22, 0, 0, 1.22, 0, 0)"
+        },
+        {
+          "text": "been",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgba(0, 0, 0, 0.592) 0px 0px 2.13889px",
+          "transform": "none"
+        },
+        {
+          "text": "a",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgba(0, 0, 0, 0.592) 0px 0px 2.13889px",
+          "transform": "none"
+        }
+      ]
+    },
+    "wall_type": {
+      "text": "IT HAS TRULY BEEN A",
+      "placement": "background_center",
+      "stacked": false,
+      "tiltCssVar": "0deg",
+      "pillFont": "\"DejaVu Sans Condensed\", sans-serif / 45.6296px",
+      "pillBg": "rgba(8, 12, 22, 0.72)",
+      "previewBox": {
+        "leftPct": 15,
+        "topPct": 13,
+        "widthPct": 70,
+        "heightPx": 122
+      },
+      "hasStoryIcon": false,
+      "activeWordText": "truly",
+      "words": [
+        {
+          "text": "It",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgba(24, 12, 8, 0.435) 0px 0px 2.13889px",
+          "transform": "none"
+        },
+        {
+          "text": "has",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgba(24, 12, 8, 0.435) 0px 0px 2.13889px",
+          "transform": "none"
+        },
+        {
+          "text": "truly",
+          "active": true,
+          "color": "rgb(255, 179, 61)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgba(24, 12, 8, 0.435) 0px 0px 2.13889px",
+          "transform": "matrix(1.05, 0, 0, 1.05, 0, 0)"
+        },
+        {
+          "text": "been",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgba(24, 12, 8, 0.435) 0px 0px 2.13889px",
+          "transform": "none"
+        },
+        {
+          "text": "a",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgba(24, 12, 8, 0.435) 0px 0px 2.13889px",
+          "transform": "none"
+        }
+      ]
+    },
+    "story_pop_cue1": {
+      "text": "✦Hello my lovely viewers",
+      "placement": "bottom_center",
+      "stacked": true,
+      "tiltCssVar": "0deg",
+      "pillFont": "\"Studio Caption DejaVu Sans\", sans-serif / 36.7487px",
+      "pillBg": "rgb(34, 10, 20)",
+      "previewBox": {
+        "leftPct": 6,
+        "topPct": 73,
+        "widthPct": 88,
+        "heightPx": 64
+      },
+      "hasStoryIcon": true,
+      "activeWordText": "lovely",
+      "words": [
+        {
+          "text": "Hello",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "none",
+          "transform": "none"
+        },
+        {
+          "text": "my",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "none",
+          "transform": "none"
+        },
+        {
+          "text": "lovely",
+          "active": true,
+          "color": "rgb(255, 179, 61)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "none",
+          "transform": "matrix(1.15, 0, 0, 1.15, 0, 0)"
+        },
+        {
+          "text": "viewers",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "none",
+          "transform": "none"
+        }
+      ]
+    },
+    "story_pop_cue2": {
+      "text": "✦It has truly been",
+      "placement": "shoulder_left",
+      "stacked": true,
+      "tiltCssVar": "0deg",
+      "pillFont": "\"Studio Caption DejaVu Sans\", sans-serif / 36.7487px",
+      "pillBg": "rgb(34, 10, 20)",
+      "previewBox": {
+        "leftPct": 6,
+        "topPct": 39,
+        "widthPct": 34,
+        "heightPx": 109
+      },
+      "hasStoryIcon": true,
+      "activeWordText": "truly",
+      "words": [
+        {
+          "text": "It",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "none",
+          "transform": "none"
+        },
+        {
+          "text": "has",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "none",
+          "transform": "none"
+        },
+        {
+          "text": "truly",
+          "active": true,
+          "color": "rgb(255, 179, 61)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "none",
+          "transform": "matrix(1.15, 0, 0, 1.15, 0, 0)"
+        },
+        {
+          "text": "been",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "none",
+          "transform": "none"
+        }
+      ]
+    },
+    "story_pop_cue4": {
+      "text": "✦and I hope you",
+      "placement": "background_center",
+      "stacked": true,
+      "tiltCssVar": "0deg",
+      "pillFont": "\"Studio Caption DejaVu Sans\", sans-serif / 36.7487px",
+      "pillBg": "rgba(8, 12, 22, 0.72)",
+      "previewBox": {
+        "leftPct": 15,
+        "topPct": 13,
+        "widthPct": 70,
+        "heightPx": 74
+      },
+      "hasStoryIcon": true,
+      "activeWordText": "you",
+      "words": [
+        {
+          "text": "and",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "none",
+          "transform": "none"
+        },
+        {
+          "text": "I",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "none",
+          "transform": "none"
+        },
+        {
+          "text": "hope",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "none",
+          "transform": "none"
+        },
+        {
+          "text": "you",
+          "active": true,
+          "color": "rgb(255, 179, 61)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "none",
+          "transform": "matrix(1.15, 0, 0, 1.15, 0, 0)"
+        }
+      ]
+    },
+    "retro": {
+      "text": "AND I HOPE YOU MISSED",
+      "placement": "top_left",
+      "stacked": true,
+      "tiltCssVar": "-2.5deg",
+      "pillFont": "\"Studio Caption Inter ExtraBold\", sans-serif / 37.7117px",
+      "pillBg": "rgba(0, 0, 0, 0)",
+      "previewBox": {
+        "leftPct": 6,
+        "topPct": 7,
+        "widthPct": 38,
+        "heightPx": 106
+      },
+      "hasStoryIcon": false,
+      "activeWordText": "you",
+      "words": [
+        {
+          "text": "and",
+          "active": false,
+          "color": "rgb(255, 241, 201)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(59, 25, 17) 0px 0px 3.56481px",
+          "transform": "none"
+        },
+        {
+          "text": "I",
+          "active": false,
+          "color": "rgb(255, 241, 201)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(59, 25, 17) 0px 0px 3.56481px",
+          "transform": "none"
+        },
+        {
+          "text": "hope",
+          "active": false,
+          "color": "rgb(255, 241, 201)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(59, 25, 17) 0px 0px 3.56481px",
+          "transform": "none"
+        },
+        {
+          "text": "you",
+          "active": true,
+          "color": "rgb(255, 227, 110)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(59, 25, 17) 0px 0px 3.56481px",
+          "transform": "matrix(1.12, 0, 0, 1.12, 0, -9.98148)"
+        },
+        {
+          "text": "missed",
+          "active": false,
+          "color": "rgb(255, 241, 201)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(59, 25, 17) 0px 0px 3.56481px",
+          "transform": "none"
+        }
+      ]
+    },
+    "sticker": {
+      "text": "HELLO MY LOVELY VIEWERS AT",
+      "placement": "top_left",
+      "stacked": true,
+      "tiltCssVar": "-2.5deg",
+      "pillFont": "\"Studio Caption Inter Black\", sans-serif / 40.0686px",
+      "pillBg": "rgba(0, 0, 0, 0)",
+      "previewBox": {
+        "leftPct": 6,
+        "topPct": 7,
+        "widthPct": 38,
+        "heightPx": 168
+      },
+      "hasStoryIcon": false,
+      "activeWordText": "lovely",
+      "words": [
+        {
+          "text": "Hello",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(10, 14, 20) 0px 0px 3.56481px",
+          "transform": "none"
+        },
+        {
+          "text": "my",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(10, 14, 20) 0px 0px 3.56481px",
+          "transform": "none"
+        },
+        {
+          "text": "lovely",
+          "active": true,
+          "color": "rgb(20, 16, 28)",
+          "bg": "rgb(248, 251, 253)",
+          "textShadow": "none",
+          "transform": "matrix(1.08934, -0.0380405, 0.0380405, 1.08934, 0, 0)"
+        },
+        {
+          "text": "viewers",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(10, 14, 20) 0px 0px 3.56481px",
+          "transform": "none"
+        },
+        {
+          "text": "at",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(10, 14, 20) 0px 0px 3.56481px",
+          "transform": "none"
+        }
+      ]
+    },
+    "luxury": {
+      "text": "It has truly been a",
+      "placement": "top_right",
+      "stacked": true,
+      "tiltCssVar": "0deg",
+      "pillFont": "\"DejaVu Serif\", sans-serif / 41.3519px",
+      "pillBg": "rgba(0, 0, 0, 0)",
+      "previewBox": {
+        "leftPct": 57,
+        "topPct": 10,
+        "widthPct": 37,
+        "heightPx": 103
+      },
+      "hasStoryIcon": false,
+      "activeWordText": "truly",
+      "words": [
+        {
+          "text": "It",
+          "active": false,
+          "color": "rgb(255, 248, 233)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgba(0, 0, 0, 0.56) 0px 0px 1.42593px",
+          "transform": "none"
+        },
+        {
+          "text": "has",
+          "active": false,
+          "color": "rgb(255, 248, 233)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgba(0, 0, 0, 0.56) 0px 0px 1.42593px",
+          "transform": "none"
+        },
+        {
+          "text": "truly",
+          "active": true,
+          "color": "rgb(231, 199, 125)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgba(0, 0, 0, 0.56) 0px 0px 1.42593px",
+          "transform": "matrix(1.05, 0, 0, 1.05, 0, 0)"
+        },
+        {
+          "text": "been",
+          "active": false,
+          "color": "rgb(255, 248, 233)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgba(0, 0, 0, 0.56) 0px 0px 1.42593px",
+          "transform": "none"
+        },
+        {
+          "text": "a",
+          "active": false,
+          "color": "rgb(255, 248, 233)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgba(0, 0, 0, 0.56) 0px 0px 1.42593px",
+          "transform": "none"
+        }
+      ]
+    },
+    "newsroom": {
+      "text": "HELLO MY LOVELY VIEWERS AT",
+      "placement": "top_center",
+      "stacked": false,
+      "tiltCssVar": "0deg",
+      "pillFont": "\"Studio Caption Inter Black\", sans-serif / 38.8901px",
+      "pillBg": "rgba(0, 0, 0, 0)",
+      "previewBox": {
+        "leftPct": 6,
+        "topPct": 9,
+        "widthPct": 88,
+        "heightPx": 49
+      },
+      "hasStoryIcon": false,
+      "activeWordText": "lovely",
+      "words": [
+        {
+          "text": "Hello",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(20, 10, 16) 0px 0px 2.85185px",
+          "transform": "none"
+        },
+        {
+          "text": "my",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(20, 10, 16) 0px 0px 2.85185px",
+          "transform": "none"
+        },
+        {
+          "text": "lovely",
+          "active": true,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgb(217, 26, 37)",
+          "textShadow": "none",
+          "transform": "matrix(1.08, 0, 0, 1.08, 0, 0)"
+        },
+        {
+          "text": "viewers",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(20, 10, 16) 0px 0px 2.85185px",
+          "transform": "none"
+        },
+        {
+          "text": "at",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(20, 10, 16) 0px 0px 2.85185px",
+          "transform": "none"
+        }
+      ]
+    },
+    "spring_slam": {
+      "text": "HELLO MY LOVELY VIEWERS AT",
+      "placement": "bottom_center",
+      "stacked": true,
+      "tiltCssVar": "0deg",
+      "pillFont": "\"Studio Caption Inter Black\", sans-serif / 44.7826px",
+      "pillBg": "rgba(0, 0, 0, 0)",
+      "previewBox": {
+        "leftPct": 6,
+        "topPct": 62,
+        "widthPct": 88,
+        "heightPx": 111
+      },
+      "hasStoryIcon": false,
+      "activeWordText": "lovely",
+      "words": [
+        {
+          "text": "Hello",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(14, 6, 8) 0px 0px 4.27778px",
+          "transform": "none"
+        },
+        {
+          "text": "my",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(14, 6, 8) 0px 0px 4.27778px",
+          "transform": "none"
+        },
+        {
+          "text": "lovely",
+          "active": true,
+          "color": "rgb(143, 93, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgba(143, 93, 255, 0.333) 0px 4px 16px",
+          "transform": "matrix(1.00959, -0.0287295, 0.0287295, 1.00959, 0, 0)"
+        },
+        {
+          "text": "viewers",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(14, 6, 8) 0px 0px 4.27778px",
+          "transform": "none"
+        },
+        {
+          "text": "at",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(14, 6, 8) 0px 0px 4.27778px",
+          "transform": "none"
+        }
+      ]
+    },
+    "neon_bloom": {
+      "text": "Hello my lovely viewers at",
+      "placement": "bottom_center",
+      "stacked": false,
+      "tiltCssVar": "0deg",
+      "pillFont": "\"Studio Caption Inter Black\", sans-serif / 38.8901px",
+      "pillBg": "rgba(0, 0, 0, 0)",
+      "previewBox": {
+        "leftPct": 6,
+        "topPct": 78,
+        "widthPct": 88,
+        "heightPx": 45
+      },
+      "hasStoryIcon": false,
+      "activeWordText": "lovely",
+      "words": [
+        {
+          "text": "Hello",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(60, 224, 208) 0px 0px 7.12963px, rgba(60, 224, 208, 0.533) 0px 0px 17.1111px",
+          "transform": "none"
+        },
+        {
+          "text": "my",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(60, 224, 208) 0px 0px 7.12963px, rgba(60, 224, 208, 0.533) 0px 0px 17.1111px",
+          "transform": "none"
+        },
+        {
+          "text": "lovely",
+          "active": true,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(255, 255, 255) 0px 0px 4.27778px, rgb(60, 224, 208) 0px 0px 12.8333px, rgb(60, 224, 208) 0px 0px 25.6667px, rgb(60, 224, 208) 0px 0px 37.0741px",
+          "transform": "matrix(1.12, 0, 0, 1.12, 0, 0)"
+        },
+        {
+          "text": "viewers",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(60, 224, 208) 0px 0px 7.12963px, rgba(60, 224, 208, 0.533) 0px 0px 17.1111px",
+          "transform": "none"
+        },
+        {
+          "text": "at",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(60, 224, 208) 0px 0px 7.12963px, rgba(60, 224, 208, 0.533) 0px 0px 17.1111px",
+          "transform": "none"
+        }
+      ]
+    },
+    "typewriter": {
+      "text": "Hello my l|",
+      "placement": "bottom_center",
+      "stacked": false,
+      "tiltCssVar": "0deg",
+      "pillFont": "\"DejaVu Sans Mono\", sans-serif / 35.6481px",
+      "pillBg": "rgba(11, 17, 24, 0.84)",
+      "previewBox": {
+        "leftPct": 6,
+        "topPct": 76,
+        "widthPct": 88,
+        "heightPx": 52
+      },
+      "hasStoryIcon": false,
+      "activeWordText": "l|",
+      "words": [
+        {
+          "text": "Hello",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(4, 8, 16) 0px 0px 1.42593px",
+          "transform": "none"
+        },
+        {
+          "text": "my",
+          "active": false,
+          "color": "rgb(255, 255, 255)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(4, 8, 16) 0px 0px 1.42593px",
+          "transform": "none"
+        },
+        {
+          "text": "l|",
+          "active": true,
+          "color": "rgb(60, 224, 208)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "textShadow": "rgb(4, 8, 16) 0px 0px 1.42593px",
+          "transform": "none"
+        }
+      ]
+    }
+  },
+  "exportCheck": {
+    "auto_captions": true,
+    "caption_style": "editorial_duo",
+    "caption_position": "smart_safe",
+    "caption_avoid_subjects": true,
+    "caption_scale": 1,
+    "segmentsCount": 5,
+    "firstSegment": {
+      "id": "transcript-caption-0-timeline-1",
+      "start_time": 1.2,
+      "end_time": 4.25,
+      "text": "Hello my amazing viewers at home!",
+      "speaker": "unknown",
+      "speaker_label": "Speaker needs review",
+      "language": "und",
+      "language_label": "Language needs review",
+      "language_confidence": 0,
+      "review_required": true,
+      "text_review_required": false,
+      "text_reviewed": true,
+      "translated_to_english": false,
+      "caption_placement": "custom",
+      "caption_icon": "auto",
+      "caption_x": 16,
+      "caption_y": 12
+    }
+  },
+  "pageErrors": []
+}

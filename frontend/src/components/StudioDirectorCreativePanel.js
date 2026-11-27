@@ -21,6 +21,8 @@ import {
 } from "./studioDirectorCreativeClient";
 import StudioDirectorFragmentControls from "./StudioDirectorFragmentControls";
 import StudioDirectorPosterControls from "./StudioDirectorPosterControls";
+import captionRenderStyles from "./studioCaptionRenderStyles.json";
+import { recommendDirectorCaptionTemplate } from "./studioDirectorCaptions";
 
 export const DIRECTOR_BRIEF_TEMPLATES = [
   {
@@ -145,6 +147,31 @@ export const DIRECTOR_BRIEF_TEMPLATES = [
       "Revive flat low-light footage, apply crimson garment selective HSL splash and face spotlight window, cut in a circle B-roll portal with voice-first audio ducking, and animate a kinetic callout.",
   },
 ];
+
+function buildDirectorCaptionDirection({
+  telemetry,
+  result,
+  snapshot,
+  brief,
+  lookId,
+  archetypeId,
+}) {
+  return recommendDirectorCaptionTemplate({
+    telemetry,
+    pixelEvidence: result?.provenance?.pixelEvidence,
+    brief: result?.brief || brief,
+    lookId: result?.provenance?.lookId || lookId,
+    archetypeId: result?.provenance?.archetypeId || archetypeId,
+    reframeAspect: snapshot?.reframeAspect,
+    smartCropMode: snapshot?.smartCropMode,
+    speakerStackCameraCount: snapshot?.speakerStackCameraCount,
+    captionSegments: snapshot?.captionSegments,
+    soundEffects: snapshot?.soundEffects,
+    creativeIntent: snapshot?.creativeIntent,
+    pacingLevel: snapshot?.pacingLevel,
+    contentProfile: snapshot?.contentProfile,
+  });
+}
 
 function summarizePlanTopology(compiled, forceRecompute = false) {
   const actions = compiled?.plan?.actions || [];
@@ -317,10 +344,20 @@ export default function StudioDirectorCreativePanel({
         context.pixelEvidence && Array.isArray(context.media)
           ? analyzeDirectorClipTelemetry(context)
           : null;
+      const captionRecommendation = buildDirectorCaptionDirection({
+        telemetry,
+        result,
+        snapshot: next,
+        brief,
+        lookId,
+        archetypeId,
+      });
       setReview({
         ...compiled,
         topologySummary: summarizePlanTopology(compiled),
         telemetry,
+        captionRecommendation,
+        applyCaptionRecommendation: true,
         result,
         reviewerUid: user.uid,
       });
@@ -394,10 +431,20 @@ export default function StudioDirectorCreativePanel({
         ...baseContext,
         pixelEvidence: result.provenance?.pixelEvidence || measuredEvidence || [],
       });
+      const captionRecommendation = buildDirectorCaptionDirection({
+        telemetry,
+        result,
+        snapshot: next,
+        brief,
+        lookId,
+        archetypeId,
+      });
       setReview({
         ...compiled,
         topologySummary: summarizePlanTopology(compiled),
         telemetry,
+        captionRecommendation,
+        applyCaptionRecommendation: true,
         result,
         reviewerUid: user.uid,
       });
@@ -426,6 +473,8 @@ export default function StudioDirectorCreativePanel({
         topologySummary: summarizePlanTopology(compiled),
         telemetry: review.telemetry || null,
         customFinishGrade: review.customFinishGrade || null,
+        captionRecommendation: review.captionRecommendation || null,
+        applyCaptionRecommendation: review.applyCaptionRecommendation !== false,
         result,
         reviewerUid: review.reviewerUid,
       });
@@ -452,6 +501,8 @@ export default function StudioDirectorCreativePanel({
         topologySummary: summarizePlanTopology(compiled),
         telemetry: review.telemetry || null,
         customFinishGrade: review.customFinishGrade || null,
+        captionRecommendation: review.captionRecommendation || null,
+        applyCaptionRecommendation: review.applyCaptionRecommendation !== false,
         result,
         reviewerUid: review.reviewerUid,
       });
@@ -503,7 +554,7 @@ export default function StudioDirectorCreativePanel({
       }
       // Recompile against the current document, not the snapshot from the model request.
       const fresh = compileDirectorCreativePlan(review.result, latest.current.getSnapshot());
-      const finalPlan =
+      const basePlan =
         review.customFinishGrade &&
         !fresh.plan.actions.some(a => a.type === "finish_grade") &&
         fresh.plan.actions.length < 64
@@ -512,6 +563,26 @@ export default function StudioDirectorCreativePanel({
               actions: [...fresh.plan.actions, review.customFinishGrade],
             }
           : fresh.plan;
+      const captionChoice = review.applyCaptionRecommendation ? review.captionRecommendation : null;
+      const finalPlan =
+        captionChoice && basePlan.actions.length < 64
+          ? {
+              ...basePlan,
+              actions: [
+                ...basePlan.actions,
+                {
+                  type: "caption_treatment",
+                  captionStyle: captionChoice.captionStyle,
+                  captionPosition: captionChoice.captionPosition || "smart_safe",
+                  captionAvoidSubjects: captionChoice.captionAvoidSubjects !== false,
+                  ...(captionChoice.captionAccent
+                    ? { captionAccent: captionChoice.captionAccent }
+                    : {}),
+                  ...(captionChoice.reason ? { reason: captionChoice.reason.slice(0, 280) } : {}),
+                },
+              ],
+            }
+          : basePlan;
       await latest.current.onApply(finalPlan);
       if ([3, 4].includes(review.result.version)) onOpenNodes?.();
       if (mounted.current) {
@@ -823,6 +894,98 @@ export default function StudioDirectorCreativePanel({
               Bind 3D LUT Finish Grade to Plan
             </button>
           </div>
+          {review.captionRecommendation ? (
+            <div
+              className="studio-director-creative__grade-bar"
+              data-testid="director-caption-recommendation"
+            >
+              <label className="inspector-check-row">
+                <input
+                  type="checkbox"
+                  data-testid="director-apply-caption-toggle"
+                  checked={Boolean(review.applyCaptionRecommendation)}
+                  disabled={busy || locked}
+                  onChange={e =>
+                    setReview(prev =>
+                      prev ? { ...prev, applyCaptionRecommendation: e.target.checked } : prev
+                    )
+                  }
+                />
+                <span>
+                  AI Director Caption Template:{" "}
+                  <strong>
+                    {captionRenderStyles[review.captionRecommendation.captionStyle]?.label ||
+                      review.captionRecommendation.captionStyle}
+                  </strong>{" "}
+                  (
+                  {review.captionRecommendation.captionPosition === "smart_safe"
+                    ? "Smart Safe"
+                    : review.captionRecommendation.captionPosition === "side_by_side"
+                      ? "Side Split"
+                      : review.captionRecommendation.captionPosition === "creative"
+                        ? "Stage Mode"
+                        : review.captionRecommendation.captionPosition}
+                  )
+                </span>
+              </label>
+              <div className="studio-director-preset-pills">
+                <select
+                  aria-label="Director caption template"
+                  data-testid="director-caption-style-select"
+                  value={review.captionRecommendation.captionStyle}
+                  disabled={busy || locked || !review.applyCaptionRecommendation}
+                  onChange={e => {
+                    const nextStyle = e.target.value;
+                    setReview(prev =>
+                      prev
+                        ? {
+                            ...prev,
+                            captionRecommendation: {
+                              ...prev.captionRecommendation,
+                              captionStyle: nextStyle,
+                              label: captionRenderStyles[nextStyle]?.label || nextStyle,
+                            },
+                          }
+                        : prev
+                    );
+                  }}
+                >
+                  {Object.entries(captionRenderStyles).map(([id, def]) => (
+                    <option key={id} value={id}>
+                      {def.label || id}
+                    </option>
+                  ))}
+                </select>
+                {review.captionRecommendation.alternatives?.map(alt => (
+                  <button
+                    key={alt.id}
+                    type="button"
+                    className="studio-director-preset-pill"
+                    disabled={busy || locked || !review.applyCaptionRecommendation}
+                    onClick={() =>
+                      setReview(prev =>
+                        prev
+                          ? {
+                              ...prev,
+                              captionRecommendation: {
+                                ...prev.captionRecommendation,
+                                captionStyle: alt.id,
+                                label: alt.label,
+                              },
+                            }
+                          : prev
+                      )
+                    }
+                  >
+                    Try {alt.label}
+                  </button>
+                ))}
+              </div>
+              <small data-testid="director-caption-reason">
+                {review.captionRecommendation.reason}
+              </small>
+            </div>
+          ) : null}
           <details open={!review.result.provenance?.fragmentIntent}>
             <summary>
               {review.result.version === 4 ? "Motion design sequence" : "Generated footage layers"}

@@ -443,6 +443,11 @@ def setup_scene(spec, asset_file=None):
     if s["template"] == "object_scene":
         from objects import build_objects
         animated["objects"] = build_objects(s, root, material)
+    if s.get("shadows", True) and s.get("background") == "transparent" and world.render.engine == "CYCLES":
+        bpy.ops.mesh.primitive_plane_add(size=24, location=(0, 0, -2.25))
+        catcher = bpy.context.object
+        catcher.name = "Ground shadow catcher"
+        catcher.is_shadow_catcher = True
     return world, root, camera, animated
 
 

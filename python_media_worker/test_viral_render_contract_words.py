@@ -156,6 +156,62 @@ class ViralRenderContractWordsTests(unittest.TestCase):
             mock_diarize.assert_not_called()
             mock_local.assert_called_once()
 
+    def test_viral_caption_segment_schema_preserves_word_timings_and_fixes_renderer_polish(self):
+        try:
+            from python_media_worker import main_media_server as mms
+        except ModuleNotFoundError:
+            return
+        req = mms.RenderViralRequest(
+            video_url="https://example.com/clip.mp4",
+            start_time=0.0,
+            end_time=4.0,
+            auto_captions=True,
+            caption_style="karaoke",
+            caption_segments=[
+                {
+                    "id": "cue-word-rt",
+                    "start_time": 0.0,
+                    "end_time": 4.0,
+                    "text": "Hello paused world",
+                    "wordTimings": [
+                        {"word": "Hello", "start": 0.0, "end": 0.35},
+                        {"word": "paused", "start": 2.10, "end": 2.45},
+                        {"word": "world", "start": 2.50, "end": 3.00},
+                    ],
+                }
+            ],
+        )
+        transcript = build_edited_caption_transcript(req.caption_segments)
+        self.assertAlmostEqual(transcript["segments"][0]["words"][1]["start"], 2.10, places=3)
+
+        # Karaoke uses \1c accent and \2c primary so spoken fill sweeps into signature yellow cleanly.
+        ass_karaoke = mms.generate_ass_captions(transcript, "karaoke", 1080, 1920)
+        self.assertIn(r"\1c&H0042F5F5\2c&H00FFFFFF", ass_karaoke)
+
+        # Neon bloom uses white inner core over outer neon halo with dual-space breathing room.
+        ass_neon = mms.generate_ass_captions(transcript, "neon_bloom", 1080, 1920)
+        self.assertIn(r"\c&H00FFFFFF&\3c&H00D0E03C&\bord3\blur0.8", ass_neon)
+
+        # Sticker renders high-contrast dark ink on cream badge.
+        ass_sticker = mms.generate_ass_captions(transcript, "sticker", 1080, 1920)
+        self.assertIn("&H001C1014", ass_sticker)
+
+        # Creative mode showcases different spatial frame placements & side-by-side splits.
+        multi_cue = build_edited_caption_transcript(
+            [
+                {"id": "c1", "start_time": 0.0, "end_time": 2.0, "text": "Host opens the story", "speaker": "host"},
+                {"id": "c2", "start_time": 2.0, "end_time": 4.0, "text": "Guest replies side by side", "speaker": "guest"},
+            ]
+        )
+        ass_split = mms.generate_ass_captions(multi_cue, "editorial_duo", 1080, 1920, caption_position="creative")
+        self.assertIn(r"\an4\pos(65,", ass_split)
+        self.assertIn(r"\an6\pos(1015,", ass_split)
+        self.assertIn(r"\N", ass_split)
+        ass_wall = mms.generate_ass_captions(multi_cue, "wall_type", 1080, 1920, caption_position="creative")
+        self.assertIn(r"\an8\pos(540,326)", ass_wall)
+        ass_retro = mms.generate_ass_captions(multi_cue, "retro", 1080, 1920, caption_position="creative")
+        self.assertIn(r"\frz2.5", ass_retro)
+
 
 if __name__ == "__main__":
     unittest.main()

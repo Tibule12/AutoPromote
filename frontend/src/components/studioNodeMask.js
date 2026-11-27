@@ -68,7 +68,23 @@ export function blendStudioNodeMask(context,original,nodeId,{overlays,keys=[],ma
       const m=pose.mask||layer.mask||{};
       const shape=(value)=>{const maskCanvas=document.createElement('canvas');maskCanvas.width=local.width;maskCanvas.height=local.height;const ctx=maskCanvas.getContext('2d');ctx.fillStyle='white';ctx.beginPath();
         if(value.enabled&&value.shape==='ellipse')ctx.ellipse(local.width/2,local.height/2,local.width*.48,local.height*.48,0,0,Math.PI*2);
-        else if(value.enabled&&value.shape==='polygon'){parsePolygon(value.path).forEach(([x,y],i)=>{if(i)ctx.lineTo(x*local.width/100,y*local.height/100);else ctx.moveTo(x*local.width/100,y*local.height/100)});ctx.closePath();}
+        else if(value.enabled&&value.shape==='polygon'){
+          const pts=parsePolygon(value.path),handles=Array.isArray(value.bezierHandles)&&value.bezierHandles.length===pts.length?value.bezierHandles:null;
+          pts.forEach(([x,y],i)=>{
+            if(!i){ctx.moveTo(x*local.width/100,y*local.height/100);return;}
+            if(handles){
+              const [px,py]=pts[i-1],h0=handles[i-1]||[0,0,0,0],h1=handles[i]||[0,0,0,0];
+              ctx.bezierCurveTo((px+Number(h0[2]||0))*local.width/100,(py+Number(h0[3]||0))*local.height/100,(x+Number(h1[0]||0))*local.width/100,(y+Number(h1[1]||0))*local.height/100,x*local.width/100,y*local.height/100);
+            }else ctx.lineTo(x*local.width/100,y*local.height/100);
+          });
+          if(handles&&pts.length>=3){
+            const [lx,ly]=pts[pts.length-1],[fx,fy]=pts[0],hl=handles[pts.length-1]||[0,0,0,0],hf=handles[0]||[0,0,0,0];
+            ctx.bezierCurveTo((lx+Number(hl[2]||0))*local.width/100,(ly+Number(hl[3]||0))*local.height/100,(fx+Number(hf[0]||0))*local.width/100,(fy+Number(hf[1]||0))*local.height/100,fx*local.width/100,fy*local.height/100);
+          }
+          ctx.closePath();
+        }
+        else if(value.enabled&&value.shape==='diamond'){ctx.moveTo(local.width/2,0);ctx.lineTo(local.width,local.height/2);ctx.lineTo(local.width/2,local.height);ctx.lineTo(0,local.height/2);ctx.closePath();}
+        else if(value.enabled&&value.shape==='inset'){ctx.roundRect(local.width*.1,local.height*.1,local.width*.8,local.height*.8,Math.min(local.width,local.height)*Number(value.radius??6)/100);}
         else ctx.roundRect(0,0,local.width,local.height,Math.min(local.width,local.height)*Number(value.radius??6)/100);
         ctx.fill();if(value.feather){const blur=document.createElement('canvas');blur.width=local.width;blur.height=local.height;blur.getContext('2d').drawImage(maskCanvas,0,0);ctx.clearRect(0,0,local.width,local.height);ctx.filter=`blur(${value.feather*height/720*pose.scale}px)`;ctx.drawImage(blur,0,0);ctx.filter='none';}if(value.inverted){ctx.globalCompositeOperation='xor';ctx.fillRect(0,0,local.width,local.height);ctx.globalCompositeOperation='source-over';}return maskCanvas;};
       const draw=(value)=>c.drawImage(shape(value),0,0);
@@ -76,7 +92,7 @@ export function blendStudioNodeMask(context,original,nodeId,{overlays,keys=[],ma
     };
     if(ref.operation==='PolygonMask'){paintLocalMask();
     }else{
-      if(!title&&picture&&(picture.tagName!=='VIDEO'||picture.readyState>=2))paintSurface(local,picture,layer,time,height*pose.scale);
+      if(!title&&picture&&(picture.tagName!=='VIDEO'||picture.readyState>=2))paintSurface(local,picture,layer,time,height*pose.scale,pose);
       if(layer.perspective)projectStudioCanvas(local,pose.perspective||layer.perspective,pose.perspectiveProgress??100);
       const filtered=studioNodeFilteredSurface(local,layer,height/720*pose.scale,!!layer.mask?.enabled);
       if(filtered.canvas!==local){const w=local.width,h=local.height;local=filtered.canvas;c=local.getContext('2d');anchorX=(filtered.padding+w*anchorX/100)/local.width*100;anchorY=(filtered.padding+h*anchorY/100)/local.height*100;}

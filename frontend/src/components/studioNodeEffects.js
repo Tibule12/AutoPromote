@@ -23,7 +23,139 @@ export function compileStudioNodeEffects(layer = {}) {
 }
 export const hasStudioNodeEffects = layer => Boolean(layer?.chromaKey?.enabled || layer?.displacementWarp?.enabled ||
   layer?.opticalFx?.halation || layer?.opticalFx?.anamorphicStreak || layer?.dofBlur);
-export const hasStudioNodeSurface = layer => hasStudioNodeEffects(layer)||Boolean(layer?.perspective||layer?.glow?.enabled||layer?.layerShadow?.enabled||Number(layer?.blur)>0);
+export const hasStudioNodeSurface = layer => hasStudioNodeEffects(layer)||Boolean(layer?.perspective||layer?.glow?.enabled||layer?.layerShadow?.enabled||Number(layer?.blur)>0||layer?.lightWrap?.enabled||layer?.linearLight||layer?.motionBlur?.enabled||layer?.screenReplace?.enabled||layer?.meshWarp?.enabled);
+
+export function applyKeyframedNodeSpec(spec, pose = null) {
+  if (!spec || spec.version !== 1 || !pose) return spec;
+  const key = { ...spec.key };
+  if (Number.isFinite(Number(pose.keySimilarity))) key.similarity = Math.max(0.02, Math.min(1, Number(pose.keySimilarity)));
+  if (Number.isFinite(Number(pose.keySmoothness))) key.smoothness = Math.max(0, Math.min(1, Number(pose.keySmoothness)));
+  if (Number.isFinite(Number(pose.keySpill))) key.spill = Math.max(0, Math.min(1, Number(pose.keySpill)));
+  if (Number.isFinite(Number(pose.keyChoke))) key.choke = Math.max(-20, Math.min(20, Number(pose.keyChoke)));
+  return { ...spec, key };
+}
+
+export function applyEdgeLightWrapAndLinear(fgData, bgData, width, height, { intensity = 0.45, radius = 14, linearLight = false, units = 1 } = {}) {
+  const n = width * height;
+  if (!fgData || fgData.length < n * 4) return fgData;
+  const r = Math.max(1, Math.min(60, Math.round(Number(radius || 14) * Math.max(0.25, units))));
+  const wrapAmt = Math.max(0, Math.min(1, Number(intensity ?? 0.45)));
+  if (wrapAmt > 0.005 && bgData && bgData.length >= n * 4) {
+    const invAlpha = new Float64Array(n);
+    const bgRgb = new Float64Array(n * 3);
+    for (let p = 0; p < n; p++) {
+      const i = p * 4, j = p * 3;
+      invAlpha[p] = 1 - fgData[i + 3] / 255;
+      bgRgb[j] = bgData[i]; bgRgb[j + 1] = bgData[i + 1]; bgRgb[j + 2] = bgData[i + 2];
+    }
+    const softInv = boxMean(invAlpha, width, height, 1, r, r);
+    const softBg = boxMean(bgRgb, width, height, 3, r, r);
+    for (let p = 0; p < n; p++) {
+      const a = fgData[p * 4 + 3] / 255;
+      if (a <= 0.002) continue;
+      const w = Math.max(0, Math.min(1, softInv[p] * wrapAmt));
+      if (w <= 0.002) continue;
+      const i = p * 4, j = p * 3;
+      for (let c = 0; c < 3; c++) {
+        const f = fgData[i + c] / 255;
+        const b = softBg[j + c] / 255;
+        const scr = 1 - (1 - f) * (1 - b);
+        const mixed = linearLight
+          ? Math.pow(Math.pow(Math.max(0, f), 2.2) * (1 - w) + Math.pow(Math.max(0, scr), 2.2) * w, 1 / 2.2)
+          : f * (1 - w) + scr * w;
+        fgData[i + c] = byte(mixed * 255);
+      }
+    }
+  } else if (linearLight && bgData && bgData.length >= n * 4) {
+    for (let p = 0; p < n; p++) {
+      const i = p * 4, a = fgData[i + 3] / 255;
+      if (a <= 0.002 || a >= 0.998) continue;
+      for (let c = 0; c < 3; c++) {
+        const fLin = Math.pow(fgData[i + c] / 255, 2.2);
+        const bLin = Math.pow(bgData[i + c] / 255, 2.2);
+        const outLin = (bLin * (1 - a) + fLin * a);
+        fgData[i + c] = byte(Math.pow(Math.max(0, outLin), 1 / 2.2) * 255);
+      }
+    }
+  }
+  return fgData;
+}
+
+export function applyScreenGlareReflection(fgData, bgData, width, height, glarePreserve = 0.35) {
+  const n = width * height;
+  const gAmt = Math.max(0, Math.min(1, Number(glarePreserve ?? 0.35)));
+  if (!fgData || !bgData || fgData.length < n * 4 || bgData.length < n * 4 || gAmt <= 0.005) return fgData;
+  for (let p = 0; p < n; p++) {
+    const i = p * 4;
+    if (fgData[i + 3] < 4) continue;
+    const br = bgData[i] / 255, bg = bgData[i + 1] / 255, bb = bgData[i + 2] / 255;
+    const lum = 0.2126 * br + 0.7152 * bg + 0.0722 * bb;
+    if (lum <= 0.65) continue;
+    const hi = ((lum - 0.65) / 0.35) * gAmt;
+    for (let c = 0; c < 3; c++) {
+      const f = fgData[i + c] / 255;
+      const glare = Math.max(0, Math.min(1, (bgData[i + c] / 255) * hi));
+      fgData[i + c] = byte((1 - (1 - f) * (1 - glare)) * 255);
+    }
+  }
+  return fgData;
+}
+
+export function applyMeshGridWarp(data, width, height, meshWarp = {}, time = 0, units = 1) {
+  if (!meshWarp?.enabled || !data || width < 4 || height < 4) return data;
+  const strength = Math.max(-1, Math.min(1, Number(meshWarp.strength ?? 0.35) || 0));
+  const pinch = Math.max(-1, Math.min(1, Number(meshWarp.pinch ?? 0) || 0));
+  const cols = Math.max(2, Math.min(8, Math.round(Number(meshWarp.cols ?? 4) || 4)));
+  const rows = Math.max(2, Math.min(8, Math.round(Number(meshWarp.rows ?? 4) || 4)));
+  if (Math.abs(strength) < 0.005 && Math.abs(pinch) < 0.005) return data;
+  const src = new Uint8ClampedArray(data);
+  const cx = (width - 1) * 0.5;
+  const cy = (height - 1) * 0.5;
+  const amp = 14 * Math.max(0.25, units);
+  for (let y = 0; y < height; y += 1) {
+    const ny = y / Math.max(1, height - 1);
+    const dyC = (y - cy) / Math.max(1, cy);
+    for (let x = 0; x < width; x += 1) {
+      const nx = x / Math.max(1, width - 1);
+      const dxC = (x - cx) / Math.max(1, cx);
+      const r2 = Math.min(1.5, dxC * dxC + dyC * dyC);
+      const gridShiftX = strength * amp * Math.sin(ny * Math.PI * rows + time * 1.1) * Math.sin(nx * Math.PI);
+      const gridShiftY = strength * amp * Math.sin(nx * Math.PI * cols + time * 0.9) * Math.sin(ny * Math.PI);
+      const pinchScale = 1 + pinch * 0.38 * (1 - r2);
+      const sx = Math.max(0, Math.min(width - 1, Math.round(cx + (x - cx) * pinchScale + gridShiftX)));
+      const sy = Math.max(0, Math.min(height - 1, Math.round(cy + (y - cy) * pinchScale + gridShiftY)));
+      const dIdx = (y * width + x) * 4;
+      const sIdx = (sy * width + sx) * 4;
+      data[dIdx] = src[sIdx];
+      data[dIdx + 1] = src[sIdx + 1];
+      data[dIdx + 2] = src[sIdx + 2];
+      data[dIdx + 3] = src[sIdx + 3];
+    }
+  }
+  return data;
+}
+
+export function blendCrossDissolveMorphRgba(frameA, frameB, width, height, progress = 0.5, warpAmount = 0.25) {
+  const t = Math.max(0, Math.min(1, Number(progress) || 0));
+  const wAmt = Math.max(0, Math.min(1, Number(warpAmount) || 0));
+  const out = new Uint8ClampedArray(frameA.length);
+  const shiftA = t * wAmt * width * 0.08;
+  const shiftB = (1 - t) * wAmt * width * 0.08;
+  for (let y = 0; y < height; y += 1) {
+    const wave = Math.sin((y / Math.max(1, height - 1)) * Math.PI * 2);
+    for (let x = 0; x < width; x += 1) {
+      const ax = Math.max(0, Math.min(width - 1, Math.round(x - shiftA * wave)));
+      const bx = Math.max(0, Math.min(width - 1, Math.round(x + shiftB * wave)));
+      const di = (y * width + x) * 4;
+      const ai = (y * width + ax) * 4;
+      const bi = (y * width + bx) * 4;
+      for (let c = 0; c < 4; c += 1) {
+        out[di + c] = Math.round(frameA[ai + c] * (1 - t) + frameB[bi + c] * t);
+      }
+    }
+  }
+  return out;
+}
 export const studioDepthScale = layer => 1 / (1 - finite(layer?.zDepth, 0, -100, 100) / 200);
 const clamp = x => Math.max(0, Math.min(1, x));
 const byte = x => Math.max(0, Math.min(255, Math.floor(x + .5)));
@@ -63,13 +195,20 @@ export function applyStudioNodeEffects(data, width, height, spec, time=0, units=
   const n=width*height,key=spec.key;
   if(key.enabled){const rgb=[1,3,5].map(i=>parseInt(key.color.slice(i,i+2),16)/255),kh=hue(...rgb),alpha=new Float64Array(n);
     const cb=(r,g,b)=>-.168736*r-.331264*g+.5*b, cr=(r,g,b)=>.5*r-.418688*g-.081312*b;
-    const dominant=rgb.indexOf(Math.max(...rgb));
+    const maxRgb=Math.max(...rgb),minRgb=Math.min(...rgb),hasMultiScreen=maxRgb>.01&&minRgb<.75*maxRgb;
+    const screenChannels=hasMultiScreen?[0,1,2].filter(c=>rgb[c]>=.9*maxRgb):[];
+    const nonScreenChannels=[0,1,2].filter(c=>!screenChannels.includes(c));
     for(let p=0;p<n;p++){const i=p*4,r=data[i]/255,g=data[i+1]/255,b=data[i+2]/255;let distance;
       if(key.mode==='luma') distance=.2126*r+.7152*g+.0722*b;
-      else if(key.mode==='hsl_delta'){const hs=hue(r,g,b),dh=Math.abs(hs[0]-kh[0]);distance=Math.hypot(Math.min(dh,1-dh)*2,hs[1]-kh[1])/Math.SQRT2;}
+      else if(key.mode==='hsl_delta'){const hs=hue(r,g,b),dh=Math.abs(hs[0]-kh[0]),dv=Math.max(r,g,b)-maxRgb;distance=Math.hypot(Math.min(dh,1-dh)*2*Math.sqrt(.48),(hs[1]-kh[1])*Math.sqrt(.42),dv*Math.sqrt(.30))/Math.sqrt(1.2);}
       else distance=Math.hypot(cb(r,g,b)-cb(...rgb),cr(r,g,b)-cr(...rgb));
-      let a=smooth(key.similarity,key.similarity+Math.max(.000001,key.smoothness),distance);if(key.invert)a=1-a;alpha[p]=a*data[i+3];
-      if(key.mode!=='luma'&&key.spill){const other=Math.max(data[i+(dominant+1)%3],data[i+(dominant+2)%3]);data[i+dominant]=byte(data[i+dominant]-Math.max(0,data[i+dominant]-other)*key.spill*(1-a));}
+      const rawA=smooth(key.similarity,key.similarity+Math.max(.000001,key.smoothness),distance);
+      alpha[p]=(key.invert?1-rawA:rawA)*data[i+3];
+      // Despill foreground bounce & semi-transparent edges independently of invert.
+      if(key.mode!=='luma'&&key.spill&&screenChannels.length&&nonScreenChannels.length){
+        let other=0;for(let k=0;k<nonScreenChannels.length;k++)other=Math.max(other,data[i+nonScreenChannels[k]]);
+        for(let k=0;k<screenChannels.length;k++){const ch=screenChannels[k];data[i+ch]=byte(data[i+ch]-Math.max(0,data[i+ch]-other)*key.spill);}
+      }
     }
     const radius=Math.round(Math.abs(key.choke)*units),matte=radius?morphology(alpha,width,height,radius,key.choke>0):alpha;
     for(let p=0;p<n;p++)data[p*4+3]=byte(matte[p]);
@@ -89,7 +228,7 @@ export function applyStudioNodeEffects(data, width, height, spec, time=0, units=
       for(let c=0;c<3;c++)data[i+c]=byte(alpha?(data[i+c]*a+h*[1,.3,.12][c]+s*[.65,.8,1][c])/alpha:0);data[i+3]=byte(alpha*255);}
   }return data;
 }
-export function paintStudioNodeSurface(canvas, source, layer, time=0, programmeHeight=720) {
+export function paintStudioNodeSurface(canvas, source, layer, time=0, programmeHeight=720, pose=null) {
   const w=canvas.width,h=canvas.height,ctx=canvas.getContext('2d',{willReadFrequently:true});if(!ctx||!w||!h)return false;
   ctx.imageSmoothingQuality='high';
   ctx.clearRect(0,0,w,h);const sw=source.videoWidth||source.naturalWidth||source.width,sh=source.videoHeight||source.naturalHeight||source.height;if(!sw||!sh)return false;
@@ -98,7 +237,8 @@ export function paintStudioNodeSurface(canvas, source, layer, time=0, programmeH
   // Ordinary branch pictures need no CPU round trip. Keep their alpha on the
   // canvas until a pixel effect actually needs it.
   if(!hasStudioNodeEffects(layer))return true;
-  const pixels=ctx.getImageData(0,0,w,h);applyStudioNodeEffects(pixels.data,w,h,compileStudioNodeEffects(layer),time,programmeHeight/720);ctx.putImageData(pixels,0,0);return true;
+  const spec = applyKeyframedNodeSpec(compileStudioNodeEffects(layer), pose);
+  const pixels=ctx.getImageData(0,0,w,h);applyStudioNodeEffects(pixels.data,w,h,spec,time,programmeHeight/720);ctx.putImageData(pixels,0,0);return true;
 }
 
 export function studioNodeFilteredSurface(canvas,layer,units,clipToBox=false) {

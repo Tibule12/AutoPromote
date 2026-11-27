@@ -19,12 +19,67 @@ export function parseStudioMaskPolygon(path = DEFAULT_STUDIO_MASK_POLYGON) {
 }
 export const studioMaskPointProperty = property => /^maskPoint(\d{1,2})(X|Y)$/.exec(String(property));
 export const studioMaskPolygonPath = points => `polygon(${points.map(p => p.map(n=>Number(n).toFixed(8).replace(/\.?0+$/,'')).join('% ')+'%').join(', ')})`;
+
+export function computeSmoothMaskBezierHandles(points = [], tension = 0.28) {
+  const n = Array.isArray(points) ? points.length : 0;
+  if (n < 3) return [];
+  const t = Math.max(0.05, Math.min(0.5, Number(tension) || 0.28));
+  return points.map((pt, i) => {
+    const prev = points[(i - 1 + n) % n];
+    const next = points[(i + 1) % n];
+    const vx = (next[0] - prev[0]) * t;
+    const vy = (next[1] - prev[1]) * t;
+    return [Number((-vx).toFixed(3)), Number((-vy).toFixed(3)), Number(vx.toFixed(3)), Number(vy.toFixed(3))];
+  });
+}
+
+export function evaluateCubicBezierMaskPoints(mask, stepsPerSegment = 10) {
+  const pts = parseStudioMaskPolygon(mask?.path || DEFAULT_STUDIO_MASK_POLYGON);
+  const handles = Array.isArray(mask?.bezierHandles) ? mask.bezierHandles : null;
+  if (!handles || handles.length !== pts.length) return pts;
+  const steps = Math.max(2, Math.min(24, Math.round(stepsPerSegment)));
+  const out = [];
+  for (let i = 0; i < pts.length; i += 1) {
+    const next = (i + 1) % pts.length;
+    const [x0, y0] = pts[i];
+    const [x3, y3] = pts[next];
+    const h0 = handles[i] || [0, 0, 0, 0];
+    const h1 = handles[next] || [0, 0, 0, 0];
+    const ox = Number(h0[2] || 0), oy = Number(h0[3] || 0);
+    const ix = Number(h1[0] || 0), iy = Number(h1[1] || 0);
+    if (Math.abs(ox) < 1e-4 && Math.abs(oy) < 1e-4 && Math.abs(ix) < 1e-4 && Math.abs(iy) < 1e-4) {
+      out.push([x0, y0]);
+      continue;
+    }
+    const c1x = x0 + ox, c1y = y0 + oy;
+    const c2x = x3 + ix, c2y = y3 + iy;
+    for (let s = 0; s < steps; s += 1) {
+      const u = s / steps, m = 1 - u;
+      const b0 = m * m * m, b1 = 3 * m * m * u, b2 = 3 * m * u * u, b3 = u * u * u;
+      out.push([b0 * x0 + b1 * c1x + b2 * c2x + b3 * x3, b0 * y0 + b1 * c1y + b2 * c2y + b3 * y3]);
+    }
+  }
+  return out;
+}
+
 export function validateStudioMaskAnimation(layer, keys = []) {
   const secondary=layer?.mask?.secondaryMasks||[];
   if(!Array.isArray(secondary)||secondary.length>8)throw Error('Use at most eight secondary masks.');
   for(const sub of secondary){
-    if(!sub||typeof sub!=='object'||sub.secondaryMasks?.length||!['ellipse','rectangle','polygon'].includes(sub.shape)||!['add','subtract','intersect','difference'].includes(sub.booleanOp||layer.mask.booleanMode||'add')||!Number.isFinite(Number(sub.feather??0))||Number(sub.feather??0)<0||Number(sub.feather??0)>100)throw Error('Invalid secondary mask shape, feather or operation.');
+    if(!sub||typeof sub!=='object'||sub.secondaryMasks?.length||!['ellipse','rectangle','polygon','diamond','inset'].includes(sub.shape)||!['add','subtract','intersect','difference'].includes(sub.booleanOp||layer.mask.booleanMode||'add')||!Number.isFinite(Number(sub.feather??0))||Number(sub.feather??0)<0||Number(sub.feather??0)>100)throw Error('Invalid secondary mask shape, feather or operation.');
     if(sub.shape==='polygon')parseStudioMaskPolygon(sub.path);
+  }
+  if (layer?.mask?.bezierHandles !== undefined) {
+    const handles = layer.mask.bezierHandles;
+    if (!Array.isArray(handles) || handles.length > 64 || handles.some(h => !Array.isArray(h) || h.length !== 4 || h.some(n => typeof n !== 'number' || !Number.isFinite(n) || n < -100 || n > 100))) {
+      throw Error('Mask Bézier handles require 4 finite tangent deltas [-100..100] per vertex.');
+    }
+    if (layer.mask.shape === 'polygon') {
+      const pts = parseStudioMaskPolygon(layer.mask.path);
+      if (handles.length && handles.length !== pts.length) {
+        throw Error('Mask Bézier handles length must match polygon vertices.');
+      }
+    }
   }
   const animated = keys.filter(key => String(key.property).startsWith('maskPoint'));
   if (!animated.length) return;
@@ -61,12 +116,32 @@ export function studioLayerMaskSvg(mask, cropX, cropY, width, height, programmeS
   if (mask.shape === 'ellipse') {
     shape = `<ellipse cx="${w / 2}" cy="${h / 2}" rx="${w * .48}" ry="${h * .48}" fill="${fill}"${filter}/>`;
   } else if (mask.shape === 'polygon') {
-    const points = parseStudioMaskPolygon(mask.path || DEFAULT_STUDIO_MASK_POLYGON)
-      .map(([px, py]) => `${px * w / 100},${py * h / 100}`).join(' ');
-    shape = `<polygon points="${points}" fill="${fill}"${filter}/>`;
+    const rawPts = parseStudioMaskPolygon(mask.path || DEFAULT_STUDIO_MASK_POLYGON);
+    const handles = Array.isArray(mask.bezierHandles) && mask.bezierHandles.length === rawPts.length ? mask.bezierHandles : null;
+    if (handles) {
+      let d = '';
+      for (let i = 0; i < rawPts.length; i += 1) {
+        const next = (i + 1) % rawPts.length;
+        const [x0, y0] = rawPts[i], [x3, y3] = rawPts[next];
+        const h0 = handles[i] || [0, 0, 0, 0], h1 = handles[next] || [0, 0, 0, 0];
+        const px0 = x0 * w / 100, py0 = y0 * h / 100;
+        const c1x = (x0 + Number(h0[2] || 0)) * w / 100, c1y = (y0 + Number(h0[3] || 0)) * h / 100;
+        const c2x = (x3 + Number(h1[0] || 0)) * w / 100, c2y = (y3 + Number(h1[1] || 0)) * h / 100;
+        const px3 = x3 * w / 100, py3 = y3 * h / 100;
+        d += i === 0 ? `M ${px0} ${py0} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${px3} ${py3} ` : `C ${c1x} ${c1y}, ${c2x} ${c2y}, ${px3} ${py3} `;
+      }
+      shape = `<path d="${d}Z" fill="${fill}"${filter}/>`;
+    } else {
+      const points = rawPts.map(([px, py]) => `${px * w / 100},${py * h / 100}`).join(' ');
+      shape = `<polygon points="${points}" fill="${fill}"${filter}/>`;
+    }
+  } else if (mask.shape === 'diamond') {
+    shape = `<polygon points="${w / 2},${y} ${w - x},${h / 2} ${w / 2},${h - y} ${x},${h / 2}" fill="${fill}"${filter}/>`;
   } else {
+    const ix = mask.shape === 'inset' ? Math.max(x, w * .1) : x;
+    const iy = mask.shape === 'inset' ? Math.max(y, h * .1) : y;
     const radius = bounded(mask.radius ?? 6, 0, 50, 6) / 100;
-    shape = `<rect x="${x}" y="${y}" width="${w - x * 2}" height="${h - y * 2}" rx="${Math.min(w * radius, (w - x * 2) / 2)}" ry="${Math.min(h * radius, (h - y * 2) / 2)}" fill="${fill}"${filter}/>`;
+    shape = `<rect x="${ix}" y="${iy}" width="${w - ix * 2}" height="${h - iy * 2}" rx="${Math.min(w * radius, (w - ix * 2) / 2)}" ry="${Math.min(h * radius, (h - iy * 2) / 2)}" fill="${fill}"${filter}/>`;
   }
   // Invert alpha directly. A black/white luminance mask applies color-space
   // conversion to partial coverage and changes the authored Gaussian edge.

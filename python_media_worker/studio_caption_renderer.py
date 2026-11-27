@@ -345,6 +345,89 @@ def _measure_group_word_boxes(
     return boxes, left_start, top_y, total_w
 
 
+def _layout_stacked_group(
+    words_raw: Sequence[str],
+    icon_char: str,
+    fontname: str,
+    ass_fontsize: int,
+    bold: bool,
+    spacing: float,
+    align: int,
+    pos_x: float,
+    pos_y: float,
+    max_line_px: Optional[float] = None,
+    max_words_per_line: Optional[int] = None,
+    separator: str = " ",
+    line_step_ratio: float = 1.18,
+) -> Dict[str, Any]:
+    """Wrap words into stacked visual lines and measure exact (wx0, wx1, line_top_y) per word."""
+    icon_w = 0.0
+    if icon_char:
+        icon_w = _measure_text_px(icon_char, "Noto Sans Symbols2", round(ass_fontsize * 1.36), False, 0.0)
+        icon_w += _measure_text_px(" ", fontname, ass_fontsize, bold, spacing)
+    space_w = _measure_text_px(separator, fontname, ass_fontsize, bold, spacing)
+    word_widths = [
+        _measure_text_px(w, fontname, ass_fontsize, bold, spacing) for w in words_raw
+    ]
+    lines: List[List[int]] = []
+    cur: List[int] = []
+    cur_w = icon_w
+    for idx, ww in enumerate(word_widths):
+        extra = ww if not cur else space_w + ww
+        exceeds_w = bool(cur and max_line_px and (cur_w + extra) > max_line_px)
+        exceeds_c = bool(cur and max_words_per_line and len(cur) >= max_words_per_line)
+        if exceeds_w or exceeds_c:
+            lines.append(cur)
+            cur = [idx]
+            cur_w = ww
+        else:
+            cur.append(idx)
+            cur_w += extra
+    if cur:
+        lines.append(cur)
+
+    line_step = ass_fontsize * line_step_ratio
+    total_h = ass_fontsize + max(0, len(lines) - 1) * line_step
+    if align in (7, 8, 9):
+        block_top_y = pos_y
+    elif align in (4, 5, 6):
+        block_top_y = pos_y - total_h / 2.0
+    else:
+        block_top_y = pos_y - total_h
+
+    word_rects: Dict[int, Tuple[float, float, float]] = {}
+    max_line_w = 0.0
+    min_x0 = float("inf")
+    max_x1 = 0.0
+    for l_idx, line_indices in enumerate(lines):
+        l_prefix = icon_w if l_idx == 0 else 0.0
+        l_w = l_prefix + sum(word_widths[k] for k in line_indices) + space_w * max(0, len(line_indices) - 1)
+        max_line_w = max(max_line_w, l_w)
+        if align in (1, 4, 7):
+            l_x0 = pos_x
+        elif align in (3, 6, 9):
+            l_x0 = pos_x - l_w
+        else:
+            l_x0 = pos_x - l_w / 2.0
+        l_y0 = block_top_y + l_idx * line_step
+        min_x0 = min(min_x0, l_x0)
+        max_x1 = max(max_x1, l_x0 + l_w)
+        cursor = l_x0 + l_prefix
+        for k in line_indices:
+            word_rects[k] = (cursor, cursor + word_widths[k], l_y0)
+            cursor += word_widths[k] + space_w
+    return {
+        "lines": lines,
+        "word_rects": [word_rects[i] for i in range(len(words_raw))],
+        "block_x0": min_x0 if min_x0 != float("inf") else pos_x,
+        "block_x1": max_x1,
+        "top_y": block_top_y,
+        "bottom_y": block_top_y + total_h,
+        "total_w": max_line_w,
+        "total_h": total_h,
+    }
+
+
 def generate_studio_ass_captions(
     whisper_result: Mapping[str, Any],
     caption_styles: Mapping[str, Mapping[str, Any]],
@@ -425,14 +508,26 @@ def generate_studio_ass_captions(
         if segment.get("no_speech_prob", 0) > 0.8:
             continue
 
-        caption_treatment = resolve_story_treatment(
-            segment,
-            segment_index,
-            video_width,
-            video_height,
-            style["fontsize"],
-            default_position=caption_position,
-        )
+        try:
+            caption_treatment = resolve_story_treatment(
+                segment,
+                segment_index,
+                video_width,
+                video_height,
+                style["fontsize"],
+                default_position=caption_position,
+                style_name=style_name,
+                segment_count=len(segments),
+            )
+        except TypeError:
+            caption_treatment = resolve_story_treatment(
+                segment,
+                segment_index,
+                video_width,
+                video_height,
+                style["fontsize"],
+                default_position=caption_position,
+            )
         placement_override = str(caption_treatment.get("text_override") or "")
         active_accent = str(caption_treatment.get("accent") or "&H003DB3FF")
         emphasis_accent = (
@@ -469,7 +564,7 @@ def generate_studio_ass_captions(
         pad_x = max(6, round(fs * 0.20))
         pad_y = max(3, round(fs * 0.09))
         pill_radius = max(4, round(fs * 0.22))
-        word_sep = "  " if anim in {"active_pill", "sticker_pill", "marker_swipe", "vertical_bounce"} else " "
+        word_sep = "  " if anim in {"active_pill", "sticker_pill", "marker_swipe", "vertical_bounce", "neon_bloom"} else " "
         max_single_line_w = max(140.0, float(video_width) - 2.0 * caption_margin_x - 2.0 * pad_x * 1.6)
 
         story_group_size = 4
@@ -497,6 +592,19 @@ def generate_studio_ass_captions(
                 uppercase=bool(style.get("uppercase")),
                 separator=word_sep,
             )
+        elif anim == "spring_pop":
+            # Reserve headroom for 1.22x active-word overshoot so wide lines never wrap mid-word.
+            groups = chunk_words_to_fit(
+                words,
+                style["fontname"],
+                fs,
+                bool(style.get("bold")),
+                float(style.get("spacing", 0) or 0),
+                max_single_line_w * 0.84,
+                max_words=5,
+                uppercase=bool(style.get("uppercase")),
+                separator=word_sep,
+            )
         else:
             groups = chunk_words(
                 words,
@@ -508,6 +616,25 @@ def generate_studio_ass_captions(
             caption_treatment, style, video_width, video_height
         )
         accent_bgr = _split_bgr_hex(active_accent, "3DB3FF")
+        placed_zone = str(caption_treatment.get("placement") or "").strip().lower()
+        is_side_column_zone = placed_zone in {
+            "shoulder_left", "shoulder_right", "side_left", "side_right",
+            "background_left", "background_right", "middle_left", "middle_right",
+            "top_left", "top_right", "bottom_left", "bottom_right",
+        } or (placed_zone == "custom" and (pos_x <= video_width * 0.34 or pos_x >= video_width * 0.66))
+        is_stacked = bool(caption_treatment.get("stacked")) or is_side_column_zone
+        stack_max_w = (
+            float(video_width) * (0.34 if video_width > video_height else 0.44)
+            if is_side_column_zone
+            else max_single_line_w * 0.62
+        )
+        stack_max_words = 2 if (is_side_column_zone or (is_stacked and style_name in {"spring_slam", "headline", "retro", "sticker", "luxury"})) else None
+
+        def _join_stacked(parts_seq: Sequence[str], line_groups: Sequence[Sequence[int]], sep: str) -> str:
+            if not is_stacked or len(line_groups) <= 1:
+                return sep.join(parts_seq)
+            rendered_lines = [sep.join(parts_seq[idx] for idx in line_indices if idx < len(parts_seq)) for line_indices in line_groups]
+            return "\\N".join(line for line in rendered_lines if line)
 
         for group in groups:
             if not group:
@@ -520,6 +647,21 @@ def generate_studio_ass_captions(
             raw_tokens = [t for t in raw_tokens if t]
             if not raw_tokens:
                 continue
+            stack_layout = _layout_stacked_group(
+                raw_tokens,
+                icon_char,
+                style["fontname"],
+                fs,
+                bool(style.get("bold")),
+                float(style.get("spacing", 0) or 0),
+                align,
+                pos_x,
+                pos_y,
+                max_line_px=(stack_max_w if is_stacked else None),
+                max_words_per_line=(stack_max_words if is_stacked and len(raw_tokens) >= 3 else None),
+                separator=word_sep,
+            )
+            line_groups = stack_layout["lines"]
 
             if anim in {"rainbow_words", "focus_cut"}:
                 rainbow_palette = [
@@ -555,7 +697,7 @@ def generate_studio_ass_captions(
                     if parts:
                         ass_lines.append(
                             f"Dialogue: 2,{w_start},{w_end},Default,,0,0,0,,"
-                            f"{placement_override}{design_override}{{\\fad(45,65)}}{icon_prefix}{' '.join(parts)}"
+                            f"{placement_override}{design_override}{{\\fad(45,65)}}{icon_prefix}{_join_stacked(parts, line_groups, ' ')}"
                         )
 
             elif anim == "story_pop":
@@ -578,7 +720,7 @@ def generate_studio_ass_captions(
                     if parts:
                         ass_lines.append(
                             f"Dialogue: 2,{w_start},{w_end},Default,,0,0,0,,"
-                            f"{placement_override}{design_override}{{\\fad(55,70)}}{icon_prefix}{' '.join(parts)}"
+                            f"{placement_override}{design_override}{{\\fad(55,70)}}{icon_prefix}{_join_stacked(parts, line_groups, ' ')}"
                         )
 
             elif anim == "karaoke_fill":
@@ -601,6 +743,7 @@ def generate_studio_ass_captions(
                         ),
                     )
                 prev_end = float(group[0]["start"])
+                stacked_line_starts = {line[0] for line in line_groups[1:] if line} if is_stacked else set()
                 for word_index, word in enumerate(group):
                     w_start = max(prev_end, float(word["start"]))
                     w_end = max(w_start + 0.01, float(word["end"]))
@@ -609,14 +752,16 @@ def generate_studio_ass_captions(
                     prev_end = w_end
                     word_text = caption_word(word.get("word", ""))
                     if word_text:
-                        spacer = "" if not text_parts else "\\N" if word_index == break_index else " "
+                        force_break = word_index == break_index or word_index in stacked_line_starts
+                        spacer = "" if not text_parts else "\\N" if force_break else " "
                         gap_tag = f"{{\\k{gap_cs}}}" if gap_cs > 0 else ""
                         text_parts.append(f"{spacer}{gap_tag}{{\\kf{w_dur_cs}}}{word_text}")
                 if text_parts:
                     line = "".join(text_parts)
+                    # ASS \kf sweeps from \2c (unspoken) to \1c (spoken fill).
                     ass_lines.append(
                         f"Dialogue: 0,{start_ass},{end_ass},Default,,0,0,0,,"
-                        f"{placement_override}{design_override}{{\\2c{emphasis_accent}}}{icon_prefix}{line}"
+                        f"{placement_override}{design_override}{{\\1c{emphasis_accent}\\2c{style['primary_color']}}}{icon_prefix}{line}"
                     )
 
             elif anim == "scale_pop":
@@ -636,7 +781,7 @@ def generate_studio_ass_captions(
                             parts.append(wt)
                     ass_lines.append(
                         f"Dialogue: 0,{w_start},{w_end},Default,,0,0,0,,"
-                        f"{placement_override}{design_override}{icon_prefix}{' '.join(parts)}"
+                        f"{placement_override}{design_override}{icon_prefix}{_join_stacked(parts, line_groups, ' ')}"
                     )
 
             elif anim == "spring_pop":
@@ -661,7 +806,7 @@ def generate_studio_ass_captions(
                             parts.append(wt)
                     ass_lines.append(
                         f"Dialogue: 2,{w_start},{w_end},Default,,0,0,0,,"
-                        f"{placement_override}{design_override}{icon_prefix}{' '.join(parts)}"
+                        f"{placement_override}{design_override}{icon_prefix}{_join_stacked(parts, line_groups, ' ')}"
                     )
 
             elif anim == "neon_bloom":
@@ -677,12 +822,12 @@ def generate_studio_ass_captions(
                             continue
                         if j == i:
                             bloom_parts.append(
-                                f"{{\\fscx114\\fscy114\\1a&HFF&\\3c&H00{bloom_bgr}&\\bord{max(6, style['outline'] + 7)}\\blur14}}{wt}"
+                                f"{{\\fscx110\\fscy110\\1a&HFF&\\3c&H00{bloom_bgr}&\\bord{max(7, style['outline'] + 7)}\\blur12}}{wt}"
                                 f"{{\\fscx100\\fscy100\\bord{max(4, style['outline'] + 4)}\\blur9}}"
                             )
                             core_parts.append(
-                                f"{{\\fscx114\\fscy114\\c{emphasis_accent}\\3c&H00{bloom_bgr}&\\bord{max(2, style['outline'])}\\blur2"
-                                f"\\t(65,185,\\fscx105\\fscy105)}}"
+                                f"{{\\fscx110\\fscy110\\c&H00FFFFFF&\\3c&H00{bloom_bgr}&\\bord{max(1, min(3, style['outline']))}\\blur0.8"
+                                f"\\t(65,185,\\fscx103\\fscy103)}}"
                                 f"{wt}{{\\fscx100\\fscy100\\c{style['primary_color']}\\3c{style['outline_color']}\\blur0}}"
                             )
                         else:
@@ -691,32 +836,25 @@ def generate_studio_ass_captions(
                     if core_parts:
                         ass_lines.append(
                             f"Dialogue: 0,{w_start},{w_end},Default,,0,0,0,,"
-                            f"{placement_override}{design_override}{icon_prefix}{' '.join(bloom_parts)}"
+                            f"{placement_override}{design_override}{icon_prefix}{_join_stacked(bloom_parts, line_groups, word_sep)}"
                         )
                         ass_lines.append(
                             f"Dialogue: 2,{w_start},{w_end},Default,,0,0,0,,"
-                            f"{placement_override}{design_override}{icon_prefix}{' '.join(core_parts)}"
+                            f"{placement_override}{design_override}{icon_prefix}{_join_stacked(core_parts, line_groups, word_sep)}"
                         )
 
             elif anim in {"active_pill", "sticker_pill", "marker_swipe", "glass_card", "kinetic_bar"}:
-                boxes, block_x0, top_y, total_w = _measure_group_word_boxes(
-                    raw_tokens,
-                    icon_char,
-                    style["fontname"],
-                    fs,
-                    bool(style.get("bold")),
-                    float(style.get("spacing", 0) or 0),
-                    align,
-                    pos_x,
-                    pos_y,
-                    separator=word_sep,
-                )
+                word_rects = stack_layout["word_rects"]
+                block_x0 = stack_layout["block_x0"]
+                block_x1 = stack_layout["block_x1"]
+                top_y = stack_layout["top_y"]
+                bottom_y = stack_layout["bottom_y"]
                 pill_fill_bgr = accent_bgr
                 pill_alpha = "00"
                 active_text_color = "&H00100C08"
                 if anim == "sticker_pill":
                     pill_fill_bgr = "F8FBFF"
-                    active_text_color = f"&H00{accent_bgr}&" if style_name == "sticker" else "&H00120C08"
+                    active_text_color = "&H001C1014" if style_name == "sticker" else "&H00120C08"
                 elif anim == "glass_card":
                     pill_fill_bgr = "1D140E"
                     pill_alpha = "48"
@@ -729,12 +867,12 @@ def generate_studio_ass_captions(
                     pill_fill_bgr = "251AD9"
                     active_text_color = "&H00FFFFFF"
 
-                # Backdrop rounded pill for glass_card / kinetic_bar spanning whole caption phrase
+                # Backdrop rounded pill for glass_card / kinetic_bar spanning whole stacked or single-line block
                 if anim in {"glass_card", "kinetic_bar"}:
                     card_x0 = max(2.0, block_x0 - pad_x * 1.4)
-                    card_x1 = min(float(video_width - 2), block_x0 + total_w + pad_x * 1.4)
+                    card_x1 = min(float(video_width - 2), block_x1 + pad_x * 1.4)
                     card_y0 = max(2.0, top_y - pad_y * 1.35)
-                    card_y1 = min(float(video_height - 2), top_y + fs + pad_y * (1.85 if anim == "kinetic_bar" else 1.35))
+                    card_y1 = min(float(video_height - 2), bottom_y + pad_y * (1.85 if anim == "kinetic_bar" else 1.35))
                     card_path = _ass_rounded_rect_path(card_x0, card_y0, card_x1, card_y1, pill_radius * 1.15)
                     border_bgr = accent_bgr if anim == "kinetic_bar" else "FFFFFF"
                     ass_lines.append(
@@ -746,24 +884,31 @@ def generate_studio_ass_captions(
                 for i, word in enumerate(group):
                     w_start = seconds_to_ass_time(word["start"])
                     w_end = seconds_to_ass_time(word["end"])
-                    wx0, wx1 = boxes[i]
+                    wx0, wx1, wy0 = word_rects[i]
                     if anim in {"active_pill", "sticker_pill", "marker_swipe"}:
                         if anim == "marker_swipe":
-                            px0, py0 = wx0 - pad_x * 0.9, top_y + fs * 0.22
-                            px1, py1 = wx1 + pad_x * 0.9, top_y + fs + pad_y * 0.9
+                            px0, py0 = wx0 - pad_x * 0.9, wy0 + fs * 0.22
+                            px1, py1 = wx1 + pad_x * 0.9, wy0 + fs + pad_y * 0.9
                             badge_path = _ass_rounded_rect_path(px0, py0, px1, py1, pill_radius * 0.55)
                             badge_alpha = "18"
                         else:
-                            px0, py0 = wx0 - pad_x, top_y - pad_y
-                            px1, py1 = wx1 + pad_x, top_y + fs + pad_y
+                            px0, py0 = wx0 - pad_x, wy0 - pad_y
+                            px1, py1 = wx1 + pad_x, wy0 + fs + pad_y
                             badge_path = _ass_rounded_rect_path(px0, py0, px1, py1, pill_radius)
                             badge_alpha = pill_alpha
-                        ass_lines.append(
-                            f"Dialogue: 1,{w_start},{w_end},Default,,0,0,0,,"
-                            f"{{\\an7\\pos(0,0)\\bord0\\shad0\\1c&H00{pill_fill_bgr}&\\1a&H{badge_alpha}&\\p1}}{badge_path}{{\\p0}}"
-                        )
+                        if anim == "sticker_pill":
+                            ass_lines.append(
+                                f"Dialogue: 1,{w_start},{w_end},Default,,0,0,0,,"
+                                f"{{\\an7\\pos(0,0)\\bord{max(2, round(fs * 0.045))}\\shad3\\1c&H00{pill_fill_bgr}&\\1a&H{badge_alpha}&"
+                                f"\\3c&H00{accent_bgr}&\\4c&H000A0E14&\\p1}}{badge_path}{{\\p0}}"
+                            )
+                        else:
+                            ass_lines.append(
+                                f"Dialogue: 1,{w_start},{w_end},Default,,0,0,0,,"
+                                f"{{\\an7\\pos(0,0)\\bord0\\shad0\\1c&H00{pill_fill_bgr}&\\1a&H{badge_alpha}&\\p1}}{badge_path}{{\\p0}}"
+                            )
                     elif anim == "kinetic_bar":
-                        bar_y0 = top_y + fs + pad_y * 0.45
+                        bar_y0 = wy0 + fs + pad_y * 0.45
                         bar_y1 = bar_y0 + max(4, round(fs * 0.085))
                         bar_path = _ass_rounded_rect_path(wx0 - 2, bar_y0, wx1 + 2, bar_y1, 3)
                         ass_lines.append(
@@ -789,22 +934,11 @@ def generate_studio_ass_captions(
                             parts.append(wt)
                     ass_lines.append(
                         f"Dialogue: 2,{w_start},{w_end},Default,,0,0,0,,"
-                        f"{placement_override}{design_override}{icon_prefix}{word_sep.join(parts)}"
+                        f"{placement_override}{design_override}{icon_prefix}{_join_stacked(parts, line_groups, word_sep)}"
                     )
 
             elif anim == "vertical_bounce":
-                boxes, _bx, top_y, _tw = _measure_group_word_boxes(
-                    raw_tokens,
-                    icon_char,
-                    style["fontname"],
-                    fs,
-                    bool(style.get("bold")),
-                    float(style.get("spacing", 0) or 0),
-                    align,
-                    pos_x,
-                    pos_y,
-                    separator=word_sep,
-                )
+                word_rects = stack_layout["word_rects"]
                 hop_px = max(8, round(fs * 0.24))
                 for i, word in enumerate(group):
                     w_start = seconds_to_ass_time(word["start"])
@@ -821,12 +955,12 @@ def generate_studio_ass_captions(
                             parts.append(wt)
                     ass_lines.append(
                         f"Dialogue: 0,{w_start},{w_end},Default,,0,0,0,,"
-                        f"{placement_override}{design_override}{icon_prefix}{word_sep.join(parts)}"
+                        f"{placement_override}{design_override}{icon_prefix}{_join_stacked(parts, line_groups, word_sep)}"
                     )
                     active_wt = caption_word(word.get("word", ""))
                     if active_wt:
-                        wx0, wx1 = boxes[i]
-                        cx, ry = round((wx0 + wx1) / 2.0), round(top_y)
+                        wx0, wx1, wy0 = word_rects[i]
+                        cx, ry = round((wx0 + wx1) / 2.0), round(wy0)
                         ass_lines.append(
                             f"Dialogue: 2,{w_start},{w_end},Default,,0,0,0,,"
                             f"{{\\an8\\move({cx},{ry + 2},{cx},{ry - hop_px},0,110)\\q0\\c{emphasis_accent}{bold_override}"
@@ -835,28 +969,22 @@ def generate_studio_ass_captions(
 
             elif anim == "true_typewriter":
                 # Dark badge card under typed monospace line
-                _, block_x0, top_y, total_w = _measure_group_word_boxes(
-                    raw_tokens,
-                    icon_char,
-                    style["fontname"],
-                    fs,
-                    bool(style.get("bold")),
-                    float(style.get("spacing", 0) or 0),
-                    align,
-                    pos_x,
-                    pos_y,
-                )
+                block_x0 = stack_layout["block_x0"]
+                block_x1 = stack_layout["block_x1"]
+                top_y = stack_layout["top_y"]
+                bottom_y = stack_layout["bottom_y"]
                 card_path = _ass_rounded_rect_path(
                     max(2.0, block_x0 - pad_x * 1.4),
                     max(2.0, top_y - pad_y),
-                    min(float(video_width - 2), block_x0 + total_w + pad_x * 1.4),
-                    min(float(video_height - 2), top_y + fs + pad_y),
+                    min(float(video_width - 2), block_x1 + pad_x * 1.4),
+                    min(float(video_height - 2), bottom_y + pad_y),
                     max(6, round(fs * 0.16)),
                 )
                 ass_lines.append(
                     f"Dialogue: 0,{start_ass},{end_ass},Default,,0,0,0,,"
                     f"{{\\an7\\pos(0,0)\\bord2\\shad0\\1c&H0018110B&\\1a&H28&\\3c&H00{accent_bgr}&\\3a&H90&\\p1}}{card_path}{{\\p0}}"
                 )
+                line_breaks = {line[0] for line in line_groups[1:] if line} if is_stacked else set()
                 typed_prefix = ""
                 for idx, word in enumerate(group):
                     raw_w = caption_word_raw(word.get("word", ""))
@@ -865,18 +993,18 @@ def generate_studio_ass_captions(
                     w_s = float(word["start"])
                     w_e = max(w_s + 0.04, float(word["end"]))
                     step = (w_e - w_s) / max(1, len(raw_w))
-                    sep = " " if typed_prefix else ""
+                    sep = "" if not typed_prefix else ("\\N" if idx in line_breaks else " ")
                     for ch_idx in range(1, len(raw_w) + 1):
                         sub_s = seconds_to_ass_time(w_s + (ch_idx - 1) * step)
                         is_last_overall = idx == len(group) - 1 and ch_idx == len(raw_w)
                         sub_e = end_ass if is_last_overall else seconds_to_ass_time(w_s + ch_idx * step)
-                        partial = escape_ass(f"{typed_prefix}{sep}{raw_w[:ch_idx]}")
+                        partial = typed_prefix + sep + escape_ass(raw_w[:ch_idx])
                         cursor_tag = "" if is_last_overall else f"{{\\c{emphasis_accent}}}|{{\\c{style['primary_color']}}}"
                         ass_lines.append(
                             f"Dialogue: 2,{sub_s},{sub_e},Default,,0,0,0,,"
                             f"{placement_override}{design_override}{icon_prefix}{partial}{cursor_tag}"
                         )
-                    typed_prefix = f"{typed_prefix}{sep}{raw_w}"
+                    typed_prefix = typed_prefix + sep + escape_ass(raw_w)
 
             elif anim == "editorial_duo":
                 for i, word in enumerate(group):
@@ -899,7 +1027,42 @@ def generate_studio_ass_captions(
                     if parts:
                         ass_lines.append(
                             f"Dialogue: 2,{w_start},{w_end},Default,,0,0,0,,"
-                            f"{placement_override}{design_override}{icon_prefix}{' '.join(parts)}"
+                            f"{placement_override}{design_override}{icon_prefix}{_join_stacked(parts, line_groups, ' ')}"
+                        )
+
+            elif anim == "fade_word" and style_name != "minimal":
+                if style_name == "wall_type" and placed_zone.startswith("background"):
+                    wall_card = _ass_rounded_rect_path(
+                        max(2.0, stack_layout["block_x0"] - pad_x * 1.8),
+                        max(2.0, stack_layout["top_y"] - pad_y * 1.4),
+                        min(float(video_width - 2), stack_layout["block_x1"] + pad_x * 1.8),
+                        min(float(video_height - 2), stack_layout["bottom_y"] + pad_y * 1.4),
+                        max(8, round(fs * 0.18)),
+                    )
+                    ass_lines.append(
+                        f"Dialogue: 0,{start_ass},{end_ass},Default,,0,0,0,,"
+                        f"{{\\an7\\pos(0,0)\\bord2\\shad0\\1c&H00120D09&\\1a&H64&"
+                        f"\\3c&H00{accent_bgr}&\\3a&H88&\\blur1.5\\p1}}{wall_card}{{\\p0}}"
+                    )
+                for i, word in enumerate(group):
+                    w_start = seconds_to_ass_time(word["start"])
+                    w_end = seconds_to_ass_time(word["end"])
+                    parts = []
+                    for j, w in enumerate(group):
+                        wt = caption_word(w.get("word", ""))
+                        if not wt:
+                            continue
+                        if j == i:
+                            parts.append(
+                                f"{{\\c{emphasis_accent}\\fscx106\\fscy106\\t(60,180,\\fscx100\\fscy100)}}{wt}"
+                                f"{{\\c{style['primary_color']}\\fscx100\\fscy100}}"
+                            )
+                        else:
+                            parts.append(wt)
+                    if parts:
+                        ass_lines.append(
+                            f"Dialogue: 2,{w_start},{w_end},Default,,0,0,0,,"
+                            f"{placement_override}{design_override}{{\\fad(45,65)}}{icon_prefix}{_join_stacked(parts, line_groups, ' ')}"
                         )
 
             elif anim == "bounce_word":
@@ -919,7 +1082,7 @@ def generate_studio_ass_captions(
                             parts.append(wt)
                     ass_lines.append(
                         f"Dialogue: 0,{w_start},{w_end},Default,,0,0,0,,"
-                        f"{placement_override}{design_override}{icon_prefix}{' '.join(parts)}"
+                        f"{placement_override}{design_override}{icon_prefix}{_join_stacked(parts, line_groups, ' ')}"
                     )
 
             elif anim == "glow_pulse":
@@ -939,11 +1102,12 @@ def generate_studio_ass_captions(
                             parts.append(wt)
                     ass_lines.append(
                         f"Dialogue: 0,{w_start},{w_end},Default,,0,0,0,,"
-                        f"{placement_override}{design_override}{icon_prefix}{' '.join(parts)}"
+                        f"{placement_override}{design_override}{icon_prefix}{_join_stacked(parts, line_groups, ' ')}"
                     )
 
             else:
-                clean_text = " ".join(caption_word(w.get("word", "")) for w in group if str(w.get("word", "")).strip())
+                clean_words = [caption_word(w.get("word", "")) for w in group if str(w.get("word", "")).strip()]
+                clean_text = _join_stacked(clean_words, line_groups, " ")
                 if clean_text:
                     ass_lines.append(
                         f"Dialogue: 0,{start_ass},{end_ass},Default,,0,0,0,,"

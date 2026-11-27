@@ -143,6 +143,7 @@ export function ensureAudioRemixPreview(media) {
     const compressor = context.createDynamicsCompressor();
     const output = context.createGain();
     const trackGain = context.createGain();
+    const panner = typeof context.createStereoPanner === "function" ? context.createStereoPanner() : null;
     const analyser = context.createAnalyser();
 
     try {
@@ -181,7 +182,12 @@ export function ensureAudioRemixPreview(media) {
     wet.connect(output);
 
     output.connect(trackGain);
-    trackGain.connect(analyser);
+    if (panner) {
+      trackGain.connect(panner);
+      panner.connect(analyser);
+    } else {
+      trackGain.connect(analyser);
+    }
     analyser.connect(context.destination);
 
     const unlockAudio = () => {
@@ -213,6 +219,7 @@ export function ensureAudioRemixPreview(media) {
       compressor,
       output,
       trackGain,
+      panner,
       analyser,
       meterSubscribers: new Set(),
       meterFrame: null,
@@ -245,6 +252,18 @@ export function applyStudioMediaGain(media, value) {
   const nativeGain = Math.min(1, gain);
   if (media.volume !== nativeGain) media.volume = nativeGain;
   return gain <= 1;
+}
+
+export function applyStudioMediaPan(media, panPct = 0) {
+  if (!media) return false;
+  const clamped = Number.isFinite(Number(panPct)) ? Math.max(-100, Math.min(100, Number(panPct))) / 100 : 0;
+  let graph = graphs.get(media) || media.__audioRemixGraph;
+  if (!graph && Math.abs(clamped) > 0.005) graph = ensureAudioRemixPreview(media);
+  if (graph?.panner?.pan) {
+    setAudioParam(graph.panner.pan, clamped, graph.context);
+    return true;
+  }
+  return false;
 }
 
 export async function updateAudioRemixPreview(media, value, bypass = false, { playbackRate = 1 } = {}) {
@@ -334,9 +353,13 @@ const measureGraph = (graph, now) => {
       energy += sample * sample;
     });
     const rms = Math.sqrt(energy / samples.length);
+    const rmsDb = Math.max(-60, 20 * Math.log10(Math.max(rms, 0.001)));
+    const peakDb = Math.max(-60, 20 * Math.log10(Math.max(peak, 0.001)));
     const reading = {
-      peakDb: Math.max(-60, 20 * Math.log10(Math.max(peak, 0.001))),
-      rmsDb: Math.max(-60, 20 * Math.log10(Math.max(rms, 0.001))),
+      peakDb,
+      rmsDb,
+      lufsDb: Number(Math.max(-70, rmsDb - 0.691).toFixed(1)),
+      truePeakDbtp: Number(peakDb.toFixed(1)),
       clipping: peak >= 0.985,
     };
     graph.meterSubscribers.forEach(listener => listener(reading));

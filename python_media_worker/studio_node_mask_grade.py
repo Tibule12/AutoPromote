@@ -69,7 +69,7 @@ async def render_node_masked_finish(*,source_path,output_path,request,width,heig
                 title_animator=None
                 asset=os.path.join(directory,f'{job_id}_grade_mask_{index}_source'+('.mp4' if overlay.type=='video' else '.png'));temp_paths.add(asset)
                 if kind=='PolygonMask':
-                    Image.new('RGBA',(16,16),'white').save(asset,format='PNG');layer.pop('vector_shape',None);layer.pop('text_animator',None);raw['type']='image';raw['mediaFit']='stretch'
+                    Image.new('RGBA',(16,16),'white').save(asset,format='PNG');layer.pop('vector_shape',None);layer.pop('text_animator',None);raw['type']='image';raw['mediaFit']='stretch';raw['frameShape']='edge'
                 elif overlay.type=='text':
                     try:
                         from .studio_text import render_title_asset
@@ -138,7 +138,7 @@ async def render_node_masked_finish(*,source_path,output_path,request,width,heig
     # Re-quantising masked grades and grain here before the selected export
     # profile runs discards detail that the native inspection still contains.
     preserve_samples=preserve_reviewed_sequence_samples(width,height,fps,duration,True)
-    command+=['-filter_complex',graph,'-map',f'[{previous}]','-map','0:a?','-c:v','libx264','-preset','veryfast','-crf','0' if preserve_samples else '18','-pix_fmt','yuv420p','-c:a','copy','-t',str(duration),'-movflags','+faststart','-y',output_path]
+    command+=['-filter_complex',graph,'-map',f'[{previous}]','-map','0:a?','-c:v','libx264','-preset','veryfast','-crf','0' if preserve_samples else '18','-pix_fmt','yuv444p' if preserve_samples else 'yuv420p','-c:a','copy','-t',str(duration),'-movflags','+faststart','-y',output_path]
     temp_paths.add(output_path)
     await run(command,check=True)
     return output_path

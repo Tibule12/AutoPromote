@@ -233,7 +233,10 @@ export default function AudioRemixPanel({
               style={{ width: `${Math.max(0, Math.min(100, ((meter.peakDb + 60) / 60) * 100))}%` }}
             />
           </span>
-          <small>{meter.clipping ? "CLIP" : `${Math.round(meter.peakDb)} dB`}</small>
+          <small>
+            {meter.clipping ? "CLIP" : `${Math.round(meter.peakDb)} dB`} ·{" "}
+            {Number(meter.lufsDb ?? (meter.rmsDb - 0.691)).toFixed(1)} LUFS
+          </small>
         </div>
       </div>
 
