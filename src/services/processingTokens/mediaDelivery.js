@@ -18,19 +18,49 @@ function readCapability(cap) {
   if(data.exp<Date.now()||!Number.isSafeInteger(data.size)||data.size<1)fail('TRANSFER_EXPIRED',410);
   return data;
 }
-async function workerSources(value,userId) {
-  if(Array.isArray(value))return Promise.all(value.map(v=>workerSources(v,userId)));
+async function workerSources(value,userId,options={}) {
+  options.seen ||= new Map();
+  if(Array.isArray(value))return Promise.all(value.map(v=>workerSources(v,userId,options)));
   if(value&&typeof value==='object')return Object.fromEntries(await Promise.all(Object.entries(value)
-    .map(async([key,v])=>[key,await workerSources(v,userId)])));
+    .map(async([key,v])=>[key,await workerSources(v,userId,options)])));
   if(typeof value!=='string'||!value.startsWith('https://'))return value;
   let url;try{url=new URL(value);}catch{return value;}
   if(!['api.autopromote.org','autopromote.onrender.com'].includes(url.hostname)||
-      !url.pathname.startsWith('/api/processing-media/'))return value;
+      !url.pathname.startsWith('/api/processing-media/')) {
+    // Firebase's fine-grained bucket does not automatically give the native
+    // worker read access to browser-uploaded objects. Grant only an admitted,
+    // owner-proven source object; never change the bucket's default/public ACL.
+    if(!options.serviceAccount)return value;
+    const bucket=require('../../firebaseAdmin').storage.bucket();
+    let object;
+    const prefix='/'+bucket.name+'/';
+    if(url.hostname==='storage.googleapis.com'&&url.pathname.startsWith(prefix))object=decodeURIComponent(url.pathname.slice(prefix.length));
+    if(url.hostname==='firebasestorage.googleapis.com'&&url.pathname.startsWith('/v0/b/'+bucket.name+'/o/'))object=decodeURIComponent(url.pathname.split('/o/')[1]);
+    if(!object)return value;
+    const cacheKey=bucket.name+'/'+object;
+    if(!options.seen.has(cacheKey))options.seen.set(cacheKey,(async()=>{
+      const original=bucket.file(object),[meta]=await original.getMetadata();
+      if(url.searchParams.has('generation')&&url.searchParams.get('generation')!==String(meta.generation))fail('SOURCE_GENERATION_CHANGED',409);
+      const owned=meta.metadata?.ownerUid===userId||meta.metadata?.userId===userId||object.split('/').includes(userId);
+      const file=bucket.file(object,{generation:String(meta.generation)});
+      const entity='user-'+options.serviceAccount;
+      const [acl]=await file.acl.get();
+      if(!owned){
+        if(acl.some(a=>['allUsers','allAuthenticatedUsers'].includes(a.entity)&&['OWNER','READER'].includes(a.role)))return value;
+        fail('SOURCE_FORBIDDEN',403);
+      }
+      if(!acl.some(a=>[entity,'allUsers','allAuthenticatedUsers'].includes(a.entity)&&['OWNER','READER'].includes(a.role)))
+        await file.acl.add({entity,role:'READER'});
+      return (await file.getSignedUrl({action:'read',expires:Date.now()+30*60000,
+        queryParams:{generation:String(meta.generation)}}))[0];
+    })());
+    return options.seen.get(cacheKey);
+  }
   const data=readCapability(url.pathname.slice('/api/processing-media/'.length));
   if(data.uid!==userId)fail('SOURCE_FORBIDDEN',403);
   const file=require('../../firebaseAdmin').storage.bucket(data.bucket).file(data.path);
-  return (await file.getSignedUrl({action:'read',expires:Date.now()+30*60000,
-    queryParams:{generation:data.generation}}))[0];
+  return workerSources((await file.getSignedUrl({action:'read',expires:Date.now()+30*60000,
+    queryParams:{generation:data.generation}}))[0],userId,options);
 }
 async function reserveBytes(id, bytes) {
   if (!Number.isSafeInteger(bytes) || bytes < 1) fail('INVALID_TRANSFER_SIZE', 400);

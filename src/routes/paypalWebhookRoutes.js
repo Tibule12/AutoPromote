@@ -1,4 +1,5 @@
 const express = require("express");
+const crypto = require("node:crypto");
 const router = express.Router();
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
 const paypalPublicLimiter = rateLimiter({
@@ -167,7 +168,8 @@ router.get("/debug/status", authMiddleware, paypalPublicLimiter, async (req, res
   const tokenCached = !!__tokenCache.token && __tokenCache.expiresAt > Date.now();
   return res.json({
     ok: true,
-    env: { hasClientId, hasSecret, mode, webhookIdPresent },
+    env: { hasClientId, hasSecret, mode, webhookIdPresent,
+      webhookIdFingerprint: webhookIdPresent ? crypto.createHash('sha256').update(process.env.PAYPAL_WEBHOOK_ID).digest('hex').slice(0,16) : null },
     runtime: {
       node: process.version,
       fetchAvailable: !!fetchFn,

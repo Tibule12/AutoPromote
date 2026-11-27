@@ -146,7 +146,7 @@ function createNativeWorkerAdapter({ db, profile: p, request, now = Date.now }) 
           const endpoint = new URL(target).pathname;
           if (!endpoints[p.operation]?.includes(endpoint)) fail('RESERVATION_PROFILE_CONFLICT', 503);
           validateNativePayload(endpoint, body);
-          body = await require('./mediaDelivery').workerSources(body,ctx.uid);
+          body = await require('./mediaDelivery').workerSources(body,ctx.uid,{serviceAccount:p.serviceAccount});
           const job = (await get(p.job)).data; assertJob(job, p);
           const nativeJobId = body.job_id || body.jobId || 'native-' + crypto.randomUUID();
           if (!/^[A-Za-z0-9_-]{8,160}$/.test(nativeJobId)) fail('INVALID_NATIVE_JOB', 400);

@@ -56,6 +56,9 @@ jobs:
       - name: Verify guarded Rules publication with fake APIs
         run: python3 -m unittest discover -s test/security -p 'rules_publisher_test.py' -v
 
+      - name: Install locked Cloud Functions test dependencies
+        run: npm --prefix autopromote-functions ci --ignore-scripts
+
       - name: Verify retention read cache and independent financial fixes locally
         timeout-minutes: 10
         run: node scripts/test-free-first.cjs --portable
