@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import FindViralClipsPanel from "../FindViralClipsPanel";
 
 let mockScannerProps;
@@ -68,8 +68,85 @@ describe("FindViralClipsPanel Viral Clip Studio handoff", () => {
 
     expect(onOpenStudio).toHaveBeenCalledWith(
       source,
-      expect.objectContaining({ id: "clip-1", start: 4, end: 24, score: 91 }),
-      [expect.objectContaining({ id: "clip-1", start: 4, end: 24 })]
+      expect.objectContaining({
+        id: "clip-1",
+        start: 4,
+        end: 24,
+        score: 91,
+        autoTrackOnOpen: true,
+        targetAspectRatio: "9:16",
+      }),
+      [expect.objectContaining({ id: "clip-1", start: 4, end: 24, autoTrackOnOpen: true, targetAspectRatio: "9:16" })]
+    );
+  });
+
+  test("sorts suggested moments by Reels, Shorts, or TikTok format and sends target format into Studio", () => {
+    const source = new File(["video"], "source.mp4", { type: "video/mp4" });
+    const onOpenStudio = jest.fn();
+    render(<FindViralClipsPanel initialFile={source} onOpenStudio={onOpenStudio} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /analyse video/i }));
+    const { act } = require("@testing-library/react");
+    act(() =>
+      mockScannerProps.onResults([
+        {
+          id: "long-reel",
+          start: 0,
+          end: 72,
+          duration: 72,
+          score: 92,
+          hookText: "Long story beat",
+          targetAspectRatio: "9:16",
+          recommendedDestination: "instagram_reels",
+          destinationScores: { instagram_reels: 91, tiktok: 85, youtube_shorts: 70 },
+          formatTags: [
+            { id: "instagram_reels", label: "Instagram Reels", aspect: "9:16", score: 91, fit: "Strong fit" },
+            { id: "tiktok", label: "TikTok", aspect: "9:16", score: 85, fit: "Strong fit" },
+            { id: "youtube_shorts", label: "YouTube Shorts", aspect: "9:16", score: 70, fit: "Trim needed", note: "Trim to 60s or under for YouTube Shorts" },
+          ],
+        },
+        {
+          id: "punchy-short",
+          start: 80,
+          end: 112,
+          duration: 32,
+          score: 88,
+          hookText: "Why this works fast",
+          targetAspectRatio: "9:16",
+          recommendedDestination: "youtube_shorts",
+          destinationScores: { youtube_shorts: 94, tiktok: 89, instagram_reels: 84 },
+          formatTags: [
+            { id: "youtube_shorts", label: "YouTube Shorts", aspect: "9:16", score: 94, fit: "Strong fit" },
+            { id: "tiktok", label: "TikTok", aspect: "9:16", score: 89, fit: "Strong fit" },
+            { id: "instagram_reels", label: "Instagram Reels", aspect: "9:16", score: 84, fit: "Strong fit" },
+          ],
+        },
+      ])
+    );
+
+    const sortBar = screen.getByTestId("viral-format-sort-bar");
+    expect(sortBar).toHaveTextContent("9:16 Vertical");
+
+    // Default "All selected": long-reel (92) ranks first.
+    let titles = Array.from(document.querySelectorAll(".viral-moment-copy strong")).map(el => el.textContent);
+    expect(titles[0]).toBe("Long story beat");
+
+    // Switching sort to YouTube Shorts moves the <=60s punchy-short first.
+    fireEvent.click(within(sortBar).getByRole("button", { name: "YouTube Shorts" }));
+    titles = Array.from(document.querySelectorAll(".viral-moment-copy strong")).map(el => el.textContent);
+    expect(titles[0]).toBe("Why this works fast");
+
+    const createButtons = screen.getAllByRole("button", { name: /create clip/i });
+    fireEvent.click(createButtons[0]);
+    expect(onOpenStudio).toHaveBeenCalledWith(
+      source,
+      expect.objectContaining({
+        id: "punchy-short",
+        autoTrackOnOpen: true,
+        targetAspectRatio: "9:16",
+        preferredDestination: "youtube_shorts",
+      }),
+      expect.any(Array)
     );
   });
 });

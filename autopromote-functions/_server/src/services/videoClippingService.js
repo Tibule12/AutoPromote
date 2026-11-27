@@ -67,9 +67,18 @@ const normalizeClipSuggestion = (raw, index, maxDurationSeconds = 0) => {
     strategyIntent: normalizeString(raw?.strategyIntent, null),
     hookText: normalizeString(raw?.hookText, null),
     captionSuggestion: normalizeString(raw?.captionSuggestion, "Watch till the end! 😱 #viral"),
+    titleSuggestion: normalizeString(raw?.titleSuggestion, null),
     bestFor: normalizeString(raw?.bestFor, null),
     retentionNotes: Array.isArray(raw?.retentionNotes) ? raw.retentionNotes : [],
     scoreBreakdown: raw?.scoreBreakdown || null,
+    destinationScores:
+      raw?.destinationScores && typeof raw.destinationScores === "object"
+        ? raw.destinationScores
+        : null,
+    formatTags: Array.isArray(raw?.formatTags) ? raw.formatTags : [],
+    recommendedDestination: normalizeString(raw?.recommendedDestination, null),
+    targetAspectRatio: normalizeString(raw?.targetAspectRatio, "9:16"),
+    exportFormat: normalizeString(raw?.exportFormat, "vertical_9_16"),
     studioMove: raw?.studioMove || null,
     campaignRole: raw?.campaignRole || null,
     campaignOrder: Number.isFinite(Number(raw?.campaignOrder)) ? Number(raw.campaignOrder) : index + 1,

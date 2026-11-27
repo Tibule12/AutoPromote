@@ -105,3 +105,26 @@ def test_a_pause_after_a_comma_keeps_its_list_in_the_same_sentence():
         ('misunderstood',2.5,3),('and',3,3.2),('disappointed.',3.2,4)]]
     units=speech_units(data,8)
     assert len(units)==1 and units[0]['text'].startswith('I have') and units[0]['completeEnd']
+
+
+def test_destination_scoring_and_sorting_prioritize_shorts_and_reels_formats():
+    from python_media_worker.viral_moment_selection import sort_moments_for_destination
+    data=[
+        segment(0,68,'I remember when we launched that idea and felt scared, yet the story turned out great because every obstacle taught us persistence.'),
+        segment(75,90,'Why did conversions double overnight?'),
+        segment(90,115,'Because we simplified onboarding and finally learned what buyers actually wanted.'),
+    ]
+    candidates=build_moment_candidates(data,[],120,settings={'minDuration':20,'maxDuration':80,'destinations':['youtube_shorts','instagram_reels','tiktok']})
+    shorts_ready=[c for c in candidates if c['duration']<=60]
+    too_long_for_shorts=[c for c in candidates if c['duration']>60]
+    assert shorts_ready and too_long_for_shorts
+    assert all(c['targetAspectRatio']=='9:16' for c in candidates)
+    long_shorts_tag=next(t for t in too_long_for_shorts[0]['formatTags'] if t['id']=='youtube_shorts')
+    assert long_shorts_tag['fit']=='Trim needed'
+    assert '60s' in (long_shorts_tag['note'] or '')
+
+    sorted_for_shorts=sort_moments_for_destination(candidates,'youtube_shorts')
+    assert sorted_for_shorts[0]['duration']<=60
+    finalized_shorts=finalize_moments(candidates,settings={'minDuration':20,'maxDuration':80,'destinations':['youtube_shorts']},limit=12)
+    assert finalized_shorts[0]['duration']<=60
+    assert finalized_shorts[0]['recommendedDestination']=='youtube_shorts'

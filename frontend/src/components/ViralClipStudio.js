@@ -137,6 +137,12 @@ import {
 import { applyCaptionBulkEdit } from "./studioCaptionBulkEdit";
 import { captionsForSource, mergeSourceCaptions } from "./studioCaptionGeneration";
 import { getMediaAuthToken } from "../utils/mediaAuth";
+import {
+  destinationDurationLimit,
+  destinationToExportTarget,
+  exportTargetToDestination,
+  normalizeDestinationId,
+} from "../utils/clipSelectionSettings";
 import { runStudioSourceShotJob } from "./studioAnalysisJobClient";
 import useCinematicEffects, { CINEMATIC_PRESETS, buildCinematicCssFilter } from "../hooks/useCinematicEffects";
 import StudioFinishLayers from "./StudioFinishLayers";
@@ -2778,6 +2784,8 @@ const ViralClipStudio = ({
   const [faceTrackingStatus, setFaceTrackingStatus] = useState("idle");
   const [faceTrackingMessage, setFaceTrackingMessage] = useState("");
   const faceTrackingGeneration = useRef(0);
+  const autoTrackedClipsRef = useRef(new Set());
+  const [autoSplitSuggestions, setAutoSplitSuggestions] = useState([]);
   const [reframeKeyframes, setReframeKeyframes] = useState([]);
   const [speakerStackFraming, setSpeakerStackFraming] = useState(
     DEFAULT_SPEAKER_STACK_FRAMING
@@ -3213,7 +3221,9 @@ const ViralClipStudio = ({
   const [isExporting, setIsExporting] = useState(false);
   const [exportStatusLabel, setExportStatusLabel] = useState("Render Final Clip");
   const [dualExportOutputs, setDualExportOutputs] = useState(null);
-  const [selectedExportDestination, setSelectedExportDestination] = useState("general");
+  const [selectedExportDestination, setSelectedExportDestination] = useState(() =>
+    destinationToExportTarget((clips || [])[0]?.preferredDestination)
+  );
   const [splitExportEnabled, setSplitExportEnabled] = useState(false);
   const [splitExportHooks, setSplitExportHooks] = useState([]);
   const [exportSettings, setExportSettings] = useState({
@@ -4434,6 +4444,7 @@ const ViralClipStudio = ({
     ++faceTrackingGeneration.current;
     setFaceTrackingStatus("idle");
     setFaceTrackingMessage("");
+    setAutoSplitSuggestions([]);
     setLocalDirectorProposal(null);
     setDirectorReview(null);
     setDirectorReviewState("idle");
@@ -9182,24 +9193,41 @@ const ViralClipStudio = ({
     });
   };
 
-  const analyzeSpeakerFaces = async (mode = "anchored", { directorReviewOnly = false } = {}) => {
+  const analyzeSpeakerFaces = async (
+    mode = "anchored",
+    { directorReviewOnly = false, autoHandoff = false, aspectOverride = null } = {}
+  ) => {
     if (faceTrackingStatus === "processing") return;
     if (directorReviewOnly && trackStates.video?.locked) {
       setFaceTrackingMessage("Unlock the video track before asking Director to reframe it.");
       return;
     }
-    if (mode === "source_shots") setLocalDirectorProposal(null);
+    if (mode === "source_shots" && !autoHandoff) setLocalDirectorProposal(null);
     const generation = ++faceTrackingGeneration.current;
     const clipId = currentTimelineClip?.id;
-    const split = !directorReviewOnly && effectiveSmartCropMode === "center" && reframeAspect !== "16:9";
+    const targetAspect = aspectOverride || reframeAspect;
+    const split = !directorReviewOnly && !autoHandoff && effectiveSmartCropMode === "center" && targetAspect !== "16:9";
     const window = getTimelineClipWindow(currentTimelineClip);
     if (window.duration > 900) {
-      setFaceTrackingMessage("Trim the analysis range to fifteen minutes or less.");
+      if (!autoHandoff) setFaceTrackingMessage("Trim the analysis range to fifteen minutes or less.");
       return;
     }
     setFaceTrackingStatus("processing");
-    setFaceTrackingMessage("Detecting real faces. Existing framing stays unchanged until results arrive…");
+    setFaceTrackingMessage(
+      autoHandoff
+        ? "Auto-tracking faces for 9:16 vertical framing…"
+        : "Detecting real faces. Existing framing stays unchanged until results arrive…"
+    );
     try {
+      const token = await getMediaAuthToken();
+      if (!token) {
+        if (autoHandoff) {
+          setFaceTrackingStatus("idle");
+          setFaceTrackingMessage("");
+          return;
+        }
+        throw new Error("Sign in to analyze this source.");
+      }
       let sourceShotAssetId = null;
       if (mode === "source_shots") {
         const sourceDocument = getEditorSnapshot().studioDocument;
@@ -9211,11 +9239,29 @@ const ViralClipStudio = ({
         }
       }
       const source = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
-      const directorSourceVideo = directorReviewOnly ? [beforeVideoRef.current,
-        !renderedOutputUrl ? videoRef.current : null].find(media => media && media.videoWidth > 0 && media.videoHeight > 0 &&
-          getSafeMediaSource(media.currentSrc || media.src) === source) : null;
-      if (directorReviewOnly && !directorSourceVideo)
+      const directorSourceVideo = [
+        beforeVideoRef.current,
+        !renderedOutputUrl || !previewFinishedFile ? videoRef.current : null,
+      ].find(
+        media =>
+          media &&
+          media.videoWidth > 0 &&
+          media.videoHeight > 0 &&
+          getSafeMediaSource(media.currentSrc || media.src) === source
+      );
+      const knownMediaEntry = projectMedia.find(
+        item => getSafeMediaSource(item?.url) === source && item?.videoWidth > 0 && item?.videoHeight > 0
+      );
+      const knownTimelineWidth = Number(currentTimelineClip?.videoWidth || knownMediaEntry?.videoWidth || 0);
+      const knownTimelineHeight = Number(currentTimelineClip?.videoHeight || knownMediaEntry?.videoHeight || 0);
+      if (
+        directorReviewOnly &&
+        !directorSourceVideo &&
+        !(knownTimelineWidth > 0 && knownTimelineHeight > 0) &&
+        !(currentTimelineClip && Number(window?.duration || currentTimelineClip.duration || 0) > 0 && source)
+      ) {
         throw new Error("Open the source in Live Edit and wait for its picture to load before asking Director to reframe it.");
+      }
       const durableStoragePath = currentTimelineClip?.sourceStoragePath ||
         currentTimelineClip?.storagePath ||
         (currentTimelineClip?.id === "main" ? sourceStoragePath : null);
@@ -9230,9 +9276,13 @@ const ViralClipStudio = ({
         if (!response.ok) throw new Error("Source video could not be read.");
         blob = await response.blob();
       }
-      const [aspectWidth, aspectHeight] = reframeAspect.split(":").map(Number);
-      const sourceAspect = directorSourceVideo ? directorSourceVideo.videoWidth / directorSourceVideo.videoHeight
-        : (videoRef.current?.videoWidth || 1920)/(videoRef.current?.videoHeight || 1080);
+      const [aspectWidth, aspectHeight] = targetAspect.split(":").map(Number);
+      const sourceAspect = directorSourceVideo
+        ? directorSourceVideo.videoWidth / directorSourceVideo.videoHeight
+        : knownTimelineWidth > 0 && knownTimelineHeight > 0
+          ? knownTimelineWidth / knownTimelineHeight
+          : (videoRef.current?.videoWidth || programmeMediaAspectRatio * 1080) /
+            (videoRef.current?.videoHeight || 1080);
       const coordinates = soloTrackingCoordinates(activeReframePosition,
         sourceAspect,
         aspectWidth/aspectHeight, speakerTrackZoom);
@@ -9251,8 +9301,6 @@ const ViralClipStudio = ({
           body.append("sourceAssetId", sourceShotAssetId);
         }
       }
-      const token = await getMediaAuthToken();
-      if (!token) throw new Error("Sign in to analyze this source.");
       let result;
       if (mode === "source_shots" &&
           process.env.REACT_APP_ENABLE_STUDIO_ANALYSIS_JOBS === "true" &&
@@ -9306,12 +9354,17 @@ const ViralClipStudio = ({
       if (directorReviewOnly) {
         const snapshot = getEditorSnapshot();
         const request = buildDirectorReframeRequest({ document: snapshot.studioDocument,
-          occurrenceId: String(clipId), analysis: result, aspect: reframeAspect,
+          occurrenceId: String(clipId), analysis: result, aspect: targetAspect,
           zoom: speakerTrackZoom, sourceAspect,
           proposalId: createSecureId("director-reframe"), idempotencyKey: createSecureId("director-follow-command") });
         const draft = await createSourceShotDirectorDraft(snapshot.studioDocument, { request, occurrenceId: String(clipId) });
         if (generation !== faceTrackingGeneration.current || activeProjectIdRef.current !== projectId) return;
         if (!draft) throw new Error("Tracking no longer matches this edit. Request Director again.");
+        setAutoSplitSuggestions(
+          (result.editPlan?.splitSuggestions || []).filter(
+            suggestion => suggestion.reason === "two_clean_foreground_faces"
+          )
+        );
         setLocalDirectorProposal(draft); setDirectorReview(null); setDirectorReviewState("idle"); setDirectorReviewError("");
         setFaceTrackingStatus("ready");
         setFaceTrackingMessage("Director framing is ready for review. Your current edit is unchanged; approve its exact path before applying it.");
@@ -9355,9 +9408,15 @@ const ViralClipStudio = ({
               ? { sourceTimeOffsetSeconds: Number(cut.sourceTimeOffsetSeconds) }
               : {}),
           }));
-          const cleanSplits = (plan.splitSuggestions || []).filter(
+          const detectedSplits = (plan.splitSuggestions || []).filter(
             suggestion => suggestion.reason === "two_clean_foreground_faces"
           );
+          if (autoHandoff) {
+            setAutoSplitSuggestions(detectedSplits);
+          } else {
+            setAutoSplitSuggestions([]);
+          }
+          const cleanSplits = autoHandoff ? [] : detectedSplits;
           cleanSplits.forEach(suggestion => {
             const activeShot = [...(plan.timelineCuts || [])]
               .filter(cut => Number(cut.time) <= Number(suggestion.end) + 1e-6)
@@ -9466,18 +9525,20 @@ const ViralClipStudio = ({
               });
             }));
           }
-          setMainFrame(current => normalizeMainFrame({
-            ...current,
-            enabled: plan.mainFrame ? plan.mainFrame.enabled !== false : current.enabled,
-            insetPercent: Number(plan.mainFrame?.insetPercent ?? 2.5),
-            radiusPercent: Number(plan.mainFrame?.radiusPercent ?? 10),
-            background: plan.mainFrame?.background || "studio_black",
-          }));
-          const naturalGrade = CINEMATIC_PRESETS.find(preset => preset.id === "studio_natural");
-          if (naturalGrade) applyFinishPreset(naturalGrade);
+          if (!autoHandoff) {
+            setMainFrame(current => normalizeMainFrame({
+              ...current,
+              enabled: plan.mainFrame ? plan.mainFrame.enabled !== false : current.enabled,
+              insetPercent: Number(plan.mainFrame?.insetPercent ?? 2.5),
+              radiusPercent: Number(plan.mainFrame?.radiusPercent ?? 10),
+              background: plan.mainFrame?.background || "studio_black",
+            }));
+            const naturalGrade = CINEMATIC_PRESETS.find(preset => preset.id === "studio_natural");
+            if (naturalGrade) applyFinishPreset(naturalGrade);
+          }
         }
       }
-      if (mode === "source_shots" && !split) {
+      if (mode === "source_shots" && !split && !autoHandoff) {
         try {
           const snapshot = getEditorSnapshot();
           const parameters = {
@@ -9506,13 +9567,25 @@ const ViralClipStudio = ({
       const coverage = slots.map(slot => `${slot}: ${Math.round((result.tracks[slot].coverage || 0)*100)}%`).join(" · ");
       setFaceTrackingStatus("ready");
       const editPlan = result.editPlan;
-      setFaceTrackingMessage(mode === "source_shots"
-        ? editPlan
-          ? `Podcast layout draft applied (${coverage}; ${result.sceneCuts?.length || 0} camera cuts; ${editPlan.splitSuggestions?.length || 0} two-person layout suggestions). Picture fill, face-safe captions, Studio Natural grade and one rounded frame now match preview and export. Review marked cuts. Any proposed clip split below needs separate approval.`
-          : `Source-shot draft applied (${coverage}; ${result.sceneCuts?.length || 0} cuts). Review every cut. Any proposed clip split below needs separate approval.`
-        : `Face-follow draft applied (${coverage}). Review camera cuts and missed faces. This detects faces, not who is speaking.`);
+      setFaceTrackingMessage(autoHandoff
+        ? `Auto face tracking applied (${coverage}). Review or adjust points in Reframe.`
+        : mode === "source_shots"
+          ? editPlan
+            ? `Podcast layout draft applied (${coverage}; ${result.sceneCuts?.length || 0} camera cuts; ${editPlan.splitSuggestions?.length || 0} two-person layout suggestions). Picture fill, face-safe captions, Studio Natural grade and one rounded frame now match preview and export. Review marked cuts. Any proposed clip split below needs separate approval.`
+            : `Source-shot draft applied (${coverage}; ${result.sceneCuts?.length || 0} cuts). Review every cut. Any proposed clip split below needs separate approval.`
+          : `Face-follow draft applied (${coverage}). Review camera cuts and missed faces. This detects faces, not who is speaking.`);
     } catch (error) {
       if (generation !== faceTrackingGeneration.current) return;
+      if (autoHandoff) {
+        setFaceTrackingStatus("idle");
+        const noFaces = /face|enough|missing/i.test(String(error?.message || ""));
+        setFaceTrackingMessage(
+          noFaces
+            ? "No continuous face detected; framing stays centered. Add manual points in Reframe anytime."
+            : "Auto face tracking skipped; framing stays centered. You can run Detect & follow face in Reframe."
+        );
+        return;
+      }
       setFaceTrackingStatus("error");
       setFaceTrackingMessage(error.message || "Tracking failed; keep the existing framing.");
     }
@@ -9522,9 +9595,39 @@ const ViralClipStudio = ({
     faceTrackingGeneration.current += 1;
     setFaceTrackingStatus("idle");
     setFaceTrackingMessage("");
+    setAutoSplitSuggestions([]);
     return () => { faceTrackingGeneration.current += 1; };
   }, [projectId, currentTimelineClip?.id, currentTimelineClip?.sourceStoragePath, currentTimelineClip?.startRequest, currentTimelineClip?.endRequest,
     selectedClip?.start, selectedClip?.end, effectiveSmartCropMode, reframeAspect, speakerTrackZoom]);
+
+  useEffect(() => {
+    if (!selectedClip?.autoTrackOnOpen || initialSavedProject?.snapshot || renderedOutputUrl) return;
+    if (!smartCrop || effectiveSmartCropMode !== "speaker_track" || reframeKeyframes.length > 0) return;
+    if (faceTrackingStatus !== "idle") return;
+    const duration = Number(currentTimelineClip?.duration || 0);
+    const window = getTimelineClipWindow(currentTimelineClip);
+    if (!currentTimelineClip?.id || duration <= 0 || window.duration <= 0 || window.duration > 900) return;
+    const clipKey = `${projectId}:${currentTimelineClip.id}:${window.start}:${window.end}:${currentTimelineClip.url || videoUrl}`;
+    if (autoTrackedClipsRef.current.has(clipKey)) return;
+    const sourceDocument = getEditorSnapshot().studioDocument;
+    const hasOccurrence = sourceDocument?.clipOccurrences?.some(
+      occurrence => occurrence.occurrenceId === String(currentTimelineClip.id)
+    );
+    if (!hasOccurrence) return;
+    autoTrackedClipsRef.current.add(clipKey);
+    void analyzeSpeakerFaces("source_shots", { autoHandoff: true });
+  }, [
+    projectId,
+    selectedClip?.autoTrackOnOpen,
+    initialSavedProject?.snapshot,
+    renderedOutputUrl,
+    smartCrop,
+    effectiveSmartCropMode,
+    reframeKeyframes.length,
+    faceTrackingStatus,
+    currentTimelineClip,
+    videoUrl,
+  ]);
 
   const focusCaptionSegmentsForReview = segments => {
     const normalizedSegments = normalizeCaptionSegments(segments);
@@ -10265,8 +10368,13 @@ const ViralClipStudio = ({
         ...(!entry.clip.sourceStoragePath && !entry.clip.storagePath && path &&
           (entry.clip.url || videoUrl) === current.url ? { sourceStoragePath: path } : {}),
       } }));
+      const preferredDestination =
+        exportTargetToDestination(selectedExportDestination) ||
+        normalizeDestinationId(selectedClip?.preferredDestination) ||
+        null;
       const request = buildDirectorMomentRequest({ document: snapshot.studioDocument,
         occurrenceId: String(current.id), candidates,
+        preferredDestination,
         proposalId: createSecureId("director-moment"), idempotencyKey: createSecureId("director-moment-command") });
       if (!request) throw new Error("No scored moment fits this owned source range. Analyze a longer source in Find Viral Clips or keep editing this range.");
       const draft = await createSourceShotDirectorDraft(snapshot.studioDocument,
@@ -10275,11 +10383,119 @@ const ViralClipStudio = ({
       if (!draft || !sourceShotDirectorDraftMatches(getEditorSnapshot().studioDocument, draft.savedDraft))
         throw new Error("The source range changed. Ask Director again for its current range.");
       setLocalDirectorProposal(draft); setDirectorReview(null); setDirectorReviewState("idle"); setDirectorReviewError("");
-      setStudioActionMessage("Director selected a source-bound moment from the existing scores. Review both boundaries before applying it; your edit is unchanged.");
+      setStudioActionMessage(
+        preferredDestination
+          ? `Director selected the strongest ${preferredDestination.replace("_", " ")}-ready moment. Review both boundaries before applying it; your edit is unchanged.`
+          : "Director selected a source-bound moment from the existing scores. Review both boundaries before applying it; your edit is unchanged."
+      );
     } catch (error) {
       if (selection === directorCandidateSelectionRef.current && activeProjectIdRef.current === projectId)
         setStudioActionMessage(error.message || "Director could not prepare a moment. Your edit is unchanged.");
     }
+  };
+
+  const applySuggestedTwoSpeakerSplit = () => {
+    if (!autoSplitSuggestions.length) return;
+    const first = autoSplitSuggestions[0];
+    const window = getTimelineClipWindow(currentTimelineClip);
+    const offset = getTimelineOffsetForIndex(activeTimelineIndex);
+    const toTimelineTime = value => offset + Number(value || 0) - window.start;
+    setReframeAspect("9:16");
+    setSpeakerStackFraming(current => ({
+      ...current,
+      trackSpeakers: true,
+      roundedCards: true,
+      cardInsetPercent: 2.5,
+      cardGapPercent: 2.5,
+      cardRadiusPercent: 8,
+      top: {
+        ...current.top,
+        ...first.top,
+        keyframes: Array.isArray(first.top?.keyframes) && first.top.keyframes.length >= 2
+          ? first.top.keyframes.map((mark, index) => ({
+              time: toTimelineTime(mark.time),
+              x: Number(mark.x ?? first.top?.x ?? 50),
+              y: Number(mark.y ?? first.top?.y ?? 50),
+              source_visible_top_percent: Number(first.top?.source_visible_top_percent || 0),
+              source_visible_bottom_percent: Number(first.top?.source_visible_bottom_percent || 0),
+              ...(index === 0 || mark.cut ? { cut: true } : {}),
+            }))
+          : autoSplitSuggestions.map(suggestion => ({
+              time: toTimelineTime(suggestion.start),
+              x: Number(suggestion.top?.x ?? first.top?.x ?? 50),
+              y: Number(suggestion.top?.y ?? first.top?.y ?? 50),
+              source_visible_top_percent: Number(suggestion.top?.source_visible_top_percent || 0),
+              source_visible_bottom_percent: Number(suggestion.top?.source_visible_bottom_percent || 0),
+              cut: true,
+            })),
+      },
+      bottom: {
+        ...current.bottom,
+        ...first.bottom,
+        keyframes: Array.isArray(first.bottom?.keyframes) && first.bottom.keyframes.length >= 2
+          ? first.bottom.keyframes.map((mark, index) => ({
+              time: toTimelineTime(mark.time),
+              x: Number(mark.x ?? first.bottom?.x ?? 50),
+              y: Number(mark.y ?? first.bottom?.y ?? 50),
+              source_visible_top_percent: Number(first.bottom?.source_visible_top_percent || 0),
+              source_visible_bottom_percent: Number(first.bottom?.source_visible_bottom_percent || 0),
+              ...(index === 0 || mark.cut ? { cut: true } : {}),
+            }))
+          : autoSplitSuggestions.map(suggestion => ({
+              time: toTimelineTime(suggestion.start),
+              x: Number(suggestion.bottom?.x ?? first.bottom?.x ?? 50),
+              y: Number(suggestion.bottom?.y ?? first.bottom?.y ?? 50),
+              source_visible_top_percent: Number(suggestion.bottom?.source_visible_top_percent || 0),
+              source_visible_bottom_percent: Number(suggestion.bottom?.source_visible_bottom_percent || 0),
+              cut: true,
+            })),
+      },
+    }));
+    showEveryoneSplit();
+    setAutoSplitSuggestions([]);
+    setStudioActionMessage("Two-speaker 9:16 split applied from detected foreground faces.");
+  };
+
+  const fitClipToDestinationLimit = maxSeconds => {
+    const targetLimit = Math.max(5, Number(maxSeconds || 58));
+    const totalDuration = getTimelineDuration();
+    if (!Number.isFinite(totalDuration) || totalDuration <= targetLimit + 0.05) return;
+    const sentenceEnds = (captionSegments || [])
+      .map(seg => Number(resolveCaptionTimelineRange(seg)?.end || 0))
+      .filter(end => Number.isFinite(end) && end >= 12 && end <= targetLimit)
+      .sort((a, b) => b - a);
+    const cutAt = sentenceEnds[0] || targetLimit;
+    if (totalDuration - cutAt < 0.25) return;
+    commitProgrammeRemoval([{ start: cutAt, end: totalDuration }], `Fit to ${Math.round(cutAt)}s vertical limit`);
+  };
+
+  const directVerticalForPlatform = () => {
+    void analyzeSpeakerFaces("source_shots", { directorReviewOnly: true, aspectOverride: "9:16" });
+  };
+
+  useEffect(() => {
+    if (initialSavedProject?.snapshot || !selectedClip?.preferredDestination) return;
+    const target = destinationToExportTarget(selectedClip.preferredDestination);
+    if (target && target !== "general") setSelectedExportDestination(target);
+  }, [initialSavedProject?.snapshot, selectedClip?.preferredDestination]);
+
+  const directorVerticalControls = {
+    targetDestination: selectedExportDestination,
+    reframeAspect,
+    clipDurationSeconds: liveTimelineDuration,
+    durationLimitSeconds: destinationDurationLimit(selectedExportDestination),
+    faceTrackingStatus,
+    splitSuggestionCount: autoSplitSuggestions.length,
+    showSafeZones,
+    onChangeDestination: target => {
+      setSelectedExportDestination(target);
+      setReframeAspect("9:16");
+      setSmartCrop(true);
+    },
+    onToggleSafeZones: () => setShowSafeZones(current => !current),
+    onProposeTrackedVertical: directVerticalForPlatform,
+    onSwitchToTwoSpeakerSplit: applySuggestedTwoSpeakerSplit,
+    onFitToDestinationLimit: fitClipToDestinationLimit,
   };
 
   const selectDirectorSourceCut = async request => {
@@ -23557,6 +23773,7 @@ const ViralClipStudio = ({
                 <div className="clip-inspector-body" role="tabpanel" data-testid="studio-director-inspector">
                   <StudioDirectorCreativePanel getSnapshot={getEditorSnapshot} onApply={applyReviewedScenePlan}
                     onOpenNodes={()=>{setWorkspaceMode('fxflow');selectCreativeTool('flow');}}
+                    verticalControls={directorVerticalControls}
                     locked={!!(trackStates.graphics?.locked || trackStates.broll?.locked || trackStates.video?.locked)} />
                 </div>
               ) : null}
@@ -24285,6 +24502,31 @@ const ViralClipStudio = ({
                   <button type="button" className="mini-toggle-btn" data-testid="director-propose-reframe"
                     disabled={faceTrackingStatus === "processing" || trackStates.video?.locked || speakerTrackZoom > 1.5}
                     onClick={() => analyzeSpeakerFaces("source_shots", { directorReviewOnly: true })}>Director: propose tracked framing</button>
+                  {incomingDirectorProposalRequest?.operation?.type === "reframe" ? (
+                    <button
+                      type="button"
+                      className="mini-toggle-btn is-active"
+                      data-testid="director-jump-to-review"
+                      onClick={() => {
+                        document
+                          .querySelector("[data-testid='studio-director-review']")
+                          ?.scrollIntoView?.({ behavior: "smooth", block: "nearest" });
+                        void openDirectorReview();
+                      }}
+                    >
+                      Open Director framing review ↑
+                    </button>
+                  ) : null}
+                  {autoSplitSuggestions.length > 0 ? (
+                    <button
+                      type="button"
+                      className="mini-toggle-btn"
+                      data-testid="reframe-auto-split-prompt"
+                      onClick={applySuggestedTwoSpeakerSplit}
+                    >
+                      2 speakers detected · Switch to Split View
+                    </button>
+                  ) : null}
                   {speakerTrackZoom > 1.5 ? <small>Set Speaker zoom to 1.5× or less for a reviewed Director proposal.</small> : null}
                   {faceTrackingMessage && effectiveSmartCropMode !== "speaker_track" ? <p role="status">{faceTrackingMessage}</p> : null}
 
@@ -27122,6 +27364,7 @@ const ViralClipStudio = ({
                     <StudioDirectorCreativePanel
                       getSnapshot={getEditorSnapshot}
                       onApply={applyReviewedScenePlan}
+                      verticalControls={directorVerticalControls}
                       locked={!!(trackStates.graphics?.locked || trackStates.broll?.locked || trackStates.video?.locked)}
                     />
                   </details>
@@ -31321,6 +31564,28 @@ const ViralClipStudio = ({
                   </button>
                 ))}
               </div>
+              {destinationDurationLimit(selectedExportDestination) &&
+              Number(liveTimelineDuration || 0) > Number(destinationDurationLimit(selectedExportDestination)) ? (
+                <div
+                  className="export-destination-limit-note"
+                  data-testid="export-destination-limit-note"
+                  role="status"
+                  style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", marginBottom: "8px", fontSize: "0.75rem" }}
+                >
+                  <span>
+                    Target platform max is {destinationDurationLimit(selectedExportDestination)}s (current: {Number(liveTimelineDuration || 0).toFixed(1)}s).
+                  </span>
+                  <button
+                    type="button"
+                    className="mini-toggle-btn"
+                    data-testid="export-fit-destination-limit"
+                    disabled={isExporting}
+                    onClick={() => fitClipToDestinationLimit(Number(destinationDurationLimit(selectedExportDestination)) - 2)}
+                  >
+                    Fit clip ≤{Number(destinationDurationLimit(selectedExportDestination)) - 2}s
+                  </button>
+                </div>
+              ) : null}
               <div className="export-settings-grid" data-testid="export-settings-grid">
                 <label>
                   <span>Resolution</span>

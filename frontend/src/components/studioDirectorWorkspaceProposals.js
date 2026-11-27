@@ -1,6 +1,11 @@
 import { validateStudioProjectDocument } from "./studioProjectDocument";
 import { validateStudioReframeOperation } from "./studioReframeCommand";
-import { secondsToTicks } from "./studioTime";
+import { secondsToTicks, TICKS_PER_SECOND } from "./studioTime";
+import {
+  computeClipDestinationMeta,
+  destinationDurationLimit,
+  normalizeDestinationId,
+} from "../utils/clipSelectionSettings";
 
 export const sourceShotWorkerResult = analysis => {
   const { sourceShotArtifact: _sourceShot, analysisArtifact: _analysis, ...workerResult } = analysis || {};
@@ -76,11 +81,20 @@ export const buildDirectorReframeRequest = ({ document, occurrenceId, analysis, 
 
 // Rank only the existing source-bound suggestions; scores are editorial hints,
 // never a promise of virality or model confidence. The owner reviews the range.
-export const buildDirectorMomentRequest = ({ document, occurrenceId, candidates, proposalId, idempotencyKey }) => {
+export const buildDirectorMomentRequest = ({
+  document,
+  occurrenceId,
+  candidates,
+  proposalId,
+  idempotencyKey,
+  preferredDestination = null,
+}) => {
   validateStudioProjectDocument(document);
   const occurrence = document.clipOccurrences.find(item => item.occurrenceId === occurrenceId);
   const asset = document.assets.find(item => item.assetId === occurrence?.assetId);
   if (!occurrence || !asset) return null;
+  const destId = normalizeDestinationId(preferredDestination);
+  const destLimit = destId ? destinationDurationLimit(destId) : null;
   const eligible = (candidates || []).flatMap(candidate => {
     const clip = candidate.clip || candidate;
     const path = clip.sourceStoragePath || clip.storagePath;
@@ -93,9 +107,22 @@ export const buildDirectorMomentRequest = ({ document, occurrenceId, candidates,
     const removed = [keep.startTick - occurrence.sourceRange.startTick, occurrence.sourceRange.endTick - keep.endTick];
     if (keep.endTick - keep.startTick < 18000 || removed.some(value => value < 0 || (value > 0 && value < 18000)) ||
         removed.every(value => value === 0)) return [];
-    const score = Number(candidate.score ?? clip.guidedScore ?? clip.score ?? clip.viralScore ?? 0);
-    return [{ keep, score: Number.isFinite(score) ? score : 0 }];
-  }).sort((a, b) => b.score - a.score || a.keep.startTick - b.keep.startTick);
-  return eligible.length ? { proposalId, idempotencyKey, directorId: "studio-moment-ranking-v1",
+    const durationSeconds = (keep.endTick - keep.startTick) / TICKS_PER_SECOND;
+    const rawScore = Number(candidate.score ?? clip.guidedScore ?? clip.score ?? clip.viralScore ?? 0);
+    const score = Number.isFinite(rawScore) ? rawScore : 0;
+    const readyForDest = !destLimit || durationSeconds <= destLimit + 0.01;
+    const destScore = destId
+      ? Number(
+          computeClipDestinationMeta({ ...clip, duration: durationSeconds, score }, [destId])
+            .destinationScores[destId] ?? score
+        )
+      : score;
+    return [{ keep, score, readyForDest, destScore }];
+  }).sort((a, b) => {
+    if (destId && a.readyForDest !== b.readyForDest) return a.readyForDest ? -1 : 1;
+    if (destId && b.destScore !== a.destScore) return b.destScore - a.destScore;
+    return b.score - a.score || a.keep.startTick - b.keep.startTick;
+  });
+  return eligible.length ? { proposalId, idempotencyKey, directorId: destId ? `studio-moment-ranking-${destId}` : "studio-moment-ranking-v1",
     operation: { type: "trim_clip", target: { occurrenceId }, keep: eligible[0].keep } } : null;
 };

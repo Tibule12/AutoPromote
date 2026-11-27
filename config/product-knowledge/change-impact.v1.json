@@ -745,6 +745,41 @@
         "src/services/billingService.js"
       ],
       "reason": "Independent production release candidate reduces redundant retention/diagnostic work and hardens verified legacy payments without changing public plans, creative tools, scheduling semantics, customer balances or enabling renewable processing. Existing deletion dependencies and readiness limitations remain."
+    },
+    {
+      "feature_id": "director.find_viral_clips",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/UserDashboardTabs/FindViralClipsPanel.js",
+        "frontend/src/components/ViralScanner.js",
+        "frontend/src/utils/clipSelectionSettings.js",
+        "python_media_worker/viral_moment_selection.py",
+        "src/services/videoClippingService.js"
+      ],
+      "reason": "Add destination fitness scoring and sorting for Reels, Shorts and TikTok while preserving editorial score semantics, title/destination metadata and Studio auto-handoff bounds. Broad media, scale and predictive view claims remain unqualified."
+    },
+    {
+      "feature_id": "studio.crop_reframe",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/ViralClipStudio.js",
+        "frontend/src/components/StudioDirectorCreativePanel.js",
+        "frontend/src/components/studioDirectorWorkspaceProposals.js",
+        "frontend/src/components/studioReframeCommand.js",
+        "python_media_worker/studio_face_tracking.py",
+        "python_media_worker/main_media_server.py"
+      ],
+      "reason": "Harden YuNet cut-aware speaker tracking, opening-shot acquisition, intra-shot two-speaker split keyframes, AI Director review-first vertical proposals and destination duration fit controls without expanding existing Studio readiness claims."
     }
   ]
 }

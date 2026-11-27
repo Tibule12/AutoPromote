@@ -2,6 +2,7 @@ import ast
 import json
 import os
 import re
+import shutil
 from pathlib import Path
 from fractions import Fraction
 import subprocess
@@ -49,6 +50,7 @@ from python_media_worker.main_media_server import (
     build_main_video_frame_filter,
     build_viral_export_encode_args,
     build_speaker_track_crop_filter,
+    build_tracked_speaker_keyframes,
     get_reframe_output_dimensions,
     generate_ass_captions,
     multicam_rounded_card_filter,
@@ -1457,6 +1459,192 @@ class ViralRenderContractTests(unittest.TestCase):
 
             self.assertAlmostEqual(float(media["format"]["duration"]), 2.0, delta=0.12)
             self.assertIn("audio", {stream["codec_type"] for stream in media["streams"]})
+
+
+class SpeakerTrackFallbackRenderTests(unittest.TestCase):
+    def approved_temp_dir(self):
+        shared_tmp = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp"))
+        os.makedirs(shared_tmp, exist_ok=True)
+        return tempfile.TemporaryDirectory(dir=shared_tmp)
+
+    def make_landscape_source(self, output_path):
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-v",
+                "error",
+                "-f",
+                "lavfi",
+                "-i",
+                "color=c=#e02020:s=320x360:d=2.2:r=25",
+                "-f",
+                "lavfi",
+                "-i",
+                "color=c=#20e020:s=320x360:d=2.2:r=25",
+                "-f",
+                "lavfi",
+                "-i",
+                "sine=frequency=660:duration=2.2",
+                "-filter_complex",
+                "[0:v][1:v]hstack=inputs=2[v]",
+                "-map",
+                "[v]",
+                "-map",
+                "2:a",
+                "-c:v",
+                "libx264",
+                "-pix_fmt",
+                "yuv420p",
+                "-c:a",
+                "aac",
+                "-shortest",
+                "-y",
+                output_path,
+            ],
+            check=True,
+        )
+
+    def test_build_tracked_speaker_keyframes_smooths_and_clamps(self):
+        self.assertEqual(build_tracked_speaker_keyframes([]), [])
+        keyframes = build_tracked_speaker_keyframes(
+            [(0.0, -0.2, 0.4), (0.35, 0.7, 0.5), (0.7, 1.3, 0.6)],
+            window=3,
+        )
+        self.assertEqual(len(keyframes), 3)
+        self.assertEqual(keyframes[0]["time"], 0.0)
+        for kf in keyframes:
+            self.assertGreaterEqual(kf["x"], 0.0)
+            self.assertLessEqual(kf["x"], 100.0)
+            self.assertGreaterEqual(kf["y"], 0.0)
+            self.assertLessEqual(kf["y"], 100.0)
+
+    def test_render_viral_clip_runs_speaker_tracking_when_finish_plan_has_empty_keyframes(self):
+        import cv2
+        import python_media_worker.main_media_server as worker
+
+        positions = [
+            (0.0, 0.12, 0.50),
+            (0.25, 0.12, 0.50),
+            (0.50, 0.12, 0.50),
+            (0.75, 0.12, 0.50),
+            (1.25, 0.88, 0.50),
+            (1.50, 0.88, 0.50),
+            (1.75, 0.88, 0.50),
+            (2.00, 0.88, 0.50),
+        ]
+
+        def sample_rgb_at(video_path, seconds):
+            cap = cv2.VideoCapture(video_path)
+            try:
+                cap.set(cv2.CAP_PROP_POS_MSEC, seconds * 1000.0)
+                ok, frame = cap.read()
+                self.assertTrue(ok, f"Expected readable frame at {seconds}s")
+                b, g, r = frame.mean(axis=(0, 1))
+                return (float(r), float(g), float(b))
+            finally:
+                cap.release()
+
+        with self.approved_temp_dir() as tmpdir:
+            source_path = os.path.join(tmpdir, "landscape_source.mp4")
+            self.make_landscape_source(source_path)
+
+            captured = []
+
+            async def fake_materialize(video_url, local_path, keep_audio=False, max_long_edge=None, preserve_source_bytes=False):
+                shutil.copy2(source_path, local_path)
+                return local_path
+
+            def fake_upload(local_path, destination_path=None):
+                probe = subprocess.run(
+                    [
+                        "ffprobe",
+                        "-v",
+                        "error",
+                        "-select_streams",
+                        "v:0",
+                        "-show_entries",
+                        "stream=width,height",
+                        "-of",
+                        "json",
+                        local_path,
+                    ],
+                    check=True,
+                    text=True,
+                    capture_output=True,
+                )
+                stream = json.loads(probe.stdout)["streams"][0]
+                captured.append({
+                    "width": stream["width"],
+                    "height": stream["height"],
+                    "early_rgb": sample_rgb_at(local_path, 0.15),
+                    "late_rgb": sample_rgb_at(local_path, 1.80),
+                })
+                return "https://cdn.example.com/tracked_vertical.mp4"
+
+            for zoom, detected in ((1.0, positions), (1.35, positions), (1.0, [])):
+                request = RenderViralRequest(
+                    video_url="https://example.com/landscape_source.mp4",
+                    start_time=0.0,
+                    end_time=2.0,
+                    overlays=[],
+                    smart_crop=True,
+                    smart_crop_mode="speaker_track",
+                    finish_plan={
+                        "reframe": {
+                            "enabled": True,
+                            "aspect": "9:16",
+                            "mode": "speaker_track",
+                            "zoom": zoom,
+                            "keyframes": [],
+                        }
+                    },
+                )
+                result = None
+                try:
+                    with (
+                        patch.object(worker, "materialize_video_input", side_effect=fake_materialize),
+                        patch.object(worker, "upload_file_to_firebase", side_effect=fake_upload),
+                        patch.object(worker, "detect_speaker_positions", return_value=detected) as mock_detect,
+                    ):
+                        result = asyncio.run(worker.render_viral_clip_impl(request))
+                        self.assertEqual(mock_detect.call_count, 1)
+                        self.assertEqual(result.get("status"), "completed")
+                        self.assertEqual(result.get("output_url"), "https://cdn.example.com/tracked_vertical.mp4")
+                finally:
+                    if result and result.get("output_path") and os.path.exists(result["output_path"]):
+                        os.remove(result["output_path"])
+
+            self.assertEqual(len(captured), 3)
+            for item in captured:
+                self.assertEqual((item["width"], item["height"]), (1080, 1920))
+
+            # zoom=1.0 and zoom=1.35 tracked runs must pan from red left half to green right half.
+            for idx in (0, 1):
+                early_r, early_g, _ = captured[idx]["early_rgb"]
+                late_r, late_g, _ = captured[idx]["late_rgb"]
+                self.assertGreater(early_r, early_g + 40.0, f"Run {idx} early frame did not track left speaker: {captured[idx]}")
+                self.assertGreater(late_g, late_r + 40.0, f"Run {idx} late frame did not track right speaker: {captured[idx]}")
+
+    def test_build_tracked_speaker_keyframes_respects_scene_cuts(self):
+        positions = [
+            (0.0, 0.12, 0.50),
+            (0.3, 0.12, 0.50),
+            (0.6, 0.12, 0.50),
+            (1.0, 0.88, 0.50),
+            (1.3, 0.88, 0.50),
+            (1.6, 0.88, 0.50),
+        ]
+        # With only 6 samples and window=7, smoothing without cuts would blend across 0.6s -> 1.0s.
+        smoothed_with_cut = smooth_positions(positions, window=7, cuts=[0.9])
+        self.assertAlmostEqual(smoothed_with_cut[2][1], 0.12, places=3)
+        self.assertAlmostEqual(smoothed_with_cut[3][1], 0.88, places=3)
+
+        keyframes = build_tracked_speaker_keyframes(positions, window=7, cuts=[0.9])
+        self.assertEqual(len(keyframes), 6)
+        self.assertAlmostEqual(keyframes[2]["x"], 12.0, places=2)
+        self.assertAlmostEqual(keyframes[3]["x"], 88.0, places=2)
+        self.assertIsNot(keyframes[2].get("cut"), True)
+        self.assertTrue(keyframes[3].get("cut"))
 
 
 if __name__ == "__main__":

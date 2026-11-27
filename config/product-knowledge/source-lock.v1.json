@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Reviewed funded launch accounting/payment changes and current-main merge. Local regression passes; exact production worker integration and qualification remain incomplete. No readiness promotion.",
-  "reviewed_at": "2026-11-27T14:09:35.929Z",
+  "reason": "Preserve upstream 0e959fe5b clip/Director changes with renewable launch accounting; exact source review after merge, not paid worker or readiness qualification.",
+  "reviewed_at": "2026-11-27T14:10:36.403Z",
   "catalog_sha256": "eecc391b0e634e380f0b393842ba8a83bc3f8c12b6cbd72f46e427a2a634e270",
   "sources": [
     {
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "98a0ff794f93046d761e24f396ceb6c4c055855ab3a70d2ae56e0836c7ba6f39"
+      "sha256": "3ac46b71123f5c9d8137a80d852aa1d187fa6bab0e7c3fbc929773fe1f1ded4b"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -47,7 +47,7 @@
     },
     {
       "path": "frontend/src/UserDashboardTabs/FindViralClipsPanel.js",
-      "sha256": "d0c03a1ca7b353b3be9d6ba1bc768e39ac02dc96f7fbbaa3139754c8832e2fbc"
+      "sha256": "001c6984a1db2a5bb0ab230bccee8c7d2ffbae4b22a7962468363f7dd4df6a3d"
     },
     {
       "path": "frontend/src/UserDashboardTabs/SchedulesPanel.js",
@@ -207,11 +207,11 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "5e3f36c7759c65afa5afb9456a54634d8f99c383f07bf1bab04dedcb4fcc6f76"
+      "sha256": "8f9dd6822e0f46ecc2929daa5e3af31264a5580098a7b4521722bbf83f9b42a2"
     },
     {
       "path": "frontend/src/components/ViralScanner.js",
-      "sha256": "3314bfefea5195965e9d3bf90113a8db021255ede98fad3f3018f1eb4851fd9d"
+      "sha256": "3e569cb081c072026c5ef2da72a7456d545163ef7c466c426471636e0f5a9256"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
@@ -483,7 +483,7 @@
     },
     {
       "path": "frontend/src/utils/clipSelectionSettings.js",
-      "sha256": "025f0a6c7aa91cab9fa23c3fde768f2eddc93fc38e93623b56fa4b44fcffbdc8"
+      "sha256": "4d7243c39e3bdd403715de1de9f0a1b79d681308f23d3af035742859d902917c"
     },
     {
       "path": "frontend/src/utils/multicamProxyUpload.js",
@@ -511,7 +511,7 @@
     },
     {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "99661a8c3e9c12b22b10f62a708156888d70f2f7142716b384b67d12424584d0"
+      "sha256": "25460177b329b286c19ed223a5bd3eb313e050379c24c57dfbeff253b18d6811"
     },
     {
       "path": "python_media_worker/studio_audio.py",
@@ -567,7 +567,7 @@
     },
     {
       "path": "python_media_worker/viral_moment_selection.py",
-      "sha256": "76531a55b1d5b082c6ea8c243d0be8bf50f500e21747df7cadc6aa9356043d56"
+      "sha256": "599ae344dccb9b6f55f27a0b83f5a9da8d374f094fb66f05b89d56e164389c33"
     },
     {
       "path": "python_media_worker/viral_render_contract.py",

@@ -11,6 +11,37 @@ from statistics import mean
 
 VERSION = "moments-v2"
 DESTINATIONS = {"tiktok", "youtube_shorts", "instagram_reels"}
+DESTINATION_LABELS = {
+    "tiktok": "TikTok",
+    "youtube_shorts": "YouTube Shorts",
+    "instagram_reels": "Instagram Reels",
+}
+DESTINATION_PROFILES = {
+    "youtube_shorts": {
+        "label": "YouTube Shorts",
+        "aspect": "9:16",
+        "ideal_min": 15.0,
+        "ideal_max": 58.0,
+        "hard_max": 60.0,
+        "weights": {"opening": 0.18, "payoff": 0.35, "story": -0.05, "energy": -0.05, "motion": -0.1, "complete": 5.0, "pace": 2.0},
+    },
+    "instagram_reels": {
+        "label": "Instagram Reels",
+        "aspect": "9:16",
+        "ideal_min": 18.0,
+        "ideal_max": 60.0,
+        "hard_max": 90.0,
+        "weights": {"opening": 0.0, "payoff": 0.05, "story": 0.35, "energy": 0.25, "motion": 0.3, "complete": 3.5, "pace": 1.0},
+    },
+    "tiktok": {
+        "label": "TikTok",
+        "aspect": "9:16",
+        "ideal_min": 12.0,
+        "ideal_max": 48.0,
+        "hard_max": 120.0,
+        "weights": {"opening": 0.4, "payoff": -0.05, "story": 0.15, "energy": 0.2, "motion": 0.25, "complete": 2.5, "pace": 3.5},
+    },
+}
 
 
 class SignalSeries:
@@ -171,10 +202,20 @@ def _candidate(start, end, text, confidence, source, settings, duration, audio, 
     if not complete:
         flags.append("Review the cut boundaries: the final phrase may be incomplete")
     digest = hashlib.sha256(f"{start:.3f}:{end:.3f}:{source}:{text}".encode()).hexdigest()[:18]
+    editorial_score = round(max(0, min(96, score)), 1)
+    format_meta = score_destination_fit(
+        length=length,
+        words=words,
+        density=density,
+        complete=complete,
+        breakdown=breakdown,
+        base_score=editorial_score,
+        destinations=settings.get("destinations"),
+    )
     return {"id": f"moment_{digest}", "start": round(start, 3), "end": round(end, 3), "duration": round(length, 3),
             "text": text, "transcript": text, "transcriptConfidence": round(confidence, 3),
             "speechTrusted": bool(words and confidence >= .62), "source": source,
-            "viralScore": round(max(0, min(96, score)), 1), "scoreBreakdown": breakdown,
+            "viralScore": editorial_score, "scoreBreakdown": breakdown,
             "editorialBreakdown": dict(breakdown),
             "scoreConfidence": round(min(95, evidence), 1),
             "scoreConfidenceLabel": "Strong evidence" if evidence >= 78 else "Moderate evidence" if evidence >= 58 else "Exploratory evidence",
@@ -182,7 +223,85 @@ def _candidate(start, end, text, confidence, source, settings, duration, audio, 
             "hookText": " ".join(text.split()[:12]) if words else f"Visual moment at {int(start)//60}:{int(start)%60:02d}",
             "scoreMeaning": "Editorial ranking from source evidence; not a confidence percentage or prediction of views.",
             "selectionSettings": settings, "selectorVersion": VERSION, "durationMatchesRequest": fit,
-            "analysisMode": "speech_editorial" if words else "visual_only"}
+            "analysisMode": "speech_editorial" if words else "visual_only",
+            **format_meta}
+
+
+def score_destination_fit(
+    *,
+    length,
+    words,
+    density,
+    complete,
+    breakdown,
+    base_score,
+    destinations=None,
+):
+    """Score grounded fit per vertical destination (Reels, Shorts, TikTok)."""
+    active = sorted(set(destinations) & DESTINATIONS) if isinstance(destinations, list) and destinations else sorted(DESTINATIONS)
+    tags = []
+    for dest_id in active:
+        profile = DESTINATION_PROFILES[dest_id]
+        weights = profile["weights"]
+        dest_score = float(base_score)
+        note = None
+        if length > profile["hard_max"]:
+            dest_score -= 18.0
+            note = f"Trim to {int(profile['hard_max'])}s or under for {profile['label']}"
+        elif profile["ideal_min"] <= length <= profile["ideal_max"]:
+            dest_score += 5.0
+        else:
+            dest_score += 1.0
+        dest_score += max(0.0, number(breakdown.get("opening"))) * weights["opening"]
+        dest_score += number(breakdown.get("payoff")) * weights["payoff"]
+        dest_score += number(breakdown.get("story")) * weights["story"]
+        dest_score += number(breakdown.get("energy")) * weights["energy"]
+        dest_score += number(breakdown.get("motion")) * weights["motion"]
+        if complete and words:
+            dest_score += weights["complete"]
+        if words and 1.8 <= density <= 3.8:
+            dest_score += weights["pace"]
+        rounded = round(max(0.0, min(96.0, dest_score)), 1)
+        fit_label = "Trim needed" if length > profile["hard_max"] else ("Strong fit" if rounded >= 68.0 else "Good fit")
+        tags.append({
+            "id": dest_id,
+            "label": profile["label"],
+            "aspect": profile["aspect"],
+            "score": rounded,
+            "fit": fit_label,
+            "note": note,
+        })
+    tags.sort(key=lambda item: (-item["score"], item["id"]))
+    ready_tag = next((tag for tag in tags if tag["fit"] != "Trim needed"), None)
+    recommended = (ready_tag or tags[0])["id"] if tags else "instagram_reels"
+    return {
+        "destinationScores": {tag["id"]: tag["score"] for tag in tags},
+        "formatTags": tags,
+        "recommendedDestination": recommended,
+        "targetAspectRatio": "9:16",
+    }
+
+
+def sort_moments_for_destination(candidates, destination=None):
+    """Sort selected moments by target Reels/Shorts/TikTok fit while preserving ties by editorial score."""
+    dest_id = destination if destination in DESTINATIONS else None
+    def rank_key(candidate):
+        tags = candidate.get("formatTags") or []
+        scores = candidate.get("destinationScores") or {}
+        if dest_id:
+            tag = next((item for item in tags if item.get("id") == dest_id), None)
+            ready = (tag or {}).get("fit") != "Trim needed"
+            dest_score = number(scores.get(dest_id), candidate.get("viralScore"))
+        else:
+            ready = any(item.get("fit") != "Trim needed" for item in tags) if tags else True
+            dest_score = max((number(v) for v in scores.values()), default=number(candidate.get("viralScore")))
+        return (
+            0 if ready else 1,
+            -dest_score,
+            -number(candidate.get("viralScore")),
+            number(candidate.get("start")),
+        )
+    return sorted([dict(item) for item in (candidates or [])], key=rank_key)
 
 
 def _overlap(a, b):
@@ -265,6 +384,7 @@ def build_moment_candidates(segments, scene_ranges, duration, *, settings=None, 
 def finalize_moments(candidates, settings=None, limit=12):
     # Optional external judgement can modestly refine evidence-led selection;
     # it cannot manufacture a 99 score or replace source times/transcript.
+    options = selection_settings(settings) if settings is not None else None
     output = []
     for value in candidates:
         c = dict(value)
@@ -276,5 +396,24 @@ def finalize_moments(candidates, settings=None, limit=12):
         c["viralScore"] = round(max(0, min(96, base)), 1)
         c["scoreBreakdown"] = dict(breakdown)
         c["reason"] = "; ".join(c.get("reasons") or [])
+        words = tokens(c.get("text") or c.get("transcript") or "")
+        length = max(0.01, number(c.get("duration"), number(c.get("end")) - number(c.get("start"))))
+        density = len(words) / max(length, 1.0)
+        complete = not any("final phrase may be incomplete" in str(flag).lower() for flag in (c.get("reviewFlags") or []))
+        active_destinations = (options or c.get("selectionSettings") or {}).get("destinations")
+        c.update(score_destination_fit(
+            length=length,
+            words=words,
+            density=density,
+            complete=complete,
+            breakdown=breakdown,
+            base_score=c["viralScore"],
+            destinations=active_destinations,
+        ))
         output.append(c)
-    return select_diverse(output, limit)
+    selected = select_diverse(output, limit)
+    if options and len(options["destinations"]) == 1:
+        selected = sort_moments_for_destination(selected, options["destinations"][0])
+        for order, item in enumerate(selected, start=1):
+            item["campaignOrder"] = order
+    return selected
