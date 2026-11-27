@@ -1,0 +1,235 @@
+{
+  "origin": "http://127.0.0.1:5090",
+  "threePathways": true,
+  "fourDedicatedSubjects": true,
+  "resultFilmsPlayedToEnd": [
+    {
+      "src": "/education/technical-v1/egd-drawing-views/result.mp4",
+      "time": 28,
+      "duration": 28,
+      "ended": true,
+      "error": null,
+      "frames": 672,
+      "dropped": 0
+    },
+    {
+      "src": "/education/technical-v1/mechanical-gears/result.mp4",
+      "time": 28,
+      "duration": 28,
+      "ended": true,
+      "error": null,
+      "frames": 672,
+      "dropped": 0
+    },
+    {
+      "src": "/education/technical-v1/electrical-simple-circuit/result.mp4",
+      "time": 28,
+      "duration": 28,
+      "ended": true,
+      "error": null,
+      "frames": 672,
+      "dropped": 0
+    },
+    {
+      "src": "/education/technical-v1/civil-brick-sequence/result.mp4",
+      "time": 28,
+      "duration": 28,
+      "ended": true,
+      "error": null,
+      "frames": 672,
+      "dropped": 0
+    }
+  ],
+  "tutorialStartMiddleEnd": true,
+  "downloads": [
+    {
+      "lessonId": "egd-drawing-views",
+      "file": "practice-kit.zip",
+      "status": 206,
+      "bytes": 256
+    },
+    {
+      "lessonId": "egd-drawing-views",
+      "file": "student-worksheet.pdf",
+      "status": 200,
+      "bytes": 27997
+    },
+    {
+      "lessonId": "egd-drawing-views",
+      "file": "teacher-guide.pdf",
+      "status": 200,
+      "bytes": 42726
+    },
+    {
+      "lessonId": "egd-drawing-views",
+      "file": "STUDIO-RECIPE.txt",
+      "status": 200,
+      "bytes": 19772
+    },
+    {
+      "lessonId": "egd-drawing-views",
+      "file": "lesson.graphics.json",
+      "status": 200,
+      "bytes": 17219
+    },
+    {
+      "lessonId": "egd-drawing-views",
+      "file": "starter.graphics.json",
+      "status": 200,
+      "bytes": 17218
+    },
+    {
+      "lessonId": "egd-drawing-views",
+      "file": "PROJECT-RESTORE.txt",
+      "status": 200,
+      "bytes": 1149
+    },
+    {
+      "lessonId": "mechanical-gears",
+      "file": "practice-kit.zip",
+      "status": 206,
+      "bytes": 256
+    },
+    {
+      "lessonId": "mechanical-gears",
+      "file": "student-worksheet.pdf",
+      "status": 200,
+      "bytes": 29569
+    },
+    {
+      "lessonId": "mechanical-gears",
+      "file": "teacher-guide.pdf",
+      "status": 200,
+      "bytes": 43971
+    },
+    {
+      "lessonId": "mechanical-gears",
+      "file": "STUDIO-RECIPE.txt",
+      "status": 200,
+      "bytes": 37142
+    },
+    {
+      "lessonId": "mechanical-gears",
+      "file": "lesson.graphics.json",
+      "status": 200,
+      "bytes": 34562
+    },
+    {
+      "lessonId": "mechanical-gears",
+      "file": "starter.graphics.json",
+      "status": 200,
+      "bytes": 34561
+    },
+    {
+      "lessonId": "mechanical-gears",
+      "file": "PROJECT-RESTORE.txt",
+      "status": 200,
+      "bytes": 1149
+    },
+    {
+      "lessonId": "electrical-simple-circuit",
+      "file": "practice-kit.zip",
+      "status": 206,
+      "bytes": 256
+    },
+    {
+      "lessonId": "electrical-simple-circuit",
+      "file": "student-worksheet.pdf",
+      "status": 200,
+      "bytes": 28056
+    },
+    {
+      "lessonId": "electrical-simple-circuit",
+      "file": "teacher-guide.pdf",
+      "status": 200,
+      "bytes": 43374
+    },
+    {
+      "lessonId": "electrical-simple-circuit",
+      "file": "STUDIO-RECIPE.txt",
+      "status": 200,
+      "bytes": 19699
+    },
+    {
+      "lessonId": "electrical-simple-circuit",
+      "file": "lesson.graphics.json",
+      "status": 200,
+      "bytes": 17132
+    },
+    {
+      "lessonId": "electrical-simple-circuit",
+      "file": "starter.graphics.json",
+      "status": 200,
+      "bytes": 17134
+    },
+    {
+      "lessonId": "electrical-simple-circuit",
+      "file": "PROJECT-RESTORE.txt",
+      "status": 200,
+      "bytes": 1149
+    },
+    {
+      "lessonId": "civil-brick-sequence",
+      "file": "practice-kit.zip",
+      "status": 206,
+      "bytes": 256
+    },
+    {
+      "lessonId": "civil-brick-sequence",
+      "file": "student-worksheet.pdf",
+      "status": 200,
+      "bytes": 28294
+    },
+    {
+      "lessonId": "civil-brick-sequence",
+      "file": "teacher-guide.pdf",
+      "status": 200,
+      "bytes": 43881
+    },
+    {
+      "lessonId": "civil-brick-sequence",
+      "file": "STUDIO-RECIPE.txt",
+      "status": 200,
+      "bytes": 28735
+    },
+    {
+      "lessonId": "civil-brick-sequence",
+      "file": "lesson.graphics.json",
+      "status": 200,
+      "bytes": 25997
+    },
+    {
+      "lessonId": "civil-brick-sequence",
+      "file": "starter.graphics.json",
+      "status": 200,
+      "bytes": 26005
+    },
+    {
+      "lessonId": "civil-brick-sequence",
+      "file": "PROJECT-RESTORE.txt",
+      "status": 200,
+      "bytes": 1149
+    }
+  ],
+  "completePackRange": true,
+  "notesPersistReloadDownloadClear": true,
+  "layouts": [
+    {
+      "width": 1440,
+      "noHorizontalOverflow": true
+    },
+    {
+      "width": 390,
+      "noHorizontalOverflow": true
+    },
+    {
+      "width": 360,
+      "noHorizontalOverflow": true
+    }
+  ],
+  "noCaptionTracks": true,
+  "renderRequests": 0,
+  "browserErrors": [],
+  "httpFailures": [],
+  "scope": "Local actual page/playback/download verification. Not a physical school-device or independent teacher assessment."
+}

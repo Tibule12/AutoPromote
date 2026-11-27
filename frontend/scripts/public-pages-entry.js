@@ -3,6 +3,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { StaticRouter } from "react-router";
 import { visibleEducationLessons } from "../src/education/educationCatalog";
 import catCatalog from "../src/education/catCatalog.json";
+import technicalCatalog from "../src/education/technicalCatalog.json";
+import { hasTechnicalPresentationRelease } from "../src/education/technicalPresentationRelease";
 import EducationPage from "../src/education/EducationPage";
 import About from "../src/About";
 import Contact from "../src/Contact";
@@ -19,6 +21,7 @@ export const retiredRoutes = ["analytics", "metrics", "smart-promo", "smart_prom
 export const footerRoutes = FOOTER_GROUPS.flatMap(([, links]) => links.map(([, route]) => route));
 export const nestedRoutes = [
   "/education/library", "/education/teachers", "/education/partners", "/education/cat",
+  ...(hasTechnicalPresentationRelease(technicalCatalog) ? ["/education/technical", ...technicalCatalog.lessons.map(lesson => `/education/technical/${lesson.id}`)] : []),
   ...(catCatalog.presentationRelease?.channel === "teacher-review" ? catCatalog.lessons.map(lesson => `/education/cat/${lesson.id}`) : []),
   ...visibleEducationLessons().map(lesson => `/education/lessons/${lesson.id}`),
   ...guides.map(guide => `/docs/${guide.slug}`),

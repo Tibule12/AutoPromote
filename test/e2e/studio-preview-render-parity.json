@@ -1,4 +1,27 @@
 {
+  "educationPresentationRelease20261127": {
+    "date": "2026-11-27",
+    "scope": "Owner-authorised public teacher-review release of the four completed native technical lessons; existing IT and CAT gates preserved.",
+    "evidenceRefs": [
+      "reports/education-release-20261127/README.md",
+      "frontend/public/education/technical-v1/release-manifest.json",
+      "reports/education-technical-20261125/native-verification.json",
+      "reports/education-technical-20261125/kit-recreation.json"
+    ],
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "teacherFeedbackReceived": false,
+    "independentLearnerRecreation": false,
+    "schoolHardwareTrial": false,
+    "formalCAPSApproval": false,
+    "deploymentAuthorization": "Owner: deploy man education updates, 27 November 2026",
+    "learnerEnrolment": false,
+    "paidGpuJobs": 0,
+    "blockers": [
+      "External educator feedback, independent learner recreation and actual school device trials remain pending.",
+      "Shared S02/S04/S03 and historical typography13/16 limits remain unchanged."
+    ]
+  },
   "technicalTeaching20261125": {
     "date": "2026-11-25",
     "scope": "Four complete private technical-school review packages using native Studio: EGD third-angle views,20/40 gears, low-voltage conventional-current illustration and stretcher-bond sequence. Preserve IT/CAT.",

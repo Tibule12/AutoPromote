@@ -1,0 +1,987 @@
+{
+  "format": "autopromote-technical-presentation",
+  "version": 1,
+  "authorizedBy": "owner",
+  "date": "2026-11-27",
+  "channel": "teacher-review",
+  "lessonIds": [
+    "egd-drawing-views",
+    "mechanical-gears",
+    "electrical-simple-circuit",
+    "civil-brick-sequence"
+  ],
+  "curriculumApproval": false,
+  "learnerEnrolment": false,
+  "files": [
+    {
+      "path": "OPEN - Technical school review.html",
+      "bytes": 18094,
+      "sha256": "6ab2dc055198fedc7c3170718b96a230003b5e05d2a60e3eed468ac0f708b110"
+    },
+    {
+      "path": "PERMISSIONS.txt",
+      "bytes": 549,
+      "sha256": "656cb664fe80a45dd6b34f0f69f9fb64b623a037313d44876c9cd375ee154fa0"
+    },
+    {
+      "path": "PRESENTATION-RELEASE.txt",
+      "bytes": 877,
+      "sha256": "5787bbb6c3e25093fc3194fb5464a57837b7748fbc87ffb2e215cb0eee4f5fd4"
+    },
+    {
+      "path": "REVIEW-BRIEF.txt",
+      "bytes": 1111,
+      "sha256": "545cf461c42f69c51067fb33ea72029c2bd212b4f92b813e7dfd59f791947fa6"
+    },
+    {
+      "path": "civil-brick-sequence/CONCEPT-TRANSCRIPT.txt",
+      "bytes": 521,
+      "sha256": "28ea2c942aa5b45f75a1a1fbd2c09e3202724930a170b935a1849f0cb95ce828"
+    },
+    {
+      "path": "civil-brick-sequence/LEARNER-NOTES.txt",
+      "bytes": 794,
+      "sha256": "b33e7d957a99624c27069adc253be9014d1033ee093665829cd13ef760cd04db"
+    },
+    {
+      "path": "civil-brick-sequence/PROJECT-RESTORE.txt",
+      "bytes": 1149,
+      "sha256": "ab6cf4416df1c772b5bce7c8a02c26bda7507ba43ef28d43cb994e57510e9768"
+    },
+    {
+      "path": "civil-brick-sequence/REBUILD-LAYERS.txt",
+      "bytes": 613,
+      "sha256": "9abdf1a9d3b8061716bb02cea5dacd52f98ccbcf55eeeffce4ae40cb1cdb9a79"
+    },
+    {
+      "path": "civil-brick-sequence/SOURCE-PROVENANCE.txt",
+      "bytes": 803,
+      "sha256": "74b423fbf7fa1da980fd830b03bd0d65d47df0baac2ee56d156b138e819cb07b"
+    },
+    {
+      "path": "civil-brick-sequence/STUDENT-EXERCISES.txt",
+      "bytes": 871,
+      "sha256": "cbfdaa7d07e0a4697cf0619510e65f65f9b19f753aa5a792f1ac4a7c61951df5"
+    },
+    {
+      "path": "civil-brick-sequence/STUDIO-RECIPE.txt",
+      "bytes": 28735,
+      "sha256": "2fbbbfeaa9d90706c11a797155ac2eee972e73adac4434d34dbd103f7d37d6c7"
+    },
+    {
+      "path": "civil-brick-sequence/TEACHER-ASSESSMENT.txt",
+      "bytes": 2101,
+      "sha256": "fea27b697f57214e574b075a081e5f1c9d4c86d060d4e2dabfc696bc751cb4e5"
+    },
+    {
+      "path": "civil-brick-sequence/TEACHER-REVIEW-CHECKLIST.txt",
+      "bytes": 823,
+      "sha256": "6b6b77952a5389e592a395fa82ffbf73f3780202220a8680bb04916f5ef86e4f"
+    },
+    {
+      "path": "civil-brick-sequence/TECHNICAL-VERIFICATION.json",
+      "bytes": 4220,
+      "sha256": "3043d8f3d7c8dad4aedca737ad750f94f94207fa178862596573cf39acb17562"
+    },
+    {
+      "path": "civil-brick-sequence/TUTORIAL-TRANSCRIPT.txt",
+      "bytes": 4348,
+      "sha256": "f5b643e6fe34e8e2b4b868d6ead85d69052e64252dc5df2122455681f1455166"
+    },
+    {
+      "path": "civil-brick-sequence/lesson.graphics.json",
+      "bytes": 25997,
+      "sha256": "63e35a15f806ba49b4ddecf920e80d79f106183b5d15a569561f619c96f352eb"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/bed-joint-annotation.graphics.json",
+      "bytes": 1831,
+      "sha256": "8861c214ac3de1dc883ba5da8824332357e0d1530fb33b6d3c07a1871b40da26"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/bed-joint-label.graphics.json",
+      "bytes": 597,
+      "sha256": "6a261a397c451ff8d0f3e6df54d766ce199792f20d55d0349bbf22dca282242e"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/callout-1.graphics.json",
+      "bytes": 614,
+      "sha256": "e5f9fd1c54b9df6929aca1eecbcd7ed1846e63e522854e71bfb2b2090db3db02"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/callout-2.graphics.json",
+      "bytes": 590,
+      "sha256": "9f38f6bbd4b1f195d209d734fe5dd6f0ff4851343e05faba2e01fe0afa36bec8"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/callout-3.graphics.json",
+      "bytes": 603,
+      "sha256": "ae71d8ebb06b9d4d9d3e5a480819e436704a7f83a904c8e05546a963f2ff0e4f"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/callout-4.graphics.json",
+      "bytes": 632,
+      "sha256": "243cea8088383cdd5a1f81b482930f27c1678f28b3b7b9a9b0a6ce0154e3596d"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/course-1.graphics.json",
+      "bytes": 2445,
+      "sha256": "acd8094a6000cd5ed88cf6a775c90104105ec2fcde55e40f924acc1812005ea9"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/course-1.svg",
+      "bytes": 1645,
+      "sha256": "d0f29a3ca248fe8368a113dbf311e645d32d89ec83620d8016f52a7de41d0bcc"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/course-2.graphics.json",
+      "bytes": 2448,
+      "sha256": "01b21f0c7938f3c7f5f7ffced9e8bcf4d7a10dbdb0f8cc32114fd7266bc6165d"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/course-2.svg",
+      "bytes": 1647,
+      "sha256": "9cf95c662cd8392baef874c26742e454f66b80814f8ff9ad65186621c2165225"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/course-3.graphics.json",
+      "bytes": 2445,
+      "sha256": "3f90257d26fe9a1799c4b53bf55e7f59b58e07b75a34795cca753084d727beca"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/course-3.svg",
+      "bytes": 1645,
+      "sha256": "d0f29a3ca248fe8368a113dbf311e645d32d89ec83620d8016f52a7de41d0bcc"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/course-4.graphics.json",
+      "bytes": 2447,
+      "sha256": "1cc82ff95f749fa01ff423f202d19e9f5422675652a0557d8973760aca6ea533"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/course-4.svg",
+      "bytes": 1647,
+      "sha256": "9cf95c662cd8392baef874c26742e454f66b80814f8ff9ad65186621c2165225"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/course-label-1.graphics.json",
+      "bytes": 586,
+      "sha256": "73c54f66692589fcbb05e78eb1a8f673c33d610b658596eb78b35269eaefdbaa"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/course-label-2.graphics.json",
+      "bytes": 587,
+      "sha256": "a4a5323958fcbb7e3e06a3b7d7dae756d20bc3f41d4bcb9a61f2fb4b9611405f"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/course-label-3.graphics.json",
+      "bytes": 586,
+      "sha256": "641c11655542f8b4e9b00b9ce26ad45cac51483ecae392ad6e277cedc9206351"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/course-label-4.graphics.json",
+      "bytes": 586,
+      "sha256": "6e28c9802be8c47d7dae2174bc22b8df35c589e9d67a82b618722d4d8879b41c"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/crop-note.graphics.json",
+      "bytes": 617,
+      "sha256": "59176f326096cd9191cccee912ea27d3eb5e9f0c9fa5ca7298ab233b39a79cf9"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/lesson-title.graphics.json",
+      "bytes": 608,
+      "sha256": "e2970873742169e49360c839e762f96d37c69bea91aa9f99f3c30a4b8330c1d3"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/level-and-plumb-guides.graphics.json",
+      "bytes": 898,
+      "sha256": "f7954bffe05a8f0cb8ded8b6fc5fff015b7b5509db9675e3cf2abdee18d84955"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/level-and-plumb-guides.svg",
+      "bytes": 296,
+      "sha256": "03f7a3750cabdd341b6bc67fba6c8cc87bc9c0d3e61c0fe034d639f10797edc5"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/pathway-marker.graphics.json",
+      "bytes": 623,
+      "sha256": "aca421ab76dfc02e8565dff29dd87db3f823b4f30b1e4411c3d0d263336ecc15"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/perp-joint-annotation.graphics.json",
+      "bytes": 1824,
+      "sha256": "97b1f9148a2869322b83b3f0a2ba0fd11bbcb93de9b9ae5e9ee48262f8641b68"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/perp-joint-label.graphics.json",
+      "bytes": 601,
+      "sha256": "f87a8f6d3917e233285eec74229fffe8c06ab4e64dd2ac00230dae8a96b1b92c"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/prepared-support.graphics.json",
+      "bytes": 732,
+      "sha256": "87dad22b12ef9911439be9ce26c034a896758dbd00c0bd6cf843072d1f1b0d33"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/prepared-support.svg",
+      "bytes": 164,
+      "sha256": "01bfdfb40fb391d7fee86b4ea3e0695b6f129a4abe29acc715fa8f56a3cab55a"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/schematic-dpc.graphics.json",
+      "bytes": 751,
+      "sha256": "31db2bab450e23fbf86961e168cc5b6c5995a19655b7ec04bb160d133bf9f34c"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/schematic-dpc.svg",
+      "bytes": 190,
+      "sha256": "9d20dd4a9761c11a9d0c01b343bbb942ee7e4fe5c22393d46a97019e8e693fe3"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/stage-dividers.graphics.json",
+      "bytes": 823,
+      "sha256": "e52f179f512b50d58e34cc87c1c569790cc5a0872ba73f45bd40f0f35172f4a6"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/stage-dividers.svg",
+      "bytes": 249,
+      "sha256": "c4304d1a0a4eeefd85b5cb030b6d3d93b4f00b9607f428d7b45327ea03ef28ad"
+    },
+    {
+      "path": "civil-brick-sequence/original-assets/support-note.graphics.json",
+      "bytes": 608,
+      "sha256": "921024367d075c80a36682ea4694752bc74286579127f49e89a76e04b3a98db5"
+    },
+    {
+      "path": "civil-brick-sequence/poster.jpg",
+      "bytes": 65029,
+      "sha256": "b2c253c217158c085a96380861d549cf5498d6913b0453ea144b834cb4019b37"
+    },
+    {
+      "path": "civil-brick-sequence/practice-kit.zip",
+      "bytes": 11830378,
+      "sha256": "6bb55d99c0aa14e493eda621a82be7c089aed4b8987775f59b13773e26fa82b4"
+    },
+    {
+      "path": "civil-brick-sequence/result.mp4",
+      "bytes": 808256,
+      "sha256": "76b7c5ba4d02f6cdfa8820a0e25958b5cb622e245e69bac3fcbb3e8c7ef23555"
+    },
+    {
+      "path": "civil-brick-sequence/source.mp4",
+      "bytes": 391128,
+      "sha256": "8f9875c97efce914485ea877dcf1850afaa50aa0ed631bc78f23f92939737afb"
+    },
+    {
+      "path": "civil-brick-sequence/starter.graphics.json",
+      "bytes": 26005,
+      "sha256": "aecece8e2120bbce754632416b78c08dcdf7a2698d7f045a5280414d7b2768b4"
+    },
+    {
+      "path": "civil-brick-sequence/student-worksheet.html",
+      "bytes": 2620,
+      "sha256": "3e9cea08236433bf345bbabfab68fd904d1539831356cc8228c6b212b7d3feb2"
+    },
+    {
+      "path": "civil-brick-sequence/student-worksheet.pdf",
+      "bytes": 28294,
+      "sha256": "1a8825b8fc9276a52e82609c53c5be3a8307a5e435686c71ad41204efac9565d"
+    },
+    {
+      "path": "civil-brick-sequence/teacher-guide.html",
+      "bytes": 8524,
+      "sha256": "ea4ae07146f3f753dc0344d446323a62c65d59e35209649ca25b8a335a18b484"
+    },
+    {
+      "path": "civil-brick-sequence/teacher-guide.pdf",
+      "bytes": 43881,
+      "sha256": "121baa38a13362af4a45f3fed5e62fd8f57f182b642f7af2e6ff4e2a29bc89c8"
+    },
+    {
+      "path": "civil-brick-sequence/tutorial.mp4",
+      "bytes": 10475342,
+      "sha256": "3b1f49efdc6b78619074dc071bc25f63a0f455a3be2e2827ae25bf8565e5d702"
+    },
+    {
+      "path": "egd-drawing-views/CONCEPT-TRANSCRIPT.txt",
+      "bytes": 432,
+      "sha256": "62b39d768acad5051d0f2c2b8c8a2343adf86a6238f5a1029867a1068612bd45"
+    },
+    {
+      "path": "egd-drawing-views/LEARNER-NOTES.txt",
+      "bytes": 575,
+      "sha256": "698f197e9b7d4c71303c372c928a78dd597425c99106de72efe0afad8ef2f6d5"
+    },
+    {
+      "path": "egd-drawing-views/PROJECT-RESTORE.txt",
+      "bytes": 1149,
+      "sha256": "ab6cf4416df1c772b5bce7c8a02c26bda7507ba43ef28d43cb994e57510e9768"
+    },
+    {
+      "path": "egd-drawing-views/REBUILD-LAYERS.txt",
+      "bytes": 613,
+      "sha256": "9abdf1a9d3b8061716bb02cea5dacd52f98ccbcf55eeeffce4ae40cb1cdb9a79"
+    },
+    {
+      "path": "egd-drawing-views/SOURCE-PROVENANCE.txt",
+      "bytes": 692,
+      "sha256": "4d20dad6808cec7721cecdc5bc848f1fd6f41efcd2fc6b515b72a57aac0a9b8e"
+    },
+    {
+      "path": "egd-drawing-views/STUDENT-EXERCISES.txt",
+      "bytes": 845,
+      "sha256": "0263d5fa3e3276c8a77151a291e5de3a52e4b96105000ec2b58ddd969250f7cb"
+    },
+    {
+      "path": "egd-drawing-views/STUDIO-RECIPE.txt",
+      "bytes": 19772,
+      "sha256": "35cac0bb3e958519b96100e6bdadb7b8d02f95a8897c93d0991605ee29931be2"
+    },
+    {
+      "path": "egd-drawing-views/TEACHER-ASSESSMENT.txt",
+      "bytes": 1836,
+      "sha256": "eca02c1ab5af18f4f81bde02b9cb1ec58f5a14a587809a31598980179c789c54"
+    },
+    {
+      "path": "egd-drawing-views/TEACHER-REVIEW-CHECKLIST.txt",
+      "bytes": 823,
+      "sha256": "6b6b77952a5389e592a395fa82ffbf73f3780202220a8680bb04916f5ef86e4f"
+    },
+    {
+      "path": "egd-drawing-views/TECHNICAL-VERIFICATION.json",
+      "bytes": 3789,
+      "sha256": "86084b4233e748f3bd4689f354573335d80eea796b18de258957fe0b83fb80b8"
+    },
+    {
+      "path": "egd-drawing-views/TUTORIAL-TRANSCRIPT.txt",
+      "bytes": 4243,
+      "sha256": "b51ef4ffd33f47d8ed4319440fe1d6382dc4ad1d95a17292bc562e1d8e27b49f"
+    },
+    {
+      "path": "egd-drawing-views/lesson.graphics.json",
+      "bytes": 17219,
+      "sha256": "308d8c48ea8b795cbb79377e2c452662bdd77a23b0cbb1585e46ed3523846c15"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/callout-1.graphics.json",
+      "bytes": 597,
+      "sha256": "0d66e22b0a78b1f608c83b7e7d4a7f72ca85ad32d9eb44ca1905355adeeb82e0"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/callout-2.graphics.json",
+      "bytes": 586,
+      "sha256": "30d8d2ac7f92bbc18a3d4360bd7ebc15a3c203af32b1ad98bbf60a33c3c03bbe"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/callout-3.graphics.json",
+      "bytes": 594,
+      "sha256": "b32b754333b835f6b905522917c6de029d5aafe68f0b41d47ab1491b2e9a11e4"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/callout-4.graphics.json",
+      "bytes": 619,
+      "sha256": "06af1afae29379305f5e727c9402fa2914344e130fd30013dc4cec03dd605522"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/convention.graphics.json",
+      "bytes": 592,
+      "sha256": "79801524b220656049c2bfef175fba80466e2ea5911b0aa60c7f153f76111c5f"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/front-focus.graphics.json",
+      "bytes": 1789,
+      "sha256": "989cce80cceb908a6e75dcb7394559e17be6002b9e066d51bced5fef399c413c"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/front-label.graphics.json",
+      "bytes": 600,
+      "sha256": "493b42b2b67eedd83b21eaf76377273dcf4008b9c13951a49cb97281312cfce6"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/front-view.graphics.json",
+      "bytes": 831,
+      "sha256": "e0dd01cff5f69ae00dabc25af70abac74818ac16a9c933602e6908721f9eb61b"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/front-view.svg",
+      "bytes": 283,
+      "sha256": "2aa95606edfc50c12ff70b48d0c462132adabe912cdc1e16a50ee8fcc5852c8d"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/isometric-label.graphics.json",
+      "bytes": 598,
+      "sha256": "0b5ae2db025850d26f56e1479c4ec9fc2407dc732ad9d40c192fa62b9f12c97a"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/isometric-object.graphics.json",
+      "bytes": 1513,
+      "sha256": "785f58c506b474e3b442fba0ee2efe30cdc853de0a2d0aa1f7dcb464bc247333"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/isometric-object.svg",
+      "bytes": 907,
+      "sha256": "53241b967b5130260f9ff2f06d33711ffdc58e15a6a8b8fd1952451649df7c55"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/lesson-title.graphics.json",
+      "bytes": 609,
+      "sha256": "0bceafb82a90440d6b0ddc833ca776fe2c4c08053ec7ac73856f3eab3d573567"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/pathway-marker.graphics.json",
+      "bytes": 610,
+      "sha256": "5a504545ae60acda5132fdd44b28ba870c9a70a48251a66e9096caf9dbcb737b"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/projection-alignment-guides.graphics.json",
+      "bytes": 1140,
+      "sha256": "d6e8959ee3c1d7aca47f3c82cb62d0ec95edc0e9e0eecee363636e7025d8eb65"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/projection-alignment-guides.svg",
+      "bytes": 495,
+      "sha256": "9ef6886817a2283cfaa4712ddc3a3b1835c14402b51dfa127a39fefb86a9b291"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/right-side-view.graphics.json",
+      "bytes": 906,
+      "sha256": "34516a89cf311de39c2412ed2f66a7645b1818b43ac30d670ccf05a23d00ad9c"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/right-side-view.svg",
+      "bytes": 331,
+      "sha256": "834d5e960c10c4ca18d4af09a8b85abc91fa8897bb8267a7166d624731d0dba2"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/side-focus.graphics.json",
+      "bytes": 1792,
+      "sha256": "34577c765db19c41b2cfb2e68b7b6547d5edd259be5f9db5a65e90fdc8fe0005"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/side-label.graphics.json",
+      "bytes": 606,
+      "sha256": "4f8917727167cc8eb44400580aa9d1122da6fdde97c45931cf33c4b973e72363"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/stage-dividers.graphics.json",
+      "bytes": 823,
+      "sha256": "e52f179f512b50d58e34cc87c1c569790cc5a0872ba73f45bd40f0f35172f4a6"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/stage-dividers.svg",
+      "bytes": 249,
+      "sha256": "c4304d1a0a4eeefd85b5cb030b6d3d93b4f00b9607f428d7b45327ea03ef28ad"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/top-focus.graphics.json",
+      "bytes": 1797,
+      "sha256": "f21ad32517031b2ae1f1ff7092594e531f96a164a5fc009418b7c41aca3bd7b6"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/top-label.graphics.json",
+      "bytes": 593,
+      "sha256": "ada65ce73b5ef8bbee5e0fffeeb8558fa8972fd62e6313d9e56bf96a9bcce679"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/top-view.graphics.json",
+      "bytes": 882,
+      "sha256": "4200f7ff0dddac4e7854dbf16cf0f9a200f7c757b7dec3f4372b30c0290fb910"
+    },
+    {
+      "path": "egd-drawing-views/original-assets/top-view.svg",
+      "bytes": 328,
+      "sha256": "2a6fb413a3e8deda2731dcb661e9d3db96e9644332ca3f372cefa7953ac71d80"
+    },
+    {
+      "path": "egd-drawing-views/poster.jpg",
+      "bytes": 54350,
+      "sha256": "d5524d3dfde30ba68fa35d06a8f97319d105368c1e2a45bbff4d612a2b4e8a99"
+    },
+    {
+      "path": "egd-drawing-views/practice-kit.zip",
+      "bytes": 11269013,
+      "sha256": "f8e278ac1839d3bd719719b81c88cc7672c79fbf63dec79372813de0b2da039d"
+    },
+    {
+      "path": "egd-drawing-views/result.mp4",
+      "bytes": 683526,
+      "sha256": "afc831c3eb3213c515836bec1fb29f9b0686ae17ee3afcbc2510f308e870e17d"
+    },
+    {
+      "path": "egd-drawing-views/source.mp4",
+      "bytes": 346062,
+      "sha256": "4ad73cc0b91c955b164a3addca9eaebf05594b5366e35ea371143285e4102db2"
+    },
+    {
+      "path": "egd-drawing-views/starter.graphics.json",
+      "bytes": 17218,
+      "sha256": "c8cc625d0160369b9e29d3a82c18283222a27259b37445bb4b9ea34c890396f7"
+    },
+    {
+      "path": "egd-drawing-views/student-worksheet.html",
+      "bytes": 2401,
+      "sha256": "f9f5c7b343bff77bf37d306b173d7baa7822235ed95d081fbcd8d444a1ae263b"
+    },
+    {
+      "path": "egd-drawing-views/student-worksheet.pdf",
+      "bytes": 27997,
+      "sha256": "1da56d8368e833334a6be16ec1aae462e6ee026ae0b375cfe9674b3b24ed8f25"
+    },
+    {
+      "path": "egd-drawing-views/teacher-guide.html",
+      "bytes": 7339,
+      "sha256": "4de70c721820cde93d032af8f4a500efda6fee45e6656bec9c2ded96b13e349d"
+    },
+    {
+      "path": "egd-drawing-views/teacher-guide.pdf",
+      "bytes": 42726,
+      "sha256": "1aef33df1ea0cbdbc4b948a250e32d30e98d42546ff238db13c83dbf471cbdb2"
+    },
+    {
+      "path": "egd-drawing-views/tutorial.mp4",
+      "bytes": 10093961,
+      "sha256": "92db6c6df44a91f11bb9f7e887e4e42be0c7379daf0b0fe4f1f0ffaad071abb5"
+    },
+    {
+      "path": "electrical-simple-circuit/CONCEPT-TRANSCRIPT.txt",
+      "bytes": 491,
+      "sha256": "6d31e1c56ad6a091749b1bfb93a756a99eeb3e860abe70e7d8980346ba09485b"
+    },
+    {
+      "path": "electrical-simple-circuit/LEARNER-NOTES.txt",
+      "bytes": 742,
+      "sha256": "fc2654759879887dfe31399ab9eb6497d435ba1cf5144176e6d3a9239e990a6e"
+    },
+    {
+      "path": "electrical-simple-circuit/PROJECT-RESTORE.txt",
+      "bytes": 1149,
+      "sha256": "ab6cf4416df1c772b5bce7c8a02c26bda7507ba43ef28d43cb994e57510e9768"
+    },
+    {
+      "path": "electrical-simple-circuit/REBUILD-LAYERS.txt",
+      "bytes": 613,
+      "sha256": "9abdf1a9d3b8061716bb02cea5dacd52f98ccbcf55eeeffce4ae40cb1cdb9a79"
+    },
+    {
+      "path": "electrical-simple-circuit/SOURCE-PROVENANCE.txt",
+      "bytes": 734,
+      "sha256": "efe6bfdcfab0a66209b6ffc116651349e4f8e710170d2dd947f72eb812d52a09"
+    },
+    {
+      "path": "electrical-simple-circuit/STUDENT-EXERCISES.txt",
+      "bytes": 852,
+      "sha256": "0e2891b4eb9e134ac2325af5510616f9c51e4164a1432ec75df00014f9fdb05e"
+    },
+    {
+      "path": "electrical-simple-circuit/STUDIO-RECIPE.txt",
+      "bytes": 19699,
+      "sha256": "bbb1da9bbd2ece935f145760f11ac6659ea8a06ac5436f1b932b519452abcd9b"
+    },
+    {
+      "path": "electrical-simple-circuit/TEACHER-ASSESSMENT.txt",
+      "bytes": 2042,
+      "sha256": "7b8f1a888ced7bcad4d084d9ed77ac9478641ab705472a4d7d24e2e2e527ff73"
+    },
+    {
+      "path": "electrical-simple-circuit/TEACHER-REVIEW-CHECKLIST.txt",
+      "bytes": 823,
+      "sha256": "6b6b77952a5389e592a395fa82ffbf73f3780202220a8680bb04916f5ef86e4f"
+    },
+    {
+      "path": "electrical-simple-circuit/TECHNICAL-VERIFICATION.json",
+      "bytes": 3827,
+      "sha256": "ccd52bfa5dcda9d22efa3ed9b6f0b8c7d87f2f098bfb944844c39772b308b3b9"
+    },
+    {
+      "path": "electrical-simple-circuit/TUTORIAL-TRANSCRIPT.txt",
+      "bytes": 4296,
+      "sha256": "f40732e0619845b29795099314e72ca5de364abf15a30f6ff353d7ecf4dbca65"
+    },
+    {
+      "path": "electrical-simple-circuit/lesson.graphics.json",
+      "bytes": 17132,
+      "sha256": "4d22156ad9fc7e4c38f93c14c6ac97b0cd3b4f9bd175c6c329ebe0fb67c8773f"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/callout-1.graphics.json",
+      "bytes": 597,
+      "sha256": "b80aed56c41cf54403943b0836268aa06ca729cac04b5503df6185d0fb07beeb"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/callout-2.graphics.json",
+      "bytes": 607,
+      "sha256": "3a0787211a63fb385a263789f4f25a902a3fc22d7fbd85adaacdff46525de42f"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/callout-3.graphics.json",
+      "bytes": 612,
+      "sha256": "44d3a3538abba1b29282302584a61feee59c313cfe441c116b7b96edbbfd0654"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/callout-4.graphics.json",
+      "bytes": 623,
+      "sha256": "5463f630e5a28180e279907157f02f38c8cc343487c7bd32f5933ae434c05e03"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/closed-state.graphics.json",
+      "bytes": 585,
+      "sha256": "793ef134cf7f6a15141e7113734648265c4bcae2d39072850cfa8d5a3b8fddbe"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/conductors-and-symbols.graphics.json",
+      "bytes": 2367,
+      "sha256": "8b2bc08a2ecc8ca9727133865c0488fcfa600c17b01fa92b355023df27fcf02f"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/conductors-and-symbols.svg",
+      "bytes": 1565,
+      "sha256": "65aa88ffc2739c7b281aac4a2d9c29e3dd9dbf7d730ecb8d0b0bd3dd3614d76a"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/conventional-current-marker.graphics.json",
+      "bytes": 794,
+      "sha256": "18bf1c17387437bee1ff49714033bde963fb178d0d42e5c75881c5fe7f93d8e1"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/conventional-current-marker.svg",
+      "bytes": 166,
+      "sha256": "2b92a9fbaa63da6d944fd9bea4d4b0f6c60a7cdf1d35899d17c24aea6bfe8b2c"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/flow-note.graphics.json",
+      "bytes": 599,
+      "sha256": "b9b373fd502d62ca49584d33a7e1fa0ca0bbe39ebfd7709904be6c5db7dbc48e"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/lamp-light.graphics.json",
+      "bytes": 923,
+      "sha256": "1930f292ecbdd803865df5a2759b269af24c4b55ef12f6d33c0c2e2021a38422"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/lamp-light.svg",
+      "bytes": 334,
+      "sha256": "d5e5510f5ec8958d024b88eedf3423d1065279831a1b5df0dd82942d2f9df841"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/lesson-title.graphics.json",
+      "bytes": 606,
+      "sha256": "1eafef2483dff186240d9c2449d99fff4c8cbe36e56b24d746e40a8d47afa902"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/load-label.graphics.json",
+      "bytes": 582,
+      "sha256": "f8acb2ef345d30413367202d1b3b58114439b815b99b30e0493135865aef8c81"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/negative-terminal.graphics.json",
+      "bytes": 601,
+      "sha256": "33bfcd80d4252cacb931f325c045328273700c1b68c43ce1baf4cdc8069d90f9"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/open-again.graphics.json",
+      "bytes": 579,
+      "sha256": "80fa33643aeb0367e07c2127dd1a6bf8d0ff1051fa63b0bbbd46ca094f20de50"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/open-state.graphics.json",
+      "bytes": 578,
+      "sha256": "41097409e007574191b3f74afa6ab05e484d2c70053a0e3dc813ed3d874c1cd7"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/pathway-marker.graphics.json",
+      "bytes": 628,
+      "sha256": "64ec2a406779c988e5cf715375fa8a462f1a8888577f2a215ecd4365a3ece8b7"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/positive-terminal.graphics.json",
+      "bytes": 596,
+      "sha256": "1cc56f8ab6e8555e64ef22a978638d24b800033038ff586150381ed91878b728"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/source-label.graphics.json",
+      "bytes": 592,
+      "sha256": "f28ccafd047529a149dbf24530df5cf9545745bf8c2fb9f8ef8e0fc6e681d77e"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/stage-dividers.graphics.json",
+      "bytes": 823,
+      "sha256": "e52f179f512b50d58e34cc87c1c569790cc5a0872ba73f45bd40f0f35172f4a6"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/stage-dividers.svg",
+      "bytes": 249,
+      "sha256": "c4304d1a0a4eeefd85b5cb030b6d3d93b4f00b9607f428d7b45327ea03ef28ad"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/switch-label.graphics.json",
+      "bytes": 584,
+      "sha256": "176720e2ab71bb252e988e709b8fef0881340720434b0502e22c517c199624ac"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/switch-lever.graphics.json",
+      "bytes": 847,
+      "sha256": "181c9ada29d636115ea39f171e7496bbb0e6d02b316e25b254e30b3300a86410"
+    },
+    {
+      "path": "electrical-simple-circuit/original-assets/switch-lever.svg",
+      "bytes": 249,
+      "sha256": "757f4987ad02acb228857be61466092bb663780a8de9cba32c68bf5729eba0ed"
+    },
+    {
+      "path": "electrical-simple-circuit/poster.jpg",
+      "bytes": 39723,
+      "sha256": "29da06372f1ad32b8b4eb14f89f72ad6ad01823084fc675ca81a7360e656431b"
+    },
+    {
+      "path": "electrical-simple-circuit/practice-kit.zip",
+      "bytes": 11292277,
+      "sha256": "dc45b190b9530dd7003a567ee991bb60911d45f5bac0754aafbc7a97a12a67bc"
+    },
+    {
+      "path": "electrical-simple-circuit/result.mp4",
+      "bytes": 731103,
+      "sha256": "f4b2b0e520fddbb3eb14a0b8469eb76f6770c76ec960684001ff1a9cd73729d8"
+    },
+    {
+      "path": "electrical-simple-circuit/source.mp4",
+      "bytes": 364195,
+      "sha256": "48b388f3182131457e4a7d16ed1ed9d6a4cf9d7dc20bd7557a5fa05d2eca2e61"
+    },
+    {
+      "path": "electrical-simple-circuit/starter.graphics.json",
+      "bytes": 17134,
+      "sha256": "97b1f48d0c1da0ea2394ec279d8a2436d831033d63607893c18db921f0057dce"
+    },
+    {
+      "path": "electrical-simple-circuit/student-worksheet.html",
+      "bytes": 2562,
+      "sha256": "51f76444e951ce119f867af9028fe2be513332439da9d1b3c8cc9ce8b90b363b"
+    },
+    {
+      "path": "electrical-simple-circuit/student-worksheet.pdf",
+      "bytes": 28056,
+      "sha256": "1fb3f23e01171154ea08149812eee6fea4b270254c9c22286fc117527818c731"
+    },
+    {
+      "path": "electrical-simple-circuit/teacher-guide.html",
+      "bytes": 8472,
+      "sha256": "fe649676ecdb939c07dcb483b047d7d2a10d3e2c4e1a1aef519ebdc8a06563c6"
+    },
+    {
+      "path": "electrical-simple-circuit/teacher-guide.pdf",
+      "bytes": 43374,
+      "sha256": "52f3f46174c200051f8f05530709252433e6b7e781f03a2216fcb853a7abfb67"
+    },
+    {
+      "path": "electrical-simple-circuit/tutorial.mp4",
+      "bytes": 10063977,
+      "sha256": "7913841af8c5d0e580de0831cede4c164873096e72afd6d50d0387d908436745"
+    },
+    {
+      "path": "mechanical-gears/CONCEPT-TRANSCRIPT.txt",
+      "bytes": 468,
+      "sha256": "49fb34afc40c33dd0f8eafc73f33572478a3c1e0a38d6ff1158a757859bef5c9"
+    },
+    {
+      "path": "mechanical-gears/LEARNER-NOTES.txt",
+      "bytes": 847,
+      "sha256": "7de50d4ff7ed7ff88304c47a47eb9dde85edd680bcdc571e0f14740c47039f65"
+    },
+    {
+      "path": "mechanical-gears/PROJECT-RESTORE.txt",
+      "bytes": 1149,
+      "sha256": "ab6cf4416df1c772b5bce7c8a02c26bda7507ba43ef28d43cb994e57510e9768"
+    },
+    {
+      "path": "mechanical-gears/REBUILD-LAYERS.txt",
+      "bytes": 613,
+      "sha256": "9abdf1a9d3b8061716bb02cea5dacd52f98ccbcf55eeeffce4ae40cb1cdb9a79"
+    },
+    {
+      "path": "mechanical-gears/SOURCE-PROVENANCE.txt",
+      "bytes": 848,
+      "sha256": "7e32e7d87328d94d96221bdfda5fa462497d6488b74fbb1eaf7d2eda3808eb36"
+    },
+    {
+      "path": "mechanical-gears/STUDENT-EXERCISES.txt",
+      "bytes": 881,
+      "sha256": "1bc69a376a658f2f1b36f81ba2dd9445a776a6a40b2e6198b875a0354bdea9fb"
+    },
+    {
+      "path": "mechanical-gears/STUDIO-RECIPE.txt",
+      "bytes": 37142,
+      "sha256": "a93347574646a8999e1ebe1f35bc1f277875563050c2e561e433595d55b4c3c6"
+    },
+    {
+      "path": "mechanical-gears/TEACHER-ASSESSMENT.txt",
+      "bytes": 2193,
+      "sha256": "7d66cb5ee9858cfae4f72bda1130a27fce875fdbdab1d3483eacab39363b2cf4"
+    },
+    {
+      "path": "mechanical-gears/TEACHER-REVIEW-CHECKLIST.txt",
+      "bytes": 823,
+      "sha256": "6b6b77952a5389e592a395fa82ffbf73f3780202220a8680bb04916f5ef86e4f"
+    },
+    {
+      "path": "mechanical-gears/TECHNICAL-VERIFICATION.json",
+      "bytes": 3635,
+      "sha256": "4cab75d4ddbe427e15927544bba578ec75ea6f08904e93cc9769101c71f2277e"
+    },
+    {
+      "path": "mechanical-gears/TUTORIAL-TRANSCRIPT.txt",
+      "bytes": 4345,
+      "sha256": "d89d87ba49f4b6be2f6ac44b2ac1b1f143f3f6b6c7893ec9e66aa573a7f07e57"
+    },
+    {
+      "path": "mechanical-gears/lesson.graphics.json",
+      "bytes": 34562,
+      "sha256": "fd7e6d85f30b0fc23f5407e59ae9c5c4c97c567315821833e71d058d2e63621b"
+    },
+    {
+      "path": "mechanical-gears/original-assets/callout-1.graphics.json",
+      "bytes": 607,
+      "sha256": "d0cde4244353b5f3096ec5815b0520e3aa3f6c1ce6a4c101bed3c1ceaafef9eb"
+    },
+    {
+      "path": "mechanical-gears/original-assets/callout-2.graphics.json",
+      "bytes": 608,
+      "sha256": "5c83919a2fa83c3e72d2893abdcbebdefd612f621c63c9a76691784b69096ab6"
+    },
+    {
+      "path": "mechanical-gears/original-assets/callout-3.graphics.json",
+      "bytes": 628,
+      "sha256": "d24ef073dcb60d3c3e7578cb5e12a82e1a48b8df60257fed30f629d89f39a4f3"
+    },
+    {
+      "path": "mechanical-gears/original-assets/callout-4.graphics.json",
+      "bytes": 599,
+      "sha256": "2c90cbeac7ecf1b32b778dec3405686d4830e849ab6584f15adc97b3635cf2ce"
+    },
+    {
+      "path": "mechanical-gears/original-assets/driven-gear.graphics.json",
+      "bytes": 17010,
+      "sha256": "ec767266868197eb22829751c09d6cb4986f03fe498e1086c5d92889b6709f8e"
+    },
+    {
+      "path": "mechanical-gears/original-assets/driven-gear.svg",
+      "bytes": 16365,
+      "sha256": "c945f91c689e56cfa990ee0ab2a9562f0d92d2a7be3cf3a0fbcee5219da1e0bc"
+    },
+    {
+      "path": "mechanical-gears/original-assets/driven-label.graphics.json",
+      "bytes": 599,
+      "sha256": "49f6649ce8ff5556993ae7117ec65ae7e266fc18ca50e20276f1dc1f348ad1cd"
+    },
+    {
+      "path": "mechanical-gears/original-assets/driver-gear.graphics.json",
+      "bytes": 8863,
+      "sha256": "371d8653ecd365372ab6493e1234ff31f51cfd33bdac65ebc9ae5388c29315b4"
+    },
+    {
+      "path": "mechanical-gears/original-assets/driver-gear.svg",
+      "bytes": 8227,
+      "sha256": "96c3cf3dbc20469ce710432491333d01d8c2eb68c428fd64394a94853c9206e7"
+    },
+    {
+      "path": "mechanical-gears/original-assets/driver-label.graphics.json",
+      "bytes": 599,
+      "sha256": "e2ff2609b2a9ee1c62734ba61872d5062ac835b56b4048aec4d8294d4f9d7d07"
+    },
+    {
+      "path": "mechanical-gears/original-assets/lesson-title.graphics.json",
+      "bytes": 602,
+      "sha256": "8cde8569b7a9905527767b73f0b5855fdc7c1fdc9b7d606b5a7ecd38a95bb67d"
+    },
+    {
+      "path": "mechanical-gears/original-assets/motion-note.graphics.json",
+      "bytes": 604,
+      "sha256": "24b48689d919186626e7bc186a12dff9a92b4efc88fa840a2a9b29b5f41d648f"
+    },
+    {
+      "path": "mechanical-gears/original-assets/pathway-marker.graphics.json",
+      "bytes": 628,
+      "sha256": "a584171475291f87ad88bc13e14a686b4f2041a091dedff7e0393ff27a818aca"
+    },
+    {
+      "path": "mechanical-gears/original-assets/ratio-badge.graphics.json",
+      "bytes": 579,
+      "sha256": "943f6de8e30013cb559036c9c3dcc81df5a25322739c7a600a9b2545838cd58a"
+    },
+    {
+      "path": "mechanical-gears/original-assets/ratio-explanation.graphics.json",
+      "bytes": 606,
+      "sha256": "8dca473f9f7fa7e93cf730e9fd9f49235f6c4b506dec0c4c10c820b5c6cdfda4"
+    },
+    {
+      "path": "mechanical-gears/original-assets/stage-dividers.graphics.json",
+      "bytes": 823,
+      "sha256": "e52f179f512b50d58e34cc87c1c569790cc5a0872ba73f45bd40f0f35172f4a6"
+    },
+    {
+      "path": "mechanical-gears/original-assets/stage-dividers.svg",
+      "bytes": 249,
+      "sha256": "c4304d1a0a4eeefd85b5cb030b6d3d93b4f00b9607f428d7b45327ea03ef28ad"
+    },
+    {
+      "path": "mechanical-gears/original-assets/turn-relation.graphics.json",
+      "bytes": 605,
+      "sha256": "deecaf8100729d02fa448a9739bc4d35e71e41151d380f62a1cedda7c2beb82e"
+    },
+    {
+      "path": "mechanical-gears/poster.jpg",
+      "bytes": 53140,
+      "sha256": "7de9677cff86dee6918d94d6cd942960f1ecb344c91b607359c69e105ba08b53"
+    },
+    {
+      "path": "mechanical-gears/practice-kit.zip",
+      "bytes": 13196360,
+      "sha256": "ae218645c32a7472a9ccfced51a758869fd95d99872c3e71331491a5e3a118b9"
+    },
+    {
+      "path": "mechanical-gears/result.mp4",
+      "bytes": 1671236,
+      "sha256": "bb050ac9f3b122ca757457e6db1f931c3ea926c900250255b1da993e58f23ddb"
+    },
+    {
+      "path": "mechanical-gears/source.mp4",
+      "bytes": 372423,
+      "sha256": "73f8b869cb2dc048248c6061418d732e6931debff9d0eeb7823c74e74fba84f3"
+    },
+    {
+      "path": "mechanical-gears/starter.graphics.json",
+      "bytes": 34561,
+      "sha256": "935035dc6c4a0d55b7ab691812037528552792505cfbd8f1a74403490c6d33c0"
+    },
+    {
+      "path": "mechanical-gears/student-worksheet.html",
+      "bytes": 2786,
+      "sha256": "5c8ffc25cbf3fb0fa6dcbab7981c35ddc5d8a4a7de098c77a19b825ea2b898a1"
+    },
+    {
+      "path": "mechanical-gears/student-worksheet.pdf",
+      "bytes": 29569,
+      "sha256": "579710446b104a49d6f8c693973117634adc089b748158af70960fbd08f056f1"
+    },
+    {
+      "path": "mechanical-gears/teacher-guide.html",
+      "bytes": 7783,
+      "sha256": "bbb57f39e8c924f7d66e1141d52c694bdf703b869ffff53f8cf174233eae8833"
+    },
+    {
+      "path": "mechanical-gears/teacher-guide.pdf",
+      "bytes": 43971,
+      "sha256": "5168ed17c06de765a51c0874595aa7fbf1f6530dd88c22946af1429873a09226"
+    },
+    {
+      "path": "mechanical-gears/tutorial.mp4",
+      "bytes": 10966542,
+      "sha256": "1184319746e61061d3e1ef834d012d89f053ac2e0f3b8ab6e0e12c2a002f12f9"
+    },
+    {
+      "path": "teacher-review-pack.zip",
+      "bytes": 47616810,
+      "sha256": "94f0a8913bdc4756575268a86962e16e32e3145f9a57cb5a272d9bf876a7c3a4"
+    }
+  ]
+}

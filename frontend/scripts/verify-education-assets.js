@@ -18,9 +18,48 @@ if(fs.existsSync(base))for(const name of fs.readdirSync(base))if(name.endsWith('
 // The owner authorised a public, read-only CAT teacher presentation. This is
 // distinct from an approved learner release; IT gates remain unchanged.
 const catCatalog = require('../src/education/catCatalog.json');
-// The new technical-school brief explicitly withholds production deployment.
-// Local review builds may contain complete proof; normal builds cannot copy it.
-if (!preview) fs.rmSync(path.join(build, 'education/technical-v1'), { recursive: true, force: true });
+// Keep unapproved technical material private; the separately authorised
+// four-lesson teacher presentation is validated below.
+const technicalCatalog = require('../src/education/technicalCatalog.json');
+const { hasTechnicalPresentationRelease } = require('../src/education/technicalPresentationRelease');
+const technicalBuild = path.join(build, 'education/technical-v1');
+if (!preview && !hasTechnicalPresentationRelease(technicalCatalog)) {
+  assert(!technicalCatalog.presentationRelease, 'Invalid technical presentation release');
+  fs.rmSync(technicalBuild, { recursive: true, force: true });
+} else if (!preview) {
+  const crypto = require('crypto');
+  assert.equal(technicalCatalog.presentationRelease.manifest, 'release-manifest.json');
+  const manifest = JSON.parse(fs.readFileSync(path.join(technicalBuild, 'release-manifest.json')));
+  assert.equal(manifest.format, 'autopromote-technical-presentation');
+  assert.equal(manifest.version, 1);
+  assert.deepEqual(manifest.lessonIds, technicalCatalog.presentationRelease.lessonIds);
+  const allowed = new Set(['catalog.json', 'release-manifest.json']);
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(technicalBuild, 'catalog.json'))), technicalCatalog);
+  for (const item of manifest.files) {
+    assert(typeof item.path === 'string' && /^[a-zA-Z0-9 _./-]+$/.test(item.path));
+    assert(!item.path.split('/').some(part => part === '..' || !part));
+    assert(!/private|owned.project|owner.project|signed|token/i.test(item.path));
+    assert(!allowed.has(item.path), 'Duplicate presentation asset');
+    const bytes = fs.readFileSync(path.join(technicalBuild, item.path));
+    assert.equal(bytes.length, item.bytes, 'Changed presentation asset: ' + item.path);
+    assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'), item.sha256, 'Changed presentation bytes: ' + item.path);
+    allowed.add(item.path);
+  }
+  for (const lesson of technicalCatalog.lessons) {
+    for (const name of ['source.mp4','result.mp4','tutorial.mp4','poster.jpg','lesson.graphics.json','starter.graphics.json','practice-kit.zip','student-worksheet.pdf','teacher-guide.pdf','STUDIO-RECIPE.txt','STUDENT-EXERCISES.txt','TEACHER-ASSESSMENT.txt','TEACHER-REVIEW-CHECKLIST.txt','TECHNICAL-VERIFICATION.json','PROJECT-RESTORE.txt'])
+      assert(allowed.has(lesson.id + '/' + name), 'Missing technical review material: ' + lesson.id + '/' + name);
+    for (const [file, field] of [['result.mp4','resultSha256'],['tutorial.mp4','tutorialSha256']])
+      assert.equal(manifest.files.find(item => item.path === lesson.id + '/' + file).sha256, lesson.media[field]);
+  }
+  assert(allowed.has('teacher-review-pack.zip'));
+  function cleanTechnical(dir) { for (const entry of fs.readdirSync(dir,{withFileTypes:true})) {
+    const target = path.join(dir,entry.name);
+    if (entry.isDirectory()) { cleanTechnical(target); if (!fs.readdirSync(target).length) fs.rmdirSync(target); }
+    else if (!allowed.has(path.relative(technicalBuild,target).split(path.sep).join('/'))) fs.unlinkSync(target);
+  } }
+  cleanTechnical(technicalBuild);
+  console.log(JSON.stringify({technicalTeacherReviewLessons:4,verifiedPresentationAssets:manifest.files.length,learnerEnrolment:false,formalApproval:false}));
+}
 const catBuild = path.join(build, 'education/cat-html-v1');
 if (!preview && catCatalog.presentationRelease?.channel !== 'teacher-review') {
   fs.rmSync(catBuild, { recursive: true, force: true });
