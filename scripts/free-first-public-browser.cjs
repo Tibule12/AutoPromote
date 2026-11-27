@@ -17,7 +17,7 @@ const option = (name, fallback) => {const i=process.argv.indexOf(name);return i<
   fs.mkdirSync(folder,{recursive:true});
   const report={scope:'Real public App and ordinary account; approved cloud qualification; no additional publication',checks:[],errors:[],dialogs:[]};
   const browser=await chromium.launch({headless:true,args:['--mute-audio']});
-  let token;
+  let token,liveContext;
   try {
     for (const width of [1440,390,360]) {
       const context=await browser.newContext({viewport:{width,height:1000},timezoneId:'Africa/Johannesburg',reducedMotion:'reduce'});
@@ -30,6 +30,7 @@ const option = (name, fallback) => {const i=process.argv.indexOf(name);return i<
       await context.close();
     }
     const context=await browser.newContext({viewport:{width:1440,height:1000},timezoneId:'Africa/Johannesburg',recordVideo:{dir:folder+'/browser-recordings',size:{width:1440,height:1000}}});
+    liveContext=context;
     const page=await context.newPage();page.setDefaultTimeout(20000);
     page.on('pageerror',e=>report.errors.push(e.message));
     page.on('response', async response=>{
@@ -82,6 +83,19 @@ const option = (name, fallback) => {const i=process.argv.indexOf(name);return i<
     const title=page.getByRole('button',{name:/Create for free/}).first();if(await title.isVisible())await title.click();
     await page.screenshot({path:folder+'/free-project-reopened.png'});
     report.checks.push({name:'saved-project-reopened',savedProjectVisible:true});
+    await context.storageState({path:folder+'/session.private.json',indexedDB:true});
+    fs.chmodSync(folder+'/session.private.json',0o600);
+    const requiredCommits=option('--required-commits','').split(',').filter(Boolean);
+    if(requiredCommits.length){
+      let version;
+      for(let n=0;n<600;n+=5){
+        version=await fetch(info.origin+'/api/version').then(r=>r.json());
+        if(requiredCommits.includes(version.commit))break;
+        await page.waitForTimeout(5000);
+      }
+      assert.ok(requiredCommits.includes(version.commit),'required production integration must serve before paid submission');
+      report.apiCommit=version.commit;
+    }
     await page.getByRole('button',{name:'Export',exact:true}).click();
     console.log('Export panel',await page.locator('.export-btn').allTextContents());
     report.exportPanel=await page.locator('body').innerText().then(t=>t.slice(-1800));
@@ -122,5 +136,8 @@ const option = (name, fallback) => {const i=process.argv.indexOf(name);return i<
     assert.deepEqual(report.errors,[]);
     console.log(JSON.stringify({checks:report.checks,remaining:after.processing.remaining}));
   } catch(error) {report.failure=error.message;throw error;}
-  finally {fs.writeFileSync(folder+'/browser-evidence.json',JSON.stringify(report,null,2)+'\n');await browser.close();}
+  finally {
+    if(liveContext)await liveContext.storageState({path:folder+'/session.private.json',indexedDB:true}).then(()=>fs.chmodSync(folder+'/session.private.json',0o600)).catch(()=>{});
+    fs.writeFileSync(folder+'/browser-evidence.json',JSON.stringify(report,null,2)+'\n',{mode:0o600});await browser.close();
+  }
 })().catch(e=>{console.error(e);process.exitCode=1;});

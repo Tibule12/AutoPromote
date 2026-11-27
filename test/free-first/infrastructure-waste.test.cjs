@@ -92,10 +92,12 @@ test('approval replay creates exactly one real emulator schedule and preserves a
  await assert.rejects(()=>createApprovalSchedule({db,contentId:data.contentId,data}),/identity/);
  report.measurements.approvalReplay={deliveries:20,schedulesCreated:1,successfulWrites:replay.writes};
 });
-test('the actual Firebase Functions SDK consolidated export invokes the retained approval handler',async()=>{
+test('the actual Firebase Functions SDK consolidated export invokes the retained approval handler',async t=>{
  process.env.CONTENT_UPDATE_ROUTER_MODE='survivor';process.env.GCLOUD_PROJECT='demo-autopromote-credits';
  process.env.FIREBASE_CONFIG=JSON.stringify({projectId:'demo-autopromote-credits',storageBucket:'demo-autopromote-credits'});process.env.CI='true';
  const functions=require('../../autopromote-functions/index');
+ const functionsAdmin=require(require.resolve('firebase-admin',{paths:[path.dirname(require.resolve('../../autopromote-functions/index'))]}));
+ t.after(()=>functionsAdmin.app().delete());
  assert.equal(typeof functions.createPromotionOnApproval.run,'function');
  assert.equal(functions.contentUpdated,undefined);
  for(const name of ['handleLandingPageIntent','handleSmartLinkIntent','autoRewardCreators'])assert.equal(functions[name],undefined);
@@ -105,7 +107,6 @@ test('the actual Firebase Functions SDK consolidated export invokes the retained
  const schedules=await db.collection('promotion_schedules').where('contentId','==','waste-actual-sdk').get();
  assert.equal(schedules.size,1);assert.equal(schedules.docs[0].data().isActive,true);
  report.measurements.actualFunctionsSdk={consolidatedExport:true,survivingTrigger:'createPromotionOnApproval',additionalTriggerCreated:false,threeRedundantUpdateExportsAbsent:true,deliveries:2,schedules:1};
- await require('firebase-admin/app').deleteApp(require('firebase-admin/app').getApp());
 });
 function loadRouter(source,filename){
  const authFile=require.resolve('../../src/authMiddleware'),firebaseFile=require.resolve('../../src/firebaseAdmin');
