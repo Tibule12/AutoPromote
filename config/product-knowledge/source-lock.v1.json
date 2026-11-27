@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Final independent infrastructure and legacy payment-security release, signed-in existing-plan Studio/help, unchanged public welcome and guarded financial-only Rules delta.",
-  "reviewed_at": "2026-11-27T03:57:04.842Z",
+  "reason": "Review bounded negative-only retention cache; unchanged features, prices, creative gates and financial controls.",
+  "reviewed_at": "2026-11-27T04:25:59.943Z",
   "catalog_sha256": "c09a26f3a093fe05b546f1006e2da1ed4c5f10efb8e49ab84c2fe77a452e29c1",
   "sources": [
     {
@@ -755,7 +755,7 @@
     },
     {
       "path": "src/services/publishedVideoRetention.js",
-      "sha256": "2a2bc1bd0b87ce550af0bf3814bc909ce3a234a4ed27a160d555a14c49690593"
+      "sha256": "2fd5e2f71e9defecffc8b39caa9416618c626e95f40ce5f06355d396682a3ecb"
     },
     {
       "path": "src/services/publishingIntent.js",
@@ -815,11 +815,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "9dfdd0466fea9e1c7603056e4f408cb07fcad3382be6dfd8258de8dd4d4edbe5"
+      "sha256": "5f75f1c8d305791992e3198b2d1bd13b13c581a2ec3b1d7b434bf106e72f29f0"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "ec7b4f5c99b959d109fe1cb42bb0c7087fb264f483aa42b7d6e662ffaa41ebf9"
+      "sha256": "27dfe856b395405b5e0a73c6e8aa4a7293e80c8ab6044f77aab5c80853a4298a"
     },
     {
       "path": "worker.js",
