@@ -59,9 +59,9 @@ export function applySkyReplacementRgba(rgba, width, height, options = {}) {
     const cloudMaskY = smooth(0.12, horizonFrac * 0.92, ny);
     for (let x = 0; x < width; x += 1) {
       const nx = x / Math.max(1, width - 1);
-      const wispA = Math.sin(nx * 4.7 + ny * 6.3 + t * 0.18) * Math.cos(nx * 3.1 - ny * 4.1 - t * 0.11);
-      const wispB = Math.sin(nx * 9.3 - ny * 8.4 + t * 0.25) * 0.5;
-      const cloud = clamp01(0.5 + 0.32 * wispA + 0.18 * wispB) * cloudMaskY;
+      const wispWaveA = Math.sin(nx * 4.7 + ny * 6.3 + t * 0.18) * Math.cos(nx * 3.1 - ny * 4.1 - t * 0.11);
+      const wispWaveB = Math.sin(nx * 9.3 - ny * 8.4 + t * 0.25) * 0.5;
+      const cloud = clamp01(0.5 + 0.32 * wispWaveA + 0.18 * wispWaveB) * cloudMaskY;
       const dx = (nx - 0.34) / 0.42;
       const dy = (ny - horizonFrac * 0.78) / 0.34;
       const glow = Math.exp(-(dx * dx + dy * dy));
