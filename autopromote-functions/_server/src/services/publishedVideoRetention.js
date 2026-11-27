@@ -1,25 +1,112 @@
 const { toMillis } = require("./storageRetentionPolicy");
+const { createHash } = require("node:crypto");
 const DAY = 24 * 60 * 60 * 1000;
 const ownerOf = content => content.user_id || content.userId || content.uid;
 const names = value => (Array.isArray(value) ? value : value ? [value] : []).map(String);
-const publishingCopies = (content, extractPath) => [...new Set([
-  content.url,content.media_url,content.video_url,content.file_url,content.processedUrl,content.persistentMediaUrl,
-].filter(value=>typeof value==='string'))].map(url=>({url,path:extractPath(url)})).filter(row=>row.path?.startsWith('uploads/videos/'));
+const publishingCopies = (content, extractPath) =>
+  [
+    ...new Set(
+      [
+        content.url,
+        content.media_url,
+        content.video_url,
+        content.file_url,
+        content.processedUrl,
+        content.persistentMediaUrl,
+      ].filter(value => typeof value === "string")
+    ),
+  ]
+    .map(url => ({ url, path: extractPath(url) }))
+    .filter(row => row.path?.startsWith("uploads/videos/"));
 
-async function readRetentionDependencies(db,ids,scanLimit) {
-  const result=new Map();
-  const collections=['platform_posts','promotion_tasks','promotion_schedules','media_transform_tasks'];
-  for(let index=0;index<ids.length;index+=10){
-    const group=ids.slice(index,index+10);
-    const byCollection=await Promise.all(collections.map(async name=>{
-      if(group.length===1)return new Map([[group[0],await db.collection(name).where('contentId','==',group[0]).limit(scanLimit).get()]]);
-      const snapshot=await db.collection(name).where('contentId','in',group).limit(scanLimit).get();
-      // A full shared result can hide dependencies for later IDs. Fall back to
-      // the original per-content bounds; never infer safe deletion from it.
-      if(snapshot.docs.length>=scanLimit)return new Map(await Promise.all(group.map(async id=>[id,await db.collection(name).where('contentId','==',id).limit(scanLimit).get()])));
-      return new Map(group.map(id=>[id,{docs:snapshot.docs.filter(doc=>doc.data().contentId===id)}]));
-    }));
-    for(const id of group)result.set(id,byCollection.map(map=>map.get(id)));
+// Retaining bytes is safe when dependencies change without updating content.
+// Cache only negative decisions, never permission to delete. This may postpone
+// reconsideration by at most an hour; publication/scheduling do not use this cache.
+// A future known 24-hour deadline expires the entry at that deadline instead.
+const retentionHoldsByDatabase = new WeakMap();
+const RETENTION_HOLD_MS = 60 * 60 * 1000;
+const MAX_RETENTION_HOLDS = 2000;
+const retentionVersion = record =>
+  createHash("sha256").update(JSON.stringify(record.data())).digest("hex");
+function retentionHoldCache(db) {
+  let cache = retentionHoldsByDatabase.get(db);
+  if (!cache) retentionHoldsByDatabase.set(db, (cache = new Map()));
+  return cache;
+}
+function cachedRetentionHold(db, accountId, record, now) {
+  const cache = retentionHoldCache(db),
+    key = accountId + "/" + record.id;
+  const entry = cache.get(key);
+  const version = retentionVersion(record);
+  if (entry && entry.expiresAt > now && now >= entry.observedAt && entry.version === version)
+    return { ...entry.decision };
+  cache.delete(key);
+  return null;
+}
+function rememberRetentionHold(db, accountId, record, decision, now) {
+  if (decision.eligible) return;
+  const deadline = Date.parse(decision.deleteAfter);
+  const expiresAt =
+    Number.isFinite(deadline) && deadline > now
+      ? Math.min(now + RETENTION_HOLD_MS, deadline)
+      : now + RETENTION_HOLD_MS;
+  const cache = retentionHoldCache(db),
+    key = accountId + "/" + record.id;
+  cache.delete(key);
+  while (cache.size >= MAX_RETENTION_HOLDS) cache.delete(cache.keys().next().value);
+  cache.set(key, {
+    version: retentionVersion(record),
+    observedAt: now,
+    expiresAt,
+    decision: { ...decision },
+  });
+}
+
+async function readRetentionDependencies(db, ids, scanLimit) {
+  const result = new Map();
+  const collections = [
+    "platform_posts",
+    "promotion_tasks",
+    "promotion_schedules",
+    "media_transform_tasks",
+  ];
+  for (let index = 0; index < ids.length; index += 10) {
+    const group = ids.slice(index, index + 10);
+    const byCollection = await Promise.all(
+      collections.map(async name => {
+        if (group.length === 1)
+          return new Map([
+            [
+              group[0],
+              await db.collection(name).where("contentId", "==", group[0]).limit(scanLimit).get(),
+            ],
+          ]);
+        const snapshot = await db
+          .collection(name)
+          .where("contentId", "in", group)
+          .limit(scanLimit)
+          .get();
+        // A full shared result can hide dependencies for later IDs. Fall back to
+        // the original per-content bounds; never infer safe deletion from it.
+        if (snapshot.docs.length >= scanLimit)
+          return new Map(
+            await Promise.all(
+              group.map(async id => [
+                id,
+                await db.collection(name).where("contentId", "==", id).limit(scanLimit).get(),
+              ])
+            )
+          );
+        return new Map(
+          group.map(id => [id, { docs: snapshot.docs.filter(doc => doc.data().contentId === id) }])
+        );
+      })
+    );
+    for (const id of group)
+      result.set(
+        id,
+        byCollection.map(map => map.get(id))
+      );
   }
   return result;
 }
@@ -114,14 +201,30 @@ async function cleanupPublishedVideos({
         .orderBy("__name__");
       if (cursor) contentQuery = contentQuery.startAfter(cursor);
       const contentSnap = await contentQuery.limit(scanLimit).get();
-      const candidatesForPreflight=contentSnap.docs.filter(record=>{
-        const content=record.data();
-        return !seen.has(record.id)&&ownerOf(content)===account.id&&
-          content.storageRetentionStatus!=='deleted_after_publication'&&
-          String(content.type||content.mediaType||'').toLowerCase().startsWith('video')&&
-          publishingCopies(content,extractPath).length>0;
+      const heldDecisions = new Map();
+      if (!dryRun)
+        for (const record of contentSnap.docs) {
+          const decision = cachedRetentionHold(db, account.id, record, now);
+          if (decision) heldDecisions.set(record.id, decision);
+        }
+      const candidatesForPreflight = contentSnap.docs.filter(record => {
+        const content = record.data();
+        return (
+          !seen.has(record.id) &&
+          ownerOf(content) === account.id &&
+          content.storageRetentionStatus !== "deleted_after_publication" &&
+          String(content.type || content.mediaType || "")
+            .toLowerCase()
+            .startsWith("video") &&
+          publishingCopies(content, extractPath).length > 0 &&
+          !heldDecisions.has(record.id)
+        );
       });
-      const preflight=await readRetentionDependencies(db,candidatesForPreflight.map(record=>record.id),scanLimit);
+      const preflight = await readRetentionDependencies(
+        db,
+        candidatesForPreflight.map(record => record.id),
+        scanLimit
+      );
       for (const record of contentSnap.docs) {
         if (seen.has(record.id)) continue;
         seen.add(record.id);
@@ -131,13 +234,28 @@ async function cleanupPublishedVideos({
           content.storageRetentionStatus === "deleted_after_publication"
         )
           continue;
-        if(!String(content.type||content.mediaType||'').toLowerCase().startsWith('video')){
-          results.push({contentId:record.id,eligible:false,reason:'not_video'});continue;
+        if (
+          !String(content.type || content.mediaType || "")
+            .toLowerCase()
+            .startsWith("video")
+        ) {
+          results.push({ contentId: record.id, eligible: false, reason: "not_video" });
+          continue;
         }
-        if(!publishingCopies(content,extractPath).length){
-          results.push({contentId:record.id,eligible:false,reason:'no_owned_publishing_copy'});continue;
+        if (!publishingCopies(content, extractPath).length) {
+          results.push({
+            contentId: record.id,
+            eligible: false,
+            reason: "no_owned_publishing_copy",
+          });
+          continue;
         }
-        const [posts,tasks,schedules,transforms]=preflight.get(record.id);
+        const heldDecision = heldDecisions.get(record.id);
+        if (heldDecision) {
+          results.push({ contentId: record.id, ...heldDecision, deleted: [] });
+          continue;
+        }
+        const [posts, tasks, schedules, transforms] = preflight.get(record.id);
         if ([posts, tasks, schedules, transforms].some(snap => snap.docs.length >= scanLimit)) {
           results.push({
             contentId: record.id,
@@ -158,7 +276,10 @@ async function cleanupPublishedVideos({
         );
         const result = { contentId: record.id, ...decision, deleted: [] };
         results.push(result);
-        if (!decision.eligible) continue;
+        if (!decision.eligible) {
+          if (!dryRun) rememberRetentionHold(db, account.id, record, decision, now);
+          continue;
+        }
         // Only content-publishing copies in our bucket qualify. Project/source
         // libraries, models, thumbnails and arbitrary remote objects do not.
         const urls = [
@@ -323,4 +444,4 @@ async function cleanupPublishedVideos({
   return results;
 }
 
-module.exports = { publicationDeadline, cleanupPublishedVideos,readRetentionDependencies };
+module.exports = { publicationDeadline, cleanupPublishedVideos, readRetentionDependencies };

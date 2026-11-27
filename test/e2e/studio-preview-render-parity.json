@@ -27094,5 +27094,17 @@
       "Existing S02/S04/S03 and typography13/16 limitations"
     ],
     "nextTaskId": "S02"
+  },
+  "retentionReadCache20261127": {
+    "date": "2026-11-27",
+    "scope": "Bounded negative retention cache; no deletion authorization or Studio readiness change.",
+    "evidenceRefs": [
+      "docs/releases/retention-read-cache-20261127.md"
+    ],
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "remaining": [
+      "Production warm-cycle measurement; all existing Studio S02/S04/S03 and creative gates remain."
+    ]
   }
 }
