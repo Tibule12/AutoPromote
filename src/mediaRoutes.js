@@ -20,6 +20,17 @@ const { refreshOwnedStudioOutput, persistWorkerBucketOutput, retainedLocalComple
 async function refreshCompletedStudioOutput(data,userId,jobId,docRef) {
   if (data.status !== "completed" || data.options?.renderViral !== true) return;
   let storagePath = data.outputStoragePath || data.result?.outputStoragePath;
+  if(data.processingBindingId && storagePath?.startsWith('processed/')) {
+    const file=admin.storage().bucket().file(storagePath);
+    const delivery=require('./services/processingTokens/mediaDelivery');
+    const url=await delivery.ownedOutputUrl(file,userId,jobId);
+    if(url){
+      data.outputUrl=url;
+      data.downloadUrl=await delivery.ownedOutputUrl(file,userId,jobId,true);
+      data.result={...data.processingResult,...data.result,url,outputStoragePath:storagePath};
+      return;
+    }
+  }
   if (!storagePath?.startsWith("studio/exports/")) {
     const url=data.outputUrl || data.result?.url || data.result?.output_url;
     const expectedSha256=data.result?.outputSha256 || data.result?.output_sha256 ||

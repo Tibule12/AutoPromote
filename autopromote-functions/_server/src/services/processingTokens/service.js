@@ -187,7 +187,7 @@ function createProcessingService({
       const held = g?.reservedMicros || 0;
       const dailyRemaining = Math.max(0, caps.dailyMicros - (g?.days?.[day] || 0) - held);
       const monthlyRemaining = Math.max(0, caps.monthlyMicros - (g?.months?.[month] || 0) - held);
-      return { available: g?.enabled === true && dailyRemaining >= requiredMicros && monthlyRemaining >= requiredMicros,
+      return { available: g?.enabled === true && g.purchasesPaused !== true && dailyRemaining >= requiredMicros && monthlyRemaining >= requiredMicros,
         requiredMicros, dailyRemaining, monthlyRemaining };
     },
     // Operator provisioning is deliberately not exposed through a user API.

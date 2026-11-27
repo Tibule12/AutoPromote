@@ -1,6 +1,6 @@
 {
   "enabled": true,
-  "plusPurchasesEnabled": false,
+  "plusPurchasesEnabled": true,
   "paypalPlanId": "P-77029123VG7119804NME2GMY",
   "cutoverAt": "2026-11-27T17:51:46.784658Z",
   "dailyMicros": 2000000,

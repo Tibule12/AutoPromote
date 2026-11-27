@@ -23,6 +23,7 @@ const mockDocRef = id => ({
 });
 
 jest.mock("firebase-admin", () => ({
+  storage:jest.fn(()=>({bucket:()=>({file:name=>({name})})})),
   firestore: Object.assign(
     jest.fn(() => ({ collection: jest.fn(() => ({ doc: jest.fn(id => mockDocRef(id)) })) })),
     { FieldValue: { serverTimestamp: jest.fn(() => "SERVER_TIMESTAMP") } }
@@ -57,6 +58,11 @@ jest.mock("../services/studioWorkerOutputService", () => ({
   refreshOwnedStudioOutput: jest.fn().mockResolvedValue("https://storage.example.com/renewed.mp4"),
 }));
 const {persistWorkerBucketOutput,refreshOwnedStudioOutput} = require("../services/studioWorkerOutputService");
+jest.mock('../services/processingTokens/mediaDelivery',()=>({
+  ...jest.requireActual('../services/processingTokens/mediaDelivery'),
+  ownedOutputUrl:jest.fn(async(_file,_uid,_job,download)=>'https://api.autopromote.org/api/processing-media/'+(download?'download':'preview')),
+}));
+const {ownedOutputUrl}=require('../services/processingTokens/mediaDelivery');
 const mediaRoutes = require("../mediaRoutes");
 const { deductCredits, refundCredits, getCreditBreakdown } = require("../creditSystem");
 
@@ -78,6 +84,19 @@ const renderRequest = (app, renderRequestId = "render-request-123", userId = "ow
     });
 
 describe("Viral Clip Studio render attempts", () => {
+  it('delivers the completed funded native output without another copy, upload or render',async()=>{
+    mockDocs.set('funded-native',{userId:'owner-1',status:'completed',processingBindingId:'trusted-binding',
+      options:{renderViral:true},outputStoragePath:'processed/funded-native_viral.mp4',
+      processingResult:{duration:60,output_sha256:'a'.repeat(64)}});
+    const response=await request(buildApp()).get('/api/media/status/funded-native');
+    expect(response.status).toBe(200);
+    expect(response.body.outputUrl).toBe('https://api.autopromote.org/api/processing-media/preview');
+    expect(response.body.result.downloadUrl).toBe('https://api.autopromote.org/api/processing-media/download');
+    expect(persistWorkerBucketOutput).not.toHaveBeenCalled();
+    expect(mockStartProcessingJob).not.toHaveBeenCalled();
+    expect(ownedOutputUrl).toHaveBeenCalledTimes(2);
+    expect((await request(buildApp()).get('/api/media/status/funded-native').set('x-test-user','attacker')).status).toBe(403);
+  });
   beforeEach(() => {
     jest.clearAllMocks();
     mockDocs.clear();

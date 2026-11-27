@@ -359,7 +359,13 @@ router.post(
             );
             if (!read.ok) throw Error("paypal_read_failed");
             const remote = await read.json();
-            await require("../services/payments/subscriptionVerification").persistVerifiedSubscription(
+            const verifier=require("../services/payments/subscriptionVerification");
+            if(['CANCELLED','SUSPENDED','EXPIRED'].includes(remote.status)) {
+              if(remote.id!==subscriptionId||(remote.custom_id&&remote.custom_id!==intent.userId))
+                throw Error('subscription_owner_conflict');
+              await verifier.persistSubscriptionEnd({db,userId:intent.userId,subscriptionId,
+                status:remote.status,eventId:event.id});
+            } else await verifier.persistVerifiedSubscription(
               {
                 db,
                 userId: intent.userId,

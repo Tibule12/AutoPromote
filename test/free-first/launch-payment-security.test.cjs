@@ -5,6 +5,17 @@ const {persistPaymentRevocation,persistFailedCollection}=require('../../src/serv
 const {readCurrentPaymentProof}=require('../../src/services/payments/paymentProof');
 const {checkoutOrigins,assertPurchaseCapacity}=require('../../src/services/payments/checkoutPolicy');
 const db=createSandboxDatabase();after(()=>db.terminate());
+test('the operator can hold new purchases for final public qualification without disabling Free tools or changing allowances',async()=>{
+ const namespace='processing_qualification_checkout_pause_'+crypto.randomBytes(6).toString('hex');
+ const service=require('../../src/services/processingTokens/service').createProcessingService({db,namespace,entitlement:()=> 'free'});
+ await service.configure({enabled:true});
+ assert.equal((await service.purchaseCapacity(1100000)).available,true);
+ await db.collection(namespace+'_control').doc('global').set({purchasesPaused:true},{merge:true});
+ assert.equal((await service.purchaseCapacity(1100000)).available,false);
+ assert.equal((await service.status('ordinary-free')).remaining,100);
+ await db.collection(namespace+'_control').doc('global').set({purchasesPaused:false},{merge:true});
+ assert.equal((await service.purchaseCapacity(1100000)).available,true);
+});
 function fixture(){const userId='launch-pay-'+crypto.randomUUID(),subscriptionId='I-'+crypto.randomBytes(8).toString('hex').toUpperCase(),now=Date.now(),time=new Date(now-60000).toISOString();return {db,userId,subscriptionId,now,env:{PAYPAL_PLUS_PLAN_ID:'P-APPROVED',PAYPAL_MODE:'live'},intent:{userId,planId:'plus'},paypalSub:{id:subscriptionId,status:'ACTIVE',plan_id:'P-APPROVED',custom_id:userId,create_time:time,billing_info:{next_billing_time:new Date(now+29*86400000).toISOString(),last_payment:{time,amount:{currency_code:'USD',value:'4.99'}}}},paymentProof:{transactionId:'PAYMENT'+crypto.randomBytes(8).toString('hex'),paymentTime:time,status:'COMPLETED',amount:'4.99',currency:'USD'}};}
 test('only current completed $4.99 transactions prove payment; refunded or additional charges do not',async()=>{
  const f=fixture();const row={id:f.paymentProof.transactionId,time:f.paymentProof.paymentTime,status:'COMPLETED',amount_with_breakdown:{gross_amount:{currency_code:'USD',value:'4.99'}}};

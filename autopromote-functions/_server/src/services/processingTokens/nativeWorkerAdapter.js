@@ -111,6 +111,9 @@ function createNativeWorkerAdapter({ db, profile: p, request, now = Date.now }) 
       const file = require('../../firebaseAdmin').storage.bucket().file(output);
       const url = await require('./mediaDelivery').ownedOutputUrl(file,binding.userId,binding.nativeJobId);
       result = {...result,output_storage_path:output,...(url ? {output_url:url,outputUrl:url,url} : {})};
+      if(url && ['studio.render','multicam.render'].includes(p.operation))
+        await db.collection('video_edits').doc(binding.nativeJobId).set({outputStoragePath:output,
+          outputUrl:url,result:{...native.result,...result,outputStoragePath:output}},{merge:true});
       if(url && p.operation==='audio.extract'){
         result={...result,audio_url:url,result:{...result.result,audioUrl:url}};
         await db.collection('video_edits').doc(binding.nativeJobId).set({audio_url:url,result:result.result},{merge:true});
