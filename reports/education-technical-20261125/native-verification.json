@@ -1,0 +1,3692 @@
+[
+  {
+    "lessonId": "egd-drawing-views",
+    "title": "One object. Three connected views.",
+    "verification": {
+      "lessonId": "egd-drawing-views",
+      "sha256": "afc831c3eb3213c515836bec1fb29f9b0686ae17ee3afcbc2510f308e870e17d",
+      "framesDecoded": 672,
+      "seconds": 28.0,
+      "width": 1280,
+      "height": 720,
+      "fps": 24.0,
+      "allFramesNonblank": true,
+      "nativeWorkflowProof": "tutorial/proof.json",
+      "geometryAssessment": {
+        "thirdAnglePlacement": true,
+        "frontWidthHeight": [
+          80,
+          40
+        ],
+        "topWidthDepth": [
+          80,
+          50
+        ],
+        "rightDepthHeight": [
+          50,
+          40
+        ],
+        "sameSteppedSolid": true,
+        "preparedStaticProjectionDisclosed": true,
+        "CADOr3DSimulation": false,
+        "assessment": "Bounded geometry/kinematic/timing checks; not educator sign-off",
+        "teacherFeedbackReceived": false,
+        "independentLearnerRecreation": false,
+        "schoolHardwareTrial": false
+      },
+      "pairedPreFinalPreview": [
+        {
+          "time": 2,
+          "meanAbsoluteRgbDifference": 5.0191843894675925,
+          "p95RgbDifference": 7.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 48,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        },
+        {
+          "time": 3,
+          "meanAbsoluteRgbDifference": 5.172175564236111,
+          "p95RgbDifference": 8.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 72,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        },
+        {
+          "time": 8,
+          "meanAbsoluteRgbDifference": 5.619955512152778,
+          "p95RgbDifference": 9.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 192,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        },
+        {
+          "time": 9,
+          "meanAbsoluteRgbDifference": 6.386466652199074,
+          "p95RgbDifference": 11.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 216,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        },
+        {
+          "time": 15,
+          "meanAbsoluteRgbDifference": 5.804174262152777,
+          "p95RgbDifference": 10.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 360,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        },
+        {
+          "time": 16,
+          "meanAbsoluteRgbDifference": 5.561804832175926,
+          "p95RgbDifference": 10.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 384,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        },
+        {
+          "time": 24,
+          "meanAbsoluteRgbDifference": 6.792447916666666,
+          "p95RgbDifference": 12.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 576,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        }
+      ],
+      "nativeGearMotion": null,
+      "strictWholeStudioPixelParity": false,
+      "externalTeacherReview": false,
+      "independentLearnerRecreation": false,
+      "actualSchoolHardwareTrial": false,
+      "creativeOwnerApproval": false,
+      "reviewLimit": "Geometry/kinematic/timing and actual decoded-film checks support a private teacher-review candidate. Teachers must judge educational suitability and practical terminology; full human listening and school-device trials remain required.",
+      "audioRms": 0.11293533444404602,
+      "noSubtitleTracks": true,
+      "nativePixelSemanticChecks": {
+        "actualFrontSteppedSilhouette": true,
+        "actualTopAndRightViewsAtThirdAnglePositions": true,
+        "visibleTopAndSideStepEdges": true,
+        "source": "Actual decoded native frame24s, well inside the final explanatory interval."
+      }
+    },
+    "actualControlTutorial": {
+      "lessonId": "egd-drawing-views",
+      "normalAuthenticatedStudio": true,
+      "staticOriginalAssetsDisclosed": true,
+      "manuallyCompletedNativeKey": true,
+      "originalLabelCreatedAndRemoved": true,
+      "visibleToolClicks": true,
+      "orientationPaths": true,
+      "longScrollingOmittedPerOwner": true,
+      "captionTracks": 0,
+      "nativeExport": true,
+      "actualNativeDownload": true,
+      "completeMovingPreview": true,
+      "completeFinishedPlayback": true,
+      "exactColdRecovery": true,
+      "renderWaitOmitted": true,
+      "finishedMovieAudioStart": 291.28566695803835,
+      "canonicalHash": "7f44509740d90fdc1c5f45997407142dc06b43b32054265b657e953145fd3181",
+      "outputSha256": "afc831c3eb3213c515836bec1fb29f9b0686ae17ee3afcbc2510f308e870e17d",
+      "pageErrors": [],
+      "teacherFeedbackReceived": false,
+      "independentLearnerRecreation": false,
+      "schoolHardwareTrial": false,
+      "productionOperations": 0,
+      "paidGpuJobs": 0
+    },
+    "preExportAllDecisions": {
+      "allReferenceDecisionsAgree": true,
+      "differences": []
+    },
+    "nativeRenderReceipt": {
+      "startedAt": "2026-11-25T17:06:19.341Z",
+      "completedAt": "2026-11-25T17:10:40.006Z",
+      "submittedJobId": "viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+      "events": [
+        {
+          "path": "/api/media/process",
+          "status": 200
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_b4de78165bec68c2d5103993e1fc0b8ac4f031e0cb3ed2ec7ef0ab9a8500d412",
+          "status": 200,
+          "jobStatus": "completed"
+        }
+      ],
+      "serverOutputSha256": "afc831c3eb3213c515836bec1fb29f9b0686ae17ee3afcbc2510f308e870e17d",
+      "projectId": "viral-project-995bd544-06f7-4bb9-b0e1-ab5aa679e00b",
+      "projectHash": "7f44509740d90fdc1c5f45997407142dc06b43b32054265b657e953145fd3181",
+      "projectHashBeforeMediaUpload": "0618362545dc49f05899c9313681880389f1addba83ff16049501b9f646e4c14",
+      "templateRef": null
+    },
+    "renderObservationSeconds": 260.665
+  },
+  {
+    "lessonId": "mechanical-gears",
+    "title": "Two gears. One clear ratio.",
+    "verification": {
+      "lessonId": "mechanical-gears",
+      "sha256": "bb050ac9f3b122ca757457e6db1f931c3ea926c900250255b1da993e58f23ddb",
+      "framesDecoded": 672,
+      "seconds": 28.0,
+      "width": 1280,
+      "height": 720,
+      "fps": 24.0,
+      "allFramesNonblank": true,
+      "nativeWorkflowProof": "tutorial/proof.json",
+      "geometryAssessment": {
+        "driverTeeth": 20,
+        "drivenTeeth": 40,
+        "pressureAngleDegrees": 20,
+        "drawingModulePixels": 7.2,
+        "pitchRadiiPixels": [
+          72,
+          144
+        ],
+        "centreDistancePixels": 216,
+        "oppositeRotation": true,
+        "nativeRateRatio": 2,
+        "driverIntervalDegrees": 360,
+        "drivenIntervalDegrees": -180,
+        "linearKeys": true,
+        "sampledToothMeshStates": 361,
+        "maxErodedRasterInteriorOverlapSquarePixels": 0.0,
+        "rasterBoundaryTolerancePixels": 0.2,
+        "manufacturingOrForceSimulation": false,
+        "120rpmInputAnswer": 60,
+        "idealPowerNotCreated": true,
+        "assessment": "Bounded geometry/kinematic/timing checks; not educator sign-off",
+        "teacherFeedbackReceived": false,
+        "independentLearnerRecreation": false,
+        "schoolHardwareTrial": false
+      },
+      "pairedPreFinalPreview": [
+        {
+          "time": 4,
+          "meanAbsoluteRgbDifference": 5.267142650462963,
+          "p95RgbDifference": 10.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 96,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        },
+        {
+          "time": 9,
+          "meanAbsoluteRgbDifference": 5.378853443287037,
+          "p95RgbDifference": 11.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 216,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        },
+        {
+          "time": 14,
+          "meanAbsoluteRgbDifference": 7.1606626157407405,
+          "p95RgbDifference": 11.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 336,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        },
+        {
+          "time": 19,
+          "meanAbsoluteRgbDifference": 8.421110387731481,
+          "p95RgbDifference": 11.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 456,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        },
+        {
+          "time": 24,
+          "meanAbsoluteRgbDifference": 8.178661024305555,
+          "p95RgbDifference": 11.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 576,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        }
+      ],
+      "nativeGearMotion": {
+        "all481MovingSamplesDetected": true,
+        "maxIndexAngleErrorDegrees": 1.3799145681203129,
+        "driverMeasuredTurnDegrees": 359.42347724411866,
+        "drivenMeasuredTurnDegrees": -180.5927468849868,
+        "measuredOppositeSpeedRatio": 1.990243148984399,
+        "toleranceDegrees": 2.0,
+        "note": "Tracks coloured index dots in actual native final frames. This is kinematic illustration verification, not engineering force simulation."
+      },
+      "strictWholeStudioPixelParity": false,
+      "externalTeacherReview": false,
+      "independentLearnerRecreation": false,
+      "actualSchoolHardwareTrial": false,
+      "creativeOwnerApproval": false,
+      "reviewLimit": "Geometry/kinematic/timing and actual decoded-film checks support a private teacher-review candidate. Teachers must judge educational suitability and practical terminology; full human listening and school-device trials remain required.",
+      "audioRms": 0.12520352005958557,
+      "noSubtitleTracks": true
+    },
+    "actualControlTutorial": {
+      "lessonId": "mechanical-gears",
+      "normalAuthenticatedStudio": true,
+      "staticOriginalAssetsDisclosed": true,
+      "manuallyCompletedNativeKey": true,
+      "originalLabelCreatedAndRemoved": true,
+      "visibleToolClicks": true,
+      "orientationPaths": true,
+      "longScrollingOmittedPerOwner": true,
+      "captionTracks": 0,
+      "nativeExport": true,
+      "actualNativeDownload": true,
+      "completeMovingPreview": true,
+      "completeFinishedPlayback": true,
+      "exactColdRecovery": true,
+      "renderWaitOmitted": true,
+      "finishedMovieAudioStart": 306.3013339351502,
+      "canonicalHash": "e2e8d7adf0a4364c9db13596e188659c151ac4418f77c20b2a3880202b4ed148",
+      "outputSha256": "bb050ac9f3b122ca757457e6db1f931c3ea926c900250255b1da993e58f23ddb",
+      "pageErrors": [],
+      "teacherFeedbackReceived": false,
+      "independentLearnerRecreation": false,
+      "schoolHardwareTrial": false,
+      "productionOperations": 0,
+      "paidGpuJobs": 0
+    },
+    "preExportAllDecisions": {
+      "allReferenceDecisionsAgree": true,
+      "differences": []
+    },
+    "nativeRenderReceipt": {
+      "startedAt": "2026-11-25T17:10:42.752Z",
+      "completedAt": "2026-11-25T17:14:34.923Z",
+      "submittedJobId": "viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+      "events": [
+        {
+          "path": "/api/media/process",
+          "status": 200
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_cc24c41e4095bdbe5629ab62a8e05c9dc43c31da06cfac70e856f37c2d9929da",
+          "status": 200,
+          "jobStatus": "completed"
+        }
+      ],
+      "serverOutputSha256": "bb050ac9f3b122ca757457e6db1f931c3ea926c900250255b1da993e58f23ddb",
+      "projectId": "viral-project-f9f6b16d-50b8-4dcd-b6b6-9052c2881ffb",
+      "projectHash": "e2e8d7adf0a4364c9db13596e188659c151ac4418f77c20b2a3880202b4ed148",
+      "projectHashBeforeMediaUpload": "4c62efe3d9fef2f11ead3bab28725692fca4e63ad9d9b0208c67659268bbe390",
+      "templateRef": null
+    },
+    "renderObservationSeconds": 232.171
+  },
+  {
+    "lessonId": "electrical-simple-circuit",
+    "title": "Close the path. Light the load.",
+    "verification": {
+      "lessonId": "electrical-simple-circuit",
+      "sha256": "f4b2b0e520fddbb3eb14a0b8469eb76f6770c76ec960684001ff1a9cd73729d8",
+      "framesDecoded": 672,
+      "seconds": 28.0,
+      "width": 1280,
+      "height": 720,
+      "fps": 24.0,
+      "allFramesNonblank": true,
+      "nativeWorkflowProof": "tutorial/proof.json",
+      "geometryAssessment": {
+        "sourceVoltsLabel": 3,
+        "currentExternalDirection": "positive to negative",
+        "markerPathPixels": [
+          [
+            240.0,
+            280.0
+          ],
+          [
+            240.0,
+            200.0
+          ],
+          [
+            500.0,
+            200.0
+          ],
+          [
+            620.0,
+            200.0
+          ],
+          [
+            900.0,
+            200.0
+          ],
+          [
+            900.0,
+            350.0
+          ],
+          [
+            900.0,
+            520.0
+          ],
+          [
+            240.0,
+            520.0
+          ],
+          [
+            240.0,
+            420.0
+          ]
+        ],
+        "markersOnlyWhileClosed": true,
+        "switchLightCausalFrameCheck": true,
+        "illustrationNotSimulation": true,
+        "supervisedPracticalBoundary": true,
+        "measuredCurrentOrElectronSpeed": false,
+        "assessment": "Bounded geometry/kinematic/timing checks; not educator sign-off",
+        "teacherFeedbackReceived": false,
+        "independentLearnerRecreation": false,
+        "schoolHardwareTrial": false
+      },
+      "pairedPreFinalPreview": [
+        {
+          "time": 8,
+          "meanAbsoluteRgbDifference": 5.243625217013889,
+          "p95RgbDifference": 7.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 192,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        },
+        {
+          "time": 9.5,
+          "meanAbsoluteRgbDifference": 6.153469328703704,
+          "p95RgbDifference": 10.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 228,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        },
+        {
+          "time": 14,
+          "meanAbsoluteRgbDifference": 5.626210214120371,
+          "p95RgbDifference": 6.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 336,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        },
+        {
+          "time": 24.1,
+          "meanAbsoluteRgbDifference": 5.421999421296296,
+          "p95RgbDifference": 7.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 578,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        },
+        {
+          "time": 25,
+          "meanAbsoluteRgbDifference": 6.838077980324074,
+          "p95RgbDifference": 8.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 600,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        }
+      ],
+      "nativeGearMotion": null,
+      "strictWholeStudioPixelParity": false,
+      "externalTeacherReview": false,
+      "independentLearnerRecreation": false,
+      "actualSchoolHardwareTrial": false,
+      "creativeOwnerApproval": false,
+      "reviewLimit": "Geometry/kinematic/timing and actual decoded-film checks support a private teacher-review candidate. Teachers must judge educational suitability and practical terminology; full human listening and school-device trials remain required.",
+      "audioRms": 0.11573281139135361,
+      "noSubtitleTracks": true,
+      "nativePixelSemanticChecks": {
+        "all672NativeLampStatesMatchClosureInterval": true,
+        "all672NativeLeverAnglesMatchKeys": true,
+        "leverAngleToleranceDegrees": 3,
+        "currentMarkerVisibleFrames": 314,
+        "currentIndicatorOnlyWhileClosed": true,
+        "lampOffMedianLuma": 17.4544,
+        "lampOnMedianLuma": 136.66439999999997,
+        "source": "Every actual native output frame; illustrative direction indicators, no electrical simulation or measurement claim."
+      }
+    },
+    "actualControlTutorial": {
+      "lessonId": "electrical-simple-circuit",
+      "normalAuthenticatedStudio": true,
+      "staticOriginalAssetsDisclosed": true,
+      "manuallyCompletedNativeKey": true,
+      "originalLabelCreatedAndRemoved": true,
+      "visibleToolClicks": true,
+      "orientationPaths": true,
+      "longScrollingOmittedPerOwner": true,
+      "captionTracks": 0,
+      "nativeExport": true,
+      "actualNativeDownload": true,
+      "completeMovingPreview": true,
+      "completeFinishedPlayback": true,
+      "exactColdRecovery": true,
+      "renderWaitOmitted": true,
+      "finishedMovieAudioStart": 289.69999980926514,
+      "canonicalHash": "58dbeff6c5ac8603bf9b0b836591dd19a8b4c1a873952698b8901a56c07957b2",
+      "outputSha256": "f4b2b0e520fddbb3eb14a0b8469eb76f6770c76ec960684001ff1a9cd73729d8",
+      "pageErrors": [],
+      "teacherFeedbackReceived": false,
+      "independentLearnerRecreation": false,
+      "schoolHardwareTrial": false,
+      "productionOperations": 0,
+      "paidGpuJobs": 0
+    },
+    "preExportAllDecisions": {
+      "allReferenceDecisionsAgree": true,
+      "differences": []
+    },
+    "nativeRenderReceipt": {
+      "startedAt": "2026-11-25T16:59:25.587Z",
+      "completedAt": "2026-11-25T17:06:16.846Z",
+      "submittedJobId": "viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+      "events": [
+        {
+          "path": "/api/media/process",
+          "status": 200
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_c26142ad0f08050870390c7890f9c4d4e1746999f17baa82a371d1f87a1dc1c6",
+          "status": 200,
+          "jobStatus": "completed"
+        }
+      ],
+      "serverOutputSha256": "f4b2b0e520fddbb3eb14a0b8469eb76f6770c76ec960684001ff1a9cd73729d8",
+      "projectId": "viral-project-94aedc96-a7a8-4994-818d-20c3a57c43e4",
+      "projectHash": "58dbeff6c5ac8603bf9b0b836591dd19a8b4c1a873952698b8901a56c07957b2",
+      "projectHashBeforeMediaUpload": "77e785b762d46803d171dddddf7fd5edb26ec0cc2d743ec9d5ec3638dbe986bb",
+      "templateRef": null
+    },
+    "renderObservationSeconds": 411.259
+  },
+  {
+    "lessonId": "civil-brick-sequence",
+    "title": "Build the bond, course by course.",
+    "verification": {
+      "lessonId": "civil-brick-sequence",
+      "sha256": "76b7c5ba4d02f6cdfa8820a0e25958b5cb622e245e69bac3fcbb3e8c7ef23555",
+      "framesDecoded": 672,
+      "seconds": 28.0,
+      "width": 1280,
+      "height": 720,
+      "fps": 24.0,
+      "allFramesNonblank": true,
+      "nativeWorkflowProof": "tutorial/proof.json",
+      "geometryAssessment": {
+        "courses": 4,
+        "bottomUpNativeStartsSeconds": [
+          3,
+          8,
+          13,
+          18
+        ],
+        "drawingModulePixels": 160,
+        "alternateOffsetPixels": 80,
+        "brickHeightPixels": 52,
+        "bedJointPixels": 8,
+        "perpJointPixels": 10,
+        "nativeGroupCrop": {
+          "enabled": true,
+          "shape": "polygon",
+          "path": "polygon(19.53125% 38%, 81.25% 38%, 81.25% 76.388889%, 19.53125% 76.388889%)",
+          "feather": 0,
+          "inverted": false
+        },
+        "cropFragmentsNotCutInstructions": true,
+        "structuralOrConstructionSpecification": false,
+        "assessment": "Bounded geometry/kinematic/timing checks; not educator sign-off",
+        "teacherFeedbackReceived": false,
+        "independentLearnerRecreation": false,
+        "schoolHardwareTrial": false
+      },
+      "pairedPreFinalPreview": [
+        {
+          "time": 2,
+          "meanAbsoluteRgbDifference": 4.8172395833333335,
+          "p95RgbDifference": 5.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 48,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        },
+        {
+          "time": 4,
+          "meanAbsoluteRgbDifference": 5.074189091435185,
+          "p95RgbDifference": 8.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 96,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        },
+        {
+          "time": 9,
+          "meanAbsoluteRgbDifference": 11.501833767361111,
+          "p95RgbDifference": 63.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 216,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        },
+        {
+          "time": 14,
+          "meanAbsoluteRgbDifference": 10.942851924189815,
+          "p95RgbDifference": 49.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 336,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        },
+        {
+          "time": 20,
+          "meanAbsoluteRgbDifference": 5.711783130787037,
+          "p95RgbDifference": 11.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 480,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        },
+        {
+          "time": 24,
+          "meanAbsoluteRgbDifference": 6.83216652199074,
+          "p95RgbDifference": 14.0,
+          "previewPixels": [
+            1280,
+            720
+          ],
+          "outputFrame": 576,
+          "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+        }
+      ],
+      "nativeGearMotion": null,
+      "strictWholeStudioPixelParity": false,
+      "externalTeacherReview": false,
+      "independentLearnerRecreation": false,
+      "actualSchoolHardwareTrial": false,
+      "creativeOwnerApproval": false,
+      "reviewLimit": "Geometry/kinematic/timing and actual decoded-film checks support a private teacher-review candidate. Teachers must judge educational suitability and practical terminology; full human listening and school-device trials remain required.",
+      "audioRms": 0.13902777433395386,
+      "noSubtitleTracks": true,
+      "nativePixelSemanticChecks": {
+        "all672CourseOrderAndSettledPresenceChecks": true,
+        "all672RightCropNoLeakChecks": true,
+        "actualVerticalJointCentresPixels": [
+          [
+            404.5,
+            564.5,
+            724.5,
+            884.5
+          ],
+          [
+            324.5,
+            484.5,
+            644.5,
+            804.5,
+            964.5
+          ],
+          [
+            404.5,
+            564.5,
+            724.5,
+            884.5
+          ],
+          [
+            324.5,
+            484.5,
+            644.5,
+            804.5,
+            964.5
+          ]
+        ],
+        "actualAlternateHalfModuleOffsetPixels": 80,
+        "jointPositionTolerancePixels": 2,
+        "source": "Actual native frame sequence and final mortar-joint detection; cropped elevation, not a construction specification."
+      }
+    },
+    "actualControlTutorial": {
+      "lessonId": "civil-brick-sequence",
+      "normalAuthenticatedStudio": true,
+      "staticOriginalAssetsDisclosed": true,
+      "manuallyCompletedNativeKey": true,
+      "originalLabelCreatedAndRemoved": true,
+      "visibleToolClicks": true,
+      "orientationPaths": true,
+      "longScrollingOmittedPerOwner": true,
+      "captionTracks": 0,
+      "nativeExport": true,
+      "actualNativeDownload": true,
+      "completeMovingPreview": true,
+      "completeFinishedPlayback": true,
+      "exactColdRecovery": true,
+      "renderWaitOmitted": true,
+      "finishedMovieAudioStart": 333.5710000991822,
+      "canonicalHash": "f9d966c095bb8e548b571361496cd6c153eec79fe9659a0a03e124ff0cab8bb8",
+      "outputSha256": "76b7c5ba4d02f6cdfa8820a0e25958b5cb622e245e69bac3fcbb3e8c7ef23555",
+      "pageErrors": [],
+      "teacherFeedbackReceived": false,
+      "independentLearnerRecreation": false,
+      "schoolHardwareTrial": false,
+      "productionOperations": 0,
+      "paidGpuJobs": 0
+    },
+    "preExportAllDecisions": {
+      "allReferenceDecisionsAgree": true,
+      "differences": []
+    },
+    "nativeRenderReceipt": {
+      "startedAt": "2026-11-25T17:14:38.164Z",
+      "completedAt": "2026-11-25T17:19:56.284Z",
+      "submittedJobId": "viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+      "events": [
+        {
+          "path": "/api/media/process",
+          "status": 200
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "processing"
+        },
+        {
+          "path": "/api/media/status/viral_7bfa3e92d5b31ea32716a56a97132bbc4cad4a55d86be4d6982cea422c6d6457",
+          "status": 200,
+          "jobStatus": "completed"
+        }
+      ],
+      "serverOutputSha256": "76b7c5ba4d02f6cdfa8820a0e25958b5cb622e245e69bac3fcbb3e8c7ef23555",
+      "projectId": "viral-project-ab6a2a5b-5995-44a2-bff5-2eeb787fe19d",
+      "projectHash": "f9d966c095bb8e548b571361496cd6c153eec79fe9659a0a03e124ff0cab8bb8",
+      "projectHashBeforeMediaUpload": "a88e18c4401aec888da7a56c056ddb181a86f8069730fdaf992779192548856a",
+      "templateRef": null
+    },
+    "renderObservationSeconds": 318.12
+  }
+]

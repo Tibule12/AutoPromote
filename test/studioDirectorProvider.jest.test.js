@@ -72,7 +72,8 @@ test.each([
   expect(complete).toHaveBeenCalledTimes(1);
 });
 test.each([
-  ["free", 403],
+  ["free", 200],
+  ["plus", 200],
   ["premium", 200],
 ])("existing %s access is enforced before inference", async (tier, status) => {
   getEffectiveTierSnapshot.mockResolvedValue({ tierId: tier, testerAccess: null });

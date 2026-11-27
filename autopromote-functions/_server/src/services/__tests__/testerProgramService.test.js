@@ -61,7 +61,7 @@ describe("testerProgramService", () => {
       totalStartingCredits: 1500,
       uploads: 10,
       queuedPlatformPosts: 30,
-      connectedPlatforms: 3,
+      connectedPlatforms: 6,
     });
     expect(mockSet).toHaveBeenCalledWith(
       expect.objectContaining({ path: "users/user-1" }),
@@ -108,7 +108,7 @@ describe("testerProgramService", () => {
     expect(mockSet).not.toHaveBeenCalled();
   });
 
-  it("keeps tools outside the controlled tester workflow locked", () => {
+  it("shares creative tools with testers while preserving their promotional credit and team restrictions", () => {
     const capabilities = applyTesterCapabilityAllowlist(getPlanCapabilities("pro"), {
       programId: "founding_testers_2026",
       status: "active",
@@ -118,9 +118,9 @@ describe("testerProgramService", () => {
     expect(capabilities.editing.features.findViralClips.enabled).toBe(true);
     expect(capabilities.editing.features.clipRender.enabled).toBe(true);
     expect(capabilities.editing.features.smartPromoSummary).toBeUndefined();
-    expect(capabilities.editing.features.thumbnailLab.enabled).toBe(false);
-    expect(capabilities.editing.features.viralClipStudio.enabled).toBe(false);
-    expect(capabilities.editing.features.watermarkRemoval.enabled).toBe(false);
+    expect(capabilities.editing.features.thumbnailLab.enabled).toBe(true);
+    expect(capabilities.editing.features.viralClipStudio.enabled).toBe(true);
+    expect(capabilities.editing.features.watermarkRemoval.enabled).toBe(true);
     expect(capabilities.editing.topUpsEnabled).toBe(false);
     expect(capabilities.teamSeats).toBe(1);
   });

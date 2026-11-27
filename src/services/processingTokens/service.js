@@ -10,6 +10,8 @@ function identifier(value) {
 }
 const blank = () => ({
   reservedMicros: 0,
+  apiReservedMicros: 0,
+  freeReservedMicros: 0,
   active: 0,
   days: {},
   months: {},
@@ -17,11 +19,11 @@ const blank = () => ({
   apiDays: {},
 });
 const DEFAULT_LIMITS = Object.freeze({
-  dailyMicros: 1000000,
+  dailyMicros: 2000000,
   monthlyMicros: 10000000,
-  freeDailyMicros: 250000,
-  apiDailyMicros: 100000,
-  maxActive: 4,
+  freeDailyMicros: 2000000,
+  apiDailyMicros: 50000,
+  maxActive: 1,
   maxActiveUser: 1,
   maxEventsPerUser: 5000,
   maxAccountGrantsPerDay: 100,
@@ -57,6 +59,7 @@ function createProcessingService({
     const p = plans(planId);
     if (!a)
       return {
+        schemaVersion: 2,
         userId: null,
         planId,
         cycleStart: time,
@@ -64,10 +67,21 @@ function createProcessingService({
         cycleAllowance: p.tokens,
         used: 0,
         reservedMicros: 0,
+        reservedTokens: 0,
         active: 0,
         history: [],
         storageBytes: 0,
       };
+    // Only historical prelaunch records used cash as their token unit. Migrate
+    // those existing holds/history without resetting any allowance or liability.
+    if (a.schemaVersion !== 2) {
+      a.reservedTokens = Math.ceil(a.reservedMicros / TOKEN_MICROS);
+      a.used = Math.max(0, a.used - a.reservedTokens);
+      a.history = a.history.map(event => ({ ...event,
+        tokens: Number.isSafeInteger(event.tokens) ? event.tokens : Math.ceil(event.micros / TOKEN_MICROS) }));
+      a.schemaVersion = 2;
+    }
+    integer(a.reservedTokens, "TOKEN_HOLD");
     if (time < a.cycleStart) fail("CLOCK_MOVED_BACKWARDS", 503);
     if (time >= a.resetAt) {
       const interval = p.resetHours * 3600000;
@@ -88,20 +102,11 @@ function createProcessingService({
   }
   function summary(a, time) {
     const p = plans(a.planId);
-    const spentMicros = a.history.reduce((sum, event) => sum + event.micros, 0);
-    const remaining = Math.max(
-      0,
-      Math.min(
-        a.cycleAllowance - a.used,
-        Math.floor(
-          (p.rolling30DayTokens * TOKEN_MICROS - spentMicros - a.reservedMicros) / TOKEN_MICROS
-        )
-      )
-    );
-    const cycleRemainingTokens = Math.max(0, a.cycleAllowance - a.used);
-    const rollingRemainingTokens = Math.max(0, Math.floor(
-      (p.rolling30DayTokens * TOKEN_MICROS - spentMicros - a.reservedMicros) / TOKEN_MICROS
-    ));
+    const spentTokens = a.history.reduce((sum, event) => sum + event.tokens, 0);
+    const cycleRemainingTokens = Math.max(0, a.cycleAllowance - a.used - a.reservedTokens);
+    const rollingRemainingTokens = Math.max(0,
+      p.rolling30DayTokens - spentTokens - a.reservedTokens);
+    const remaining = Math.min(cycleRemainingTokens, rollingRemainingTokens);
     return {
       planId: a.planId,
       allowance: a.cycleAllowance,
@@ -113,8 +118,8 @@ function createProcessingService({
         ? (rollingRemainingTokens === 0 ? "cycle_and_rolling" : "cycle") : "rolling",
       nextResetAt: new Date(a.resetAt).toISOString(),
       rolling30DayLimit: p.rolling30DayTokens,
-      rollingSpentTokens: Math.ceil(spentMicros / TOKEN_MICROS),
-      reservedTokens: Math.ceil(a.reservedMicros / TOKEN_MICROS),
+      rollingSpentTokens: spentTokens,
+      reservedTokens: a.reservedTokens,
       storage: {
         usedBytes: a.storageBytes,
         reservedBytes: a.storageReservedBytes || 0,
@@ -124,14 +129,32 @@ function createProcessingService({
       activeJobs: a.active,
       localEditingAvailable: true,
       provisional: true,
-      rollingAvailableAt: a.history.length
-        ? new Date(Math.min(...a.history.map(e => e.at)) + 30 * DAY).toISOString()
+      rollingAvailableAt: a.history.some(e => e.tokens > 0)
+        ? new Date(Math.min(...a.history.filter(e => e.tokens > 0).map(e => e.at)) + 30 * DAY).toISOString()
         : null,
       asOf: new Date(time).toISOString(),
     };
   }
   function validateGlobal(g) {
     if (!g?.enabled) fail("CLOUD_PROCESSING_PAUSED", 503);
+  }
+  async function initializeCashHolds(tx, g) {
+    if (Number.isSafeInteger(g.apiReservedMicros) && Number.isSafeInteger(g.freeReservedMicros)) return;
+    // One-time migration of existing outstanding liabilities. Do not turn a
+    // missing counter into zero while an old reservation is still unsettled.
+    let rows = [];
+    if (g.reservedMicros) {
+      const snapshot = await tx.get(db.collection('processing_jobs')
+        .where('state', 'in', ['reserved', 'started']).limit(5001));
+      if (snapshot.size > 5000) fail('CASH_HOLD_MIGRATION_REQUIRED', 503);
+      rows = snapshot.docs.map(doc => doc.data());
+      if (rows.reduce((sum, row) => sum + row.maxMicros, 0) !== g.reservedMicros)
+        fail('CASH_HOLD_RECONCILIATION_REQUIRED', 503);
+    }
+    g.apiReservedMicros = rows.filter(row => row.resource === 'external-api')
+      .reduce((sum, row) => sum + row.maxMicros, 0);
+    g.freeReservedMicros = rows.filter(row => row.planId === 'free')
+      .reduce((sum, row) => sum + row.maxMicros, 0);
   }
   async function load(tx, uid, requestId) {
     const refs = [account(uid), control, ...(requestId ? [job(uid, requestId)] : [])];
@@ -150,11 +173,23 @@ function createProcessingService({
   }
   return {
     quote: operation => quote(operation, operations),
+    async purchaseCapacity(requiredMicros) {
+      integer(requiredMicros, "PURCHASE_CAPACITY", 1);
+      const g = (await control.get()).data();
+      const day = new Date(now()).toISOString().slice(0, 10), month = day.slice(0, 7);
+      const held = g?.reservedMicros || 0;
+      const dailyRemaining = Math.max(0, caps.dailyMicros - (g?.days?.[day] || 0) - held);
+      const monthlyRemaining = Math.max(0, caps.monthlyMicros - (g?.months?.[month] || 0) - held);
+      return { available: g?.enabled === true && dailyRemaining >= requiredMicros && monthlyRemaining >= requiredMicros,
+        requiredMicros, dailyRemaining, monthlyRemaining };
+    },
     // Operator provisioning is deliberately not exposed through a user API.
     async configure({ enabled = false } = {}) {
       return db.runTransaction(async tx => {
         const current = await tx.get(control);
-        tx.set(control, { ...blank(), ...(current.data() || {}), enabled });
+        const previous = current.data();
+        if (previous) await initializeCashHolds(tx, previous);
+        tx.set(control, { ...blank(), ...(previous || {}), enabled });
       });
     },
     async status(uid) {
@@ -258,24 +293,31 @@ function createProcessingService({
         return r;
       });
     },
-    async reserve(uid, { operation, requestId, fingerprint, approvedTokens }) {
+    async reserve(uid, { operation, requestId, fingerprint, approvedTokens, notBefore = 0 }) {
       identifier(fingerprint);
+      integer(notBefore, "DISPATCH_TIME");
       const q = quote(operation, operations);
       if (approvedTokens !== q.tokens) fail("PROCESSING_ESTIMATE_REQUIRED", 409);
       return db.runTransaction(async tx => {
         const { a, g, existing, time, fresh } = await load(tx, uid, requestId);
+        if (notBefore > time + 30 * DAY) fail("SCHEDULE_OUTSIDE_BUDGET_WINDOW", 409);
         if (existing) {
-          if (existing.operation !== operation || existing.fingerprint !== fingerprint)
+          if (existing.operation !== operation || existing.fingerprint !== fingerprint ||
+              (existing.notBefore || 0) !== notBefore)
             fail("IDEMPOTENCY_CONFLICT", 409);
           return { ...existing, duplicate: true }; // Caller must never dispatch a duplicate.
         }
         validateGlobal(g);
+        await initializeCashHolds(tx, g);
         const day = new Date(time).toISOString().slice(0, 10),
           month = day.slice(0, 7);
         const p = plans(a.planId);
         if (fresh && (g.grants?.[day] || 0) >= caps.maxAccountGrantsPerDay)
           fail("ENROLMENT_BUDGET_REACHED", 429);
-        if (a.active >= caps.maxActiveUser || g.active >= caps.maxActive)
+        // A future publication holds tokens and cash, not a running-worker slot.
+        // Its slot is acquired transactionally at dispatch, under the same cap.
+        const activeCounted = notBefore <= time;
+        if (activeCounted && (a.active >= caps.maxActiveUser || g.active >= caps.maxActive))
           fail("CONCURRENT_JOB_LIMIT", 429);
         if (a.history.length >= caps.maxEventsPerUser) fail("USAGE_EVENT_LIMIT", 429);
         if (q.tokens > summary(a, time).remaining) fail("PROCESSING_ALLOWANCE_REACHED", 429);
@@ -287,25 +329,27 @@ function createProcessingService({
           fail("GLOBAL_PROCESSING_BUDGET", 429);
         if (
           a.planId === "free" &&
-          (g.freeDays[day] || 0) + g.reservedMicros + q.maxMicros > caps.freeDailyMicros
+          (g.freeDays[day] || 0) + g.freeReservedMicros + q.maxMicros > caps.freeDailyMicros
         )
           fail("FREE_PROCESSING_BUDGET", 429);
         if (
           q.resource === "external-api" &&
-          (g.apiDays[day] || 0) + g.reservedMicros + q.maxMicros > caps.apiDailyMicros
+          (g.apiDays[day] || 0) + g.apiReservedMicros + q.maxMicros > caps.apiDailyMicros
         )
           fail("EXTERNAL_API_BUDGET", 429);
         if (
-          a.history.reduce((s, e) => s + e.micros, 0) + a.reservedMicros + q.maxMicros >
-          p.rolling30DayTokens * TOKEN_MICROS
+          a.history.reduce((s, e) => s + e.tokens, 0) + a.reservedTokens + q.tokens >
+          p.rolling30DayTokens
         )
           fail("ROLLING_PROCESSING_BUDGET", 429);
         a.userId = uid;
-        a.used += q.tokens;
+        a.reservedTokens += q.tokens;
         a.reservedMicros += q.maxMicros;
-        a.active++;
+        if (activeCounted) a.active++;
         g.reservedMicros += q.maxMicros;
-        g.active++;
+        if (a.planId === 'free') g.freeReservedMicros += q.maxMicros;
+        if (q.resource === 'external-api') g.apiReservedMicros += q.maxMicros;
+        if (activeCounted) g.active++;
         if (fresh) g.grants = { ...(g.grants || {}), [day]: (g.grants?.[day] || 0) + 1 };
         const record = {
           userId: uid,
@@ -313,6 +357,7 @@ function createProcessingService({
           operation,
           fingerprint,
           tokens: q.tokens,
+          tokenPricing: q.tokenPricing,
           maxMicros: q.maxMicros,
           maxSeconds: q.maxSeconds,
           resource: q.resource,
@@ -320,8 +365,10 @@ function createProcessingService({
           cycleStart: a.cycleStart,
           state: "reserved",
           attempts: 0,
+          notBefore,
+          activeCounted,
           reservedAt: time,
-          expiresAt: time + q.maxSeconds * 1000 + 60000,
+          expiresAt: Math.max(time, notBefore) + q.maxSeconds * 1000 + 60000,
         };
         tx.set(account(uid), a);
         tx.set(control, g);
@@ -332,15 +379,23 @@ function createProcessingService({
     },
     async start(uid, requestId) {
       return db.runTransaction(async tx => {
-        const snapshot = await tx.get(job(uid, requestId));
-        const r = snapshot.data();
+        const { a, g, existing: r, time } = await load(tx, uid, requestId);
         if (!r || r.state !== "reserved" || r.attempts !== 0) fail("JOB_ALREADY_DISPATCHED", 409);
-        const c = await tx.get(control);
-        validateGlobal(c.data());
-        if (now() >= r.expiresAt) fail("RESERVATION_EXPIRED", 409);
+        validateGlobal(g);
+        if (time < (r.notBefore || 0)) fail("PUBLICATION_NOT_DUE", 409);
+        if (time >= r.expiresAt) fail("RESERVATION_EXPIRED", 409);
+        if (r.activeCounted === false) {
+          if (a.active >= caps.maxActiveUser || g.active >= caps.maxActive)
+            fail("CONCURRENT_JOB_LIMIT", 429);
+          a.active++;
+          g.active++;
+          r.activeCounted = true;
+          tx.set(account(uid), a);
+          tx.set(control, g);
+        }
         r.state = "started";
         r.attempts = 1;
-        r.startedAt = now();
+        r.startedAt = time;
         tx.set(job(uid, requestId), r);
         return r;
       });
@@ -357,7 +412,7 @@ function createProcessingService({
     },
     // Only authenticated workers/operators call this with measured usage. An HTTP timeout
     // is not proof that work stopped. Uncertain jobs retain their liability and active slot.
-    async settle(uid, requestId, { eventId, success, actualMicros, stopped = false }) {
+    async settle(uid, requestId, { eventId, success, actualMicros, consumedTokens, stopped = false }) {
       identifier(eventId);
       integer(actualMicros, "ACTUAL_COST");
       if (typeof success !== "boolean" || stopped !== true)
@@ -366,21 +421,35 @@ function createProcessingService({
         const { a, g, existing: r, time } = await load(tx, uid, requestId);
         if (!r) fail("JOB_NOT_FOUND", 404);
         if (r.state === "settled") {
-          if (r.eventId !== eventId || r.actualMicros !== actualMicros || r.success !== success)
+          if (r.eventId !== eventId || r.actualMicros !== actualMicros || r.success !== success ||
+              (consumedTokens !== undefined && consumedTokens !== r.consumedTokens))
             fail("SETTLEMENT_CONFLICT", 409);
           return { ...r, duplicate: true };
         }
         if (r.state === "reserved" && actualMicros !== 0) fail("JOB_NOT_STARTED", 409);
+        await initializeCashHolds(tx, g);
         const day = new Date(time).toISOString().slice(0, 10),
           month = day.slice(0, 7);
-        const consumed = success ? Math.min(r.tokens, Math.ceil(actualMicros / TOKEN_MICROS)) : 0;
+        const quoted = r.tokenPricing === "fixed-v1";
+        const consumed = success ? (consumedTokens === undefined
+          ? (quoted ? r.tokens : Math.min(r.tokens, Math.ceil(actualMicros / TOKEN_MICROS)))
+          : integer(consumedTokens, "CONSUMED_TOKENS")) : 0;
+        if (consumed > r.tokens) fail("TOKEN_QUOTE_EXCEEDED", 409);
         // A refund belongs to the original cycle. Never inflate a later allowance.
-        if (r.cycleStart === a.cycleStart) a.used -= r.tokens - consumed;
-        a.active--;
+        if (r.cycleStart === a.cycleStart) a.used += consumed;
+        a.reservedTokens -= r.tokens;
+        integer(a.reservedTokens, "TOKEN_HOLD");
+        // Records created before deferred dispatch always owned a slot.
+        if (r.activeCounted !== false) a.active--;
         a.reservedMicros -= r.maxMicros;
-        a.history.push({ at: time, micros: actualMicros, requestId });
-        g.active--;
+        a.history.push({ at: time, micros: actualMicros,
+          tokens: quoted ? consumed : Math.ceil(actualMicros / TOKEN_MICROS), requestId });
+        if (r.activeCounted !== false) g.active--;
         g.reservedMicros -= r.maxMicros;
+        if (r.planId === 'free') g.freeReservedMicros -= r.maxMicros;
+        if (r.resource === 'external-api') g.apiReservedMicros -= r.maxMicros;
+        integer(g.apiReservedMicros, 'API_CASH_HOLD');
+        integer(g.freeReservedMicros, 'FREE_CASH_HOLD');
         g.days[day] = (g.days[day] || 0) + actualMicros;
         g.months[month] = (g.months[month] || 0) + actualMicros;
         if (r.planId === "free") g.freeDays[day] = (g.freeDays[day] || 0) + actualMicros;

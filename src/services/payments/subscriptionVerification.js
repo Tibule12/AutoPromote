@@ -11,6 +11,9 @@ function validatePlusPlanDefinition(remote) {
   if (remote?.status !== "ACTIVE" || regular.length !== 1 || remote.billing_cycles.length !== 1 ||
       price?.currency_code !== "USD" || Number(price.value) !== Number(resolvePlan("plus").price) ||
       c.frequency?.interval_unit !== "MONTH" || c.frequency?.interval_count !== 1 ||
+      c.sequence !== 1 || c.total_cycles !== 0 || remote.quantity_supported === true ||
+      Number(remote.taxes?.percentage || 0) !== 0 ||
+      remote.payment_preferences?.auto_bill_outstanding === true ||
       Number(remote.payment_preferences?.setup_fee?.value || 0) !== 0)
     fail("PAYPAL_PLUS_TERMS_MISMATCH", 503);
 }
@@ -51,7 +54,7 @@ function verifiedSubscription({
   if (
     !payment ||
     payment.amount?.currency_code !== "USD" ||
-    Number(payment.amount.value) < (plan.id === "plus" ? Number(plan.price) : 0.000001) ||
+    (plan.id === "plus" ? Number(payment.amount.value) !== Number(plan.price) : Number(payment.amount.value) <= 0) ||
     !Number.isFinite(Date.parse(payment.time || "")) ||
     Date.parse(payment.time) > now ||
     Date.parse(payment.time) < oldestPlusPayment ||
@@ -74,8 +77,21 @@ async function persistVerifiedSubscription({
   intent,
   env = process.env,
   now = Date.now(),
+  readPaymentResource,
+  paymentProof,
 }) {
   const v = verifiedSubscription({ userId, subscriptionId, remote: paypalSub, intent, env, now });
+  if (v.planId === "plus" && env.PAYPAL_MODE === "live") {
+    if (!paymentProof) {
+      if (!readPaymentResource) fail("PAYMENT_TRANSACTION_PROOF_REQUIRED", 503);
+      paymentProof = await require("./paymentProof").readCurrentPaymentProof({
+        subscriptionId, remote:paypalSub, read:readPaymentResource, now });
+    }
+    if (!/^[A-Z0-9-]{5,100}$/i.test(paymentProof.transactionId || "") ||
+        paymentProof.paymentTime !== v.paymentTime || paymentProof.status !== "COMPLETED" ||
+        paymentProof.currency !== "USD" || Number(paymentProof.amount) !== 4.99)
+      fail("PAYMENT_TRANSACTION_PROOF_REQUIRED", 409);
+  }
   const plan = resolvePlan(v.planId),
     timestamp = new Date(now).toISOString();
   return db.runTransaction(async tx => {
@@ -85,13 +101,19 @@ async function persistVerifiedSubscription({
       .update(subscriptionId + ":" + v.paymentTime)
       .digest("hex");
     const eventRef = db.collection("subscription_events").doc(eventId);
-    const [claim, event, current] = await tx.getAll(
+    // A sale can be refunded before activation. Its immutable provider ID is
+    // authoritative even when subscription/sale timestamps differ slightly.
+    const saleRef = paymentProof && db.collection("subscription_events").doc(require("node:crypto")
+      .createHash("sha256").update(subscriptionId + ":sale:" + paymentProof.transactionId).digest("hex"));
+    const [claim, event, current, sale] = await tx.getAll(
       claimRef,
       eventRef,
-      db.collection("user_subscriptions").doc(userId)
+      db.collection("user_subscriptions").doc(userId),
+      ...(saleRef ? [saleRef] : [])
     );
     if (claim.exists && claim.data().userId !== userId) fail("SUBSCRIPTION_ALREADY_CLAIMED", 403);
     // A delayed payment replay must not replace a newer agreement.
+    if (event.data()?.revoked === true || sale?.data()?.revoked === true) fail("PAYMENT_REVOKED", 409);
     const existing = current.data() || {};
     if (Date.parse(existing.nextBillingDate || "") > Date.parse(v.nextBillingDate)) fail("STALE_SUBSCRIPTION", 409);
     if (
@@ -113,6 +135,8 @@ async function persistVerifiedSubscription({
       nextBillingDate: v.nextBillingDate,
       expiresAt: v.nextBillingDate,
       verifiedAt: timestamp,
+      lastPaymentTime: v.paymentTime,
+      ...(paymentProof ? { lastPaymentSaleId:paymentProof.transactionId } : {}),
       updatedAt: timestamp,
     };
     tx.set(claimRef, { userId, planId: v.planId, claimedAt: claim.data()?.claimedAt || timestamp });
@@ -189,7 +213,7 @@ async function persistSubscriptionEnd({
     const userRef = db.collection("users").doc(userId),
       billingRef = db.collection("user_billing").doc(userId);
     const eventRef = db.collection("subscription_events").doc(id);
-    const [subscription, user, billing, event] = await tx.getAll(
+    const [subscription, user, _billing, event] = await tx.getAll(
       subscriptionRef,
       userRef,
       billingRef,

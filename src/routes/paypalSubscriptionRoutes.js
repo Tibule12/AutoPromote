@@ -113,7 +113,7 @@ function extractPayPalNextBillingDate(paypalSub) {
   );
 }
 
-function extractPayPalStartDate(paypalSub) {
+function _extractPayPalStartDate(paypalSub) {
   return paypalSub?.start_time || paypalSub?.create_time || new Date().toISOString();
 }
 
@@ -137,7 +137,7 @@ function isPayPalMissingResource(value) {
   );
 }
 
-function inferMonthlyPeriodStart(nextBillingDate, fallback) {
+function _inferMonthlyPeriodStart(nextBillingDate, fallback) {
   if (!nextBillingDate) return fallback || null;
   const nextDate = new Date(nextBillingDate);
   if (Number.isNaN(nextDate.getTime())) return fallback || null;
@@ -146,11 +146,20 @@ function inferMonthlyPeriodStart(nextBillingDate, fallback) {
   return periodStart.toISOString();
 }
 
+async function readPaymentResource(path) {
+  if (!path.startsWith("/v1/billing/subscriptions/")) throw Error("invalid_payment_resource");
+  const base=process.env.PAYPAL_MODE === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
+  const response=await fetchFn(base+path,{headers:{Authorization:"Bearer "+await getAccessToken()},signal:AbortSignal.timeout(15000)});
+  if(!response.ok) throw Error("paypal_payment_read_failed");
+  return response.json();
+}
+
 async function refreshPersistedSubscriptionFromPayPal({ userId, subscriptionId, paypalSub }) {
   const helpers = require("../services/payments/subscriptionVerification");
   const intent = (await db.collection("subscription_intents").doc(subscriptionId).get()).data();
   if (paypalSub.status === "ACTIVE")
-    return helpers.persistVerifiedSubscription({ db, userId, subscriptionId, paypalSub, intent });
+    return helpers.persistVerifiedSubscription({ db, userId, subscriptionId, paypalSub, intent,
+      readPaymentResource });
   const status = String(paypalSub.status || "").toLowerCase();
   if (["cancelled", "suspended", "expired"].includes(status))
     return helpers.persistSubscriptionEnd({
@@ -379,13 +388,14 @@ async function fetchPayPalSubscriptionDetails(subscriptionId) {
   return await res.json().catch(() => null);
 }
 
-async function persistActivatedSubscription({ userId, subscriptionId, planId, paypalSub, intent }) {
+async function persistActivatedSubscription({ userId, subscriptionId, planId: _planId, paypalSub, intent }) {
   return require("../services/payments/subscriptionVerification").persistVerifiedSubscription({
     db,
     userId,
     subscriptionId,
     paypalSub,
     intent,
+    readPaymentResource,
   });
 }
 
@@ -480,7 +490,7 @@ async function getAccessToken() {
   return json.access_token;
 }
 
-async function createSubscriptionViaRest({ planId, userData, returnUrl, cancelUrl, customId }) {
+async function createSubscriptionViaRest({ planId, userData, returnUrl, cancelUrl, customId, requestId }) {
   const access = await getAccessToken();
   const base =
     process.env.PAYPAL_MODE === "live"
@@ -509,7 +519,7 @@ async function createSubscriptionViaRest({ planId, userData, returnUrl, cancelUr
   const res = await safeFetch(base + "/v1/billing/subscriptions", fetchFn, {
     fetchOptions: {
       method: "POST",
-      headers: { Authorization: `Bearer ${access}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${access}`, "Content-Type": "application/json", "PayPal-Request-Id": requestId },
       body: JSON.stringify(body),
     },
     requireHttps: true,
@@ -528,6 +538,15 @@ async function createSubscriptionViaRest({ planId, userData, returnUrl, cancelUr
 router.get("/plans", async (req, res) => {
   try {
     const plans = Object.values(SUBSCRIPTION_PLANS).map(buildPublicPlan);
+    if (process.env.PLUS_PURCHASES_ENABLED === "true" && process.env.FREE_FIRST_USAGE_ENABLED === "true") {
+      let funded = false;
+      try { await require("../services/payments/checkoutPolicy").assertPurchaseCapacity(
+        require("../services/processingTokens/runtime").service()); funded = true; } catch {}
+      if (!funded) for (const plan of plans) if (plan.id === "plus") {
+        plan.purchaseEnabled = false; delete plan.paypalPlanId;
+        plan.purchaseUnavailableReason = "FUNDED_CAPACITY_UNAVAILABLE";
+      }
+    }
     res.json({
       success: true,
       plans,
@@ -547,7 +566,8 @@ router.get("/plans", async (req, res) => {
 router.post("/create-subscription", authMiddleware, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
-    const { planId, returnUrl, cancelUrl } = req.body;
+    const { planId } = req.body;
+    const { returnUrl, cancelUrl } = require("../services/payments/checkoutPolicy").checkoutOrigins(req.body);
 
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });
@@ -567,6 +587,8 @@ router.post("/create-subscription", authMiddleware, async (req, res) => {
           error: "PRICE_VALIDATION_PENDING",
           message: "Plus pricing is proposed and purchases are not yet enabled.",
         });
+    await require("../services/payments/checkoutPolicy").assertPurchaseCapacity(
+      require("../services/processingTokens/runtime").service());
     const normalizedPlanId = normalizePlanId(planId);
     const plan = resolvePlan(normalizedPlanId);
     const paypalPlanId = plan.paypalPlanIdEnv ? process.env[plan.paypalPlanIdEnv] : undefined;
@@ -595,114 +617,24 @@ router.post("/create-subscription", authMiddleware, async (req, res) => {
     const userDoc = await db.collection("users").doc(userId).get();
     const userData = userDoc.data() || {};
 
-    // Create PayPal subscription - prefer SDK, fall back to REST if SDK missing
-    if (paypal && paypal.subscriptions && paypal.subscriptions.SubscriptionsCreateRequest) {
-      const request = new paypal.subscriptions.SubscriptionsCreateRequest();
-      request.requestBody({
-        plan_id: paypalPlanId,
-        subscriber: {
-          name: {
-            given_name: userData.displayName?.split(" ")[0] || "User",
-            surname: userData.displayName?.split(" ")[1] || "",
-          },
-          email_address: userData.email || req.user?.email,
-        },
-        application_context: {
-          brand_name: "AutoPromote",
-          locale: "en-US",
-          shipping_preference: "NO_SHIPPING",
-          user_action: "SUBSCRIBE_NOW",
-          payment_method: {
-            payer_selected: "PAYPAL",
-            payee_preferred: "IMMEDIATE_PAYMENT_REQUIRED",
-          },
-          return_url: returnUrl || `${process.env.FRONTEND_URL}/dashboard?payment=success`,
-          cancel_url: cancelUrl || `${process.env.FRONTEND_URL}/dashboard?payment=cancelled`,
-        },
-        custom_id: userId,
-      });
-
-      const client = paypalClient.client();
-      const subscription = await client.execute(request);
-
-      // Store subscription intent in Firestore
-      await db.collection("subscription_intents").doc(subscription.result.id).set({
-        userId,
-        planId: normalizedPlanId,
-        paypalSubscriptionId: subscription.result.id,
-        status: "pending",
-        amount: plan.price,
-        createdAt: new Date().toISOString(),
-      });
-
-      audit.log("paypal.subscription.created", {
-        userId,
-        planId: normalizedPlanId,
-        subscriptionId: subscription.result.id,
-      });
-
-      // Get approval URL
-      const approvalLink = subscription.result.links.find(link => link.rel === "approve");
-
-      res.json({
-        success: true,
-        used: "sdk",
-        subscriptionId: subscription.result.id,
-        approvalUrl: approvalLink?.href,
-        planId: normalizedPlanId,
-        amount: plan.price,
-      });
-    } else {
-      // REST fallback
-      try {
-        console.warn("[PayPal] SDK subscriptions API missing; using REST fallback");
-        const rest = await createSubscriptionViaRest({
-          planId: paypalPlanId,
-          userData,
-          returnUrl: returnUrl || `${process.env.FRONTEND_URL}/dashboard?payment=success`,
-          cancelUrl: cancelUrl || `${process.env.FRONTEND_URL}/dashboard?payment=cancelled`,
-          customId: userId,
-        });
-        const subscriptionId = rest && (rest.id || rest.subscription_id);
-        await db.collection("subscription_intents").doc(subscriptionId).set({
-          userId,
-          planId: normalizedPlanId,
-          paypalSubscriptionId: subscriptionId,
-          status: "pending",
-          amount: plan.price,
-          createdAt: new Date().toISOString(),
-        });
-        audit.log("paypal.subscription.created", {
-          userId,
-          planId: normalizedPlanId,
-          subscriptionId,
-        });
-        const approvalLink =
-          (rest && rest.links && rest.links.find(l => l.rel === "approve")) || null;
-        return res.json({
-          success: true,
-          used: "rest",
-          subscriptionId,
-          approvalUrl: approvalLink?.href,
-          planId: normalizedPlanId,
-          amount: plan.price,
-        });
-      } catch (e) {
-        console.error("[PayPal] Create subscription REST fallback error:", e);
-        audit.log("paypal.subscription.error", {
-          userId: req.userId,
-          error: e.message || String(e),
-        });
-        return res.status(500).json({ error: "Failed to create subscription" });
-      }
-    }
+    const checkout = await require("../services/payments/checkoutSession").createOwnedCheckout({
+      db, userId, planId: normalizedPlanId, paypalPlanId, returnUrl, cancelUrl,
+      read: fetchPayPalSubscriptionDetails,
+      create: requestId => createSubscriptionViaRest({ planId: paypalPlanId, userData,
+        returnUrl, cancelUrl, customId: userId, requestId }),
+    });
+    audit.log("paypal.subscription.created", {
+      userId, planId: normalizedPlanId, subscriptionId: checkout.subscriptionId,
+      duplicate: checkout.duplicate,
+    });
+    return res.json({ success: true, ...checkout, planId: normalizedPlanId, amount: plan.price });
   } catch (error) {
     console.error("[PayPal] Create subscription error:", error);
     audit.log("paypal.subscription.error", {
       userId: req.userId,
       error: error.message,
     });
-    res.status(500).json({ error: "Failed to create subscription" });
+    res.status(error.status || 500).json({ error: error.code || "Failed to create subscription" });
   }
 });
 
@@ -713,7 +645,7 @@ router.post("/create-subscription", authMiddleware, async (req, res) => {
 router.post("/activate", authMiddleware, async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
-    const { subscriptionId, planId: requestedPlanId } = req.body;
+    const { subscriptionId, planId: _requestedPlanId } = req.body;
 
     if (!userId || !subscriptionId) {
       return res.status(400).json({ error: "Missing required fields" });

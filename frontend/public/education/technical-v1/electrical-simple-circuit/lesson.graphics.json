@@ -1,0 +1,649 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Close the path. Light the load.",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Pathway marker",
+      "name": "Pathway marker",
+      "type": "text",
+      "text": "AUTOPROMOTE EDUCATION  /  ELECTRICAL TECHNOLOGY",
+      "x": 50.0,
+      "y": 4.166666666666667,
+      "width": 94,
+      "scale": 0.35,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": []
+    },
+    {
+      "id": "Lesson title",
+      "name": "Lesson title",
+      "type": "text",
+      "text": "Close the path. Light the load.",
+      "x": 50.0,
+      "y": 10.13888888888889,
+      "width": 94,
+      "scale": 0.94,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 800,
+      "textAlign": "center",
+      "color": "#eff5ff",
+      "keys": []
+    },
+    {
+      "id": "Stage dividers",
+      "name": "Stage dividers",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><line x1=\"56\" y1=\"119\" x2=\"1224\" y2=\"119\" stroke=\"#25334b\" stroke-width=\"1\"/><line x1=\"56\" y1=\"610\" x2=\"1224\" y2=\"610\" stroke=\"#25334b\" stroke-width=\"1\"/></svg>",
+      "x": 50.0,
+      "y": 50.0,
+      "width": 100.0,
+      "height": 100.0,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "contain",
+      "keys": []
+    },
+    {
+      "id": "Conductors and symbols",
+      "name": "Conductors and symbols",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><line x1=\"240\" y1=\"280\" x2=\"240\" y2=\"200\" stroke=\"#74bfff\" stroke-width=\"5\"/><line x1=\"240\" y1=\"200\" x2=\"500\" y2=\"200\" stroke=\"#74bfff\" stroke-width=\"5\"/><line x1=\"620\" y1=\"200\" x2=\"900\" y2=\"200\" stroke=\"#74bfff\" stroke-width=\"5\"/><line x1=\"900\" y1=\"200\" x2=\"900\" y2=\"310\" stroke=\"#74bfff\" stroke-width=\"5\"/><line x1=\"900\" y1=\"390\" x2=\"900\" y2=\"520\" stroke=\"#74bfff\" stroke-width=\"5\"/><line x1=\"900\" y1=\"520\" x2=\"240\" y2=\"520\" stroke=\"#74bfff\" stroke-width=\"5\"/><line x1=\"240\" y1=\"520\" x2=\"240\" y2=\"420\" stroke=\"#74bfff\" stroke-width=\"5\"/><line x1=\"240\" y1=\"280\" x2=\"240\" y2=\"316\" stroke=\"#eff5ff\" stroke-width=\"4\"/><line x1=\"204\" y1=\"316\" x2=\"276\" y2=\"316\" stroke=\"#eff5ff\" stroke-width=\"5\"/><line x1=\"219\" y1=\"332\" x2=\"261\" y2=\"332\" stroke=\"#eff5ff\" stroke-width=\"5\"/><line x1=\"240\" y1=\"332\" x2=\"240\" y2=\"360\" stroke=\"#eff5ff\" stroke-width=\"4\"/><line x1=\"204\" y1=\"360\" x2=\"276\" y2=\"360\" stroke=\"#eff5ff\" stroke-width=\"5\"/><line x1=\"219\" y1=\"377\" x2=\"261\" y2=\"377\" stroke=\"#eff5ff\" stroke-width=\"5\"/><line x1=\"240\" y1=\"377\" x2=\"240\" y2=\"420\" stroke=\"#eff5ff\" stroke-width=\"4\"/><circle cx=\"900\" cy=\"350\" r=\"40\" fill=\"none\" stroke=\"#eff5ff\" stroke-width=\"4\"/><line x1=\"872\" y1=\"322\" x2=\"928\" y2=\"378\" stroke=\"#eff5ff\" stroke-width=\"3\"/><line x1=\"872\" y1=\"378\" x2=\"928\" y2=\"322\" stroke=\"#eff5ff\" stroke-width=\"3\"/><circle cx=\"500\" cy=\"200\" r=\"6\" fill=\"#eff5ff\" stroke=\"none\" stroke-width=\"1\"/><circle cx=\"620\" cy=\"200\" r=\"6\" fill=\"#eff5ff\" stroke=\"none\" stroke-width=\"1\"/></svg>",
+      "x": 50.0,
+      "y": 50.0,
+      "width": 100.0,
+      "height": 100.0,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "contain",
+      "keys": []
+    },
+    {
+      "id": "Switch lever",
+      "name": "Switch lever",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"280\" height=\"280\" viewBox=\"0 0 280 280\"><line x1=\"140\" y1=\"140\" x2=\"260\" y2=\"140\" stroke=\"#ffcc79\" stroke-width=\"6\"/><circle cx=\"140\" cy=\"140\" r=\"7\" fill=\"#ffcc79\" stroke=\"none\" stroke-width=\"1\"/></svg>",
+      "x": 39.0625,
+      "y": 27.77777777777778,
+      "width": 21.875,
+      "height": 38.888888888888886,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "contain",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 0,
+          "value": -35,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 8.5,
+          "value": -35,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 9.5,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 24,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 25,
+          "value": -35,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "Lamp light",
+      "name": "Lamp light",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"128\" height=\"128\" viewBox=\"0 0 128 128\"><defs><radialGradient id=\"light\"><stop stop-color=\"#ffdf86\" stop-opacity=\".7\"/><stop offset=\"1\" stop-color=\"#ffdf86\" stop-opacity=\"0\"/></radialGradient></defs><circle cx=\"64\" cy=\"64\" r=\"64\" fill=\"url(#light)\" stroke=\"none\" stroke-width=\"1\"/></svg>",
+      "x": 70.3125,
+      "y": 48.61111111111111,
+      "width": 12.5,
+      "height": 22.22222222222222,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "contain",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 9.49,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 9.5,
+          "value": 1,
+          "easing": "hold"
+        },
+        {
+          "property": "opacity",
+          "time": 24,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 24.05,
+          "value": 0,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "id": "Source label",
+      "name": "Source label",
+      "type": "text",
+      "text": "3 V DC SOURCE",
+      "x": 18.671875,
+      "y": 79.02777777777777,
+      "width": 94,
+      "scale": 0.5,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#eff5ff",
+      "keys": []
+    },
+    {
+      "id": "Positive terminal",
+      "name": "Positive terminal",
+      "type": "text",
+      "text": "+",
+      "x": 22.890625,
+      "y": 39.86111111111111,
+      "width": 94,
+      "scale": 0.65,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ffcc79",
+      "keys": []
+    },
+    {
+      "id": "Negative terminal",
+      "name": "Negative terminal",
+      "type": "text",
+      "text": "−",
+      "x": 22.890625,
+      "y": 58.33333333333333,
+      "width": 94,
+      "scale": 0.65,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#74bfff",
+      "keys": []
+    },
+    {
+      "id": "Switch label",
+      "name": "Switch label",
+      "type": "text",
+      "text": "SWITCH",
+      "x": 44.6875,
+      "y": 20.416666666666668,
+      "width": 94,
+      "scale": 0.5,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#eff5ff",
+      "keys": []
+    },
+    {
+      "id": "Load label",
+      "name": "Load label",
+      "type": "text",
+      "text": "LAMP / LOAD",
+      "x": 80.9375,
+      "y": 48.61111111111111,
+      "width": 94,
+      "scale": 0.5,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#eff5ff",
+      "keys": []
+    },
+    {
+      "id": "Flow note",
+      "name": "Flow note",
+      "type": "text",
+      "text": "ILLUSTRATIVE CONVENTIONAL CURRENT",
+      "x": 50.0,
+      "y": 80.27777777777777,
+      "width": 94,
+      "scale": 0.39,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9daec8",
+      "keys": []
+    },
+    {
+      "id": "Conventional current marker",
+      "name": "Conventional current marker",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\" fill=\"#ffcf53\" stroke=\"none\" stroke-width=\"1\"/></svg>",
+      "x": 18.75,
+      "y": 38.888888888888886,
+      "width": 1.875,
+      "height": 3.333333333333333,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 10,
+      "duration": 13.1,
+      "mediaFit": "contain",
+      "keys": [
+        {
+          "property": "x",
+          "time": 10.0,
+          "value": 18.75,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 10.0,
+          "value": 38.888889,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 10.571428571428571,
+          "value": 18.75,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 10.571428571428571,
+          "value": 27.777778,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 12.428571428571429,
+          "value": 39.0625,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.428571428571429,
+          "value": 27.777778,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 13.285714285714285,
+          "value": 48.4375,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.285714285714285,
+          "value": 27.777778,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 15.285714285714285,
+          "value": 70.3125,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 15.285714285714285,
+          "value": 27.777778,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 16.357142857142858,
+          "value": 70.3125,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 16.357142857142858,
+          "value": 48.611111,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 17.57142857142857,
+          "value": 70.3125,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 17.57142857142857,
+          "value": 72.222222,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 22.285714285714285,
+          "value": 18.75,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 22.285714285714285,
+          "value": 72.222222,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 23.0,
+          "value": 18.75,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 23.0,
+          "value": 58.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 10,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 23.05,
+          "value": 0,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "id": "Open state",
+      "name": "Open state",
+      "type": "text",
+      "text": "OPEN PATH  /  LAMP OFF",
+      "x": 50.0,
+      "y": 65.0,
+      "width": 94,
+      "scale": 0.58,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 8.5,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ffcc79",
+      "keys": []
+    },
+    {
+      "id": "Closed state",
+      "name": "Closed state",
+      "type": "text",
+      "text": "CLOSED PATH  /  LAMP ON",
+      "x": 50.0,
+      "y": 65.0,
+      "width": 94,
+      "scale": 0.58,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 9.5,
+      "duration": 14.5,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": []
+    },
+    {
+      "id": "Open again",
+      "name": "Open again",
+      "type": "text",
+      "text": "OPEN AGAIN  /  LAMP OFF",
+      "x": 50.0,
+      "y": 65.0,
+      "width": 94,
+      "scale": 0.58,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 25,
+      "duration": 3,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ffcc79",
+      "keys": []
+    },
+    {
+      "id": "Callout 1",
+      "name": "Callout 1",
+      "type": "text",
+      "text": "Open switch: the path is broken",
+      "x": 50.0,
+      "y": 91.66666666666667,
+      "width": 94,
+      "scale": 0.68,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 7,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 0.35,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 0,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 0.5,
+          "value": 91.666667,
+          "easing": "ease_out"
+        }
+      ]
+    },
+    {
+      "id": "Callout 2",
+      "name": "Callout 2",
+      "type": "text",
+      "text": "Closed switch: a complete conducting path",
+      "x": 50.0,
+      "y": 91.66666666666667,
+      "width": 94,
+      "scale": 0.68,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 7,
+      "duration": 7,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 7,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 7.35,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 7,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 7.5,
+          "value": 91.666667,
+          "easing": "ease_out"
+        }
+      ]
+    },
+    {
+      "id": "Callout 3",
+      "name": "Callout 3",
+      "type": "text",
+      "text": "Conventional current: external + → −",
+      "x": 50.0,
+      "y": 91.66666666666667,
+      "width": 94,
+      "scale": 0.68,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 14,
+      "duration": 7,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 14,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 14.35,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.5,
+          "value": 91.666667,
+          "easing": "ease_out"
+        }
+      ]
+    },
+    {
+      "id": "Callout 4",
+      "name": "Callout 4",
+      "type": "text",
+      "text": "Illustration only · practical work needs supervision",
+      "x": 50.0,
+      "y": 91.66666666666667,
+      "width": 94,
+      "scale": 0.68,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 21,
+      "duration": 7,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 21,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 21.35,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 21,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 21.5,
+          "value": 91.666667,
+          "easing": "ease_out"
+        }
+      ]
+    }
+  ],
+  "groups": []
+}

@@ -20,6 +20,7 @@ jest.mock("../services/billingService", () => ({
 const retiredResponse = require("../retiredFeatureResponse");
 const {
   SUBSCRIPTION_PLANS,
+  LEGACY_SUBSCRIPTION_PLANS,
   CREDIT_TOP_UP_PACKS,
   getPlanCapabilities,
 } = require("../config/subscriptionPlans");
@@ -141,21 +142,25 @@ test("owned historical generated media remains readable without dispatch or repe
   });
   await request(app()).get("/api/clips/analysis/old-job").expect(403);
 });
-test("plan identities, prices, credit allocations, top-ups and active editing access stay compatible", () => {
+test("Free/Plus offers share creative access while legacy prices, credit allocations and top-ups remain compatible", () => {
   expect(
-    Object.values(SUBSCRIPTION_PLANS).map(p => [p.id, p.price, p.features.monthlyCredits])
+    Object.values(LEGACY_SUBSCRIPTION_PLANS).map(p => [p.id, p.price, p.features.monthlyCredits])
   ).toEqual([
     ["free", 0, 15],
     ["premium", 14.99, 150],
     ["pro", 34.99, 500],
     ["enterprise", 99.99, 2000],
   ]);
+  expect(Object.values(SUBSCRIPTION_PLANS).map(p => [p.id, p.price, p.features.monthlyCredits]))
+    .toEqual([["free", 0, 0], ["plus", 4.99, 0]]);
+  expect(SUBSCRIPTION_PLANS.free.processing).toMatchObject({ tokens: 100, resetHours: 144, rolling30DayTokens: 500 });
+  expect(SUBSCRIPTION_PLANS.plus.processing).toMatchObject({ tokens: 500, resetHours: 24, rolling30DayTokens: 2000 });
   expect(CREDIT_TOP_UP_PACKS.map(p => [p.credits, p.price])).toEqual([
     [50, 4.99],
     [200, 14.99],
     [500, 29.99],
   ]);
-  for (const id of ["premium", "pro", "enterprise"]) {
+  for (const id of ["free", "plus", "premium", "pro", "enterprise"]) {
     const c = getPlanCapabilities(id);
     expect(c.analytics).toBeUndefined();
     expect(c.editing.features.smartPromoSummary).toBeUndefined();

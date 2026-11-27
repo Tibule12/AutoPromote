@@ -1,0 +1,127 @@
+{
+  "lessonId": "egd-drawing-views",
+  "sha256": "afc831c3eb3213c515836bec1fb29f9b0686ae17ee3afcbc2510f308e870e17d",
+  "framesDecoded": 672,
+  "seconds": 28.0,
+  "width": 1280,
+  "height": 720,
+  "fps": 24.0,
+  "allFramesNonblank": true,
+  "nativeWorkflowProof": "tutorial/proof.json",
+  "geometryAssessment": {
+    "thirdAnglePlacement": true,
+    "frontWidthHeight": [
+      80,
+      40
+    ],
+    "topWidthDepth": [
+      80,
+      50
+    ],
+    "rightDepthHeight": [
+      50,
+      40
+    ],
+    "sameSteppedSolid": true,
+    "preparedStaticProjectionDisclosed": true,
+    "CADOr3DSimulation": false,
+    "assessment": "Bounded geometry/kinematic/timing checks; not educator sign-off",
+    "teacherFeedbackReceived": false,
+    "independentLearnerRecreation": false,
+    "schoolHardwareTrial": false
+  },
+  "pairedPreFinalPreview": [
+    {
+      "time": 2,
+      "meanAbsoluteRgbDifference": 5.0191843894675925,
+      "p95RgbDifference": 7.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 48,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    },
+    {
+      "time": 3,
+      "meanAbsoluteRgbDifference": 5.172175564236111,
+      "p95RgbDifference": 8.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 72,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    },
+    {
+      "time": 8,
+      "meanAbsoluteRgbDifference": 5.619955512152778,
+      "p95RgbDifference": 9.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 192,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    },
+    {
+      "time": 9,
+      "meanAbsoluteRgbDifference": 6.386466652199074,
+      "p95RgbDifference": 11.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 216,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    },
+    {
+      "time": 15,
+      "meanAbsoluteRgbDifference": 5.804174262152777,
+      "p95RgbDifference": 10.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 360,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    },
+    {
+      "time": 16,
+      "meanAbsoluteRgbDifference": 5.561804832175926,
+      "p95RgbDifference": 10.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 384,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    },
+    {
+      "time": 24,
+      "meanAbsoluteRgbDifference": 6.792447916666666,
+      "p95RgbDifference": 12.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 576,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    }
+  ],
+  "nativeGearMotion": null,
+  "strictWholeStudioPixelParity": false,
+  "externalTeacherReview": false,
+  "independentLearnerRecreation": false,
+  "actualSchoolHardwareTrial": false,
+  "creativeOwnerApproval": false,
+  "reviewLimit": "Geometry/kinematic/timing and actual decoded-film checks support a private teacher-review candidate. Teachers must judge educational suitability and practical terminology; full human listening and school-device trials remain required.",
+  "audioRms": 0.11293533444404602,
+  "noSubtitleTracks": true,
+  "nativePixelSemanticChecks": {
+    "actualFrontSteppedSilhouette": true,
+    "actualTopAndRightViewsAtThirdAnglePositions": true,
+    "visibleTopAndSideStepEdges": true,
+    "source": "Actual decoded native frame24s, well inside the final explanatory interval."
+  }
+}

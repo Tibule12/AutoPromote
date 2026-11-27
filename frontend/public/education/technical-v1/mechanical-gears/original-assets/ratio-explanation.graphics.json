@@ -1,0 +1,29 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Ratio explanation \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Ratio explanation",
+      "name": "Ratio explanation",
+      "type": "text",
+      "text": "SPEED REDUCTION",
+      "x": 84.375,
+      "y": 48.61111111111111,
+      "width": 94,
+      "scale": 0.4,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9daec8",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "subject": "Engineering Graphics and Design",
+    "reference": {
+      "title": "DBE CAPS Grades 10–12 — Engineering Graphics and Design",
+      "url": "https://www.education.gov.za/LinkClick.aspx?fileticket=pqcxCwUTO98%3D&forcedownload=true&mid=1558&portalid=0&tabid=570",
+      "pdfPages": [
+        18,
+        22
+      ],
+      "note": "Teacher must confirm the current annual teaching plan and specialisation. Page numbers count the PDF cover.",
+      "sha256": "f5f1251d07edd0ed7ff05c1d78b28e6632a04b7653475db6c742b5ee30d08dc3"
+    }
+  },
+  {
+    "subject": "Mechanical Technology",
+    "reference": {
+      "title": "DBE CAPS Grades 10–12 — Mechanical Technology",
+      "url": "https://www.education.gov.za/LinkClick.aspx?fileticket=Pu7gZywTv48%3D&forcedownload=true&mid=1558&portalid=0&tabid=570",
+      "pdfPages": [
+        28,
+        34,
+        37
+      ],
+      "note": "Teacher must confirm the current annual teaching plan and specialisation. Page numbers count the PDF cover.",
+      "sha256": "3bd88940d9c9f8484138c8b4f608b1fb0cd4f3e1ebe996ca0e2b09521af03665"
+    }
+  },
+  {
+    "subject": "Electrical Technology",
+    "reference": {
+      "title": "DBE CAPS Grades 10–12 — Electrical Technology",
+      "url": "https://www.education.gov.za/LinkClick.aspx?fileticket=D5mc22RBvDA%3D&forcedownload=true&mid=1558&portalid=0&tabid=570",
+      "pdfPages": [
+        11,
+        23,
+        26
+      ],
+      "note": "Teacher must confirm the current annual teaching plan and specialisation. Page numbers count the PDF cover.",
+      "sha256": "9ea0f234087adae42f2375871830d8081099d4735c8b330e3dda0d4440a47690"
+    }
+  },
+  {
+    "subject": "Civil Technology",
+    "reference": {
+      "title": "DBE CAPS Grades 10–12 — Civil Technology",
+      "url": "https://www.education.gov.za/LinkClick.aspx?fileticket=-ObkWQR3PVo%3D&forcedownload=true&mid=1558&portalid=0&tabid=570",
+      "pdfPages": [
+        47,
+        49,
+        56,
+        58
+      ],
+      "note": "Teacher must confirm the current annual teaching plan and specialisation. Page numbers count the PDF cover.",
+      "sha256": "d32a03fe99471b7330d241d2496b465dbcc2f5fb3f92c4b351b746f0b538004f"
+    }
+  }
+]

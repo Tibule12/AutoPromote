@@ -729,6 +729,22 @@
         "reports/free-first-waste-20261126/README.md"
       ],
       "reason": "Measured local retention read/write reduction, diagnostic cache/visibility, opt-in content trigger consolidation and identical native output adoption without backend re-upload. Preserve shared creative access, all financial/security/ownership controls and existing readiness. Production attribution, hosted metrics, cleanup and deployment remain pending; no monetary or creative qualification is inferred."
+    },
+    {
+      "feature_id": "publishing.schedule",
+      "documentation_impact": [
+        "DEPENDENCIES",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "src/server.js",
+        "src/services/publishedVideoRetention.js",
+        "src/services/storageCleanupService.js",
+        "src/services/billingService.js"
+      ],
+      "reason": "Independent production release candidate reduces redundant retention/diagnostic work and hardens verified legacy payments without changing public plans, creative tools, scheduling semantics, customer balances or enabling renewable processing. Existing deletion dependencies and readiness limitations remain."
     }
   ]
 }

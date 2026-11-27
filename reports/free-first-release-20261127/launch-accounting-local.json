@@ -1,0 +1,52 @@
+{
+  "date": "2026-11-27",
+  "scope": "Local financial/subscription regression; no production qualification",
+  "freeFirst": {
+    "tests": 92,
+    "passed": 92,
+    "failed": 0,
+    "logSha256": "f85602c4fcb1054aab047ee395fd63709f1802f5ffd9df38ed824811d953ee67"
+  },
+  "previousCiFailures": {
+    "suites": 5,
+    "tests": 35,
+    "passed": 35,
+    "failed": 0,
+    "reason": "Preserve legacy allocations separately; assert approved shared Free/Plus access and provide required packaging fixtures."
+  },
+  "educationPreservation": {
+    "tests": 7,
+    "passed": 7,
+    "changedPublicEducationFilesAgainstMain": 0
+  },
+  "knowledge": {
+    "tests": 17,
+    "passed": 17
+  },
+  "newTestFiles": [
+    {
+      "path": "test/free-first/launch-cash-token-separation.test.cjs",
+      "sha256": "71b7cd48d3fecb4671ed70037b3389d31e1d9ea47f6f867662457d77f87d0a9d"
+    },
+    {
+      "path": "test/free-first/launch-cash-subcaps.test.cjs",
+      "sha256": "769641a88955947444056f211139581bfde20dd91660b087446752c749e1e9fb"
+    },
+    {
+      "path": "test/free-first/launch-scheduled-accounting.test.cjs",
+      "sha256": "2fd0d4d1fea2d054ad01cb1747372b95d018d059d0b6dad843dc2dded30a0c3c"
+    },
+    {
+      "path": "test/free-first/launch-payment-security.test.cjs",
+      "sha256": "a3cbdf07cdb20e86f68713d4308bb97784f4c0b8b376721644444fc6e24319ed"
+    },
+    {
+      "path": "test/free-first/launch-checkout-session.test.cjs",
+      "sha256": "682a9b8894e458b05510c7a24414e4aa0abc6d0f221f710dcf3115c61fc7c4a7"
+    }
+  ],
+  "providers": "PayPal and Cloud Run mutation transports are fixtures in these local tests. No merchant charge or production compute execution is represented.",
+  "productionEnablement": false,
+  "newPaidWorkloadExecutions": 0,
+  "newLiveCheckouts": 0
+}

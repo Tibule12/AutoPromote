@@ -1,0 +1,98 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Side focus \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Side focus",
+      "name": "Side focus",
+      "type": "artwork",
+      "x": 76.171875,
+      "y": 61.11111111111111,
+      "width": 13.59375,
+      "height": 20.0,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.8,
+            "y": 0.8,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.2,
+            "y": 0.8,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.2,
+            "y": 99.2,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.8,
+            "y": 99.2,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#ffcc79",
+          "width": 0.8
+        }
+      },
+      "keys": []
+    }
+  ],
+  "groups": []
+}

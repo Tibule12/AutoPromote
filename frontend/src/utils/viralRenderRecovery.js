@@ -2,6 +2,7 @@ const KEY_PREFIX = "autopromote-viral-render-attempt:";
 const DEVICE_EDUCATION_KEYS = new Set([
   "autopromote.education.it-studio.v1",
   "autopromote.education.cat.review.v1",
+  "autopromote.education.technical.review.v1",
 ]);
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 

@@ -1,0 +1,31 @@
+{
+  "nodeConceptAndPublicReleaseTests": 7,
+  "focusedEducationAndRecoveryTests": 28,
+  "fullAppBuild": {
+    "passed": true,
+    "publicEntryPages": 67,
+    "welcomeAssets": 19
+  },
+  "productionDeployments": 0,
+  "paidGpuJobs": 0,
+  "teacherFeedbackReceived": false,
+  "independentLearnerRecreation": false,
+  "actualSchoolHardwareTrial": false,
+  "formalReadinessCountsUnchanged": true,
+  "fullStudioPixelParityQualified": false,
+  "exactCIFrontendSelection": {
+    "suites": 6,
+    "cases": 61,
+    "passed": true
+  },
+  "canonicalReplayMatches": true,
+  "studioContractRecordsValid": true,
+  "finalAnonymousWelcomeComparisons": 8,
+  "actualOwnerBackupRestores": 4,
+  "freshBrowserKitRecreations": 4,
+  "shareableArchivesIntegrityChecked": 5,
+  "deliveredSourceAndMovieCopiesMatch": 12,
+  "finalServingCheck": true,
+  "freshSettledLocalSnapshotRetained": true,
+  "sourceVersion": "d2d0d647 base plus the locally committed Technical Education changes"
+}

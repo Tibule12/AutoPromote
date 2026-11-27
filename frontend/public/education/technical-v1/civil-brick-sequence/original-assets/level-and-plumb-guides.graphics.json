@@ -1,0 +1,28 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Level and plumb guides \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Level and plumb guides",
+      "name": "Level and plumb guides",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><line x1=\"245\" y1=\"302\" x2=\"245\" y2=\"555\" stroke=\"#74bfff\" stroke-width=\"2\" stroke-dasharray=\"5 5\"/><line x1=\"245\" y1=\"302\" x2=\"1047\" y2=\"302\" stroke=\"#74bfff\" stroke-width=\"2\" stroke-dasharray=\"5 5\"/></svg>",
+      "x": 50.0,
+      "y": 50.0,
+      "width": 100.0,
+      "height": 100.0,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "contain",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

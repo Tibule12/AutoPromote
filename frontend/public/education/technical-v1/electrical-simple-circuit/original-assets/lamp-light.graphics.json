@@ -1,0 +1,28 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Lamp light \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Lamp light",
+      "name": "Lamp light",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"128\" height=\"128\" viewBox=\"0 0 128 128\"><defs><radialGradient id=\"light\"><stop stop-color=\"#ffdf86\" stop-opacity=\".7\"/><stop offset=\"1\" stop-color=\"#ffdf86\" stop-opacity=\"0\"/></radialGradient></defs><circle cx=\"64\" cy=\"64\" r=\"64\" fill=\"url(#light)\" stroke=\"none\" stroke-width=\"1\"/></svg>",
+      "x": 70.3125,
+      "y": 48.61111111111111,
+      "width": 12.5,
+      "height": 22.22222222222222,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "contain",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

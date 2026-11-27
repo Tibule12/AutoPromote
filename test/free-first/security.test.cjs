@@ -201,9 +201,9 @@ test("client SDK cannot edit balances, subscriptions, token ledger or claim owne
 });
 test('Plus checkout rejects foreign currency, wrong interval and setup fees before any approval link', () => {
   const {validatePlusPlanDefinition}=require('../../src/services/payments/subscriptionVerification');
-  const plan={status:'ACTIVE',billing_cycles:[{tenure_type:'REGULAR',frequency:{interval_unit:'MONTH',interval_count:1},pricing_scheme:{fixed_price:{currency_code:'USD',value:'4.99'}}}]};
+  const plan={status:'ACTIVE',billing_cycles:[{tenure_type:'REGULAR',sequence:1,total_cycles:0,frequency:{interval_unit:'MONTH',interval_count:1},pricing_scheme:{fixed_price:{currency_code:'USD',value:'4.99'}}}]};
   validatePlusPlanDefinition(plan);
-  for(const mutate of [p=>p.billing_cycles[0].pricing_scheme.fixed_price.currency_code='ZAR',p=>p.billing_cycles[0].frequency.interval_unit='YEAR',p=>p.payment_preferences={setup_fee:{value:'5'}}]) {
+  for(const mutate of [p=>p.billing_cycles[0].pricing_scheme.fixed_price.currency_code='ZAR',p=>p.billing_cycles[0].frequency.interval_unit='YEAR',p=>p.payment_preferences={setup_fee:{value:'5'}},p=>p.billing_cycles[0].total_cycles=12,p=>p.taxes={percentage:'15'},p=>p.quantity_supported=true,p=>p.payment_preferences={auto_bill_outstanding:true}]) {
     const p=structuredClone(plan);mutate(p);assert.throws(()=>validatePlusPlanDefinition(p),{code:'PAYPAL_PLUS_TERMS_MISMATCH'});
   }
 });

@@ -75,7 +75,7 @@ async function getAccessToken() {
   return __tokenCache.token;
 }
 
-async function createOrder({ amount, currency = "USD", internalId, userId }) {
+async function _createOrder({ amount, currency = "USD", internalId, userId }) {
   const base =
     process.env.PAYPAL_MODE === "live"
       ? "https://api-m.paypal.com"
@@ -119,7 +119,7 @@ async function createOrder({ amount, currency = "USD", internalId, userId }) {
   return json;
 }
 
-async function captureOrder(orderId) {
+async function _captureOrder(orderId) {
   const base =
     process.env.PAYPAL_MODE === "live"
       ? "https://api-m.paypal.com"
@@ -232,7 +232,12 @@ router.post(
       return res.status(503).json({ ok: false, error: "verification_unavailable" });
     }
 
-    // Persist minimal log regardless (auditable trail), avoid logging secrets in plain text
+    // Reject before any Firestore writes. Unsigned Internet traffic must not
+    // be able to create financial events or billable webhook-log documents.
+    if (!verified) {
+      return res.status(400).json({ ok: false, error: "signature_verification_failed" });
+    }
+    // Persist the minimal verified trail without credentials or certificate URLs.
     try {
       await db.collection("webhook_logs").add({
         provider: "paypal",
@@ -254,12 +259,37 @@ router.post(
       verificationMode,
     });
 
-    if (!verified && process.env.REQUIRE_PAYPAL_WEBHOOK_VERIFICATION === "true") {
-      return res.status(400).json({ ok: false, error: "signature_verification_failed" });
-    }
-
     // Minimal event routing and subscription lifecycle handling
     try {
+      if (["PAYMENT.SALE.REFUNDED", "PAYMENT.SALE.REVERSED", "BILLING.SUBSCRIPTION.PAYMENT.FAILED"].includes(event.event_type)) {
+        const lifecycle = require("../services/payments/subscriptionLifecycle");
+        const base = process.env.PAYPAL_MODE === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
+        const read = async path => {
+          const response = await fetchFn(base + path, { headers: {
+            Authorization: "Bearer " + await getAccessToken() }, signal: AbortSignal.timeout(15000) });
+          if (!response.ok) throw Error("paypal_lifecycle_read_failed");
+          return response.json();
+        };
+        const failed = event.event_type === "BILLING.SUBSCRIPTION.PAYMENT.FAILED";
+        const status = event.event_type === "PAYMENT.SALE.REFUNDED" ? "refunded" : "reversed";
+        const sale = failed ? null : await lifecycle.authoritativeAdverseSale(event.resource, status,
+          id => read("/v1/payments/sale/" + encodeURIComponent(id)));
+        const subscriptionId = failed ? event.resource?.id : sale.billing_agreement_id;
+        if (!/^I-[A-Z0-9]+$/i.test(subscriptionId || "")) throw Error("invalid_subscription");
+        const [intent, claim] = await Promise.all([
+          db.collection("subscription_intents").doc(subscriptionId).get(),
+          db.collection("paypal_subscription_claims").doc(subscriptionId).get()]);
+        const userId = claim.data()?.userId || intent.data()?.userId;
+        if (!userId) throw Error("subscription_owner_reconciliation_required");
+        if (intent.data()?.userId && claim.data()?.userId && intent.data().userId !== claim.data().userId)
+          throw Error("subscription_owner_conflict");
+        const remote = await read("/v1/billing/subscriptions/" + encodeURIComponent(subscriptionId));
+        if (remote.id !== subscriptionId || (remote.custom_id && remote.custom_id !== userId))
+          throw Error("subscription_owner_conflict");
+        if (failed) await lifecycle.persistFailedCollection({ db, userId, subscriptionId, eventId: event.id, remote });
+        else await lifecycle.persistPaymentRevocation({ db, userId, subscriptionId, eventId: event.id,
+          paymentTime: sale.create_time, providerCurrentPaymentTime: remote.billing_info?.last_payment?.time, saleId:sale.id, status });
+      }
       if (event.event_type === "PAYMENT.CAPTURE.COMPLETED") {
         const amount = event.resource && event.resource.amount && event.resource.amount.value;
         const currency =
@@ -334,6 +364,12 @@ router.post(
                 subscriptionId,
                 paypalSub: remote,
                 intent,
+                readPaymentResource: async path => {
+                  if (!path.startsWith("/v1/billing/subscriptions/")) throw Error("invalid_payment_resource");
+                  const response=await fetchFn(base+path,{headers:{Authorization:"Bearer "+await getAccessToken()},signal:AbortSignal.timeout(15000)});
+                  if(!response.ok) throw Error("paypal_payment_read_failed");
+                  return response.json();
+                },
               }
             );
           }

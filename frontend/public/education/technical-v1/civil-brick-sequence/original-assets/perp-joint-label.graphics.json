@@ -1,0 +1,29 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Perp joint label \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Perp joint label",
+      "name": "Perp joint label",
+      "type": "text",
+      "text": "PERP JOINT",
+      "x": 87.96875,
+      "y": 73.61111111111111,
+      "width": 94,
+      "scale": 0.42,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ffcc79",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

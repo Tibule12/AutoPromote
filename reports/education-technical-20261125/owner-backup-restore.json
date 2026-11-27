@@ -1,0 +1,42 @@
+{
+  "lessons": [
+    {
+      "lessonId": "egd-drawing-views",
+      "actualNativeBackupImported": true,
+      "sameOwnerReauthorised": true,
+      "canonicalHash": "7f44509740d90fdc1c5f45997407142dc06b43b32054265b657e953145fd3181",
+      "exactIndependentBrowserRestore": true,
+      "exactColdRecovery": true
+    },
+    {
+      "lessonId": "mechanical-gears",
+      "actualNativeBackupImported": true,
+      "sameOwnerReauthorised": true,
+      "canonicalHash": "e2e8d7adf0a4364c9db13596e188659c151ac4418f77c20b2a3880202b4ed148",
+      "exactIndependentBrowserRestore": true,
+      "exactColdRecovery": true
+    },
+    {
+      "lessonId": "electrical-simple-circuit",
+      "actualNativeBackupImported": true,
+      "sameOwnerReauthorised": true,
+      "canonicalHash": "58dbeff6c5ac8603bf9b0b836591dd19a8b4c1a873952698b8901a56c07957b2",
+      "exactIndependentBrowserRestore": true,
+      "exactColdRecovery": true
+    },
+    {
+      "lessonId": "civil-brick-sequence",
+      "actualNativeBackupImported": true,
+      "sameOwnerReauthorised": true,
+      "canonicalHash": "f9d966c095bb8e548b571361496cd6c153eec79fe9659a0a03e124ff0cab8bb8",
+      "exactIndependentBrowserRestore": true,
+      "exactColdRecovery": true
+    }
+  ],
+  "normalSignIn": true,
+  "signedInHelp200": true,
+  "helpFeature": "studio.keyframes",
+  "renderRequests": 0,
+  "paidJobs": 0,
+  "scope": "Same-owner backup restoration in a fresh browser; no cross-account portability or learner approval claimed."
+}

@@ -1,0 +1,750 @@
+AUTOPROMOTE EDUCATION — One object. Three connected views.
+
+1. Upload the original stage
+Workspace → Viral Clip Studio → Choose videos → Open Creator Studio
+source.mp4 · 1280×720 · 28 seconds · original offline synthetic narration
+The source is a plain stage with sound. It contains no animated teaching diagrams.
+
+2. Keep the whole composition visible
+After → Preview quality; Reframe; View options; Sound; Captions
+Full; 16:9; Show Everyone; Fit full; main frame off; Rounded off; keep original audio; voice repair off; captions off
+Preserve precise drawing relationships and a stable full-frame lesson.
+
+3. Import the editable scaffold
+Graphics → Import animated graphics → Import graphics composition…
+starter.graphics.json; native text, artwork, masks and motion keys
+Static original SVGs become ordinary editable image layers. Existing keys use the canonical Studio animation graph; they are not an external movie.
+
+4. Complete the key deliberately
+Motion → Transform keyframes → Target layer → Motion value curve editor → Curve keyframe → Selected motion key value
+Front focus; strokeEnd at 2.8s = 100; easing ease_in_out
+Draw attention to a corresponding view without moving or distorting its technical geometry.
+
+5. Inspect the matching layer or group
+Motion → Target layer; Layer geometry & timing; Graphics → Groups where applicable
+Top focus; see the full layer/group table below
+Check the relationship between layers, rather than judging one moving part in isolation.
+
+6. Add your own annotation
+Graphics → Add title layer → Label; Copy/time/size; Motion → Transform keyframes → Target layer = Predict first → X/Y
+Practice label: Predict first; start24s; duration4s; size0.55; width60%; explicitly select Predict first in Target layer; X50 Y84. Remove the practice label before final save.
+Graphics selection and Motion target are separate. Confirm the new title before editing X/Y so the technical diagram layers remain fixed.
+
+7. Save, export and reopen
+Show media → Project name → Save; Export → Render Final Clip; Show Finished Video; saved project
+Unique project name; 720p; 24 fps; original audio; normal local CPU render/download; complete 28s playback; cold reopen
+The actual authored graph must supply the final result and restore through normal Studio controls.
+
+FULL NATIVE COMPOSITION
+Positions/sizes are canvas percentages. Times are programme seconds on the90kHz clock. Easing applies on arrival. Canvas1280×720,28seconds. Original static SVG coordinates use drawing pixels.
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "One object. Three connected views.",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Pathway marker",
+      "name": "Pathway marker",
+      "type": "text",
+      "text": "AUTOPROMOTE EDUCATION  /  EGD",
+      "x": 50.0,
+      "y": 4.166666666666667,
+      "width": 94,
+      "scale": 0.35,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": []
+    },
+    {
+      "id": "Lesson title",
+      "name": "Lesson title",
+      "type": "text",
+      "text": "One object. Three connected views.",
+      "x": 50.0,
+      "y": 10.13888888888889,
+      "width": 94,
+      "scale": 0.94,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 800,
+      "textAlign": "center",
+      "color": "#eff5ff",
+      "keys": []
+    },
+    {
+      "id": "Stage dividers",
+      "name": "Stage dividers",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><line x1=\"56\" y1=\"119\" x2=\"1224\" y2=\"119\" stroke=\"#25334b\" stroke-width=\"1\"/><line x1=\"56\" y1=\"610\" x2=\"1224\" y2=\"610\" stroke=\"#25334b\" stroke-width=\"1\"/></svg>",
+      "x": 50.0,
+      "y": 50.0,
+      "width": 100.0,
+      "height": 100.0,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "contain",
+      "keys": []
+    },
+    {
+      "id": "Isometric object",
+      "name": "Isometric object",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><polygon points=\"270.000,266.000 324.560,297.500 233.627,350.000 179.067,318.500\" fill=\"#419d8c\" stroke=\"#d9e9ff\" stroke-width=\"2\" stroke-linejoin=\"round\"/><polygon points=\"324.560,339.500 415.492,392.000 324.560,444.500 233.627,392.000\" fill=\"#7be2c4\" stroke=\"#d9e9ff\" stroke-width=\"2\" stroke-linejoin=\"round\"/><polygon points=\"324.560,339.500 233.627,392.000 233.627,350.000 324.560,297.500\" fill=\"#b88842\" stroke=\"#d9e9ff\" stroke-width=\"2\" stroke-linejoin=\"round\"/><polygon points=\"415.492,434.000 324.560,486.500 324.560,444.500 415.492,392.000\" fill=\"#d5a663\" stroke=\"#d9e9ff\" stroke-width=\"2\" stroke-linejoin=\"round\"/><polygon points=\"179.067,402.500 324.560,486.500 324.560,444.500 233.627,392.000 233.627,350.000 179.067,318.500\" fill=\"#588fc4\" stroke=\"#d9e9ff\" stroke-width=\"2\" stroke-linejoin=\"round\"/></svg>",
+      "x": 50.0,
+      "y": 50.0,
+      "width": 100.0,
+      "height": 100.0,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "contain",
+      "keys": []
+    },
+    {
+      "id": "Isometric label",
+      "name": "Isometric label",
+      "type": "text",
+      "text": "ISOMETRIC",
+      "x": 23.046875,
+      "y": 72.22222222222221,
+      "width": 94,
+      "scale": 0.55,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9daec8",
+      "keys": []
+    },
+    {
+      "id": "Front view",
+      "name": "Front view",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><polygon points=\"600.000,500.000 840.000,500.000 840.000,440.000 690.000,440.000 690.000,380.000 600.000,380.000\" fill=\"#23486c\" stroke=\"#74bfff\" stroke-width=\"3\" stroke-linejoin=\"round\"/></svg>",
+      "x": 50.0,
+      "y": 50.0,
+      "width": 100.0,
+      "height": 100.0,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "contain",
+      "keys": []
+    },
+    {
+      "id": "Top view",
+      "name": "Top view",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><polygon points=\"600.000,175.000 840.000,175.000 840.000,325.000 600.000,325.000\" fill=\"#1b4b41\" stroke=\"#8eefd0\" stroke-width=\"3\" stroke-linejoin=\"round\"/><line x1=\"690\" y1=\"175\" x2=\"690\" y2=\"325\" stroke=\"#8eefd0\" stroke-width=\"3\"/></svg>",
+      "x": 50.0,
+      "y": 50.0,
+      "width": 100.0,
+      "height": 100.0,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "contain",
+      "keys": []
+    },
+    {
+      "id": "Right-side view",
+      "name": "Right-side view",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><polygon points=\"900.000,380.000 1050.000,380.000 1050.000,500.000 900.000,500.000\" fill=\"#57452b\" stroke=\"#ffcc79\" stroke-width=\"3\" stroke-linejoin=\"round\"/><line x1=\"900\" y1=\"440\" x2=\"1050\" y2=\"440\" stroke=\"#ffcc79\" stroke-width=\"3\"/></svg>",
+      "x": 50.0,
+      "y": 50.0,
+      "width": 100.0,
+      "height": 100.0,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "contain",
+      "keys": []
+    },
+    {
+      "id": "Projection alignment guides",
+      "name": "Projection alignment guides",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><line x1=\"600\" y1=\"331\" x2=\"600\" y2=\"372\" stroke=\"#41536e\" stroke-width=\"1\" stroke-dasharray=\"4 6\"/><line x1=\"840\" y1=\"331\" x2=\"840\" y2=\"432\" stroke=\"#41536e\" stroke-width=\"1\" stroke-dasharray=\"4 6\"/><line x1=\"846\" y1=\"380\" x2=\"895\" y2=\"380\" stroke=\"#41536e\" stroke-width=\"1\" stroke-dasharray=\"4 6\"/><line x1=\"846\" y1=\"500\" x2=\"895\" y2=\"500\" stroke=\"#41536e\" stroke-width=\"1\" stroke-dasharray=\"4 6\"/></svg>",
+      "x": 50.0,
+      "y": 50.0,
+      "width": 100.0,
+      "height": 100.0,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "contain",
+      "keys": []
+    },
+    {
+      "id": "Front label",
+      "name": "Front label",
+      "type": "text",
+      "text": "FRONT  ·  80 × 40",
+      "x": 56.25,
+      "y": 75.27777777777777,
+      "width": 94,
+      "scale": 0.51,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#74bfff",
+      "keys": []
+    },
+    {
+      "id": "Top label",
+      "name": "Top label",
+      "type": "text",
+      "text": "TOP  ·  80 × 50",
+      "x": 56.25,
+      "y": 20.555555555555554,
+      "width": 94,
+      "scale": 0.51,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": []
+    },
+    {
+      "id": "Side label",
+      "name": "Side label",
+      "type": "text",
+      "text": "RIGHT SIDE  ·  50 × 40",
+      "x": 76.171875,
+      "y": 75.27777777777777,
+      "width": 94,
+      "scale": 0.47,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ffcc79",
+      "keys": []
+    },
+    {
+      "id": "Convention",
+      "name": "Convention",
+      "type": "text",
+      "text": "THIRD-ANGLE LAYOUT",
+      "x": 23.046875,
+      "y": 78.47222222222221,
+      "width": 94,
+      "scale": 0.44,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9daec8",
+      "keys": []
+    },
+    {
+      "id": "Front focus",
+      "name": "Front focus",
+      "type": "artwork",
+      "x": 56.25,
+      "y": 61.11111111111111,
+      "width": 20.625,
+      "height": 20.0,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 2,
+      "duration": 26,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.8,
+            "y": 0.8,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.2,
+            "y": 0.8,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.2,
+            "y": 99.2,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.8,
+            "y": 99.2,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#74bfff",
+          "width": 0.8
+        }
+      },
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 2,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "strokeEnd",
+          "time": 2.8,
+          "value": 100,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Top focus",
+      "name": "Top focus",
+      "type": "artwork",
+      "x": 56.25,
+      "y": 34.72222222222222,
+      "width": 20.625,
+      "height": 24.166666666666664,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 8,
+      "duration": 20,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.8,
+            "y": 0.8,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.2,
+            "y": 0.8,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.2,
+            "y": 99.2,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.8,
+            "y": 99.2,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#8eefd0",
+          "width": 0.8
+        }
+      },
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 8,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "strokeEnd",
+          "time": 8.8,
+          "value": 100,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Side focus",
+      "name": "Side focus",
+      "type": "artwork",
+      "x": 76.171875,
+      "y": 61.11111111111111,
+      "width": 13.59375,
+      "height": 20.0,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 15,
+      "duration": 13,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.8,
+            "y": 0.8,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.2,
+            "y": 0.8,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.2,
+            "y": 99.2,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.8,
+            "y": 99.2,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#ffcc79",
+          "width": 0.8
+        }
+      },
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 15,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "strokeEnd",
+          "time": 15.8,
+          "value": 100,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Callout 1",
+      "name": "Callout 1",
+      "type": "text",
+      "text": "Front: width and stepped height",
+      "x": 50.0,
+      "y": 91.66666666666667,
+      "width": 94,
+      "scale": 0.68,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 7,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 0.35,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 0,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 0.5,
+          "value": 91.666667,
+          "easing": "ease_out"
+        }
+      ]
+    },
+    {
+      "id": "Callout 2",
+      "name": "Callout 2",
+      "type": "text",
+      "text": "Top: width and depth",
+      "x": 50.0,
+      "y": 91.66666666666667,
+      "width": 94,
+      "scale": 0.68,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 7,
+      "duration": 7,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 7,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 7.35,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 7,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 7.5,
+          "value": 91.666667,
+          "easing": "ease_out"
+        }
+      ]
+    },
+    {
+      "id": "Callout 3",
+      "name": "Callout 3",
+      "type": "text",
+      "text": "Right side: depth and height",
+      "x": 50.0,
+      "y": 91.66666666666667,
+      "width": 94,
+      "scale": 0.68,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 14,
+      "duration": 7,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 14,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 14.35,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.5,
+          "value": 91.666667,
+          "easing": "ease_out"
+        }
+      ]
+    },
+    {
+      "id": "Callout 4",
+      "name": "Callout 4",
+      "type": "text",
+      "text": "Third angle: top above · right side to the right",
+      "x": 50.0,
+      "y": 91.66666666666667,
+      "width": 94,
+      "scale": 0.68,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 21,
+      "duration": 7,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 21,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 21.35,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 21,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 21.5,
+          "value": 91.666667,
+          "easing": "ease_out"
+        }
+      ]
+    }
+  ],
+  "groups": []
+}

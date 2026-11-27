@@ -40,12 +40,14 @@ test.each(['createEngagementBounty','claimTask','confirmTaskCompletion','purchas
 });
 
 test('editing entitlements and credit allocations survive removal of mission advertising', () => {
-  const { SUBSCRIPTION_PLANS, getPlanCapabilities } = require('../config/subscriptionPlans');
-  expect(SUBSCRIPTION_PLANS.free.features.monthlyCredits).toBe(15);
+  const { SUBSCRIPTION_PLANS, LEGACY_SUBSCRIPTION_PLANS, getPlanCapabilities } = require('../config/subscriptionPlans');
+  expect(LEGACY_SUBSCRIPTION_PLANS.free.features.monthlyCredits).toBe(15);
+  expect(SUBSCRIPTION_PLANS.free.processing.tokens).toBe(100);
+  expect(SUBSCRIPTION_PLANS.free.features.monthlyCredits).toBe(0);
   for (const plan of Object.values(SUBSCRIPTION_PLANS)) {
     expect(plan.features).not.toHaveProperty('wolfHuntTasks');
     const capabilities = getPlanCapabilities(plan.id);
     expect(capabilities).not.toHaveProperty('missions');
-    expect(capabilities.editing.features.viralClipStudio.enabled).toBe(plan.id !== 'free');
+    expect(capabilities.editing.features.viralClipStudio.enabled).toBe(true);
   }
 });

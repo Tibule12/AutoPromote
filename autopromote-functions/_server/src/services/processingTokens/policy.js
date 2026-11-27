@@ -52,10 +52,15 @@ function quote(operation, policy = OPERATIONS) {
   if (cost.calibrated === false) fail("COST_VALIDATION_REQUIRED", 409);
   integer(cost.maxMicros, "COST", 1);
   integer(cost.maxSeconds, "DURATION", 1);
+  const fixedTokens = cost.tokens !== undefined;
+  if (fixedTokens) integer(cost.tokens, "TOKEN_QUOTE", 1);
   return {
     ...cost,
     operation,
-    tokens: Math.ceil(cost.maxMicros / TOKEN_MICROS),
+    // The fallback reads historical/test policies only. Qualified production
+    // profiles must supply a separate user token quote.
+    tokens: fixedTokens ? cost.tokens : Math.ceil(cost.maxMicros / TOKEN_MICROS),
+    tokenPricing: fixedTokens ? "fixed-v1" : "legacy-reference-v1",
     costBasis: "conservative-estimate",
     provisional: true,
   };

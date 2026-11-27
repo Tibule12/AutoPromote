@@ -1,0 +1,29 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Driver label \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Driver label",
+      "name": "Driver label",
+      "type": "text",
+      "text": "DRIVER  /  20 TEETH",
+      "x": 30.859375,
+      "y": 77.08333333333333,
+      "width": 94,
+      "scale": 0.57,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#74bfff",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

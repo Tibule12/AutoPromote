@@ -1,5 +1,14 @@
 # Staged production checklist
 
+Current owner direction supersedes older approval gates below: funding and staged
+subscription deployment are approved within the exact limits in
+`../free-first-launch-20261127/approval-and-status.json`. Sandbox is waived. The
+two exact private YouTube uploads are confirmed. Trigger cutover, registry cleanup,
+six new provider publications and unrelated Studio readiness are not launch gates.
+Native worker and existing publishing/scheduling accounting plus Q1–Q7 remain the
+minimum unfinished engineering work. The subscription architecture is not live.
+
+
 ## 1. Independent cost/security release — deployed
 
 - [x] Prepare isolated release from current main; exclude subscription catalog,
@@ -114,14 +123,14 @@ processing was initiated. Do not enable Free with all useful operations refused.
   preserve unchanged receipts, ownership and valid cancelled paid access.
 - [x] Prepare and offline-validate inactive USD4.99 drafts with unresolved product
   ID; no product/plan creation, activation or merchant transaction performed.
-- [ ] Qualify merchant sandbox lifecycle, actual fee/FX/tax terms, paid activation,
+- [ ] Qualify automated merchant lifecycle, actual live fee/FX/tax terms, paid activation,
   renewal, failure, cancellation, reordered webhook, refund and reversal cases.
 - [ ] Integrate current main (including released Education and independent cost/
   security changes) into the feature branch through a reviewed merge; resolve
   overlaps and rerun source-lock, financial, welcome and authenticated checks.
   Do not copy the entire older feature tree over current main.
 - [ ] Complete stage5/6 before enabling the new catalog/checkout and adapters.
-- [ ] With separate explicit activation approval, create/read back inactive live
+- [ ] Under the existing explicit activation approval, create/read back inactive live
   objects; configure IDs/webhook/origins; verify exact terms; activate the approved
   plan; enable bounded cohort; verify actual funded payment and authoritative UI.
 - [ ] Preserve existing agreements, credits, balances and paid periods. Retire old

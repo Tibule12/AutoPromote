@@ -1,0 +1,7 @@
+TECHNICAL EXERCISE
+Draw a three-course cropped stretcher-bond elevation. Mark a bed joint and a perp joint, and explain why alternate joints are staggered. Predict which next-course pattern follows. Explain why cropped edge fragments do not specify cut-brick sizes, corner bonding, foundations or safe construction.
+
+CREATIVE EDITING EXERCISE
+Import the four original course assets as separate ordinary image layers. Offset alternate patterns by 80 drawing pixels for the 160-pixel module. Use a native group polygon mask to crop the continuous wall. Reveal courses from bottom to top with Y and opacity keys; add native level/plumb annotations without claiming a site measurement.
+
+Submit predictions/reasoning, original assets, editable Studio project, exact keys and complete movie. The starter deliberately contains one incomplete value; correct it using the lesson.

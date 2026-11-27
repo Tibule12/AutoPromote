@@ -1,0 +1,36 @@
+{
+  "date": "2026-11-27",
+  "status": "approved-not-executed",
+  "qualificationMaximumUsd": 5,
+  "liveCheckoutCount": 1,
+  "liveCheckoutAmountUsd": 4.99,
+  "monthlyCreativeProcessingUsd": 10,
+  "dailyCreativeProcessingUsd": 2,
+  "dailyExternalAiUsd": 0.05,
+  "maxConcurrentPaidExecutions": 1,
+  "free": {
+    "tokens": 100,
+    "resetHours": 144,
+    "rolling30DayTokens": 500
+  },
+  "plus": {
+    "monthlyUsd": 4.99,
+    "tokens": 500,
+    "resetHours": 24,
+    "rolling30DayTokens": 2000
+  },
+  "sandboxRequired": false,
+  "privateYoutubeTests": {
+    "approved": true,
+    "uploads": 2,
+    "visibility": "private",
+    "channelId": "UCJX_wX24AWulqbPznjcQyWA",
+    "mediaSha256": "632606ea5293c2e14e8dda2ef52b504585213c50d05cb41fe0e5f1fe4c441931",
+    "title": "AutoPromote Free/Plus qualification \u2014 private test"
+  },
+  "productionDeletionAuthorized": false,
+  "incrementalPaidQualificationRuns": 0,
+  "liveCheckoutsExecuted": 0,
+  "plusPlanCreated": false,
+  "subscriptionLaunchDeployed": false
+}

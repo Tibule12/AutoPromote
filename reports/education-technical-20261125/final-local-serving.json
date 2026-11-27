@@ -1,0 +1,8 @@
+{
+  "fullApp": "http://127.0.0.1:42073/#/education/technical",
+  "review": "http://127.0.0.1:5067/#/education/technical",
+  "previousClientRetained": "/home/tibule12/.local/share/autopromote-qa/education-technical-20261125/revision2/application-build",
+  "finalClient": "/home/tibule12/.local/share/autopromote-qa/education-technical-20261125/revision2/application-build-final",
+  "noApiRestart": true,
+  "productionChanged": false
+}

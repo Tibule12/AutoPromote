@@ -56,6 +56,9 @@ jobs:
       - name: Verify guarded Rules publication with fake APIs
         run: python3 -m unittest discover -s test/security -p 'rules_publisher_test.py' -v
 
+      - name: Verify retention read cache and independent financial fixes locally
+        run: node scripts/test-free-first.cjs
+
       - name: Verify existing payment, publishing and Studio workflows
         env:
           FIREBASE_ADMIN_BYPASS: "1"

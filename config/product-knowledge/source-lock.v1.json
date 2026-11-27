@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Record both verified production cost/security deployments; preserve disabled Free/Plus and explicit missing warm-cycle/merchant/worker proofs.",
-  "reviewed_at": "2026-11-27T04:52:31.681Z",
+  "reason": "Reviewed funded launch accounting/payment changes and current-main merge. Local regression passes; exact production worker integration and qualification remain incomplete. No readiness promotion.",
+  "reviewed_at": "2026-11-27T14:09:35.929Z",
   "catalog_sha256": "eecc391b0e634e380f0b393842ba8a83bc3f8c12b6cbd72f46e427a2a634e270",
   "sources": [
     {
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "2ecf41123a055336a531eb471e11e9b6a5effe16967634fa7a6bf89d40ea6471"
+      "sha256": "98a0ff794f93046d761e24f396ceb6c4c055855ab3a70d2ae56e0836c7ba6f39"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -443,7 +443,7 @@
     },
     {
       "path": "frontend/src/education/EducationPage.js",
-      "sha256": "57691588d10c822cecfef172a41965746ae9cd0fb789fb5bd8e745bbdf3234df"
+      "sha256": "081fd1116242329e03b50004e0029ce5aa33adeb003a4423113d2e0d67298890"
     },
     {
       "path": "frontend/src/education/EducationStudioGuide.js",
@@ -819,11 +819,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "bbc582fd072fc8023b55f4410a4a08860cea140c9f45cde6ac04e68a5eead1f6"
+      "sha256": "0de96dfa504195b27a338bc1846982e9137f7cc27782c6af97467409910c98d7"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "f91e5b87c1293b921e58ade7938ffce34e3a72f492424f47a7192b745394f587"
+      "sha256": "633df55d911ed6f58bfb5729c3e8f8b3191c5cce1a015f6415f4ed15a3d6fadf"
     },
     {
       "path": "worker.js",

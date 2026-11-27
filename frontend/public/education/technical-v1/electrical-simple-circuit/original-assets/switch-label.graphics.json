@@ -1,0 +1,29 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Switch label \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Switch label",
+      "name": "Switch label",
+      "type": "text",
+      "text": "SWITCH",
+      "x": 44.6875,
+      "y": 20.416666666666668,
+      "width": 94,
+      "scale": 0.5,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#eff5ff",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

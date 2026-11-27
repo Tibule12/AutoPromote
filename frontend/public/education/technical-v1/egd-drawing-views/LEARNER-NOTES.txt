@@ -1,0 +1,3 @@
+The same stepped solid has width 80, depth 50 and maximum height 40 model units; its lower step is 20 high and its tall portion 30 wide. Third-angle arrangement places the top above the front, and the right-side view to the right. The isometric picture shows appearance; the orthographic views preserve face dimensions.
+
+Prepared original static isometric/orthographic SVG assets, not Studio CAD, automatic projection, an engineered working drawing or a rendered 3D scene. Model units are explanatory; no manufacturing dimensions or SANS compliance certification is claimed.

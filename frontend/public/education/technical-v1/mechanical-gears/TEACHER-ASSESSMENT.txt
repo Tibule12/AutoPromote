@@ -1,0 +1,39 @@
+SUPPLEMENTARY PRIVATE TEACHER REVIEW — NOT CAPS APPROVED
+Two gears. One clear ratio.
+Grade 10 systems and control; Grades 11–12 extension
+
+OBJECTIVES
+Identify driver and driven gear.
+Use tooth counts to calculate a 2:1 speed reduction.
+Predict opposite directions for two external gears.
+Relate reduced speed and increased ideal torque without claiming energy creation.
+Build constant-rate native rotation using linear keys and fixed centres.
+
+DRAFT RUBRIC /20
+Identify driver/driven and justify opposing direction (4).
+Correct ratio, turn counts and 120→60 rpm calculation (6).
+Explain ideal power/torque and real losses (4).
+Maintain native fixed centres, correct tooth phase and linear rates (3).
+Recreate/edit the project and explain a new gear pair (3).
+
+REASONING GUIDE
+If the driver turns clockwise, what does the driven gear do?
+Counterclockwise, because these are two external gears in direct mesh.
+
+What is the output speed for a 120 rpm input?
+60 rpm, since 120 × 20 / 40 = 60.
+
+Does twice the ideal torque create extra power?
+No. Ideal power is torque × angular speed: doubling torque while halving speed preserves power. Friction reduces actual output.
+
+For a 30-tooth driven gear at drawing module 7.2, what changes?
+Output is 80 rpm for 120 rpm input, ratio 1.5:1, opposite direction. Pitch radii 72 and 108 give centre distance 180 drawing pixels. New geometry and initial mesh phase are required.
+
+LIMITS
+Illustrative planar kinematics using prepared original 20° involute SVG contours. Native Studio supplies layer rotation, not gear simulation, contact forces, material stress or manufacturing CAD. Root transitions are simplified, not a cutter/fabrication profile. Drawing pixels are not engineering module in millimetres. Physical angular speed is deliberately slowed for teaching; no real motor is simulated.
+
+REFERENCE
+DBE CAPS Grades 10–12 — Mechanical Technology; PDF pages 28, 34, 37
+https://www.education.gov.za/LinkClick.aspx?fileticket=Pu7gZywTv48%3D&forcedownload=true&mid=1558&portalid=0&tabid=570
+
+Teacher confirms current ATP, specialisation, terminology and suitability before learner use. No teacher endorsement or learning-speed claim is made.

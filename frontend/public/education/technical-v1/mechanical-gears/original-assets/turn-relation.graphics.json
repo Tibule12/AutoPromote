@@ -1,0 +1,29 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Turn relation \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Turn relation",
+      "name": "Turn relation",
+      "type": "text",
+      "text": "1 turn \u2192 \u00bd turn",
+      "x": 84.375,
+      "y": 54.30555555555556,
+      "width": 94,
+      "scale": 0.49,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#eff5ff",
+      "keys": []
+    }
+  ],
+  "groups": []
+}
