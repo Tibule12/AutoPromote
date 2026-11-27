@@ -2,6 +2,27 @@ const { toMillis } = require("./storageRetentionPolicy");
 const DAY = 24 * 60 * 60 * 1000;
 const ownerOf = content => content.user_id || content.userId || content.uid;
 const names = value => (Array.isArray(value) ? value : value ? [value] : []).map(String);
+const publishingCopies = (content, extractPath) => [...new Set([
+  content.url,content.media_url,content.video_url,content.file_url,content.processedUrl,content.persistentMediaUrl,
+].filter(value=>typeof value==='string'))].map(url=>({url,path:extractPath(url)})).filter(row=>row.path?.startsWith('uploads/videos/'));
+
+async function readRetentionDependencies(db,ids,scanLimit) {
+  const result=new Map();
+  const collections=['platform_posts','promotion_tasks','promotion_schedules','media_transform_tasks'];
+  for(let index=0;index<ids.length;index+=10){
+    const group=ids.slice(index,index+10);
+    const byCollection=await Promise.all(collections.map(async name=>{
+      if(group.length===1)return new Map([[group[0],await db.collection(name).where('contentId','==',group[0]).limit(scanLimit).get()]]);
+      const snapshot=await db.collection(name).where('contentId','in',group).limit(scanLimit).get();
+      // A full shared result can hide dependencies for later IDs. Fall back to
+      // the original per-content bounds; never infer safe deletion from it.
+      if(snapshot.docs.length>=scanLimit)return new Map(await Promise.all(group.map(async id=>[id,await db.collection(name).where('contentId','==',id).limit(scanLimit).get()])));
+      return new Map(group.map(id=>[id,{docs:snapshot.docs.filter(doc=>doc.data().contentId===id)}]));
+    }));
+    for(const id of group)result.set(id,byCollection.map(map=>map.get(id)));
+  }
+  return result;
+}
 
 function publicationDeadline(
   content,
@@ -93,6 +114,14 @@ async function cleanupPublishedVideos({
         .orderBy("__name__");
       if (cursor) contentQuery = contentQuery.startAfter(cursor);
       const contentSnap = await contentQuery.limit(scanLimit).get();
+      const candidatesForPreflight=contentSnap.docs.filter(record=>{
+        const content=record.data();
+        return !seen.has(record.id)&&ownerOf(content)===account.id&&
+          content.storageRetentionStatus!=='deleted_after_publication'&&
+          String(content.type||content.mediaType||'').toLowerCase().startsWith('video')&&
+          publishingCopies(content,extractPath).length>0;
+      });
+      const preflight=await readRetentionDependencies(db,candidatesForPreflight.map(record=>record.id),scanLimit);
       for (const record of contentSnap.docs) {
         if (seen.has(record.id)) continue;
         seen.add(record.id);
@@ -102,11 +131,13 @@ async function cleanupPublishedVideos({
           content.storageRetentionStatus === "deleted_after_publication"
         )
           continue;
-        const [posts, tasks, schedules, transforms] = await Promise.all(
-          ["platform_posts", "promotion_tasks", "promotion_schedules", "media_transform_tasks"].map(
-            name => db.collection(name).where("contentId", "==", record.id).limit(scanLimit).get()
-          )
-        );
+        if(!String(content.type||content.mediaType||'').toLowerCase().startsWith('video')){
+          results.push({contentId:record.id,eligible:false,reason:'not_video'});continue;
+        }
+        if(!publishingCopies(content,extractPath).length){
+          results.push({contentId:record.id,eligible:false,reason:'no_owned_publishing_copy'});continue;
+        }
+        const [posts,tasks,schedules,transforms]=preflight.get(record.id);
         if ([posts, tasks, schedules, transforms].some(snap => snap.docs.length >= scanLimit)) {
           results.push({
             contentId: record.id,
@@ -292,4 +323,4 @@ async function cleanupPublishedVideos({
   return results;
 }
 
-module.exports = { publicationDeadline, cleanupPublishedVideos };
+module.exports = { publicationDeadline, cleanupPublishedVideos,readRetentionDependencies };

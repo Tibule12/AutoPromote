@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { API_BASE_URL } from "../config";
 import { auth } from "../firebaseClient";
+import { startVisiblePoller } from "../utils/visiblePoller";
 import "../AdminDashboard.css"; // Reuse card styles
 
 function PlatformHealthPanel() {
   const [platforms, setPlatforms] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const pending = useRef(false);
 
-  const fetchStatus = async () => {
+  const fetchStatus = async signal => {
+    if (pending.current) return;
+    pending.current = true;
     setLoading(true);
     try {
       const token = await auth.currentUser?.getIdToken();
@@ -16,25 +20,26 @@ function PlatformHealthPanel() {
 
       const res = await fetch(`${API_BASE_URL}/api/admin/platforms/status`, {
         headers: { Authorization: `Bearer ${token}` },
+        signal,
       });
       const data = await res.json();
+      if (signal?.aborted) return;
       if (data.success) {
         setPlatforms(data.platforms);
+        setError(null);
       } else {
         setError(data.error || "Failed to load platform status");
       }
     } catch (e) {
-      setError(e.message);
+      if (e.name !== "AbortError") setError(e.message);
     } finally {
       setLoading(false);
+      pending.current = false;
     }
   };
 
   useEffect(() => {
-    fetchStatus();
-    // Auto-refresh every 60s
-    const timer = setInterval(fetchStatus, 60000);
-    return () => clearInterval(timer);
+    return startVisiblePoller(fetchStatus, 60000);
   }, []);
 
   if (loading && !platforms) {
@@ -50,7 +55,7 @@ function PlatformHealthPanel() {
       <h3 className="text-xl font-bold mb-4 flex justify-between items-center">
         <span>Platform Integration Status</span>
         <button
-          onClick={fetchStatus}
+          onClick={() => fetchStatus()}
           className="text-sm bg-blue-50 text-blue-600 px-3 py-1 rounded hover:bg-blue-100"
         >
           Refresh Now
