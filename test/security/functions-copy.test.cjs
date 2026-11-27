@@ -12,6 +12,11 @@ it("packages the repaired authority helper and application sources without stale
     for (const name of [
       "src",
       "lib",
+      // The real package includes the canonical creative contracts and their
+      // relative frontend dependencies. Supply that source tree to the copier.
+      "frontend/src",
+      "config",
+      "contracts",
       "package.json",
       "firebaseAdmin.js",
       "firebaseClient.js",
