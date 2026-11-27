@@ -1343,3 +1343,9 @@ router.post("/admin/refund-last-payment", authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
+// Operator qualification reuses the exact production gateway; this property
+// does not register an HTTP endpoint or bypass the owned checkout intent.
+Object.defineProperty(router, 'qualificationProvider', { value: Object.freeze({
+  create: createSubscriptionViaRest, read: fetchPayPalSubscriptionDetails,
+  validatePlan: validateConfiguredPayPalPlan,
+}) });

@@ -29,6 +29,7 @@ function verifiedSubscription({
   if (!/^I-[A-Z0-9]+$/i.test(subscriptionId || "") || remote?.id !== subscriptionId)
     fail("INVALID_SUBSCRIPTION", 400);
   if (remote.status !== "ACTIVE") fail("SUBSCRIPTION_NOT_PAID", 409);
+  if (intent?.status === "superseded") fail("CHECKOUT_SUPERSEDED", 409);
   if (intent && intent.userId !== userId) fail("SUBSCRIPTION_OWNER_MISMATCH", 403);
   if (remote.custom_id !== userId && !(intent?.userId === userId && !remote.custom_id))
     fail("SUBSCRIPTION_OWNER_MISMATCH", 403);

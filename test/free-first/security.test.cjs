@@ -112,6 +112,13 @@ test("payment replay is idempotent and one agreement cannot be claimed by anothe
     code: "SUBSCRIPTION_ALREADY_CLAIMED",
   });
 });
+test("an owner-superseded unpaid checkout cannot activate even after a late approval", async () => {
+  const f = fixture();
+  f.intent.status = "superseded";
+  await assert.rejects(persistVerifiedSubscription(f), { code: "CHECKOUT_SUPERSEDED" });
+  assert.equal((await db.collection("user_subscriptions").doc(f.userId).get()).exists, false);
+  assert.equal((await db.collection("paypal_subscription_claims").doc(f.subscriptionId).get()).exists, false);
+});
 test("cancellation retains the paid period; suspension and expiry revoke it; stale agreement cannot cancel a replacement", async () => {
   const f = fixture();
   await persistVerifiedSubscription(f);

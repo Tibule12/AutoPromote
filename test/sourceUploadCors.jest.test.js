@@ -6,6 +6,19 @@ process.env.FIREBASE_ADMIN_BYPASS = "1";
 const app = require("../src/server");
 
 describe("API CORS preflight", () => {
+  test.each(["/api/media/process", "/api/media/render-multicam", "/api/paypal-subscriptions/create-subscription"])(
+    "the public browser can send approved-token and deduplication headers to %s",
+    async path => {
+      const res = await request(app).options(path)
+        .set("Origin", "https://autopromote.org")
+        .set("Access-Control-Request-Method", "POST")
+        .set("Access-Control-Request-Headers", "authorization,content-type,idempotency-key,x-processing-tokens-approved")
+        .expect(204);
+      const headers = String(res.headers["access-control-allow-headers"]).toLowerCase().split(",").map(h => h.trim());
+      expect(headers).toEqual(expect.arrayContaining(["authorization", "content-type", "idempotency-key", "x-processing-tokens-approved"]));
+      expect(res.headers["access-control-allow-origin"]).toBe("https://autopromote.org");
+    }
+  );
   test("browser clients can read the declared upload retry cooldown", async () => {
     const res = await request(app).get("/health").set("Origin", "https://autopromote.org");
     expect(res.headers["access-control-allow-origin"]).toBe("https://autopromote.org");

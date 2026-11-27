@@ -1116,6 +1116,8 @@ try {
     allowedHeaders: [
       "Content-Type",
       "Authorization",
+      "Idempotency-Key",
+      "X-Processing-Tokens-Approved",
       "Accept",
       "Origin",
       "X-Requested-With",
