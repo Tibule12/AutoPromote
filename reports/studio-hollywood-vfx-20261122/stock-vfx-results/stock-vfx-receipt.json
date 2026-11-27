@@ -1,0 +1,88 @@
+{
+  "passed": true,
+  "cases": {
+    "case_1_greenscreen_actors_over_miami_sky": {
+      "width": 960,
+      "height": 540,
+      "video_codec": "h264",
+      "audio_codec": "aac",
+      "nb_frames": 96,
+      "duration_seconds": 4.0,
+      "bytes": 2346324,
+      "full_decode_clean": true,
+      "residual_mint_green_sky_ratio": 0.0,
+      "top_sky_mean_rgb": [
+        106.6,
+        94.9,
+        126.9
+      ]
+    },
+    "case_2_macbook_planar_screen_replace": {
+      "width": 960,
+      "height": 540,
+      "video_codec": "h264",
+      "audio_codec": "aac",
+      "nb_frames": 96,
+      "duration_seconds": 4.0,
+      "bytes": 589609,
+      "full_decode_clean": true,
+      "planar_keyframes_count": 129,
+      "remaining_green_screen_ratio": 0.0247,
+      "screen_roi_mean_rgb": [
+        125.4,
+        127.2,
+        150.9
+      ]
+    },
+    "case_3_miami_twilight_sky_optics_particles": {
+      "width": 960,
+      "height": 540,
+      "video_codec": "h264",
+      "audio_codec": "aac",
+      "nb_frames": 96,
+      "duration_seconds": 4.0,
+      "bytes": 2218579,
+      "full_decode_clean": true,
+      "sky_top_mean_rgb": [
+        96.3,
+        59.6,
+        122.7
+      ],
+      "water_bottom_mean_rgb": [
+        105.8,
+        116.0,
+        129.1
+      ]
+    },
+    "case_4_neon_embers_cinematic_title": {
+      "width": 1920,
+      "height": 1080,
+      "video_codec": "h264",
+      "audio_codec": null,
+      "nb_frames": 96,
+      "duration_seconds": 4.0,
+      "bytes": 4275133,
+      "full_decode_clean": true
+    },
+    "case_5_nle_xfade_aspect_matched": {
+      "width": 960,
+      "height": 540,
+      "video_codec": "h264",
+      "audio_codec": "aac",
+      "nb_frames": 104,
+      "duration_seconds": 4.35,
+      "bytes": 1905612,
+      "full_decode_clean": true
+    },
+    "case_6_vertical_reel_ripped_paper_lightleak": {
+      "width": 540,
+      "height": 960,
+      "video_codec": "h264",
+      "audio_codec": null,
+      "nb_frames": 96,
+      "duration_seconds": 4.0,
+      "bytes": 2599474,
+      "full_decode_clean": true
+    }
+  }
+}

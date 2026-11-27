@@ -659,7 +659,16 @@ export const deriveNodeFlowGraph = (state = {}) => {
         kind: "PolygonMask",
         category: "matte",
         targetId: ovId,
-        label: ov.mask.shape === "ellipse" ? "EllipseMask" : ov.mask.shape === "polygon" ? "PolyMask" : "RectMask",
+        label:
+          ov.mask.shape === "ellipse"
+            ? "EllipseMask"
+            : ov.mask.shape === "polygon"
+              ? "PolyMask"
+              : ov.mask.shape === "diamond"
+                ? "DiamondMask"
+                : ov.mask.shape === "inset"
+                  ? "InsetMask"
+                  : "RectMask",
         subtitle: `Feather ${ov.mask.feather || 0}px${ov.mask.inverted ? " · Inv" : ""}${subMaskCount > 0 ? ` · +${subMaskCount} Bool` : ""}`,
         accent: "#22d3ee",
         bypassed: Boolean(bypassed[maskNodeId] || ov.mask.enabled === false),

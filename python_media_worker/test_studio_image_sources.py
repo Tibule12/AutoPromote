@@ -115,3 +115,19 @@ def test_the_actual_renderer_keeps_both_occurrences_when_a_second_download_would
     pixels = np.frombuffer(raw, np.uint8).reshape(180, 320, 3)
     for x in [80, 240]:
         assert pixels[90, x, 1] > 220 and pixels[90, x, 0] < 25
+
+
+def test_vector_glow_and_matte_filter_svgs_materialize_cleanly(tmp_path):
+    from urllib.parse import quote
+    svg = (
+        "<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 100 100'>"
+        "<defs><linearGradient id='p'><stop stop-color='#8b5cf6'/><stop offset='1' stop-color='#22d3ee'/></linearGradient>"
+        "<filter id='g'><feGaussianBlur stdDeviation='1.4' result='b'/><feMerge><feMergeNode in='b'/><feMergeNode in='SourceGraphic'/></feMerge>"
+        "<feColorMatrix type='matrix' values='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0'/>"
+        "<feComponentTransfer><feFuncA type='table' tableValues='0 1'/></feComponentTransfer></filter></defs>"
+        "<path d='M 15 15 L 85 15 L 85 85 L 15 85 Z' fill='url(#p)' filter='url(#g)'/></svg>"
+    )
+    file = materialize_studio_image('data:image/svg+xml;utf8,' + quote(svg), str(tmp_path / 'vec.png'), {})
+    image = Image.open(file).convert('RGBA')
+    assert image.size == (64, 64)
+    assert image.getpixel((32, 32))[3] > 200

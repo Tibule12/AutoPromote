@@ -99,6 +99,25 @@ export function applySelectiveClone(image, patch, mask=null, time=0) {
     const sx=clamp(x+dx,0,w-1),sy=clamp(y+dy,0,h-1),x0=Math.floor(sx),y0=Math.floor(sy),x1=Math.min(w-1,x0+1),y1=Math.min(h-1,y0+1),fx=sx-x0,fy=sy-y0;
     for(let c=0;c<3;c++){const value=(source[(y0*w+x0)*4+c]*(1-fx)+source[(y0*w+x1)*4+c]*fx)*(1-fy)+(source[(y1*w+x0)*4+c]*(1-fx)+source[(y1*w+x1)*4+c]*fx)*fy,i=(y*w+x)*4+c;data[i]=patch.mode==='heal'?value:source[i]+(value-source[i])*amount;}
   }
+  if(patch.mode==='temporal_clean_plate'&&coverage){
+    const out=data.slice();
+    for(let y=bounds.y0;y<bounds.y1;y++)for(let x=bounds.x0;x<bounds.x1;x++){
+      const cVal=coverage[y*w+x];if(cVal<=0.01)continue;
+      let leftX=x;while(leftX>0&&coverage[y*w+leftX]>0.05)leftX-=1;
+      let rightX=x;while(rightX<w-1&&coverage[y*w+rightX]>0.05)rightX+=1;
+      let topY=y;while(topY>0&&coverage[topY*w+x]>0.05)topY-=1;
+      let botY=y;while(botY<h-1&&coverage[botY*w+x]>0.05)botY+=1;
+      const samples=[[leftX,y],[rightX,y],[x,topY],[x,botY]];
+      for(let c=0;c<3;c++){
+        const vals=samples.map(([sx,sy])=>source[(sy*w+sx)*4+c]).sort((a,b)=>a-b);
+        const fill=(vals[1]+vals[2])*0.5;
+        const i=(y*w+x)*4+c;
+        out[i]=Math.round(source[i]+(fill-source[i])*cVal*amount);
+      }
+    }
+    data.set(out);
+    return image;
+  }
   if(patch.mode==='heal')return healTexture(image,source,data.slice(),patch,coverage);
   return image;
 }

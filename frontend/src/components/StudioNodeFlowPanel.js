@@ -31,10 +31,15 @@ import {
 } from "./studioVectorShape";
 import {
   DEFAULT_STUDIO_MASK_POLYGON,
+  computeSmoothMaskBezierHandles,
   parseStudioMaskPolygon,
   studioMaskPolygonPath,
   validateStudioMaskAnimation,
 } from "./studioMaskGeometry";
+import { SKY_REPLACEMENT_PRESETS } from "./studioEnvironmentVfx";
+import { STUDIO_EXPORT_BLEND_MODES } from "./studioBlendModes";
+import { trackPolygonMaskAcrossFrames } from "./studioCreativeEffects";
+import { trackPlanarCornersOnVideo } from "./studioPlanarTracker";
 import {
   PERSPECTIVE_IDENTITY,
   PERSPECTIVE_LEFT,
@@ -44,7 +49,9 @@ import {
 import { CINEMATIC_PRESETS } from "../hooks/useCinematicEffects";
 import {
   CINEMA_3D_LUT_PRESETS,
+  buildAdvancedColorCube,
   buildProceduralColorCube,
+  exportColorCubeText,
   parseColorCube,
 } from "./studioColorCube";
 import {
@@ -229,6 +236,8 @@ export default function StudioNodeFlow({
   const [selectedNodeId, setSelectedNodeId] = useState("MediaOut");
   const [selectedVectorNodeIdx, setSelectedVectorNodeIdx] = useState(0);
   const [draggingMaskVertex, setDraggingMaskVertex] = useState(null);
+  const [draggingBezierHandle, setDraggingBezierHandle] = useState(null);
+  const [maskTrackBusy, setMaskTrackBusy] = useState(false);
   const [draggingCornerIdx, setDraggingCornerIdx] = useState(null);
   const [autoKeyMaskVertices, setAutoKeyMaskVertices] = useState(false);
   const [scopeMode, setScopeMode] = useState("waveform");
@@ -983,7 +992,7 @@ export default function StudioNodeFlow({
           property: `planeCorner${idx}X`,
           time: safeTime,
           value: Number(cx),
-          easing: "easeInOut",
+          easing: "linear",
         });
         nextKeys = upsertAutomationKeyframe(nextKeys, {
           id: `pin-pt-${targetOverlay.id}-${idx}-y-${Math.round(safeTime * 100)}`,
@@ -991,7 +1000,7 @@ export default function StudioNodeFlow({
           property: `planeCorner${idx}Y`,
           time: safeTime,
           value: Number(cy),
-          easing: "easeInOut",
+          easing: "linear",
         });
       });
       emitMotionKeyframes(nextKeys);
@@ -2777,7 +2786,7 @@ export default function StudioNodeFlow({
                             ))}
                           </div>
                         </div>
-                        <div className="ap-flow-field-row" style={{ alignItems: "center", marginBottom: 4 }}>
+                        <div className="ap-flow-field-row" style={{ alignItems: "center", marginBottom: 4, flexWrap: "wrap", gap: 4 }}>
                           <label className="ap-flow-checkbox-row" style={{ margin: 0 }}>
                             <input
                               type="checkbox"
@@ -2795,13 +2804,69 @@ export default function StudioNodeFlow({
                           >
                             + Key Vertices (@ {Number(currentTime || 0).toFixed(1)}s)
                           </button>
+                          <button
+                            type="button"
+                            className="ap-flow-mini-btn"
+                            data-testid="flow-mask-bezier-toggle"
+                            onClick={() => {
+                              const hasCurves = Array.isArray(selectedOverlay.mask?.bezierHandles) && selectedOverlay.mask.bezierHandles.length === pts.length;
+                              updateSelectedOverlayField({
+                                mask: {
+                                  enabled: true,
+                                  shape: "polygon",
+                                  ...(selectedOverlay.mask || {}),
+                                  bezierHandles: hasCurves ? undefined : computeSmoothMaskBezierHandles(pts, 0.28),
+                                },
+                              });
+                            }}
+                          >
+                            {Array.isArray(selectedOverlay.mask?.bezierHandles) && selectedOverlay.mask.bezierHandles.length === pts.length
+                              ? "Linearize"
+                              : "Auto Bézier"}
+                          </button>
+                          <button
+                            type="button"
+                            className="ap-flow-mini-btn"
+                            data-testid="flow-mask-track-frames"
+                            disabled={maskTrackBusy}
+                            onClick={async () => {
+                              const vid = videoRef?.current;
+                              if (!vid || !vid.videoWidth || typeof emitMotionKeyframes !== "function") {
+                                setActionError("Load a playing video frame before running automated mask tracking.");
+                                return;
+                              }
+                              setMaskTrackBusy(true);
+                              setActionError("");
+                              try {
+                                const t0 = Math.max(0, Number(currentTime || 0));
+                                const dur = Math.min(3.0, Math.max(0.5, Number(programmeDuration || 4) - t0));
+                                const trackedKeys = await trackPolygonMaskAcrossFrames({
+                                  videoElement: vid,
+                                  initialPoints: pts,
+                                  startTime: t0,
+                                  duration: dur,
+                                  targetId: selectedOverlay.id,
+                                  fps: 8,
+                                });
+                                let merged = Array.isArray(motionKeyframes) ? [...motionKeyframes] : [];
+                                trackedKeys.forEach(k => { merged = upsertAutomationKeyframe(merged, k); });
+                                emitMotionKeyframes(merged);
+                              } catch (err) {
+                                setActionError(err?.message || "Mask tracking could not complete.");
+                              } finally {
+                                setMaskTrackBusy(false);
+                              }
+                            }}
+                          >
+                            {maskTrackBusy ? "Tracking…" : "Track Mask"}
+                          </button>
                         </div>
                         <svg
                           viewBox="0 0 100 100"
                           className="ap-flow-poly-mask-svg"
                           aria-label="Polygon mask vertex editor"
                           onPointerMove={e => {
-                            if (draggingMaskVertex === null) return;
+                            if (draggingMaskVertex === null && !draggingBezierHandle) return;
                             const rect = e.currentTarget.getBoundingClientRect();
                             if (!rect.width || !rect.height) return;
                             const nx = Math.max(
@@ -2812,6 +2877,28 @@ export default function StudioNodeFlow({
                               0,
                               Math.min(100, Math.round(((e.clientY - rect.top) / rect.height) * 100))
                             );
+                            if (draggingBezierHandle) {
+                              const { idx: hIdx, side } = draggingBezierHandle;
+                              const baseHandles = Array.isArray(selectedOverlay.mask?.bezierHandles) && selectedOverlay.mask.bezierHandles.length === pts.length
+                                ? selectedOverlay.mask.bezierHandles.map(h => [...h])
+                                : computeSmoothMaskBezierHandles(pts, 0.25);
+                              const [vx, vy] = pts[hIdx] || [50, 50];
+                              const dx = Math.max(-100, Math.min(100, nx - vx));
+                              const dy = Math.max(-100, Math.min(100, ny - vy));
+                              const hTuple = baseHandles[hIdx] || [0, 0, 0, 0];
+                              baseHandles[hIdx] = side === "in"
+                                ? [dx, dy, hTuple[2], hTuple[3]]
+                                : [hTuple[0], hTuple[1], dx, dy];
+                              updateSelectedOverlayField({
+                                mask: {
+                                  enabled: true,
+                                  shape: "polygon",
+                                  ...(selectedOverlay.mask || {}),
+                                  bezierHandles: baseHandles,
+                                },
+                              });
+                              return;
+                            }
                             const nextPts = pts.map((pt, idx) =>
                               idx === draggingMaskVertex ? [nx, ny] : pt
                             );
@@ -2834,15 +2921,58 @@ export default function StudioNodeFlow({
                               );
                             }
                           }}
-                          onPointerUp={() => setDraggingMaskVertex(null)}
-                          onPointerLeave={() => setDraggingMaskVertex(null)}
+                          onPointerUp={() => {
+                            setDraggingMaskVertex(null);
+                            setDraggingBezierHandle(null);
+                          }}
+                          onPointerLeave={() => {
+                            setDraggingMaskVertex(null);
+                            setDraggingBezierHandle(null);
+                          }}
                         >
-                          <polygon
-                            points={polyPointsAttr}
-                            fill="rgba(34, 211, 238, 0.18)"
-                            stroke="#22d3ee"
-                            strokeWidth="1.8"
-                          />
+                          {(() => {
+                            const bezHandles = Array.isArray(selectedOverlay.mask?.bezierHandles) && selectedOverlay.mask.bezierHandles.length === pts.length
+                              ? selectedOverlay.mask.bezierHandles
+                              : null;
+                            if (bezHandles) {
+                              let d = "";
+                              for (let i = 0; i < pts.length; i += 1) {
+                                const nxt = (i + 1) % pts.length;
+                                const [x0, y0] = pts[i], [x3, y3] = pts[nxt];
+                                const h0 = bezHandles[i] || [0, 0, 0, 0], h1 = bezHandles[nxt] || [0, 0, 0, 0];
+                                d += i === 0
+                                  ? `M ${x0} ${y0} C ${x0 + h0[2]} ${y0 + h0[3]}, ${x3 + h1[0]} ${y3 + h1[1]}, ${x3} ${y3} `
+                                  : `C ${x0 + h0[2]} ${y0 + h0[3]}, ${x3 + h1[0]} ${y3 + h1[1]}, ${x3} ${y3} `;
+                              }
+                              return (
+                                <>
+                                  <path d={`${d}Z`} fill="rgba(34, 211, 238, 0.18)" stroke="#22d3ee" strokeWidth="1.8" />
+                                  {pts.map(([vx, vy], idx) => {
+                                    const [ix, iy, ox, oy] = bezHandles[idx] || [0, 0, 0, 0];
+                                    return (
+                                      <g key={`bh-${idx}`}>
+                                        <line x1={vx + ix} y1={vy + iy} x2={vx + ox} y2={vy + oy} stroke="#f59e0b" strokeWidth="0.9" strokeDasharray="1.8,1.2" />
+                                        <circle cx={vx + ix} cy={vy + iy} r="2.6" fill="#f59e0b" style={{ cursor: "grab" }}
+                                          data-testid={`flow-mask-bezier-in-${idx}`}
+                                          onPointerDown={e => { e.stopPropagation(); setDraggingBezierHandle({ idx, side: "in" }); }} />
+                                        <circle cx={vx + ox} cy={vy + oy} r="2.6" fill="#fb923c" style={{ cursor: "grab" }}
+                                          data-testid={`flow-mask-bezier-out-${idx}`}
+                                          onPointerDown={e => { e.stopPropagation(); setDraggingBezierHandle({ idx, side: "out" }); }} />
+                                      </g>
+                                    );
+                                  })}
+                                </>
+                              );
+                            }
+                            return (
+                              <polygon
+                                points={polyPointsAttr}
+                                fill="rgba(34, 211, 238, 0.18)"
+                                stroke="#22d3ee"
+                                strokeWidth="1.8"
+                              />
+                            );
+                          })()}
                           {pts.map(([vx, vy], idx) => (
                             <circle
                               key={idx}
@@ -2966,7 +3096,6 @@ export default function StudioNodeFlow({
                             mask: {
                               ...(selectedOverlay.mask || { enabled: true, shape: "polygon" }),
                               booleanMode: e.target.value,
-                              secondaryMasks: (selectedOverlay.mask?.secondaryMasks||[]).map(sub=>({...sub,booleanOp:e.target.value})),
                             },
                           })
                         }
@@ -2980,70 +3109,150 @@ export default function StudioNodeFlow({
                     {(selectedOverlay.mask?.secondaryMasks || []).map((sub, idx) => (
                       <div
                         key={sub.id || idx}
-                        className="ap-flow-field-row"
+                        className="ap-flow-submask-card"
+                        style={{ display: "grid", gap: 6 }}
                         data-testid={`flow-boolean-submask-row-${idx}`}
                       >
-                        <select
-                          aria-label={`Sub-mask ${idx + 1} boolean operator`}
-                          data-testid={`flow-submask-op-${idx}`}
-                          value={sub.booleanOp || "subtract"}
-                          onChange={e => {
-                            const nextList = (selectedOverlay.mask?.secondaryMasks || []).map(
-                              (item, i) =>
-                                i === idx ? { ...item, booleanOp: e.target.value } : item
-                            );
-                            updateSelectedOverlayField({
-                              mask: {
-                                ...(selectedOverlay.mask || {}),
-                                secondaryMasks: nextList,
-                              },
-                            });
-                          }}
-                        >
-                          <option value="add">Add</option>
-                          <option value="subtract">Subtract</option>
-                          <option value="intersect">Intersect</option>
-                          <option value="difference">Difference</option>
-                        </select>
-                        <select
-                          aria-label={`Sub-mask ${idx + 1} shape`}
-                          data-testid={`flow-submask-shape-${idx}`}
-                          value={sub.shape || "ellipse"}
-                          onChange={e => {
-                            const nextList = (selectedOverlay.mask?.secondaryMasks || []).map(
-                              (item, i) =>
-                                i === idx ? { ...item, shape: e.target.value } : item
-                            );
-                            updateSelectedOverlayField({
-                              mask: {
-                                ...(selectedOverlay.mask || {}),
-                                secondaryMasks: nextList,
-                              },
-                            });
-                          }}
-                        >
-                          <option value="ellipse">Ellipse</option>
-                          <option value="rectangle">Rectangle</option>
-                          <option value="diamond">Diamond</option>
-                          <option value="polygon">Polygon</option>
-                        </select>
-                        <button
-                          type="button"
-                          className="ap-flow-mini-btn"
-                          onClick={() => {
-                            const nextList = (selectedOverlay.mask?.secondaryMasks || []).filter(
-                              (_, i) => i !== idx
-                            );
-                            updateSelectedOverlayField({
-                              mask: {
-                                ...(selectedOverlay.mask || {}),
-                                secondaryMasks: nextList,
-                              },
-                            });
-                          }}
-                        >
-                          ×
-                        </button>
+                        <div className="ap-flow-field-row">
+                          <select
+                            aria-label={`Sub-mask ${idx + 1} boolean operator`}
+                            data-testid={`flow-submask-op-${idx}`}
+                            value={sub.booleanOp || "subtract"}
+                            onChange={e => {
+                              const nextList = (selectedOverlay.mask?.secondaryMasks || []).map(
+                                (item, i) =>
+                                  i === idx ? { ...item, booleanOp: e.target.value } : item
+                              );
+                              updateSelectedOverlayField({
+                                mask: {
+                                  ...(selectedOverlay.mask || {}),
+                                  secondaryMasks: nextList,
+                                },
+                              });
+                            }}
+                          >
+                            <option value="add">Add</option>
+                            <option value="subtract">Subtract</option>
+                            <option value="intersect">Intersect</option>
+                            <option value="difference">Difference</option>
+                          </select>
+                          <select
+                            aria-label={`Sub-mask ${idx + 1} shape`}
+                            data-testid={`flow-submask-shape-${idx}`}
+                            value={sub.shape || "ellipse"}
+                            onChange={e => {
+                              const nextShape = e.target.value;
+                              const nextList = (selectedOverlay.mask?.secondaryMasks || []).map(
+                                (item, i) =>
+                                  i === idx
+                                    ? {
+                                        ...item,
+                                        shape: nextShape,
+                                        ...(nextShape === "polygon" && !item.path
+                                          ? { path: DEFAULT_STUDIO_MASK_POLYGON }
+                                          : {}),
+                                      }
+                                    : item
+                              );
+                              updateSelectedOverlayField({
+                                mask: {
+                                  ...(selectedOverlay.mask || {}),
+                                  secondaryMasks: nextList,
+                                },
+                              });
+                            }}
+                          >
+                            <option value="ellipse">Ellipse</option>
+                            <option value="rectangle">Rectangle</option>
+                            <option value="diamond">Diamond</option>
+                            <option value="inset">Inset</option>
+                            <option value="polygon">Polygon</option>
+                          </select>
+                          <button
+                            type="button"
+                            className="ap-flow-mini-btn"
+                            onClick={() => {
+                              const nextList = (selectedOverlay.mask?.secondaryMasks || []).filter(
+                                (_, i) => i !== idx
+                              );
+                              updateSelectedOverlayField({
+                                mask: {
+                                  ...(selectedOverlay.mask || {}),
+                                  secondaryMasks: nextList,
+                                },
+                              });
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                        <div className="ap-flow-field-row">
+                          <label className="ap-flow-field" style={{ flex: 1 }}>
+                            <span>Sub-Mask Feather ({Number(sub.feather ?? 0)}px)</span>
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              step="1"
+                              data-testid={`flow-submask-feather-${idx}`}
+                              value={Number(sub.feather ?? 0)}
+                              onChange={e => {
+                                const nextList = (selectedOverlay.mask?.secondaryMasks || []).map(
+                                  (item, i) =>
+                                    i === idx ? { ...item, feather: Number(e.target.value) } : item
+                                );
+                                updateSelectedOverlayField({
+                                  mask: {
+                                    ...(selectedOverlay.mask || {}),
+                                    secondaryMasks: nextList,
+                                  },
+                                });
+                              }}
+                            />
+                          </label>
+                          <label className="ap-flow-checkbox" style={{ whiteSpace: "nowrap" }}>
+                            <input
+                              type="checkbox"
+                              data-testid={`flow-submask-invert-${idx}`}
+                              checked={Boolean(sub.inverted)}
+                              onChange={e => {
+                                const nextList = (selectedOverlay.mask?.secondaryMasks || []).map(
+                                  (item, i) =>
+                                    i === idx ? { ...item, inverted: e.target.checked } : item
+                                );
+                                updateSelectedOverlayField({
+                                  mask: {
+                                    ...(selectedOverlay.mask || {}),
+                                    secondaryMasks: nextList,
+                                  },
+                                });
+                              }}
+                            />
+                            <span>Invert</span>
+                          </label>
+                        </div>
+                        {sub.shape === "polygon" && (
+                          <label className="ap-flow-field">
+                            <span>Sub-Mask Polygon Path</span>
+                            <input
+                              type="text"
+                              data-testid={`flow-submask-path-${idx}`}
+                              value={sub.path || DEFAULT_STUDIO_MASK_POLYGON}
+                              onChange={e => {
+                                const nextList = (selectedOverlay.mask?.secondaryMasks || []).map(
+                                  (item, i) =>
+                                    i === idx ? { ...item, path: e.target.value } : item
+                                );
+                                updateSelectedOverlayField({
+                                  mask: {
+                                    ...(selectedOverlay.mask || {}),
+                                    secondaryMasks: nextList,
+                                  },
+                                });
+                              }}
+                            />
+                          </label>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -3215,6 +3424,35 @@ export default function StudioNodeFlow({
                     />
                     <span>Invert Keyed Alpha Matte</span>
                   </label>
+                  <button
+                    type="button"
+                    className="ap-flow-mini-btn"
+                    data-testid="flow-chroma-stamp-keys"
+                    onClick={() => {
+                      if (typeof emitMotionKeyframes !== "function") return;
+                      const t = Math.max(0, Number(currentTime) || 0);
+                      const ck = selectedOverlay.chromaKey || {};
+                      let next = Array.isArray(motionKeyframes) ? [...motionKeyframes] : [];
+                      [
+                        ["keySimilarity", Number(ck.similarity ?? 0.32)],
+                        ["keySmoothness", Number(ck.smoothness ?? 0.14)],
+                        ["keySpill", Number(ck.spillSuppression ?? 0.48)],
+                        ["keyChoke", Number(ck.choke ?? 0)],
+                      ].forEach(([prop, val]) => {
+                        next = upsertAutomationKeyframe(next, {
+                          id: `ck-${selectedOverlay.id}-${prop}-${Math.round(t * 100)}`,
+                          targetId: selectedOverlay.id,
+                          property: prop,
+                          time: t,
+                          value: val,
+                          easing: "linear",
+                        });
+                      });
+                      emitMotionKeyframes(next);
+                    }}
+                  >
+                    + Key Keyer Params (@ {Number(currentTime || 0).toFixed(1)}s)
+                  </button>
                 </div>
               )}
 
@@ -3317,15 +3555,15 @@ export default function StudioNodeFlow({
                     <div className="ap-flow-field-row">
                       <label className="ap-flow-field">
                         <span>
-                          Perspective Blend ({Math.round(Number(selectedOverlay.perspectiveProgress ?? 1) * 100)}%)
+                          Perspective Blend ({Math.round(Number(selectedOverlay.perspectiveProgress ?? 100))}%)
                         </span>
                         <input
                           type="range"
                           min="0"
-                          max="1"
-                          step="0.02"
+                          max="100"
+                          step="1"
                           data-testid="flow-corner-pin-progress"
-                          value={Number(selectedOverlay.perspectiveProgress ?? 1)}
+                          value={Number(selectedOverlay.perspectiveProgress ?? 100)}
                           onChange={e =>
                             updateSelectedOverlayField({
                               perspectiveProgress: Number(e.target.value),
@@ -3343,6 +3581,84 @@ export default function StudioNodeFlow({
                       >
                         + Key 4 Corners (@ {Number(currentTime || 0).toFixed(1)}s)
                       </button>
+                      <button
+                        type="button"
+                        className="ap-flow-mini-btn"
+                        data-testid="flow-corner-pin-track"
+                        disabled={maskTrackBusy}
+                        onClick={async () => {
+                          const vid = videoRef?.current;
+                          if (!vid || !vid.videoWidth || typeof emitMotionKeyframes !== "function") {
+                            setActionError("Load a real video before tracking 4-corner planar surfaces.");
+                            return;
+                          }
+                          setMaskTrackBusy(true);
+                          setActionError("");
+                          try {
+                            const t0 = Math.max(0, Number(currentTime || 0));
+                            const dur = Math.min(3.0, Math.max(0.5, Number(programmeDuration || 4) - t0));
+                            const trackedKeys = await trackPlanarCornersOnVideo({
+                              videoElement: vid,
+                              initialCorners: rawCorners,
+                              startTime: t0,
+                              duration: dur,
+                              targetId: selectedOverlay.id,
+                              fps: 8,
+                            });
+                            let merged = Array.isArray(motionKeyframes) ? [...motionKeyframes] : [];
+                            trackedKeys.forEach(k => { merged = upsertAutomationKeyframe(merged, k); });
+                            updateSelectedOverlayField({ perspectiveProgress: 100 });
+                            emitMotionKeyframes(merged);
+                          } catch (err) {
+                            setActionError(err?.message || "Planar surface tracking failed.");
+                          } finally {
+                            setMaskTrackBusy(false);
+                          }
+                        }}
+                      >
+                        {maskTrackBusy ? "Tracking…" : "Track 4 Corners"}
+                      </button>
+                    </div>
+                    <div className="ap-flow-grade-subcard" data-testid="flow-corner-screen-replace">
+                      <label className="ap-flow-checkbox-row">
+                        <input
+                          type="checkbox"
+                          data-testid="flow-corner-screen-replace-toggle"
+                          checked={Boolean(selectedOverlay.screenReplace?.enabled)}
+                          onChange={e =>
+                            updateSelectedOverlayField({
+                              screenReplace: {
+                                glarePreserve: 0.35,
+                                ...(selectedOverlay.screenReplace || {}),
+                                enabled: e.target.checked,
+                              },
+                            })
+                          }
+                        />
+                        <span>Screen Replacement Reflection / Glare Preserve</span>
+                      </label>
+                      {selectedOverlay.screenReplace?.enabled && (
+                        <label className="ap-flow-field">
+                          <span>Screen Glare Blend ({Math.round(Number(selectedOverlay.screenReplace?.glarePreserve ?? 0.35) * 100)}%)</span>
+                          <input
+                            type="range"
+                            min="0"
+                            max="1"
+                            step="0.05"
+                            data-testid="flow-corner-screen-glare-slider"
+                            value={Number(selectedOverlay.screenReplace?.glarePreserve ?? 0.35)}
+                            onChange={e =>
+                              updateSelectedOverlayField({
+                                screenReplace: {
+                                  ...(selectedOverlay.screenReplace || {}),
+                                  enabled: true,
+                                  glarePreserve: Number(e.target.value),
+                                },
+                              })
+                            }
+                          />
+                        </label>
+                      )}
                     </div>
                   </div>
                 );
@@ -3527,7 +3843,7 @@ export default function StudioNodeFlow({
                           );
                         }}
                       >
-                        {["normal", "screen", "multiply", "overlay", "lighten"].map(mode => (
+                        {STUDIO_EXPORT_BLEND_MODES.map(mode => (
                           <option key={mode} value={mode}>{mode}</option>
                         ))}
                       </select>
@@ -3547,11 +3863,11 @@ export default function StudioNodeFlow({
                         updateSelectedOverlayField({ blendMode: e.target.value })
                       }
                     >
-                      <option value="normal">Normal</option>
-                      <option value="screen">Screen</option>
-                      <option value="multiply">Multiply</option>
-                      <option value="overlay">Overlay</option>
-                      <option value="lighten">Lighten</option>
+                      {STUDIO_EXPORT_BLEND_MODES.map(mode => (
+                        <option key={mode} value={mode}>
+                          {mode.replace(/(^|-)\w/g, m => m.toUpperCase())}
+                        </option>
+                      ))}
                     </select>
                   </label>
                   <label className="ap-flow-field">
@@ -3641,6 +3957,134 @@ export default function StudioNodeFlow({
                         </select>
                       </label>
                     )}
+
+                  <div className="ap-flow-grade-subcard" data-testid="flow-light-wrap-controls">
+                    <label className="ap-flow-checkbox-row">
+                      <input
+                        type="checkbox"
+                        data-testid="flow-light-wrap-toggle"
+                        checked={Boolean(selectedOverlay.lightWrap?.enabled)}
+                        onChange={e =>
+                          updateSelectedOverlayField({
+                            lightWrap: {
+                              intensity: 0.45,
+                              radius: 14,
+                              ...(selectedOverlay.lightWrap || {}),
+                              enabled: e.target.checked,
+                            },
+                          })
+                        }
+                      />
+                      <span>Edge Light Wrap (Backdrop Bleed)</span>
+                    </label>
+                    {selectedOverlay.lightWrap?.enabled && (
+                      <div className="ap-flow-field-row">
+                        <label className="ap-flow-field">
+                          <span>Wrap Intensity ({Math.round(Number(selectedOverlay.lightWrap?.intensity ?? 0.45) * 100)}%)</span>
+                          <input
+                            type="range"
+                            min="0.05"
+                            max="1"
+                            step="0.05"
+                            data-testid="flow-light-wrap-intensity"
+                            value={Number(selectedOverlay.lightWrap?.intensity ?? 0.45)}
+                            onChange={e =>
+                              updateSelectedOverlayField({
+                                lightWrap: {
+                                  ...(selectedOverlay.lightWrap || {}),
+                                  enabled: true,
+                                  intensity: Number(e.target.value),
+                                },
+                              })
+                            }
+                          />
+                        </label>
+                        <label className="ap-flow-field">
+                          <span>Wrap Radius ({Math.round(Number(selectedOverlay.lightWrap?.radius ?? 14))}px)</span>
+                          <input
+                            type="range"
+                            min="2"
+                            max="48"
+                            step="1"
+                            data-testid="flow-light-wrap-radius"
+                            value={Number(selectedOverlay.lightWrap?.radius ?? 14)}
+                            onChange={e =>
+                              updateSelectedOverlayField({
+                                lightWrap: {
+                                  ...(selectedOverlay.lightWrap || {}),
+                                  enabled: true,
+                                  radius: Number(e.target.value),
+                                },
+                              })
+                            }
+                          />
+                        </label>
+                      </div>
+                    )}
+                    <label className="ap-flow-checkbox-row">
+                      <input
+                        type="checkbox"
+                        data-testid="flow-linear-light-toggle"
+                        checked={Boolean(selectedOverlay.linearLight)}
+                        onChange={e => updateSelectedOverlayField({ linearLight: e.target.checked })}
+                      />
+                      <span>Linear-Light Compositing (2.2γ)</span>
+                    </label>
+                    <label className="ap-flow-checkbox-row">
+                      <input
+                        type="checkbox"
+                        data-testid="flow-mesh-warp-toggle"
+                        checked={Boolean(selectedOverlay.meshWarp?.enabled)}
+                        onChange={e =>
+                          updateSelectedOverlayField({
+                            meshWarp: {
+                              strength: 0.35,
+                              pinch: 0,
+                              rows: 4,
+                              cols: 4,
+                              ...(selectedOverlay.meshWarp || {}),
+                              enabled: e.target.checked,
+                            },
+                          })
+                        }
+                      />
+                      <span>Mesh / Grid Warp (Deform)</span>
+                    </label>
+                    {selectedOverlay.meshWarp?.enabled && (
+                      <div className="ap-flow-field-row">
+                        <label className="ap-flow-field">
+                          <span>Mesh Strength ({Number(selectedOverlay.meshWarp?.strength ?? 0.35).toFixed(2)})</span>
+                          <input
+                            type="range"
+                            min="-1"
+                            max="1"
+                            step="0.02"
+                            value={Number(selectedOverlay.meshWarp?.strength ?? 0.35)}
+                            onChange={e =>
+                              updateSelectedOverlayField({
+                                meshWarp: { ...(selectedOverlay.meshWarp || {}), enabled: true, strength: Number(e.target.value) },
+                              })
+                            }
+                          />
+                        </label>
+                        <label className="ap-flow-field">
+                          <span>Radial Pinch ({Number(selectedOverlay.meshWarp?.pinch ?? 0).toFixed(2)})</span>
+                          <input
+                            type="range"
+                            min="-1"
+                            max="1"
+                            step="0.02"
+                            value={Number(selectedOverlay.meshWarp?.pinch ?? 0)}
+                            onChange={e =>
+                              updateSelectedOverlayField({
+                                meshWarp: { ...(selectedOverlay.meshWarp || {}), enabled: true, pinch: Number(e.target.value) },
+                              })
+                            }
+                          />
+                        </label>
+                      </div>
+                    )}
+                  </div>
 
                   <div className="ap-flow-field-row">
                     <button
@@ -3914,6 +4358,85 @@ export default function StudioNodeFlow({
                     </select>
                   </label>
 
+                  <div className="ap-flow-field-group" style={{ marginTop: 8, padding: 8, borderRadius: 6, border: "1px solid rgba(148,163,184,0.22)" }}>
+                    <label className="ap-flow-field-check" style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                      <input
+                        type="checkbox"
+                        data-testid="flow-sky-replace-toggle"
+                        checked={Boolean(finishFx?.skyReplace?.enabled)}
+                        onChange={e =>
+                          emitFinishFx?.({
+                            ...finishFx,
+                            skyReplace: {
+                              preset: "sunset_gold",
+                              horizonPct: 64,
+                              threshold: 0.48,
+                              tempMatch: 0.32,
+                              ...(finishFx?.skyReplace || {}),
+                              enabled: e.target.checked,
+                            },
+                          })
+                        }
+                      />
+                      <span>Sky Replacement &amp; Ambient Match</span>
+                    </label>
+                    {finishFx?.skyReplace?.enabled && (
+                      <>
+                        <label className="ap-flow-field">
+                          <span>Sky Preset</span>
+                          <select
+                            data-testid="flow-sky-preset-select"
+                            value={finishFx.skyReplace.preset || "sunset_gold"}
+                            onChange={e =>
+                              emitFinishFx?.({
+                                ...finishFx,
+                                skyReplace: { ...(finishFx.skyReplace || {}), enabled: true, preset: e.target.value },
+                              })
+                            }
+                          >
+                            {Object.values(SKY_REPLACEMENT_PRESETS).map(item => (
+                              <option key={item.id} value={item.id}>{item.label}</option>
+                            ))}
+                          </select>
+                        </label>
+                        <div className="ap-flow-field-row">
+                          <label className="ap-flow-field">
+                            <span>Horizon Split ({Math.round(Number(finishFx.skyReplace.horizonPct ?? 64))}%)</span>
+                            <input
+                              type="range"
+                              min="20"
+                              max="90"
+                              step="1"
+                              value={Number(finishFx.skyReplace.horizonPct ?? 64)}
+                              onChange={e =>
+                                emitFinishFx?.({
+                                  ...finishFx,
+                                  skyReplace: { ...(finishFx.skyReplace || {}), enabled: true, horizonPct: Number(e.target.value) },
+                                })
+                              }
+                            />
+                          </label>
+                          <label className="ap-flow-field">
+                            <span>Ambient Match ({Math.round(Number(finishFx.skyReplace.tempMatch ?? 0.32) * 100)}%)</span>
+                            <input
+                              type="range"
+                              min="0"
+                              max="1"
+                              step="0.02"
+                              value={Number(finishFx.skyReplace.tempMatch ?? 0.32)}
+                              onChange={e =>
+                                emitFinishFx?.({
+                                  ...finishFx,
+                                  skyReplace: { ...(finishFx.skyReplace || {}), enabled: true, tempMatch: Number(e.target.value) },
+                                })
+                              }
+                            />
+                          </label>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
                   {/* Primaries */}
                   <div className="ap-flow-field-row">
                     <label className="ap-flow-field">
@@ -4092,9 +4615,9 @@ export default function StudioNodeFlow({
                         <span>Lift / Shadows ({Number(finishFx?.lift ?? 0).toFixed(2)})</span>
                         <input
                           type="range"
-                          min="-0.5"
-                          max="0.5"
-                          step="0.02"
+                          min="-0.15"
+                          max="0.15"
+                          step="0.01"
                           aria-label="Grade Lift Shadows"
                           value={Number(finishFx?.lift ?? 0)}
                           onMouseDown={() => onInteractionStart?.()}
@@ -4114,8 +4637,8 @@ export default function StudioNodeFlow({
                         <span>Gamma / Mid ({Number(finishFx?.gamma ?? 1).toFixed(2)})</span>
                         <input
                           type="range"
-                          min="0.35"
-                          max="2.2"
+                          min="0.6"
+                          max="1.6"
                           step="0.02"
                           aria-label="Grade Gamma Midtones"
                           value={Number(finishFx?.gamma ?? 1)}
@@ -4134,8 +4657,8 @@ export default function StudioNodeFlow({
                         <span>Gain / High ({Number(finishFx?.gain ?? 1).toFixed(2)})</span>
                         <input
                           type="range"
-                          min="0.4"
-                          max="2.0"
+                          min="0.6"
+                          max="1.4"
                           step="0.02"
                           aria-label="Grade Gain Highlights"
                           value={Number(finishFx?.gain ?? 1)}
@@ -4151,6 +4674,38 @@ export default function StudioNodeFlow({
                         />
                       </label>
                     </div>
+                    <details style={{ marginTop: 6 }}>
+                      <summary style={{ cursor: "pointer", fontSize: 11, color: "#94a3b8" }}>Per-Channel R/G/B Lift &amp; Gain</summary>
+                      <div className="ap-flow-field-row" style={{ marginTop: 4 }}>
+                        {[
+                          ["R Lift", "rLift", -0.25, 0.25, 0.01, 0],
+                          ["G Lift", "gLift", -0.25, 0.25, 0.01, 0],
+                          ["B Lift", "bLift", -0.25, 0.25, 0.01, 0],
+                          ["R Gain", "rGain", 0.5, 1.5, 0.02, 1],
+                          ["G Gain", "gGain", 0.5, 1.5, 0.02, 1],
+                          ["B Gain", "bGain", 0.5, 1.5, 0.02, 1],
+                        ].map(([lbl, key, lo, hi, stp, fb]) => (
+                          <label className="ap-flow-field" key={key}>
+                            <span>{lbl} ({Number(resolvedAdvancedColor.rgbOffsets?.[key] ?? fb).toFixed(2)})</span>
+                            <input
+                              type="range"
+                              min={lo}
+                              max={hi}
+                              step={stp}
+                              value={Number(resolvedAdvancedColor.rgbOffsets?.[key] ?? fb)}
+                              onChange={e =>
+                                updateAdvancedColorPatch({
+                                  rgbOffsets: {
+                                    ...(resolvedAdvancedColor.rgbOffsets || {}),
+                                    [key]: Number(e.target.value),
+                                  },
+                                })
+                              }
+                            />
+                          </label>
+                        ))}
+                      </div>
+                    </details>
                   </div>
 
                   {/* 5-Knot Tone Curve & Global HSL Qualifier */}
@@ -4378,6 +4933,26 @@ export default function StudioNodeFlow({
                           }}
                         />
                       </label>
+                      <button
+                        type="button"
+                        className="ap-flow-mini-btn"
+                        data-testid="flow-export-cube-lut"
+                        onClick={() => {
+                          if (typeof document === "undefined" || typeof URL?.createObjectURL !== "function") return;
+                          const cube = resolvedAdvancedColor.lut || buildAdvancedColorCube(resolvedAdvancedColor, 17);
+                          if (!cube) return;
+                          const cubeText = exportColorCubeText(cube, resolvedAdvancedColor.lutName || finishFx?.preset || "Studio Look");
+                          const blob = new Blob([cubeText], { type: "text/plain" });
+                          const url = URL.createObjectURL(blob);
+                          const link = document.createElement("a");
+                          link.href = url;
+                          link.download = "autopromote-grade.cube";
+                          link.click?.();
+                          URL.revokeObjectURL?.(url);
+                        }}
+                      >
+                        Export .cube LUT
+                      </button>
                       <label className="ap-flow-field">
                         <span>
                           LUT Mix ({Math.round(Number(resolvedAdvancedColor.lutIntensity ?? 1) * 100)}%)
@@ -4445,6 +5020,64 @@ export default function StudioNodeFlow({
                           <option value="16mm_doc">16mm Documentary Grain</option>
                           <option value="anamorphic_prism">Anamorphic Prism</option>
                         </select>
+                      </label>
+                    </div>
+                    <div className="ap-flow-field-row" data-testid="flow-optical-camera-row">
+                      <label className="ap-flow-field">
+                        <span>Lens Distort ({Number(finishFx?.lensDistortion ?? 0).toFixed(2)})</span>
+                        <input
+                          type="range"
+                          min="-0.45"
+                          max="0.45"
+                          step="0.01"
+                          aria-label="Optical Lens Distortion"
+                          value={Number(finishFx?.lensDistortion ?? 0)}
+                          onChange={e =>
+                            emitFinishFx?.({ ...finishFx, lensDistortion: Number(e.target.value) })
+                          }
+                        />
+                      </label>
+                      <label className="ap-flow-field">
+                        <span>Z Rack Focus ({Math.round(Number(finishFx?.rackFocus ?? 0) * 100)}%)</span>
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.02"
+                          aria-label="Z-Depth Rack Focus Bokeh"
+                          value={Number(finishFx?.rackFocus ?? 0)}
+                          onChange={e =>
+                            emitFinishFx?.({ ...finishFx, rackFocus: Number(e.target.value) })
+                          }
+                        />
+                      </label>
+                      <label className="ap-flow-field">
+                        <span>Focus Plane ({Math.round(Number(finishFx?.focusDistance ?? 0.5) * 100)}%)</span>
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.02"
+                          aria-label="Rack Focus Plane Depth"
+                          value={Number(finishFx?.focusDistance ?? 0.5)}
+                          onChange={e =>
+                            emitFinishFx?.({ ...finishFx, focusDistance: Number(e.target.value) })
+                          }
+                        />
+                      </label>
+                      <label className="ap-flow-field">
+                        <span>Atmos Haze ({Math.round(Number(finishFx?.atmosphericHaze ?? 0) * 100)}%)</span>
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.02"
+                          aria-label="Atmospheric Depth Haze"
+                          value={Number(finishFx?.atmosphericHaze ?? 0)}
+                          onChange={e =>
+                            emitFinishFx?.({ ...finishFx, atmosphericHaze: Number(e.target.value) })
+                          }
+                        />
                       </label>
                     </div>
                     <div className="ap-flow-field-row">

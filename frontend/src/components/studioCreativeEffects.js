@@ -560,6 +560,7 @@ export const STUDIO_CREATIVE_EFFECT_CATALOG = Object.freeze([
           { value: "typewriter", label: "Typewriter Keys" },
           { value: "reveal_wipe", label: "Mask Reveal Wipe" },
           { value: "karaoke_highlight", label: "Speech Word Highlight" },
+          { value: "scrolling_credits", label: "Scrolling Film Credits" },
         ],
       },
       {
@@ -753,6 +754,10 @@ export const STUDIO_CREATIVE_EFFECT_CATALOG = Object.freeze([
       subjectX: 50,
       subjectY: 50,
       subjectRadius: 34,
+      gravity: 0.25,
+      turbulence: 0.45,
+      emitterX: 50,
+      emitterY: 55,
       seed: 53,
     },
     paramsSchema: [
@@ -762,6 +767,9 @@ export const STUDIO_CREATIVE_EFFECT_CATALOG = Object.freeze([
         type: "select",
         options: [
           { value: "sparks", label: "Glowing Sparks" },
+          { value: "fire_embers", label: "Fire & Rising Embers" },
+          { value: "shockwave", label: "Shockwave Blast & Debris" },
+          { value: "glass_shatter", label: "Glass & Voronoi Shatter" },
           { value: "dust", label: "Floating Atmosphere Dust" },
           { value: "snow", label: "Winter Snowfall" },
           { value: "confetti", label: "Celebration Confetti" },
@@ -772,6 +780,10 @@ export const STUDIO_CREATIVE_EFFECT_CATALOG = Object.freeze([
       { key: "particleCount", label: "Particle Count", type: "range", min: 10, max: 200, step: 1, keyframable: true },
       { key: "speed", label: "Motion Speed", type: "range", min: 0.2, max: 3.0, step: 0.05, keyframable: true },
       { key: "size", label: "Particle Size", type: "range", min: 2, max: 24, step: 0.5, keyframable: true },
+      { key: "gravity", label: "Physics Gravity", type: "range", min: -1.0, max: 2.0, step: 0.05, keyframable: true },
+      { key: "turbulence", label: "Curl Turbulence", type: "range", min: 0, max: 2.0, step: 0.05, keyframable: true },
+      { key: "emitterX", label: "Emitter X %", type: "range", min: 5, max: 95, step: 1, keyframable: true },
+      { key: "emitterY", label: "Emitter Y %", type: "range", min: 5, max: 95, step: 1, keyframable: true },
       {
         key: "direction",
         label: "Flow Direction",
@@ -2018,6 +2030,56 @@ export function renderFreezeCutoutFrame(ctx, width, height, effect, resolved, ti
 
 export function renderKineticTypographyFrame(ctx, width, height, effect, resolved, time) {
   const { params, opacity } = resolved;
+  const localTime = Math.max(0, time - effect.startTime);
+  const px = (clampNum(params.x, 10, 90, 50) / 100) * width;
+  const py = (clampNum(params.y, 10, 90, 72) / 100) * height;
+  const scale = clampNum(params.scale, 0.4, 2.5, 1.0);
+  const rot = (clampNum(params.rotation, -45, 45, 0) * Math.PI) / 180;
+  const fontSize = Math.max(16, Math.round(clampNum(params.fontSize, 20, 120, 54) * (height / 720) * scale));
+  const cssFont = params.fontFamily === "DejaVuSerif" ? "Georgia, serif" : params.fontFamily === "DejaVuSansMono" ? "monospace" : "Inter, sans-serif";
+
+  if (params.style === "scrolling_credits") {
+    const rawStr = String(params.text || "DIRECTED BY AUTOPROMOTE\nVFX & COMPOSITING\nEXECUTIVE PRODUCER");
+    let lines = rawStr.split(/\n+/).map(s => s.trim()).filter(Boolean);
+    if (lines.length <= 1) {
+      const toks = rawStr.trim().split(/\s+/).filter(Boolean);
+      lines = [];
+      for (let i = 0; i < toks.length; i += 3) lines.push(toks.slice(i, i + 3).join(" "));
+    }
+    if (!lines.length) return;
+    const dur = Math.max(0.5, Number(effect.duration || 4));
+    const speedFactor = clampNum(params.staggerMs ? 220 / params.staggerMs : 1, 0.4, 2.5, 1);
+    const prog = Math.min(1.2, (localTime / dur) * speedFactor);
+    const lineH = fontSize * 1.45;
+    const totalH = lines.length * lineH;
+    const startY = height * 0.92;
+    const endY = -totalH - height * 0.08;
+    const baseY = startY + (endY - startY) * Math.min(1, prog);
+    ctx.save();
+    ctx.font = `800 ${fontSize}px ${cssFont}`;
+    ctx.textBaseline = "middle";
+    ctx.textAlign = "center";
+    lines.forEach((line, idx) => {
+      const ly = baseY + idx * lineH;
+      if (ly < -lineH || ly > height + lineH) return;
+      const edgeFade = Math.min(1, Math.min(ly / (height * 0.14), (height - ly) / (height * 0.14)));
+      const a = Math.max(0, Math.min(1, edgeFade)) * opacity;
+      if (a <= 0.01) return;
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.translate(px, ly);
+      ctx.rotate(rot);
+      ctx.strokeStyle = "rgba(0,0,0,0.8)";
+      ctx.lineWidth = Math.max(2, fontSize * 0.08);
+      ctx.fillStyle = idx % 2 === 0 ? (params.highlightColor || "#facc15") : (params.color || "#ffffff");
+      ctx.strokeText(line, 0, 0);
+      ctx.fillText(line, 0, 0);
+      ctx.restore();
+    });
+    ctx.restore();
+    return;
+  }
+
   const rawWords = Array.isArray(params.wordTimings) && params.wordTimings.length
     ? params.wordTimings
     : String(params.text || "MAKE EVERY WORD COUNT")
@@ -2029,14 +2091,6 @@ export function renderKineticTypographyFrame(ctx, width, height, effect, resolve
           return { word, start: s, end: s + clampNum(params.staggerMs, 40, 600, 220) / 1000 };
         });
   if (!rawWords.length) return;
-
-  const localTime = Math.max(0, time - effect.startTime);
-  const px = (clampNum(params.x, 10, 90, 50) / 100) * width;
-  const py = (clampNum(params.y, 10, 90, 72) / 100) * height;
-  const scale = clampNum(params.scale, 0.4, 2.5, 1.0);
-  const rot = (clampNum(params.rotation, -45, 45, 0) * Math.PI) / 180;
-  const fontSize = Math.max(16, Math.round(clampNum(params.fontSize, 20, 120, 54) * (height / 720) * scale));
-  const cssFont = params.fontFamily === "DejaVuSerif" ? "Georgia, serif" : params.fontFamily === "DejaVuSansMono" ? "monospace" : "Inter, sans-serif";
 
   ctx.save();
   ctx.font = `900 ${fontSize}px ${cssFont}`;
@@ -2297,7 +2351,7 @@ export function renderFlashCameraShakeFrame(ctx, width, height, effect, resolved
   }
 }
 
-export function renderParticleOverlaysFrame(ctx, width, height, effect, resolved, time) {
+export function renderParticleOverlaysFrame(ctx, width, height, effect, resolved, time, trackedPose = null) {
   const { params, opacity } = resolved;
   const count = Math.max(10, Math.min(200, Math.round(params.particleCount || 75)));
   const speed = clampNum(params.speed, 0.2, 3.0, 1.0);
@@ -2306,6 +2360,8 @@ export function renderParticleOverlaysFrame(ctx, width, height, effect, resolved
   const c1 = hexToRgb(params.color, [255, 209, 102]);
   const c2 = hexToRgb(params.secondaryColor, [255, 94, 126]);
   const confettiColors = [[255, 94, 126], [56, 189, 248], [250, 204, 21], [74, 222, 128], [192, 132, 252]];
+  const trkDx = trackedPose && trackedPose.x != null ? (Number(trackedPose.x) - 50) / 100 : 0;
+  const trkDy = trackedPose && trackedPose.y != null ? (Number(trackedPose.y) - 50) / 100 : 0;
 
   const pLayer = document.createElement("canvas");
   pLayer.width = width;
@@ -2313,47 +2369,130 @@ export function renderParticleOverlaysFrame(ctx, width, height, effect, resolved
   const pCtx = pLayer.getContext("2d");
 
   const rand = mulberry32(hashSeed(`pt-${params.seed}`));
+  const pType = params.particleType || "sparks";
+  const gravity = clampNum(params.gravity, -1.0, 2.0, 0.25);
+  const turbulence = clampNum(params.turbulence, 0, 2.0, 0.45);
+  const emX = clampNum(params.emitterX, 5, 95, 50) / 100;
+  const emY = clampNum(params.emitterY, 5, 95, 55) / 100;
+
+  if (pType === "shockwave") {
+    const cycleT = (localT * 0.72) % 1.0;
+    const maxR = Math.hypot(width, height) * 0.52;
+    const ringR = Math.max(6, cycleT * maxR);
+    const ringAlpha = Math.max(0, (1 - cycleT) * 0.85 * opacity);
+    const ex = (emX + trkDx) * width;
+    const ey = (emY + trkDy) * height;
+    const ringGrad = pCtx.createRadialGradient(ex, ey, Math.max(1, ringR * 0.72), ex, ey, ringR * 1.15);
+    ringGrad.addColorStop(0, "rgba(255,255,255,0)");
+    ringGrad.addColorStop(0.55, `rgba(${c1[0]},${c1[1]},${c1[2]},${ringAlpha})`);
+    ringGrad.addColorStop(0.8, `rgba(255,255,255,${ringAlpha * 0.9})`);
+    ringGrad.addColorStop(1, "rgba(255,255,255,0)");
+    pCtx.fillStyle = ringGrad;
+    pCtx.beginPath();
+    pCtx.arc(ex, ey, ringR * 1.15, 0, Math.PI * 2);
+    pCtx.fill();
+  }
+
   for (let i = 0; i < count; i += 1) {
     const x0 = rand();
     const y0 = rand();
-    const pScale = 0.55 + rand() * 0.9;
+    const emberMix = rand();
+    const pScale = pType === "fire_embers" ? (0.28 + Math.pow(emberMix, 1.7) * 1.15) : (0.55 + emberMix * 0.9);
     const phase = rand() * 6.283;
     const vJitter = 0.65 + rand() * 0.7;
 
-    let vx = (rand() - 0.5) * 0.14;
-    let vy = -0.35 * vJitter;
-    if (params.direction === "down") vy = 0.35 * vJitter;
-    else if (params.direction === "left") { vx = -0.38 * vJitter; vy = (rand() - 0.5) * 0.12; }
-    else if (params.direction === "right") { vx = 0.38 * vJitter; vy = (rand() - 0.5) * 0.12; }
-    else if (params.direction === "radial_float") { vx = Math.cos(phase) * 0.18; vy = Math.sin(phase) * 0.18; }
-
-    const wx = (((x0 + vx * localT + Math.sin(localT * 2.2 + phase) * 0.025) % 1.12) + 1.12) % 1.12 - 0.06;
-    const wy = (((y0 + vy * localT) % 1.12) + 1.12) % 1.12 - 0.06;
+    let wx;
+    let wy;
+    let dvx = 0;
+    let dvy = -0.35;
+    let life = 0.5;
+    if (pType === "fire_embers") {
+      life = ((localT * (0.45 + vJitter * 0.35) + rand()) % 1.0);
+      const bx = emX + (x0 - 0.5) * 0.68;
+      const by = emY + (y0 - 0.5) * 0.28 + 0.16;
+      const vyRise = -(0.46 + vJitter * 0.32);
+      const curl = Math.sin(localT * 3.8 + phase) * 0.055 * turbulence + Math.cos(life * 5.0 + phase) * 0.025 * turbulence;
+      wx = bx + trkDx + curl;
+      wy = by + trkDy + vyRise * life + 0.5 * (-0.18 + gravity * 0.15) * life * life;
+      dvx = Math.cos(localT * 3.8 + phase) * 0.18 * turbulence;
+      dvy = vyRise + (-0.18 + gravity * 0.15) * life;
+    } else if (pType === "shockwave" || pType === "glass_shatter") {
+      const burstT = (localT * 0.72 + (pType === "glass_shatter" ? 0 : (rand() * 0.12))) % 1.4;
+      const spd = (0.32 + vJitter * 0.55);
+      const svx = Math.cos(phase) * spd;
+      const svy = Math.sin(phase) * spd * (pType === "glass_shatter" ? 0.85 : 1.0) - (pType === "glass_shatter" ? 0.12 : 0);
+      wx = emX + trkDx + (x0 - 0.5) * 0.14 + svx * burstT + Math.sin(phase + burstT * 4) * 0.015 * turbulence;
+      wy = emY + trkDy + (y0 - 0.5) * 0.14 + svy * burstT + 0.5 * Math.max(0.05, gravity) * 0.65 * burstT * burstT;
+      dvx = svx;
+      dvy = svy + Math.max(0.05, gravity) * 0.65 * burstT;
+    } else {
+      let vx = (rand() - 0.5) * 0.14;
+      let vy = -0.35 * vJitter;
+      if (params.direction === "down") vy = 0.35 * vJitter;
+      else if (params.direction === "left") { vx = -0.38 * vJitter; vy = (rand() - 0.5) * 0.12; }
+      else if (params.direction === "right") { vx = 0.38 * vJitter; vy = (rand() - 0.5) * 0.12; }
+      else if (params.direction === "radial_float") { vx = Math.cos(phase) * 0.18; vy = Math.sin(phase) * 0.18; }
+      wx = (((x0 + trkDx + vx * localT + Math.sin(localT * 2.2 + phase) * 0.025 * Math.max(0.4, turbulence)) % 1.12) + 1.12) % 1.12 - 0.06;
+      wy = (((y0 + trkDy + vy * localT + 0.08 * gravity * Math.sin(localT + phase)) % 1.12) + 1.12) % 1.12 - 0.06;
+      dvx = vx;
+      dvy = vy;
+    }
     const px = wx * width;
     const py = wy * height;
-    const r = Math.max(1.5, pSize * pScale * (params.particleType === "smoke" ? 3.2 : 0.65));
-    const col = params.particleType === "confetti"
+    const r = Math.max(1.0, pSize * pScale * (pType === "smoke" ? 3.2 : pType === "glass_shatter" ? 1.45 : pType === "fire_embers" ? 0.52 : 0.65));
+    const col = pType === "confetti"
       ? confettiColors[i % confettiColors.length]
-      : i % 3 === 0 ? c2 : c1;
-    const pAlpha = opacity * (params.particleType === "glitter" ? (0.4 + 0.6 * Math.abs(Math.sin(localT * 6 + phase))) : params.particleType === "smoke" ? 0.24 : 0.85);
+      : pType === "glass_shatter"
+        ? [210, 236, 255]
+        : i % 3 === 0 ? c2 : c1;
+    const lifeFade = pType === "fire_embers" ? Math.pow(Math.sin(Math.max(0, Math.min(1, life)) * Math.PI), 0.45) : 1;
+    const pAlpha = opacity * lifeFade * (pType === "glitter" ? (0.4 + 0.6 * Math.abs(Math.sin(localT * 6 + phase))) : pType === "smoke" ? 0.24 : 0.88);
 
     pCtx.save();
     pCtx.globalAlpha = pAlpha;
-    if (params.particleType === "confetti") {
+    if (pType === "confetti") {
       pCtx.translate(px, py);
       pCtx.rotate(localT * 3.5 + phase);
       pCtx.fillStyle = `rgb(${col[0]},${col[1]},${col[2]})`;
       pCtx.fillRect(-r, -r * 0.5, r * 2, r);
-    } else if (params.particleType === "sparks" || params.particleType === "glitter") {
-      const grad = pCtx.createRadialGradient(px, py, 0, px, py, r * 1.8);
-      grad.addColorStop(0, `rgba(255,255,255,0.95)`);
-      grad.addColorStop(0.45, `rgba(${col[0]},${col[1]},${col[2]},0.8)`);
+    } else if (pType === "glass_shatter") {
+      pCtx.translate(px, py);
+      pCtx.rotate(localT * (2.5 + (i % 5)) + phase);
+      pCtx.beginPath();
+      pCtx.moveTo(-r, -r * 0.45);
+      pCtx.lineTo(r * 0.9, -r * 0.7);
+      pCtx.lineTo(r * 0.65, r * 0.85);
+      pCtx.lineTo(-r * 0.55, r * 0.5);
+      pCtx.closePath();
+      pCtx.fillStyle = `rgba(${col[0]},${col[1]},${col[2]},0.52)`;
+      pCtx.fill();
+      pCtx.strokeStyle = "rgba(255,255,255,0.92)";
+      pCtx.lineWidth = Math.max(1, r * 0.14);
+      pCtx.stroke();
+    } else if (pType === "sparks" || pType === "glitter" || pType === "fire_embers" || pType === "shockwave") {
+      const glowR = pType === "fire_embers" ? r * 2.5 : r * 2.0;
+      const grad = pCtx.createRadialGradient(px, py, 0, px, py, glowR);
+      grad.addColorStop(0, "rgba(255,250,230,0.95)");
+      grad.addColorStop(0.35, `rgba(${col[0]},${col[1]},${col[2]},0.78)`);
       grad.addColorStop(1, `rgba(${col[0]},${col[1]},${col[2]},0)`);
       pCtx.fillStyle = grad;
       pCtx.beginPath();
-      pCtx.arc(px, py, r * 1.8, 0, Math.PI * 2);
+      pCtx.arc(px, py, glowR, 0, Math.PI * 2);
       pCtx.fill();
-    } else if (params.particleType === "smoke" || params.particleType === "dust") {
+      if (pType === "fire_embers" || pType === "sparks") {
+        const vMag = Math.max(0.05, Math.hypot(dvx, dvy));
+        const ux = dvx / vMag;
+        const uy = dvy / vMag;
+        const streak = r * 2.2;
+        pCtx.strokeStyle = "rgba(255,244,210,0.95)";
+        pCtx.lineWidth = Math.max(1, r * 0.6);
+        pCtx.lineCap = "round";
+        pCtx.beginPath();
+        pCtx.moveTo(px - ux * streak * 0.45, py - uy * streak * 0.45);
+        pCtx.lineTo(px + ux * streak * 0.55, py + uy * streak * 0.55);
+        pCtx.stroke();
+      }
+    } else if (pType === "smoke" || pType === "dust") {
       const grad = pCtx.createRadialGradient(px, py, 0, px, py, r);
       grad.addColorStop(0, `rgba(${col[0]},${col[1]},${col[2]},0.65)`);
       grad.addColorStop(1, `rgba(${col[0]},${col[1]},${col[2]},0)`);
@@ -2370,8 +2509,8 @@ export function renderParticleOverlaysFrame(ctx, width, height, effect, resolved
     pCtx.restore();
   }
 
-  // If masking particles behind tracked subject, cut out subject alpha silhouette!
-  if (params.maskMode === "behind_subject") {
+  // If masking particles behind or in front of tracked subject, apply subject alpha silhouette!
+  if (params.maskMode === "behind_subject" || params.maskMode === "front_of_subject") {
     const frameData = ctx.getImageData(0, 0, width, height);
     const subjMask = computeFreezeCutoutMask(frameData.data, width, height, {
       maskMode: "auto_subject",
@@ -2382,8 +2521,8 @@ export function renderParticleOverlaysFrame(ctx, width, height, effect, resolved
     });
     const pData = pCtx.getImageData(0, 0, width, height);
     for (let i = 0; i < subjMask.length; i += 1) {
-      const keepBg = 1.0 - subjMask[i] / 255.0;
-      pData.data[i * 4 + 3] = Math.round(pData.data[i * 4 + 3] * keepBg);
+      const keepFactor = params.maskMode === "front_of_subject" ? subjMask[i] / 255.0 : 1.0 - subjMask[i] / 255.0;
+      pData.data[i * 4 + 3] = Math.round(pData.data[i * 4 + 3] * keepFactor);
     }
     pCtx.putImageData(pData, 0, 0);
   }
@@ -2427,7 +2566,7 @@ export function renderCreativeEffectsToCanvas(ctx, width, height, creativeEffect
     } else if (effect.effectId === "flash_camera_shake") {
       renderFlashCameraShakeFrame(ctx, width, height, effect, resolved, time, options);
     } else if (effect.effectId === "particle_overlays") {
-      renderParticleOverlaysFrame(ctx, width, height, effect, resolved, time);
+      renderParticleOverlaysFrame(ctx, width, height, effect, resolved, time, trackedPose);
     }
   }
   return true;
@@ -2593,4 +2732,111 @@ export async function trackSubjectOnVideoFrames({
   videoElement.currentTime = prevTime;
   if (!wasPaused) videoElement.play?.().catch(() => {});
   return trackKeyframes;
+}
+
+// Multi-point LK / patch consensus mask tracker producing ordinary maskPoint{i}X/Y keyframes.
+export async function trackPolygonMaskAcrossFrames({
+  videoElement,
+  initialPoints = [],
+  startTime = 0,
+  duration = 2.0,
+  targetId,
+  fps = 8,
+  createId,
+} = {}) {
+  if (!videoElement || !videoElement.videoWidth || !videoElement.videoHeight) {
+    throw new Error("Load a real video before tracking mask vertices.");
+  }
+  if (!Array.isArray(initialPoints) || initialPoints.length < 3) {
+    throw new Error("Polygon mask requires at least 3 vertices to track.");
+  }
+  const prevTime = videoElement.currentTime;
+  const wasPaused = videoElement.paused;
+  videoElement.pause?.();
+  const w = 192;
+  const h = Math.max(108, Math.round((192 * videoElement.videoHeight) / Math.max(1, videoElement.videoWidth)));
+  const offscreen = document.createElement("canvas");
+  offscreen.width = w;
+  offscreen.height = h;
+  const offCtx = offscreen.getContext("2d", { willReadFrequently: true });
+  const sampleLumaAt = async seekTime => {
+    await new Promise(resolve => {
+      const done = () => { videoElement.removeEventListener("seeked", done); resolve(); };
+      videoElement.addEventListener("seeked", done);
+      videoElement.currentTime = Math.max(0, Math.min(videoElement.duration || seekTime, seekTime));
+      window.setTimeout(done, 250);
+    });
+    offCtx.drawImage(videoElement, 0, 0, w, h);
+    const data = offCtx.getImageData(0, 0, w, h).data;
+    const luma = new Float32Array(w * h);
+    for (let i = 0, j = 0; i < luma.length; i += 1, j += 4) {
+      luma[i] = data[j] * 0.299 + data[j + 1] * 0.587 + data[j + 2] * 0.114;
+    }
+    return luma;
+  };
+  const step = 1 / Math.max(2, Math.min(12, fps));
+  const totalSteps = Math.max(2, Math.min(28, Math.round(duration / step) + 1));
+  const halfPatch = 6;
+  const searchRadius = 10;
+  let ptsPx = initialPoints.map(([px, py]) => [(Number(px) / 100) * w, (Number(py) / 100) * h]);
+  let prevLuma = await sampleLumaAt(startTime);
+  const mkId = () => (createId ? createId("mtrk") : `mtrk-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`);
+  const keyframes = [];
+  ptsPx.forEach(([x, y], idx) => {
+    keyframes.push({ id: mkId(), targetId: String(targetId), property: `maskPoint${idx}X`, time: Number(startTime.toFixed(3)), value: Number(((x / w) * 100).toFixed(2)), easing: "linear" });
+    keyframes.push({ id: mkId(), targetId: String(targetId), property: `maskPoint${idx}Y`, time: Number(startTime.toFixed(3)), value: Number(((y / h) * 100).toFixed(2)), easing: "linear" });
+  });
+  for (let s = 1; s < totalSteps; s += 1) {
+    const t = startTime + (s / (totalSteps - 1)) * duration;
+    const nextLuma = await sampleLumaAt(t);
+    const deltas = [];
+    for (let pi = 0; pi < ptsPx.length; pi += 1) {
+      const [cx, cy] = ptsPx[pi];
+      const ix = Math.round(cx), iy = Math.round(cy);
+      let bestDx = 0, bestDy = 0, bestSad = Infinity;
+      for (let dy = -searchRadius; dy <= searchRadius; dy += 2) {
+        for (let dx = -searchRadius; dx <= searchRadius; dx += 2) {
+          let sad = 0, cnt = 0;
+          for (let py = -halfPatch; py <= halfPatch; py += 2) {
+            const sy = iy + py, ty = sy + dy;
+            if (sy < 0 || sy >= h || ty < 0 || ty >= h) continue;
+            for (let px = -halfPatch; px <= halfPatch; px += 2) {
+              const sx = ix + px, tx = sx + dx;
+              if (sx < 0 || sx >= w || tx < 0 || tx >= w) continue;
+              sad += Math.abs(prevLuma[sy * w + sx] - nextLuma[ty * w + tx]);
+              cnt += 1;
+            }
+          }
+          if (cnt > 0 && sad / cnt < bestSad) {
+            bestSad = sad / cnt;
+            bestDx = dx;
+            bestDy = dy;
+          }
+        }
+      }
+      deltas.push({ dx: bestDx, dy: bestDy, sad: bestSad });
+    }
+    const sortedX = [...deltas].map(d => d.dx).sort((a, b) => a - b);
+    const sortedY = [...deltas].map(d => d.dy).sort((a, b) => a - b);
+    const medDx = sortedX[Math.floor(sortedX.length / 2)] || 0;
+    const medDy = sortedY[Math.floor(sortedY.length / 2)] || 0;
+    const nextPts = [];
+    for (let idx = 0; idx < ptsPx.length; idx += 1) {
+      const [cx, cy] = ptsPx[idx];
+      const d = deltas[idx];
+      const useDx = d.sad > 26 || Math.hypot(d.dx - medDx, d.dy - medDy) > 6 ? medDx : d.dx;
+      const useDy = d.sad > 26 || Math.hypot(d.dx - medDx, d.dy - medDy) > 6 ? medDy : d.dy;
+      nextPts.push([Math.max(0, Math.min(w, cx + useDx)), Math.max(0, Math.min(h, cy + useDy))]);
+    }
+    ptsPx = nextPts;
+    prevLuma = nextLuma;
+    for (let idx = 0; idx < ptsPx.length; idx += 1) {
+      const [x, y] = ptsPx[idx];
+      keyframes.push({ id: mkId(), targetId: String(targetId), property: `maskPoint${idx}X`, time: Number(t.toFixed(3)), value: Number(((x / w) * 100).toFixed(2)), easing: "linear" });
+      keyframes.push({ id: mkId(), targetId: String(targetId), property: `maskPoint${idx}Y`, time: Number(t.toFixed(3)), value: Number(((y / h) * 100).toFixed(2)), easing: "linear" });
+    }
+  }
+  videoElement.currentTime = prevTime;
+  if (!wasPaused) videoElement.play?.().catch(() => {});
+  return keyframes;
 }

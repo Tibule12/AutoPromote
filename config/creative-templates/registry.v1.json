@@ -5,12 +5,12 @@
   "categories": [
     {
       "id": "image_to_cinematic_scene",
-      "label": "Image \u2192 cinematic moving scene",
+      "label": "Image → cinematic moving scene",
       "availability": "planned"
     },
     {
       "id": "idea_to_finished_promo",
-      "label": "Idea \u2192 finished promo",
+      "label": "Idea → finished promo",
       "availability": "planned"
     },
     {
@@ -65,12 +65,12 @@
     },
     {
       "id": "podcast_to_vertical_promo",
-      "label": "Podcast \u2192 vertical promo",
+      "label": "Podcast → vertical promo",
       "availability": "planned"
     },
     {
       "id": "long_video_to_short",
-      "label": "Long video \u2192 viral short",
+      "label": "Long video → viral short",
       "availability": "planned"
     },
     {
@@ -80,7 +80,7 @@
     },
     {
       "id": "screenplay_to_scene",
-      "label": "Script/screenplay \u2192 generated scene",
+      "label": "Script/screenplay → generated scene",
       "availability": "planned"
     },
     {
@@ -2131,7 +2131,7 @@
       "schemaVersion": 1,
       "templateId": "product_launch_cinematic_v1",
       "version": "1.1.0",
-      "label": "Product launch \u2014 editorial rhythm",
+      "label": "Product launch — editorial rhythm",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -2726,7 +2726,7 @@
           },
           {
             "property": "scale",
-            "time": 7.0,
+            "time": 7,
             "value": 1.02,
             "easing": "hold"
           },
@@ -2786,7 +2786,7 @@
           },
           {
             "property": "scale",
-            "time": 14.0,
+            "time": 14,
             "value": 1.02,
             "easing": "hold"
           },
@@ -2845,7 +2845,7 @@
       "schemaVersion": 1,
       "templateId": "product_launch_cinematic_v1",
       "version": "1.1.1",
-      "label": "Product launch \u2014 editorial rhythm",
+      "label": "Product launch — editorial rhythm",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -3470,7 +3470,7 @@
           },
           {
             "property": "scale",
-            "time": 7.0,
+            "time": 7,
             "value": 1.02,
             "easing": "hold"
           },
@@ -3530,7 +3530,7 @@
           },
           {
             "property": "scale",
-            "time": 14.0,
+            "time": 14,
             "value": 1.02,
             "easing": "hold"
           },
@@ -3588,7 +3588,7 @@
       "schemaVersion": 1,
       "templateId": "product_launch_cinematic_v1",
       "version": "1.1.2",
-      "label": "Product launch \u2014 editorial rhythm",
+      "label": "Product launch — editorial rhythm",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -4275,7 +4275,7 @@
           },
           {
             "property": "scale",
-            "time": 7.0,
+            "time": 7,
             "value": 1.02,
             "easing": "hold"
           },
@@ -4335,7 +4335,7 @@
           },
           {
             "property": "scale",
-            "time": 14.0,
+            "time": 14,
             "value": 1.02,
             "easing": "hold"
           },
@@ -4402,7 +4402,7 @@
       "schemaVersion": 1,
       "templateId": "podcast_cold_open_v1",
       "version": "1.0.0",
-      "label": "Podcast \u00b7 Before the punchline",
+      "label": "Podcast · Before the punchline",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -4462,9 +4462,9 @@
       "executionDefinition": {
         "hook": {
           "family": "podcast",
-          "selectionReason": "Open on the guest\u2019s selected statement, allow a genuine reaction, then return to the question that gives it context.",
+          "selectionReason": "Open on the guest’s selected statement, allow a genuine reaction, then return to the question that gives it context.",
           "audience": "Podcasters introducing the person behind a familiar public identity",
-          "promise": "Open on the guest\u2019s selected statement, allow a genuine reaction, then return to the question that gives it context.",
+          "promise": "Open on the guest’s selected statement, allow a genuine reaction, then return to the question that gives it context.",
           "recommendationSignals": [
             "dialogue",
             "guest_statement",
@@ -4704,7 +4704,7 @@
       "schemaVersion": 1,
       "templateId": "interview_revelation_v1",
       "version": "1.0.0",
-      "label": "Interview \u00b7 The question underneath",
+      "label": "Interview · The question underneath",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -4759,9 +4759,9 @@
       "executionDefinition": {
         "hook": {
           "family": "interview",
-          "selectionReason": "Keep the provocative question intact and cut to the selected answer, with the speaker\u2019s own words carrying the reveal.",
+          "selectionReason": "Keep the provocative question intact and cut to the selected answer, with the speaker’s own words carrying the reveal.",
           "audience": "Interviewers cutting an identity or origin-story introduction",
-          "promise": "Keep the provocative question intact and cut to the selected answer, with the speaker\u2019s own words carrying the reveal.",
+          "promise": "Keep the provocative question intact and cut to the selected answer, with the speaker’s own words carrying the reveal.",
           "recommendationSignals": [
             "question",
             "answer",
@@ -4965,7 +4965,7 @@
       "schemaVersion": 1,
       "templateId": "cinematic_flashforward_v1",
       "version": "1.0.0",
-      "label": "Cinematic \u00b7 One more round",
+      "label": "Cinematic · One more round",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -5329,7 +5329,7 @@
               "origin": "manual"
             },
             {
-              "time": 5.0,
+              "time": 5,
               "x": 50,
               "y": 50,
               "zoom": 1,
@@ -5345,7 +5345,7 @@
               "origin": "manual"
             },
             {
-              "time": 6.0,
+              "time": 6,
               "x": 50,
               "y": 50,
               "zoom": 1,
@@ -5369,7 +5369,7 @@
               "origin": "manual"
             },
             {
-              "time": 12.0,
+              "time": 12,
               "x": 50,
               "y": 50,
               "zoom": 1,
@@ -5523,7 +5523,7 @@
       "schemaVersion": 1,
       "templateId": "storytelling_comeback_v1",
       "version": "1.0.0",
-      "label": "Story \u00b7 Tomorrow might be kinder",
+      "label": "Story · Tomorrow might be kinder",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -5793,7 +5793,7 @@
               "origin": "manual"
             },
             {
-              "time": 4.0,
+              "time": 4,
               "x": 50,
               "y": 50,
               "zoom": 1,
@@ -5801,7 +5801,7 @@
               "origin": "manual"
             },
             {
-              "time": 7.0,
+              "time": 7,
               "x": 50,
               "y": 50,
               "zoom": 1,
@@ -5910,7 +5910,7 @@
       "schemaVersion": 1,
       "templateId": "kinetic_pressure_v1",
       "version": "1.0.0",
-      "label": "Motion type \u00b7 One more, then another",
+      "label": "Motion type · One more, then another",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -6360,7 +6360,7 @@
               "origin": "manual"
             },
             {
-              "time": 4.0,
+              "time": 4,
               "x": 50,
               "y": 50,
               "zoom": 1,
@@ -6376,7 +6376,7 @@
               "origin": "manual"
             },
             {
-              "time": 7.0,
+              "time": 7,
               "x": 50,
               "y": 50,
               "zoom": 1,
@@ -6384,7 +6384,7 @@
               "origin": "manual"
             },
             {
-              "time": 8.0,
+              "time": 8,
               "x": 50,
               "y": 50,
               "zoom": 1,
@@ -6498,7 +6498,7 @@
       "schemaVersion": 1,
       "templateId": "creator_action_edit_v1",
       "version": "1.0.0",
-      "label": "Creator \u00b7 Make the cut mean something",
+      "label": "Creator · Make the cut mean something",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -6877,7 +6877,7 @@
               "origin": "manual"
             },
             {
-              "time": 10.0,
+              "time": 10,
               "x": 50,
               "y": 50,
               "zoom": 1,
@@ -6997,2280 +6997,9 @@
     },
     {
       "schemaVersion": 1,
-      "templateId": "product_launch_cinematic_v1",
-      "version": "1.1.0",
-      "label": "Product launch \u2014 editorial rhythm",
-      "status": "draft",
-      "canonicalContractVersion": 1,
-      "compiler": "studioRenderCompiler",
-      "renderer": "render_viral_clip_impl",
-      "surfaces": [
-        "studio",
-        "director",
-        "welcome"
-      ],
-      "workflow": "studio",
-      "categoryIds": [
-        "product_launch"
-      ],
-      "inputSlots": [
-        {
-          "id": "logo",
-          "type": "image",
-          "required": true
-        },
-        {
-          "id": "brandColour",
-          "type": "colour",
-          "required": true
-        },
-        {
-          "id": "headline",
-          "type": "text",
-          "required": true
-        },
-        {
-          "id": "featureOne",
-          "type": "text",
-          "required": true
-        },
-        {
-          "id": "featureTwo",
-          "type": "text",
-          "required": true
-        },
-        {
-          "id": "callToAction",
-          "type": "text",
-          "required": true
-        },
-        {
-          "id": "hookFootage",
-          "type": "video",
-          "required": true
-        },
-        {
-          "id": "productFootage",
-          "type": "video",
-          "required": true
-        },
-        {
-          "id": "detailFootage",
-          "type": "video",
-          "required": true
-        },
-        {
-          "id": "music",
-          "type": "audio",
-          "required": true
-        },
-        {
-          "id": "transitionSfx",
-          "type": "audio",
-          "required": false
-        },
-        {
-          "id": "revealSfx",
-          "type": "audio",
-          "required": false
-        }
-      ],
-      "supportedAspects": [
-        "16:9",
-        "9:16"
-      ],
-      "durationTicks": 1800000,
-      "qualification": {
-        "studioLifecycle": "unverified",
-        "directorInstantiation": "unverified",
-        "creativeQuality": "unapproved",
-        "previewFinalParity": "unverified"
-      },
-      "executionDefinition": {
-        "clock": 90000,
-        "sequence": [
-          {
-            "slot": "hookFootage",
-            "offset": 3,
-            "duration": 2
-          },
-          {
-            "slot": "detailFootage",
-            "offset": 1,
-            "duration": 2.5
-          },
-          {
-            "slot": "productFootage",
-            "offset": 3,
-            "duration": 2.5
-          },
-          {
-            "slot": "hookFootage",
-            "offset": 9,
-            "duration": 1.25
-          },
-          {
-            "slot": "detailFootage",
-            "offset": 4,
-            "duration": 1.25
-          },
-          {
-            "slot": "productFootage",
-            "offset": 7,
-            "duration": 3
-          },
-          {
-            "slot": "detailFootage",
-            "offset": 2.6,
-            "duration": 0.75
-          },
-          {
-            "slot": "hookFootage",
-            "offset": 2.4,
-            "duration": 0.75
-          },
-          {
-            "slot": "productFootage",
-            "offset": 8,
-            "duration": 1.5
-          },
-          {
-            "slot": "productFootage",
-            "offset": 5,
-            "duration": 4.5
-          }
-        ],
-        "titles": [
-          {
-            "id": "opening-label",
-            "start": 0.125,
-            "duration": 1.7,
-            "scale": 0.34,
-            "portraitScale": 0.6,
-            "x": 7,
-            "y": 13,
-            "width": 82,
-            "colour": "brand",
-            "align": "left",
-            "weight": 600,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.15,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "literal": "MADE TO FEEL DIFFERENT"
-          },
-          {
-            "id": "hook-line-1",
-            "start": 0.375,
-            "duration": 1.55,
-            "scale": 2.35,
-            "portraitScale": 0.6,
-            "x": 7,
-            "y": 32,
-            "width": 82,
-            "colour": "white",
-            "align": "left",
-            "weight": 900,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 5,
-              "enterScale": 0.98,
-              "enterSeconds": 0.22,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "slot": "headline",
-            "line": 0
-          },
-          {
-            "id": "hook-line-2",
-            "start": 0.625,
-            "duration": 1.3,
-            "scale": 1.65,
-            "portraitScale": 0.6,
-            "x": 7,
-            "y": 51,
-            "width": 82,
-            "colour": "brand",
-            "align": "left",
-            "weight": 900,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 4,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.22,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "slot": "headline",
-            "line": 1
-          },
-          {
-            "id": "feature-one",
-            "start": 4.65,
-            "duration": 2.2,
-            "scale": 1.12,
-            "portraitScale": 0.6,
-            "x": 7,
-            "y": 23,
-            "width": 82,
-            "colour": "white",
-            "align": "left",
-            "weight": 900,
-            "shadow": "soft",
-            "motion": {
-              "enterX": -5,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.22,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "slot": "featureOne"
-          },
-          {
-            "id": "detail-whisper",
-            "start": 7.125,
-            "duration": 1.025,
-            "scale": 0.42,
-            "portraitScale": 0.6,
-            "x": 7,
-            "y": 87,
-            "width": 82,
-            "colour": "brand",
-            "align": "left",
-            "weight": 600,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.125,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "literal": "EVERY DETAIL."
-          },
-          {
-            "id": "feature-two",
-            "start": 9.65,
-            "duration": 2.675,
-            "scale": 1.12,
-            "portraitScale": 0.6,
-            "x": 7,
-            "y": 23,
-            "width": 82,
-            "colour": "white",
-            "align": "left",
-            "weight": 900,
-            "shadow": "soft",
-            "motion": {
-              "enterX": -5,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.22,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "slot": "featureTwo"
-          },
-          {
-            "id": "payoff",
-            "start": 13.375,
-            "duration": 1.125,
-            "scale": 1.35,
-            "portraitScale": 0.6,
-            "x": 50,
-            "y": 51,
-            "width": 82,
-            "colour": "brand",
-            "align": "center",
-            "weight": 900,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 0,
-              "enterScale": 1.05,
-              "enterSeconds": 0.1,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "slot": "headline",
-            "line": 1
-          },
-          {
-            "id": "ending-kicker",
-            "start": 15.875,
-            "duration": 3.85,
-            "scale": 0.38,
-            "portraitScale": 0.6,
-            "x": 50,
-            "y": 27,
-            "width": 82,
-            "colour": "brand",
-            "align": "center",
-            "weight": 600,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.4,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "literal": "MAKE IT YOURS"
-          },
-          {
-            "id": "cta",
-            "start": 17.1,
-            "duration": 2.6,
-            "scale": 0.63,
-            "portraitScale": 0.6,
-            "x": 50,
-            "y": 71,
-            "width": 82,
-            "colour": "white",
-            "align": "center",
-            "weight": 600,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 1,
-              "enterScale": 1,
-              "enterSeconds": 0.35,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "slot": "callToAction"
-          },
-          {
-            "id": "credit",
-            "start": 18.25,
-            "duration": 1.5,
-            "scale": 0.31,
-            "portraitScale": 0.6,
-            "x": 50,
-            "y": 89,
-            "width": 82,
-            "colour": "white",
-            "align": "center",
-            "weight": 600,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.25,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "literal": "MADE WITH AUTOPROMOTE"
-          }
-        ],
-        "logo": {
-          "start": 15.875,
-          "duration": 4.125,
-          "x": 50,
-          "y": 49,
-          "width": 52,
-          "height": 21,
-          "motion": {
-            "enterScale": 0.94,
-            "enterY": 1,
-            "enterSeconds": 0.6,
-            "settleSeconds": 0.9,
-            "exitSeconds": 0.15,
-            "curve": [
-              0.16,
-              1,
-              0.3,
-              1
-            ]
-          }
-        },
-        "soundCues": [
-          {
-            "time": 0,
-            "tone": "subdrop",
-            "duration": 0.6,
-            "volume": 0.14,
-            "fadeOut": 0.18
-          },
-          {
-            "time": 0.375,
-            "tone": "click",
-            "duration": 0.08,
-            "volume": 0.055
-          },
-          {
-            "time": 1.85,
-            "tone": "sweep",
-            "duration": 0.24,
-            "volume": 0.1,
-            "slot": "transitionSfx",
-            "fadeOut": 0.12
-          },
-          {
-            "time": 4.38,
-            "tone": "sweep",
-            "duration": 0.34,
-            "volume": 0.11,
-            "slot": "transitionSfx",
-            "fadeOut": 0.14
-          },
-          {
-            "time": 8.125,
-            "tone": "click",
-            "duration": 0.1,
-            "volume": 0.06
-          },
-          {
-            "time": 9.38,
-            "tone": "sweep",
-            "duration": 0.34,
-            "volume": 0.1,
-            "slot": "transitionSfx",
-            "fadeOut": 0.14
-          },
-          {
-            "time": 12.375,
-            "tone": "riser",
-            "duration": 1.05,
-            "volume": 0.11,
-            "fadeOut": 0.12
-          },
-          {
-            "time": 13.25,
-            "tone": "impact",
-            "duration": 0.3,
-            "volume": 0.11
-          },
-          {
-            "time": 15.625,
-            "tone": "subdrop",
-            "duration": 1.4,
-            "volume": 0.2,
-            "slot": "revealSfx",
-            "fadeOut": 0.4
-          },
-          {
-            "time": 18.15,
-            "tone": "chime",
-            "duration": 0.85,
-            "volume": 0.05,
-            "fadeOut": 0.4
-          }
-        ],
-        "animation": {
-          "enterSeconds": 0.22,
-          "settleSeconds": 0.45,
-          "exitSeconds": 0.125,
-          "curve": [
-            0.16,
-            1,
-            0.3,
-            1
-          ]
-        },
-        "music": {
-          "volume": 0.58,
-          "fadeIn": 0.25,
-          "fadeOut": 1.25,
-          "ducking": false
-        },
-        "finish": {
-          "brightness": 1,
-          "contrast": 1.07,
-          "saturation": 0.96,
-          "temperature": 4,
-          "vignette": 0.15,
-          "fadeIn": 0.08,
-          "fadeOut": 0
-        },
-        "sourceKeyframes": [
-          {
-            "property": "scale",
-            "time": 0,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 1.9583333333333333,
-            "value": 1.085,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 2,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 4.458333333333333,
-            "value": 1.045,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 4.5,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 6.958333333333333,
-            "value": 1.085,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 7,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 8.208333333333334,
-            "value": 1.045,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 8.25,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 9.458333333333334,
-            "value": 1.045,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 9.5,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 12.458333333333334,
-            "value": 1.085,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 12.5,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 13.208333333333334,
-            "value": 1.045,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 13.25,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 13.958333333333334,
-            "value": 1.045,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 14,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 15.458333333333334,
-            "value": 1.045,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 15.5,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 20,
-            "value": 1.07,
-            "easing": "linear"
-          },
-          {
-            "property": "opacity",
-            "time": 0,
-            "value": 1,
-            "easing": "linear"
-          },
-          {
-            "property": "opacity",
-            "time": 15.5,
-            "value": 1,
-            "easing": "hold"
-          },
-          {
-            "property": "opacity",
-            "time": 16.35,
-            "value": 0.17,
-            "easing": "bezier",
-            "curve": [
-              0.16,
-              1,
-              0.3,
-              1
-            ]
-          },
-          {
-            "property": "opacity",
-            "time": 20,
-            "value": 0.17,
-            "easing": "linear"
-          }
-        ]
-      }
-    },
-    {
-      "schemaVersion": 1,
-      "templateId": "product_launch_cinematic_v1",
-      "version": "1.1.1",
-      "label": "Product launch \u2014 editorial rhythm",
-      "status": "draft",
-      "canonicalContractVersion": 1,
-      "compiler": "studioRenderCompiler",
-      "renderer": "render_viral_clip_impl",
-      "surfaces": [
-        "studio",
-        "director",
-        "welcome"
-      ],
-      "workflow": "studio",
-      "categoryIds": [
-        "product_launch"
-      ],
-      "inputSlots": [
-        {
-          "id": "logo",
-          "type": "image",
-          "required": true
-        },
-        {
-          "id": "brandColour",
-          "type": "colour",
-          "required": true
-        },
-        {
-          "id": "headline",
-          "type": "text",
-          "required": true
-        },
-        {
-          "id": "featureOne",
-          "type": "text",
-          "required": true
-        },
-        {
-          "id": "featureTwo",
-          "type": "text",
-          "required": true
-        },
-        {
-          "id": "callToAction",
-          "type": "text",
-          "required": true
-        },
-        {
-          "id": "hookFootage",
-          "type": "video",
-          "required": true
-        },
-        {
-          "id": "productFootage",
-          "type": "video",
-          "required": true
-        },
-        {
-          "id": "detailFootage",
-          "type": "video",
-          "required": true
-        },
-        {
-          "id": "music",
-          "type": "audio",
-          "required": true
-        },
-        {
-          "id": "transitionSfx",
-          "type": "audio",
-          "required": false
-        },
-        {
-          "id": "revealSfx",
-          "type": "audio",
-          "required": false
-        }
-      ],
-      "supportedAspects": [
-        "16:9",
-        "9:16"
-      ],
-      "durationTicks": 1800000,
-      "qualification": {
-        "studioLifecycle": "unverified",
-        "directorInstantiation": "unverified",
-        "creativeQuality": "unapproved",
-        "previewFinalParity": "unverified"
-      },
-      "executionDefinition": {
-        "clock": 90000,
-        "sequence": [
-          {
-            "slot": "hookFootage",
-            "offset": 3,
-            "duration": 2
-          },
-          {
-            "slot": "detailFootage",
-            "offset": 1,
-            "duration": 2.5
-          },
-          {
-            "slot": "productFootage",
-            "offset": 3,
-            "duration": 2.5
-          },
-          {
-            "slot": "hookFootage",
-            "offset": 9,
-            "duration": 1.25
-          },
-          {
-            "slot": "detailFootage",
-            "offset": 4,
-            "duration": 1.25
-          },
-          {
-            "slot": "productFootage",
-            "offset": 7,
-            "duration": 3
-          },
-          {
-            "slot": "detailFootage",
-            "offset": 2.6,
-            "duration": 0.75
-          },
-          {
-            "slot": "hookFootage",
-            "offset": 2.4,
-            "duration": 0.75
-          },
-          {
-            "slot": "productFootage",
-            "offset": 8,
-            "duration": 1.5
-          },
-          {
-            "slot": "productFootage",
-            "offset": 5,
-            "duration": 4.5
-          }
-        ],
-        "titles": [
-          {
-            "id": "opening-label",
-            "start": 0.125,
-            "duration": 1.7,
-            "scale": 0.34,
-            "portraitScale": 0.6,
-            "x": 7,
-            "y": 13,
-            "width": 82,
-            "colour": "brand",
-            "align": "left",
-            "weight": 600,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.15,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "literal": "MADE TO FEEL DIFFERENT"
-          },
-          {
-            "id": "hook-line-1",
-            "start": 0.375,
-            "duration": 1.55,
-            "scale": 2.35,
-            "portraitScale": 0.6,
-            "x": 7,
-            "y": 32,
-            "width": 82,
-            "colour": "white",
-            "align": "left",
-            "weight": 900,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 5,
-              "enterScale": 0.98,
-              "enterSeconds": 0.22,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "slot": "headline",
-            "line": 0
-          },
-          {
-            "id": "hook-line-2",
-            "start": 0.625,
-            "duration": 1.3,
-            "scale": 1.65,
-            "portraitScale": 0.6,
-            "x": 7,
-            "y": 51,
-            "width": 82,
-            "colour": "brand",
-            "align": "left",
-            "weight": 900,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 4,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.22,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "slot": "headline",
-            "line": 1
-          },
-          {
-            "id": "feature-one",
-            "start": 4.65,
-            "duration": 2.2,
-            "scale": 1.12,
-            "portraitScale": 0.6,
-            "x": 7,
-            "y": 23,
-            "width": 82,
-            "colour": "white",
-            "align": "left",
-            "weight": 900,
-            "shadow": "soft",
-            "motion": {
-              "enterX": -5,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.22,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "slot": "featureOne"
-          },
-          {
-            "id": "detail-whisper",
-            "start": 7.125,
-            "duration": 1.025,
-            "scale": 0.42,
-            "portraitScale": 0.6,
-            "x": 7,
-            "y": 87,
-            "width": 82,
-            "colour": "brand",
-            "align": "left",
-            "weight": 600,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.125,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "literal": "EVERY DETAIL."
-          },
-          {
-            "id": "feature-two",
-            "start": 9.65,
-            "duration": 2.675,
-            "scale": 1.12,
-            "portraitScale": 0.6,
-            "x": 7,
-            "y": 23,
-            "width": 82,
-            "colour": "white",
-            "align": "left",
-            "weight": 900,
-            "shadow": "soft",
-            "motion": {
-              "enterX": -5,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.22,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "slot": "featureTwo"
-          },
-          {
-            "id": "rhythm-echo",
-            "slot": "headline",
-            "line": 0,
-            "start": 12.5,
-            "duration": 0.625,
-            "x": 50,
-            "y": 51,
-            "scale": 2.15,
-            "portraitScale": 0.6,
-            "width": 82,
-            "colour": "white",
-            "align": "center",
-            "weight": 900,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 0,
-              "enterScale": 0.97,
-              "enterSeconds": 0.125,
-              "settleSeconds": 0.25,
-              "exitSeconds": 0.08,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            }
-          },
-          {
-            "id": "payoff",
-            "start": 13.375,
-            "duration": 1.125,
-            "scale": 1.35,
-            "portraitScale": 0.6,
-            "x": 50,
-            "y": 51,
-            "width": 82,
-            "colour": "brand",
-            "align": "center",
-            "weight": 900,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 0,
-              "enterScale": 1.05,
-              "enterSeconds": 0.1,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "slot": "headline",
-            "line": 1
-          },
-          {
-            "id": "ending-kicker",
-            "start": 15.875,
-            "duration": 3.85,
-            "scale": 0.38,
-            "portraitScale": 0.6,
-            "x": 50,
-            "y": 27,
-            "width": 82,
-            "colour": "brand",
-            "align": "center",
-            "weight": 600,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.4,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "literal": "MAKE IT YOURS"
-          },
-          {
-            "id": "cta",
-            "start": 17.1,
-            "duration": 2.6,
-            "scale": 0.63,
-            "portraitScale": 0.6,
-            "x": 50,
-            "y": 71,
-            "width": 82,
-            "colour": "white",
-            "align": "center",
-            "weight": 600,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 1,
-              "enterScale": 1,
-              "enterSeconds": 0.35,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "slot": "callToAction"
-          },
-          {
-            "id": "credit",
-            "start": 18.25,
-            "duration": 1.5,
-            "scale": 0.31,
-            "portraitScale": 0.6,
-            "x": 50,
-            "y": 89,
-            "width": 82,
-            "colour": "white",
-            "align": "center",
-            "weight": 600,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.25,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "literal": "MADE WITH AUTOPROMOTE"
-          }
-        ],
-        "logo": {
-          "start": 15.875,
-          "duration": 4.125,
-          "x": 50,
-          "y": 49,
-          "width": 52,
-          "height": 21,
-          "motion": {
-            "enterScale": 0.94,
-            "enterY": 1,
-            "enterSeconds": 0.6,
-            "settleSeconds": 0.9,
-            "exitSeconds": 0.15,
-            "curve": [
-              0.16,
-              1,
-              0.3,
-              1
-            ]
-          }
-        },
-        "soundCues": [
-          {
-            "time": 0,
-            "tone": "subdrop",
-            "duration": 0.6,
-            "volume": 0.14,
-            "fadeOut": 0.18
-          },
-          {
-            "time": 0.375,
-            "tone": "click",
-            "duration": 0.08,
-            "volume": 0.055
-          },
-          {
-            "time": 1.85,
-            "tone": "sweep",
-            "duration": 0.24,
-            "volume": 0.1,
-            "slot": "transitionSfx",
-            "fadeOut": 0.12
-          },
-          {
-            "time": 4.38,
-            "tone": "sweep",
-            "duration": 0.34,
-            "volume": 0.11,
-            "slot": "transitionSfx",
-            "fadeOut": 0.14
-          },
-          {
-            "time": 8.125,
-            "tone": "click",
-            "duration": 0.1,
-            "volume": 0.06
-          },
-          {
-            "time": 9.38,
-            "tone": "sweep",
-            "duration": 0.34,
-            "volume": 0.1,
-            "slot": "transitionSfx",
-            "fadeOut": 0.14
-          },
-          {
-            "time": 12.375,
-            "tone": "riser",
-            "duration": 1.05,
-            "volume": 0.11,
-            "fadeOut": 0.12
-          },
-          {
-            "time": 13.25,
-            "tone": "impact",
-            "duration": 0.3,
-            "volume": 0.11
-          },
-          {
-            "time": 15.625,
-            "tone": "subdrop",
-            "duration": 1.4,
-            "volume": 0.2,
-            "slot": "revealSfx",
-            "fadeOut": 0.4
-          },
-          {
-            "time": 18.15,
-            "tone": "chime",
-            "duration": 0.85,
-            "volume": 0.05,
-            "fadeOut": 0.4
-          }
-        ],
-        "animation": {
-          "enterSeconds": 0.22,
-          "settleSeconds": 0.45,
-          "exitSeconds": 0.125,
-          "curve": [
-            0.16,
-            1,
-            0.3,
-            1
-          ]
-        },
-        "music": {
-          "volume": 0.85,
-          "fadeIn": 0.25,
-          "fadeOut": 1.25,
-          "ducking": false
-        },
-        "finish": {
-          "brightness": 1,
-          "contrast": 1.07,
-          "saturation": 0.96,
-          "temperature": 0.08,
-          "vignette": 0.15,
-          "fadeIn": 0.08,
-          "fadeOut": 0
-        },
-        "sourceKeyframes": [
-          {
-            "property": "scale",
-            "time": 0,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 1.9583333333333333,
-            "value": 1.085,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 2,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 4.458333333333333,
-            "value": 1.045,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 4.5,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 6.958333333333333,
-            "value": 1.085,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 7,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 8.208333333333334,
-            "value": 1.045,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 8.25,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 9.458333333333334,
-            "value": 1.045,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 9.5,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 12.458333333333334,
-            "value": 1.085,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 12.5,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 13.208333333333334,
-            "value": 1.045,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 13.25,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 13.958333333333334,
-            "value": 1.045,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 14,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 15.458333333333334,
-            "value": 1.045,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 15.5,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 20,
-            "value": 1.07,
-            "easing": "linear"
-          },
-          {
-            "property": "opacity",
-            "time": 0,
-            "value": 1,
-            "easing": "linear"
-          },
-          {
-            "property": "opacity",
-            "time": 15.5,
-            "value": 1,
-            "easing": "linear"
-          },
-          {
-            "property": "opacity",
-            "time": 16.35,
-            "value": 0.17,
-            "easing": "linear"
-          },
-          {
-            "property": "opacity",
-            "time": 20,
-            "value": 0.17,
-            "easing": "linear"
-          }
-        ],
-        "framing": {
-          "mode": "center",
-          "forceAspect": true,
-          "positions": []
-        }
-      }
-    },
-    {
-      "schemaVersion": 1,
-      "templateId": "product_launch_cinematic_v1",
-      "version": "1.1.2",
-      "label": "Product launch \u2014 editorial rhythm",
-      "status": "draft",
-      "canonicalContractVersion": 1,
-      "compiler": "studioRenderCompiler",
-      "renderer": "render_viral_clip_impl",
-      "surfaces": [
-        "studio",
-        "director",
-        "welcome"
-      ],
-      "workflow": "studio",
-      "categoryIds": [
-        "product_launch"
-      ],
-      "inputSlots": [
-        {
-          "id": "logo",
-          "type": "image",
-          "required": true
-        },
-        {
-          "id": "brandColour",
-          "type": "colour",
-          "required": true
-        },
-        {
-          "id": "headline",
-          "type": "text",
-          "required": true
-        },
-        {
-          "id": "featureOne",
-          "type": "text",
-          "required": true
-        },
-        {
-          "id": "featureTwo",
-          "type": "text",
-          "required": true
-        },
-        {
-          "id": "callToAction",
-          "type": "text",
-          "required": true
-        },
-        {
-          "id": "hookFootage",
-          "type": "video",
-          "required": true
-        },
-        {
-          "id": "productFootage",
-          "type": "video",
-          "required": true
-        },
-        {
-          "id": "detailFootage",
-          "type": "video",
-          "required": true
-        },
-        {
-          "id": "music",
-          "type": "audio",
-          "required": true
-        },
-        {
-          "id": "transitionSfx",
-          "type": "audio",
-          "required": false
-        },
-        {
-          "id": "revealSfx",
-          "type": "audio",
-          "required": false
-        }
-      ],
-      "supportedAspects": [
-        "16:9",
-        "9:16"
-      ],
-      "durationTicks": 1800000,
-      "qualification": {
-        "studioLifecycle": "unverified",
-        "directorInstantiation": "unverified",
-        "creativeQuality": "unapproved",
-        "previewFinalParity": "unverified"
-      },
-      "executionDefinition": {
-        "clock": 90000,
-        "sequence": [
-          {
-            "slot": "hookFootage",
-            "offset": 3,
-            "duration": 2
-          },
-          {
-            "slot": "detailFootage",
-            "offset": 1,
-            "duration": 2.5
-          },
-          {
-            "slot": "productFootage",
-            "offset": 3,
-            "duration": 2.5
-          },
-          {
-            "slot": "hookFootage",
-            "offset": 9,
-            "duration": 1.25
-          },
-          {
-            "slot": "detailFootage",
-            "offset": 4,
-            "duration": 1.25
-          },
-          {
-            "slot": "productFootage",
-            "offset": 7,
-            "duration": 3
-          },
-          {
-            "slot": "detailFootage",
-            "offset": 2.6,
-            "duration": 0.75
-          },
-          {
-            "slot": "hookFootage",
-            "offset": 2.4,
-            "duration": 0.75
-          },
-          {
-            "slot": "productFootage",
-            "offset": 8,
-            "duration": 1.5
-          },
-          {
-            "slot": "productFootage",
-            "offset": 5,
-            "duration": 4.5
-          }
-        ],
-        "titles": [
-          {
-            "id": "opening-label",
-            "start": 0.125,
-            "duration": 1.7,
-            "scale": 0.34,
-            "portraitScale": 0.6,
-            "x": 7,
-            "y": 13,
-            "width": 82,
-            "colour": "brand",
-            "align": "left",
-            "weight": 600,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.15,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "literal": "MADE TO FEEL DIFFERENT"
-          },
-          {
-            "id": "hook-line-1",
-            "start": 0.375,
-            "duration": 1.55,
-            "scale": 2.35,
-            "portraitScale": 0.6,
-            "x": 7,
-            "y": 32,
-            "width": 82,
-            "colour": "white",
-            "align": "left",
-            "weight": 900,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 5,
-              "enterScale": 0.98,
-              "enterSeconds": 0.22,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "slot": "headline",
-            "line": 0
-          },
-          {
-            "id": "hook-line-2",
-            "start": 0.625,
-            "duration": 1.3,
-            "scale": 1.65,
-            "portraitScale": 0.6,
-            "x": 7,
-            "y": 51,
-            "width": 82,
-            "colour": "brand",
-            "align": "left",
-            "weight": 900,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 4,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.22,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "slot": "headline",
-            "line": 1
-          },
-          {
-            "id": "feature-one-line-1",
-            "start": 4.65,
-            "duration": 2.2,
-            "scale": 1.12,
-            "portraitScale": 0.6,
-            "x": 7,
-            "y": 22,
-            "width": 82,
-            "colour": "white",
-            "align": "left",
-            "weight": 900,
-            "shadow": "soft",
-            "motion": {
-              "enterX": -5,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.22,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "slot": "featureOne",
-            "line": 0
-          },
-          {
-            "id": "feature-one-line-2",
-            "start": 4.775,
-            "duration": 2.075,
-            "scale": 1.12,
-            "portraitScale": 0.6,
-            "x": 7,
-            "y": 32,
-            "width": 82,
-            "colour": "white",
-            "align": "left",
-            "weight": 900,
-            "shadow": "soft",
-            "motion": {
-              "enterX": -5,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.22,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "slot": "featureOne",
-            "line": 1
-          },
-          {
-            "id": "detail-whisper",
-            "start": 7.125,
-            "duration": 1.025,
-            "scale": 0.42,
-            "portraitScale": 0.6,
-            "x": 7,
-            "y": 87,
-            "width": 82,
-            "colour": "brand",
-            "align": "left",
-            "weight": 600,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.125,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "literal": "EVERY DETAIL."
-          },
-          {
-            "id": "feature-two-line-1",
-            "start": 9.65,
-            "duration": 2.675,
-            "scale": 1.12,
-            "portraitScale": 0.6,
-            "x": 7,
-            "y": 22,
-            "width": 82,
-            "colour": "white",
-            "align": "left",
-            "weight": 900,
-            "shadow": "soft",
-            "motion": {
-              "enterX": -5,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.22,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "slot": "featureTwo",
-            "line": 0
-          },
-          {
-            "id": "feature-two-line-2",
-            "start": 9.775,
-            "duration": 2.55,
-            "scale": 1.12,
-            "portraitScale": 0.6,
-            "x": 7,
-            "y": 32,
-            "width": 82,
-            "colour": "white",
-            "align": "left",
-            "weight": 900,
-            "shadow": "soft",
-            "motion": {
-              "enterX": -5,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.22,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "slot": "featureTwo",
-            "line": 1
-          },
-          {
-            "id": "rhythm-echo",
-            "slot": "headline",
-            "line": 0,
-            "start": 12.5,
-            "duration": 0.625,
-            "x": 50,
-            "y": 51,
-            "scale": 2.15,
-            "portraitScale": 0.6,
-            "width": 82,
-            "colour": "white",
-            "align": "center",
-            "weight": 900,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 0,
-              "enterScale": 0.97,
-              "enterSeconds": 0.125,
-              "settleSeconds": 0.25,
-              "exitSeconds": 0.08,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            }
-          },
-          {
-            "id": "payoff",
-            "start": 13.375,
-            "duration": 1.125,
-            "scale": 1.35,
-            "portraitScale": 0.6,
-            "x": 50,
-            "y": 51,
-            "width": 82,
-            "colour": "brand",
-            "align": "center",
-            "weight": 900,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 0,
-              "enterScale": 1.05,
-              "enterSeconds": 0.1,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "slot": "headline",
-            "line": 1
-          },
-          {
-            "id": "ending-kicker",
-            "start": 15.875,
-            "duration": 3.85,
-            "scale": 0.38,
-            "portraitScale": 0.6,
-            "x": 50,
-            "y": 27,
-            "width": 82,
-            "colour": "brand",
-            "align": "center",
-            "weight": 600,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.4,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "literal": "MAKE IT YOURS"
-          },
-          {
-            "id": "cta",
-            "start": 17.1,
-            "duration": 2.6,
-            "scale": 0.63,
-            "portraitScale": 0.6,
-            "x": 50,
-            "y": 71,
-            "width": 82,
-            "colour": "white",
-            "align": "center",
-            "weight": 600,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 1,
-              "enterScale": 1,
-              "enterSeconds": 0.35,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "slot": "callToAction"
-          },
-          {
-            "id": "credit",
-            "start": 18.25,
-            "duration": 1.5,
-            "scale": 0.31,
-            "portraitScale": 0.6,
-            "x": 50,
-            "y": 89,
-            "width": 82,
-            "colour": "white",
-            "align": "center",
-            "weight": 600,
-            "shadow": "soft",
-            "motion": {
-              "enterX": 0,
-              "enterY": 0,
-              "enterScale": 1,
-              "enterSeconds": 0.25,
-              "settleSeconds": 0.45,
-              "exitSeconds": 0.125,
-              "curve": [
-                0.16,
-                1,
-                0.3,
-                1
-              ]
-            },
-            "literal": "MADE WITH AUTOPROMOTE"
-          }
-        ],
-        "logo": {
-          "start": 15.875,
-          "duration": 4.125,
-          "x": 50,
-          "y": 49,
-          "width": 52,
-          "height": 21,
-          "motion": {
-            "enterScale": 0.94,
-            "enterY": 1,
-            "enterSeconds": 0.6,
-            "settleSeconds": 0.9,
-            "exitSeconds": 0.15,
-            "curve": [
-              0.16,
-              1,
-              0.3,
-              1
-            ]
-          }
-        },
-        "soundCues": [
-          {
-            "time": 0,
-            "tone": "subdrop",
-            "duration": 0.6,
-            "volume": 0.14,
-            "fadeOut": 0.18
-          },
-          {
-            "time": 0.375,
-            "tone": "click",
-            "duration": 0.08,
-            "volume": 0.055
-          },
-          {
-            "time": 1.85,
-            "tone": "sweep",
-            "duration": 0.24,
-            "volume": 0.1,
-            "slot": "transitionSfx",
-            "fadeOut": 0.12
-          },
-          {
-            "time": 4.38,
-            "tone": "sweep",
-            "duration": 0.34,
-            "volume": 0.11,
-            "slot": "transitionSfx",
-            "fadeOut": 0.14
-          },
-          {
-            "time": 8.125,
-            "tone": "click",
-            "duration": 0.1,
-            "volume": 0.06
-          },
-          {
-            "time": 9.38,
-            "tone": "sweep",
-            "duration": 0.34,
-            "volume": 0.1,
-            "slot": "transitionSfx",
-            "fadeOut": 0.14
-          },
-          {
-            "time": 12.375,
-            "tone": "riser",
-            "duration": 1.05,
-            "volume": 0.11,
-            "fadeOut": 0.12
-          },
-          {
-            "time": 13.25,
-            "tone": "impact",
-            "duration": 0.3,
-            "volume": 0.11
-          },
-          {
-            "time": 15.625,
-            "tone": "subdrop",
-            "duration": 1.4,
-            "volume": 0.2,
-            "slot": "revealSfx",
-            "fadeOut": 0.4
-          },
-          {
-            "time": 18.15,
-            "tone": "chime",
-            "duration": 0.85,
-            "volume": 0.05,
-            "fadeOut": 0.4
-          }
-        ],
-        "animation": {
-          "enterSeconds": 0.22,
-          "settleSeconds": 0.45,
-          "exitSeconds": 0.125,
-          "curve": [
-            0.16,
-            1,
-            0.3,
-            1
-          ]
-        },
-        "music": {
-          "volume": 0.85,
-          "fadeIn": 0.25,
-          "fadeOut": 1.25,
-          "ducking": false
-        },
-        "finish": {
-          "brightness": 1,
-          "contrast": 1.07,
-          "saturation": 0.96,
-          "temperature": 0.08,
-          "vignette": 0.15,
-          "fadeIn": 0.08,
-          "fadeOut": 0
-        },
-        "sourceKeyframes": [
-          {
-            "property": "scale",
-            "time": 0,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 1.9583333333333333,
-            "value": 1.085,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 2,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 4.458333333333333,
-            "value": 1.045,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 4.5,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 6.958333333333333,
-            "value": 1.085,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 7,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 8.208333333333334,
-            "value": 1.045,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 8.25,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 9.458333333333334,
-            "value": 1.045,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 9.5,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 12.458333333333334,
-            "value": 1.085,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 12.5,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 13.208333333333334,
-            "value": 1.045,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 13.25,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 13.958333333333334,
-            "value": 1.045,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 14,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 15.458333333333334,
-            "value": 1.045,
-            "easing": "linear"
-          },
-          {
-            "property": "scale",
-            "time": 15.5,
-            "value": 1.02,
-            "easing": "hold"
-          },
-          {
-            "property": "scale",
-            "time": 20,
-            "value": 1.07,
-            "easing": "linear"
-          },
-          {
-            "property": "opacity",
-            "time": 0,
-            "value": 1,
-            "easing": "linear"
-          },
-          {
-            "property": "opacity",
-            "time": 15.5,
-            "value": 1,
-            "easing": "linear"
-          },
-          {
-            "property": "opacity",
-            "time": 16.35,
-            "value": 0.17,
-            "easing": "linear"
-          },
-          {
-            "property": "opacity",
-            "time": 20,
-            "value": 0.17,
-            "easing": "linear"
-          }
-        ],
-        "framing": {
-          "mode": "speaker_track",
-          "forceAspect": true,
-          "positions": [
-            {
-              "id": "editorial-source-center",
-              "time": 0,
-              "x": 50,
-              "y": 50,
-              "origin": "manual",
-              "cut": true
-            }
-          ]
-        }
-      }
-    },
-    {
-      "schemaVersion": 1,
       "templateId": "brand_trailer_momentum_v1",
       "version": "1.0.0",
-      "label": "Brand trailer \u2014 momentum",
+      "label": "Brand trailer — momentum",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -10401,7 +8130,7 @@
       "schemaVersion": 1,
       "templateId": "brand_trailer_momentum_v1",
       "version": "1.0.1",
-      "label": "Brand trailer \u2014 momentum",
+      "label": "Brand trailer — momentum",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -11532,7 +9261,7 @@
       "schemaVersion": 1,
       "templateId": "podcast_story_hook_v1",
       "version": "1.0.0",
-      "label": "Podcast \u2014 story first",
+      "label": "Podcast — story first",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -12064,7 +9793,7 @@
       "schemaVersion": 1,
       "templateId": "podcast_story_hook_v1",
       "version": "1.0.1",
-      "label": "Podcast \u2014 story first",
+      "label": "Podcast — story first",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -12647,7 +10376,7 @@
       },
       "templateId": "podcast_clip_proof_tiktok_v1",
       "version": "1.0.0",
-      "label": "Podcast proof \u2014 Tiktok",
+      "label": "Podcast proof — Tiktok",
       "categoryIds": [
         "podcast_to_vertical_promo",
         "before_after_transformation"
@@ -12825,7 +10554,7 @@
                 1
               ]
             },
-            "literal": "SAME RECORDING \u00b7 BEFORE"
+            "literal": "SAME RECORDING · BEFORE"
           },
           {
             "id": "before-a",
@@ -13095,7 +10824,7 @@
       },
       "templateId": "podcast_clip_proof_youtube_v1",
       "version": "1.0.0",
-      "label": "Podcast proof \u2014 Youtube",
+      "label": "Podcast proof — Youtube",
       "categoryIds": [
         "podcast_to_vertical_promo",
         "before_after_transformation"
@@ -13273,7 +11002,7 @@
                 1
               ]
             },
-            "literal": "SAME RECORDING \u00b7 BEFORE"
+            "literal": "SAME RECORDING · BEFORE"
           },
           {
             "id": "before-a",
@@ -13543,7 +11272,7 @@
       },
       "templateId": "podcast_clip_proof_instagram_v1",
       "version": "1.0.0",
-      "label": "Podcast proof \u2014 Instagram",
+      "label": "Podcast proof — Instagram",
       "categoryIds": [
         "podcast_to_vertical_promo",
         "before_after_transformation"
@@ -13721,7 +11450,7 @@
                 1
               ]
             },
-            "literal": "SAME RECORDING \u00b7 BEFORE"
+            "literal": "SAME RECORDING · BEFORE"
           },
           {
             "id": "before-a",
@@ -13991,7 +11720,7 @@
       },
       "templateId": "podcast_clip_proof_linkedin_v1",
       "version": "1.0.0",
-      "label": "Podcast proof \u2014 Linkedin",
+      "label": "Podcast proof — Linkedin",
       "categoryIds": [
         "podcast_to_vertical_promo",
         "before_after_transformation"
@@ -14169,7 +11898,7 @@
                 1
               ]
             },
-            "literal": "SAME RECORDING \u00b7 BEFORE"
+            "literal": "SAME RECORDING · BEFORE"
           },
           {
             "id": "before-a",
@@ -14439,7 +12168,7 @@
       },
       "templateId": "podcast_clip_proof_reddit_v1",
       "version": "1.0.0",
-      "label": "Podcast proof \u2014 Reddit",
+      "label": "Podcast proof — Reddit",
       "categoryIds": [
         "podcast_to_vertical_promo",
         "before_after_transformation"
@@ -14617,7 +12346,7 @@
                 1
               ]
             },
-            "literal": "SAME RECORDING \u00b7 BEFORE"
+            "literal": "SAME RECORDING · BEFORE"
           },
           {
             "id": "before-a",
@@ -14887,7 +12616,7 @@
       },
       "templateId": "podcast_clip_proof_facebook_v1",
       "version": "1.0.0",
-      "label": "Podcast proof \u2014 Facebook",
+      "label": "Podcast proof — Facebook",
       "categoryIds": [
         "podcast_to_vertical_promo",
         "before_after_transformation"
@@ -15065,7 +12794,7 @@
                 1
               ]
             },
-            "literal": "SAME RECORDING \u00b7 BEFORE"
+            "literal": "SAME RECORDING · BEFORE"
           },
           {
             "id": "before-a",
@@ -15335,7 +13064,7 @@
       },
       "templateId": "podcast_clip_proof_tiktok_v1",
       "version": "1.0.1",
-      "label": "Podcast proof \u2014 Tiktok",
+      "label": "Podcast proof — Tiktok",
       "categoryIds": [
         "podcast_to_vertical_promo",
         "before_after_transformation"
@@ -15513,7 +13242,7 @@
                 1
               ]
             },
-            "literal": "SAME RECORDING \u00b7 BEFORE"
+            "literal": "SAME RECORDING · BEFORE"
           },
           {
             "id": "before-a",
@@ -15783,7 +13512,7 @@
       },
       "templateId": "podcast_clip_proof_youtube_v1",
       "version": "1.0.1",
-      "label": "Podcast proof \u2014 Youtube",
+      "label": "Podcast proof — Youtube",
       "categoryIds": [
         "podcast_to_vertical_promo",
         "before_after_transformation"
@@ -15961,7 +13690,7 @@
                 1
               ]
             },
-            "literal": "SAME RECORDING \u00b7 BEFORE"
+            "literal": "SAME RECORDING · BEFORE"
           },
           {
             "id": "before-a",
@@ -16231,7 +13960,7 @@
       },
       "templateId": "podcast_clip_proof_instagram_v1",
       "version": "1.0.1",
-      "label": "Podcast proof \u2014 Instagram",
+      "label": "Podcast proof — Instagram",
       "categoryIds": [
         "podcast_to_vertical_promo",
         "before_after_transformation"
@@ -16409,7 +14138,7 @@
                 1
               ]
             },
-            "literal": "SAME RECORDING \u00b7 BEFORE"
+            "literal": "SAME RECORDING · BEFORE"
           },
           {
             "id": "before-a",
@@ -16679,7 +14408,7 @@
       },
       "templateId": "podcast_clip_proof_linkedin_v1",
       "version": "1.0.1",
-      "label": "Podcast proof \u2014 Linkedin",
+      "label": "Podcast proof — Linkedin",
       "categoryIds": [
         "podcast_to_vertical_promo",
         "before_after_transformation"
@@ -16857,7 +14586,7 @@
                 1
               ]
             },
-            "literal": "SAME RECORDING \u00b7 BEFORE"
+            "literal": "SAME RECORDING · BEFORE"
           },
           {
             "id": "before-a",
@@ -17127,7 +14856,7 @@
       },
       "templateId": "podcast_clip_proof_reddit_v1",
       "version": "1.0.1",
-      "label": "Podcast proof \u2014 Reddit",
+      "label": "Podcast proof — Reddit",
       "categoryIds": [
         "podcast_to_vertical_promo",
         "before_after_transformation"
@@ -17305,7 +15034,7 @@
                 1
               ]
             },
-            "literal": "SAME RECORDING \u00b7 BEFORE"
+            "literal": "SAME RECORDING · BEFORE"
           },
           {
             "id": "before-a",
@@ -17575,7 +15304,7 @@
       },
       "templateId": "podcast_clip_proof_facebook_v1",
       "version": "1.0.1",
-      "label": "Podcast proof \u2014 Facebook",
+      "label": "Podcast proof — Facebook",
       "categoryIds": [
         "podcast_to_vertical_promo",
         "before_after_transformation"
@@ -17753,7 +15482,7 @@
                 1
               ]
             },
-            "literal": "SAME RECORDING \u00b7 BEFORE"
+            "literal": "SAME RECORDING · BEFORE"
           },
           {
             "id": "before-a",
@@ -18023,7 +15752,7 @@
       },
       "templateId": "podcast_clip_proof_tiktok_v1",
       "version": "1.0.2",
-      "label": "Podcast proof \u2014 Tiktok",
+      "label": "Podcast proof — Tiktok",
       "categoryIds": [
         "podcast_to_vertical_promo",
         "before_after_transformation"
@@ -18201,7 +15930,7 @@
                 1
               ]
             },
-            "literal": "ORIGINAL \u00b7 16:9"
+            "literal": "ORIGINAL · 16:9"
           },
           {
             "id": "before-a",
@@ -18471,7 +16200,7 @@
       },
       "templateId": "podcast_clip_proof_youtube_v1",
       "version": "1.0.2",
-      "label": "Podcast proof \u2014 Youtube",
+      "label": "Podcast proof — Youtube",
       "categoryIds": [
         "podcast_to_vertical_promo",
         "before_after_transformation"
@@ -18649,7 +16378,7 @@
                 1
               ]
             },
-            "literal": "ORIGINAL \u00b7 16:9"
+            "literal": "ORIGINAL · 16:9"
           },
           {
             "id": "before-a",
@@ -18919,7 +16648,7 @@
       },
       "templateId": "podcast_clip_proof_instagram_v1",
       "version": "1.0.2",
-      "label": "Podcast proof \u2014 Instagram",
+      "label": "Podcast proof — Instagram",
       "categoryIds": [
         "podcast_to_vertical_promo",
         "before_after_transformation"
@@ -19097,7 +16826,7 @@
                 1
               ]
             },
-            "literal": "ORIGINAL \u00b7 16:9"
+            "literal": "ORIGINAL · 16:9"
           },
           {
             "id": "before-a",
@@ -19367,7 +17096,7 @@
       },
       "templateId": "podcast_clip_proof_linkedin_v1",
       "version": "1.0.2",
-      "label": "Podcast proof \u2014 Linkedin",
+      "label": "Podcast proof — Linkedin",
       "categoryIds": [
         "podcast_to_vertical_promo",
         "before_after_transformation"
@@ -19545,7 +17274,7 @@
                 1
               ]
             },
-            "literal": "ORIGINAL \u00b7 16:9"
+            "literal": "ORIGINAL · 16:9"
           },
           {
             "id": "before-a",
@@ -19815,7 +17544,7 @@
       },
       "templateId": "podcast_clip_proof_reddit_v1",
       "version": "1.0.2",
-      "label": "Podcast proof \u2014 Reddit",
+      "label": "Podcast proof — Reddit",
       "categoryIds": [
         "podcast_to_vertical_promo",
         "before_after_transformation"
@@ -19993,7 +17722,7 @@
                 1
               ]
             },
-            "literal": "ORIGINAL \u00b7 16:9"
+            "literal": "ORIGINAL · 16:9"
           },
           {
             "id": "before-a",
@@ -20263,7 +17992,7 @@
       },
       "templateId": "podcast_clip_proof_facebook_v1",
       "version": "1.0.2",
-      "label": "Podcast proof \u2014 Facebook",
+      "label": "Podcast proof — Facebook",
       "categoryIds": [
         "podcast_to_vertical_promo",
         "before_after_transformation"
@@ -20441,7 +18170,7 @@
                 1
               ]
             },
-            "literal": "ORIGINAL \u00b7 16:9"
+            "literal": "ORIGINAL · 16:9"
           },
           {
             "id": "before-a",
@@ -20695,7 +18424,7 @@
       "schemaVersion": 1,
       "templateId": "podcast_set_reveal_v1",
       "version": "1.0.0",
-      "label": "Podcast \u2014 set and type reveal",
+      "label": "Podcast — set and type reveal",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -20943,7 +18672,7 @@
       "schemaVersion": 1,
       "templateId": "podcast_set_dialogue_v1",
       "version": "1.0.0",
-      "label": "Podcast \u2014 two-speaker set transformation",
+      "label": "Podcast — two-speaker set transformation",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -21243,7 +18972,7 @@
       "schemaVersion": 1,
       "templateId": "podcast_set_dialogue_v1",
       "version": "1.1.0",
-      "label": "Podcast \u2014 community voices, full set",
+      "label": "Podcast — community voices, full set",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -21499,7 +19228,7 @@
       "schemaVersion": 1,
       "templateId": "podcast_set_dialogue_v1",
       "version": "1.1.1",
-      "label": "Podcast \u2014 community voices, full set",
+      "label": "Podcast — community voices, full set",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -21771,7 +19500,7 @@
       "schemaVersion": 1,
       "templateId": "podcast_set_dialogue_v1",
       "version": "1.2.0",
-      "label": "Podcast \u2014 warm camera-matched set",
+      "label": "Podcast — warm camera-matched set",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -22048,7 +19777,7 @@
       "schemaVersion": 1,
       "templateId": "creator_identity_v1",
       "version": "1.0.0",
-      "label": "Creator identity \u2014 four-source motion",
+      "label": "Creator identity — four-source motion",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -22386,7 +20115,7 @@
           {
             "id": "own",
             "start": 18.8,
-            "duration": 2.0,
+            "duration": 2,
             "scale": 2.9,
             "portraitScale": 1,
             "x": 79,
@@ -22596,7 +20325,7 @@
             "id": "Offset portrait 1",
             "name": "Offset portrait 1",
             "sourceSlot": "detailFootage",
-            "sourceStart": 0.0,
+            "sourceStart": 0,
             "startTime": 3,
             "duration": 6,
             "transform": {
@@ -23207,7 +20936,7 @@
       "schemaVersion": 1,
       "templateId": "prism_cuts_v1",
       "version": "1.0.0",
-      "label": "Prism cuts \u2014 wordless",
+      "label": "Prism cuts — wordless",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -23349,7 +21078,7 @@
         ],
         "sourceKeyframes": [],
         "sceneActions": [],
-        "directorDescription": "Prism cuts \u2014 wordless: a wordless authored motion style using your four saved clips. All layers, masks, groups and motion stay editable. No model job.",
+        "directorDescription": "Prism cuts — wordless: a wordless authored motion style using your four saved clips. All layers, masks, groups and motion stay editable. No model job.",
         "defaultCopy": {},
         "muteOriginalAudio": true,
         "framing": {
@@ -29426,7 +27155,7 @@
       "schemaVersion": 1,
       "templateId": "momentum_v1",
       "version": "1.0.0",
-      "label": "Momentum \u2014 orbit, slits & lenses",
+      "label": "Momentum — orbit, slits & lenses",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -29568,7 +27297,7 @@
         ],
         "sourceKeyframes": [],
         "sceneActions": [],
-        "directorDescription": "Momentum \u2014 orbit, slits & lenses: a wordless authored motion style using your four saved clips. All layers, masks, groups and motion stay editable. No model job.",
+        "directorDescription": "Momentum — orbit, slits & lenses: a wordless authored motion style using your four saved clips. All layers, masks, groups and motion stay editable. No model job.",
         "defaultCopy": {},
         "muteOriginalAudio": true,
         "framing": {
@@ -29963,7 +27692,7 @@
               "name": "M / time slit 0",
               "type": "video",
               "sourceSlot": "screenFootage",
-              "sourceStartTime": 0.0,
+              "sourceStartTime": 0,
               "startTime": 8,
               "duration": 7,
               "x": 50,
@@ -30123,7 +27852,7 @@
               "name": "M / time slit 4",
               "type": "video",
               "sourceSlot": "screenFootage",
-              "sourceStartTime": 1.0,
+              "sourceStartTime": 1,
               "startTime": 8,
               "duration": 7,
               "x": 50,
@@ -34162,7 +31891,7 @@
       "schemaVersion": 1,
       "templateId": "momentum_v1",
       "version": "1.0.1",
-      "label": "Momentum \u2014 orbit, slits & lenses",
+      "label": "Momentum — orbit, slits & lenses",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -34304,7 +32033,7 @@
         ],
         "sourceKeyframes": [],
         "sceneActions": [],
-        "directorDescription": "Momentum \u2014 orbit, slits & lenses: a wordless authored motion style using your four saved clips. All layers, masks, groups and motion stay editable. No model job.",
+        "directorDescription": "Momentum — orbit, slits & lenses: a wordless authored motion style using your four saved clips. All layers, masks, groups and motion stay editable. No model job.",
         "defaultCopy": {},
         "muteOriginalAudio": true,
         "framing": {
@@ -34693,7 +32422,7 @@
               "name": "M / time slit 0",
               "type": "video",
               "sourceSlot": "screenFootage",
-              "sourceStartTime": 0.0,
+              "sourceStartTime": 0,
               "startTime": 8,
               "duration": 7,
               "x": 50,
@@ -34853,7 +32582,7 @@
               "name": "M / time slit 4",
               "type": "video",
               "sourceSlot": "screenFootage",
-              "sourceStartTime": 1.0,
+              "sourceStartTime": 1,
               "startTime": 8,
               "duration": 7,
               "x": 50,
@@ -38853,7 +36582,7 @@
       "schemaVersion": 1,
       "templateId": "aperture_product_v1",
       "version": "1.0.0",
-      "label": "Aperture \u2014 mechanical product",
+      "label": "Aperture — mechanical product",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -39728,7 +37457,7 @@
       "schemaVersion": 1,
       "templateId": "editorial_fan_v1",
       "version": "1.0.0",
-      "label": "Editorial fan \u2014 fashion collage",
+      "label": "Editorial fan — fashion collage",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -41791,7 +39520,7 @@
       "schemaVersion": 1,
       "templateId": "editorial_fan_v1",
       "version": "1.0.1",
-      "label": "Editorial fan \u2014 fashion collage",
+      "label": "Editorial fan — fashion collage",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -43932,7 +41661,7 @@
       "schemaVersion": 1,
       "templateId": "split_impact_v1",
       "version": "1.0.0",
-      "label": "Split impact \u2014 sports motion",
+      "label": "Split impact — sports motion",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -45250,7 +42979,7 @@
       "schemaVersion": 1,
       "templateId": "coastal_postcards_v1",
       "version": "1.0.0",
-      "label": "Coastal postcards \u2014 travel",
+      "label": "Coastal postcards — travel",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -45455,7 +43184,7 @@
               "name": "Coastal postcard 0",
               "type": "video",
               "sourceSlot": "footage",
-              "sourceStartTime": 0.0,
+              "sourceStartTime": 0,
               "startTime": 0,
               "duration": 8,
               "x": 50,
@@ -46948,7 +44677,7 @@
       "schemaVersion": 1,
       "templateId": "vinyl_pulse_v1",
       "version": "1.0.0",
-      "label": "Vinyl pulse \u2014 music artwork",
+      "label": "Vinyl pulse — music artwork",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -48307,7 +46036,7 @@
       "schemaVersion": 1,
       "templateId": "living_infinity_v1",
       "version": "1.0.0",
-      "label": "Living infinity \u2014 cinematic type",
+      "label": "Living infinity — cinematic type",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",
@@ -48541,7 +46270,7 @@
               "id": "Infinity glyph",
               "name": "Infinity glyph",
               "type": "text",
-              "text": "\u221e",
+              "text": "∞",
               "x": 50,
               "y": 50,
               "width": 96,
@@ -48914,7 +46643,7 @@
       "schemaVersion": 1,
       "templateId": "living_infinity_v1",
       "version": "1.0.1",
-      "label": "Living type \u2014 cinematic X",
+      "label": "Living type — cinematic X",
       "status": "draft",
       "canonicalContractVersion": 1,
       "compiler": "studioRenderCompiler",

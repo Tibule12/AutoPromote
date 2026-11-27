@@ -843,6 +843,14 @@ export const buildTrackMatteStageSvgDataUri = ({
     shapeMarkup = pts.length >= 3
       ? `<polygon points="${pts.join(" ")}" fill="${fillColor}" />`
       : `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="${fillColor}" />`;
+  } else if (matteLayer.mask?.enabled && matteLayer.mask.shape === "diamond") {
+    shapeMarkup = `<polygon points="${(x + w / 2).toFixed(2)},${y.toFixed(2)} ${(x + w).toFixed(2)},${(y + h / 2).toFixed(2)} ${(x + w / 2).toFixed(2)},${(y + h).toFixed(2)} ${x.toFixed(2)},${(y + h / 2).toFixed(2)}" fill="${fillColor}" />`;
+  } else if (matteLayer.mask?.enabled && matteLayer.mask.shape === "inset") {
+    const ix = w * 0.1;
+    const iy = h * 0.1;
+    const rawRadius = Number(matteLayer.mask.radius ?? 6);
+    const rx = rawRadius > 0 ? Math.min(w * 0.4, h * 0.4, (rawRadius / 100) * Math.min(w, h)) : 0;
+    shapeMarkup = `<rect x="${(x + ix).toFixed(1)}" y="${(y + iy).toFixed(1)}" width="${(w - ix * 2).toFixed(1)}" height="${(h - iy * 2).toFixed(1)}" rx="${rx.toFixed(2)}" fill="${fillColor}" />`;
   } else {
     const rawRadius = matteLayer.frameShape === "edge"
       ? 0

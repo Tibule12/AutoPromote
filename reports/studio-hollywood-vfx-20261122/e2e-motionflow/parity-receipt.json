@@ -1,0 +1,148 @@
+{
+  "passed": true,
+  "scope": "Local loopback pre-final browser stage vs local CPU FFmpeg worker render parity for AutoPromote Comp & Rig (Null Rig parenting, loop/wiggle/spin Motion Drivers, Bezier keyframe preset, Alpha Track Matte), Signal Node Flow canonical compilation, and Cinema Color Grade (3-Way Wheels + 5-Knot Tone Curve + HSL + 3D .cube LUT) pixel parity. No cloud uploads, no GPU calls, and not a signed-in production export proof.",
+  "thresholds": {
+    "min_iou": 0.95,
+    "max_boundary_p95_px": 2.0,
+    "max_color_channel_delta": 3,
+    "min_color_psnr_db": 38.0
+  },
+  "summary": {
+    "min_measured_iou": 0.976585,
+    "max_measured_boundary_p95_px": 1.4142,
+    "frames_checked": 4,
+    "color_grade_psnr_db": 52.1,
+    "color_grade_max_delta": 3
+  },
+  "color_grade_parity": {
+    "passed": true,
+    "lut_preset": "kodak_2383",
+    "lut_size": 33,
+    "precision_wheel_max_delta": 1,
+    "lut3d_max_delta": 1,
+    "max_channel_delta": 3,
+    "mean_channel_delta": 0.3585,
+    "psnr_db": 52.1
+  },
+  "media_probe": {
+    "width": 360,
+    "height": 640,
+    "fps": 24,
+    "nb_frames": 144,
+    "duration_seconds": 6.0,
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "audio_channels": 2,
+    "full_decode_clean": true
+  },
+  "artifacts": {
+    "render_request_sha256": "d65444b859dfb13b0881b0a37d44eeeda677349a0780a2ca1899cf0d3bb3067a",
+    "final_mp4_sha256": "2ae943947f7cbb8eb1479b7ea8b1e1e6178511736a7fddd3ba354266221ae4ac"
+  },
+  "frames": [
+    {
+      "time_seconds": 0.5,
+      "frame_index": 12,
+      "preview_raw_size": [
+        534,
+        946
+      ],
+      "final_size": [
+        360,
+        640
+      ],
+      "iou": 0.976585,
+      "boundary_p95_px": 1.4142,
+      "boundary_mean_px": 0.8101,
+      "boundary_max_px": 2.0,
+      "preview_area_px": 13862,
+      "final_area_px": 13911,
+      "centroid_delta_px": [
+        1.058,
+        0.447
+      ],
+      "passed": true,
+      "preview_sha256": "9afafedfd1b2daa1060f034b145d665685b003bab1839d58750e9d679efef684",
+      "final_sha256": "fb68ae114b34c1cd81408ef58440d0d9f99d210c2162d7b023116a9f34300d1f",
+      "diff_sha256": "5490bb1f2b61ec2a679dd6642191107aa783a60ac1a634b7db8bb00e9522d819"
+    },
+    {
+      "time_seconds": 1.5,
+      "frame_index": 36,
+      "preview_raw_size": [
+        534,
+        946
+      ],
+      "final_size": [
+        360,
+        640
+      ],
+      "iou": 0.980351,
+      "boundary_p95_px": 1.4142,
+      "boundary_mean_px": 0.7659,
+      "boundary_max_px": 2.2361,
+      "preview_area_px": 17677,
+      "final_area_px": 17599,
+      "centroid_delta_px": [
+        1.079,
+        -0.492
+      ],
+      "passed": true,
+      "preview_sha256": "0d0d13bcdc5fb731904a216107c97730e43488355514b44f31dcffc5f2ca03bb",
+      "final_sha256": "3d17b1b71e03810a447e708155968ba16ca97458ee9a48359e19f23073dbe9e6",
+      "diff_sha256": "48205c01f7032b3cd08bffe59bc2c2b6434364c1a286e1069ed5849525e57b08"
+    },
+    {
+      "time_seconds": 2.5,
+      "frame_index": 60,
+      "preview_raw_size": [
+        534,
+        946
+      ],
+      "final_size": [
+        360,
+        640
+      ],
+      "iou": 0.983891,
+      "boundary_p95_px": 1.0,
+      "boundary_mean_px": 0.6671,
+      "boundary_max_px": 2.0,
+      "preview_area_px": 18288,
+      "final_area_px": 18289,
+      "centroid_delta_px": [
+        0.048,
+        0.934
+      ],
+      "passed": true,
+      "preview_sha256": "af1def7d5e7f7bc7865e79650f9aca41f626b8824425eb29d1e236f83d38ae4f",
+      "final_sha256": "179d78984b584f7f84236fd6617bc7d0a6392df5ed45be546fae79821ce14495",
+      "diff_sha256": "ab3f33718be9f6e415c81d2a43fe445dae0ec295a5d5a85aa5b6d286b02e41d3"
+    },
+    {
+      "time_seconds": 3.5,
+      "frame_index": 84,
+      "preview_raw_size": [
+        534,
+        946
+      ],
+      "final_size": [
+        360,
+        640
+      ],
+      "iou": 0.992552,
+      "boundary_p95_px": 1.0,
+      "boundary_mean_px": 0.3078,
+      "boundary_max_px": 1.4142,
+      "preview_area_px": 18353,
+      "final_area_px": 18298,
+      "centroid_delta_px": [
+        0.38,
+        -0.024
+      ],
+      "passed": true,
+      "preview_sha256": "3d26f6405a6d49dc95af95572983ead0fadd5ccb2b903215879364749e98cbf3",
+      "final_sha256": "aa68722c9ee190e2db1013bba0b854201d5498013bc78b47eb751804396f19e6",
+      "diff_sha256": "9288502d74764ce2e3a8ac0e1005901273a9de196747e77520fe5aef03e84ce0"
+    }
+  ]
+}

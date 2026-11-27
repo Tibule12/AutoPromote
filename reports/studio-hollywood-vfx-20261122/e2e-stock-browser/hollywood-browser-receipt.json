@@ -1,0 +1,46 @@
+{
+  "passed": true,
+  "completedAt": "2026-11-23T03:36:33.468Z",
+  "checks": [
+    {
+      "label": "Studio loaded with native fixture video paused cleanly"
+    },
+    {
+      "label": "Authored Delta Keyer, Bezier/Boolean Mask, Planar CornerPin+Glare, Light Wrap, Linear-Light & Mesh Warp"
+    },
+    {
+      "label": "Authored Scopes, Sunset Sky Replacement, Per-Channel/CST Grade, .cube LUT Export & Optical/Rack-Focus/Haze",
+      "scopeTelemetry": "IRE Avg: 36%RGB: 40/32/65Skin I-Line: 41%",
+      "cubeBytes": 132750
+    },
+    {
+      "label": "Authored Fire Embers, Scrolling Credits, and Ripped Paper creative effects"
+    },
+    {
+      "label": "Executed 3D Optical Camera Matchmove from Video into pose keyframes"
+    },
+    {
+      "label": "Applied Audio Remix Warm Vocal preset and verified LUFS meter readout"
+    },
+    {
+      "label": "IndexedDB checkpoint survived cold reload with identical studioDocument SHA-256",
+      "studioDocumentSha256": "43892678b9e132d56267dfc603ffcb1094a7e4c69a654a315ebcc2f3f3a857df",
+      "threeDScenesCount": 1,
+      "threeDMatchmoveKeys": 28,
+      "hasAudioRemix": true,
+      "audioRemixPreset": "warm_vocal"
+    }
+  ],
+  "pageErrors": [],
+  "apiRequests": [],
+  "studioDocumentSha256": "43892678b9e132d56267dfc603ffcb1094a7e4c69a654a315ebcc2f3f3a857df",
+  "workerSummary": {
+    "width": 540,
+    "height": 960,
+    "nb_frames": 144,
+    "duration_seconds": 6,
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "full_decode_clean": true
+  }
+}

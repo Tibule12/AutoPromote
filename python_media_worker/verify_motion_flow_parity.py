@@ -53,9 +53,14 @@ def verify_color_grade_pipeline_parity() -> dict:
     }
     prec_mod = REPO_ROOT / "frontend/src/components/studioPrecisionGrade.js"
     cube_mod = REPO_ROOT / "frontend/src/components/studioColorCube.js"
+    science_mod = REPO_ROOT / "frontend/src/components/studioColorScience.js"
     js_code = """const fs=require('fs');(async()=>{
-      const prec=await import('data:text/javascript;base64,'+fs.readFileSync(process.argv[1]).toString('base64'));
-      const cubeMod=await import('data:text/javascript;base64,'+fs.readFileSync(process.argv[2]).toString('base64'));
+      const scienceUri='data:text/javascript;base64,'+fs.readFileSync(process.argv[3]).toString('base64');
+      const loadEsm=p=>import('data:text/javascript;base64,'+Buffer.from(
+        fs.readFileSync(p,'utf8').replace(/from\\s+["']\\.\\/studioColorScience(?:\\.js)?["']/g,`from "${scienceUri}"`)
+      ).toString('base64'));
+      const prec=await loadEsm(process.argv[1]);
+      const cubeMod=await loadEsm(process.argv[2]);
       const payload=JSON.parse(fs.readFileSync(0,'utf8'));
       const precPixels=new Uint8ClampedArray(payload.pixels);
       prec.applyPrecisionGrade(precPixels, prec.buildPrecisionGrade(payload.fx));
@@ -79,7 +84,7 @@ def verify_color_grade_pipeline_parity() -> dict:
     })();"""
     browser_out = json.loads(
         subprocess.run(
-            ["node", "-e", js_code, str(prec_mod), str(cube_mod)],
+            ["node", "-e", js_code, str(prec_mod), str(cube_mod), str(science_mod)],
             input=json.dumps({"fx": fx, "pixels": source.flatten().tolist()}).encode(),
             capture_output=True,
             check=True,

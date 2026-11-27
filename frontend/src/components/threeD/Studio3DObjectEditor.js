@@ -76,6 +76,16 @@ export default function Studio3DObjectEditor({ scene, onChange, playhead, onSeek
       </fieldset> : null}
       {["box", "cylinder"].includes(selected.shape) ? <label>Edge bevel<input aria-label="Object edge bevel" type="range" min="0" max="0.15" step="0.01" value={selected.bevel || 0}
         onChange={event => update({ bevel: Number(event.target.value) })} /></label> : null}
+      {selected.shape === "gltf" ? <label>GLTF / GLB Model URL or Local File
+        <input aria-label="GLTF model URL" type="text" placeholder="https://... or upload .glb below" value={selected.gltfUrl || ""}
+          onChange={event => update({ gltfUrl: event.target.value })} />
+        <input aria-label="Upload GLTF model" type="file" accept=".glb,.gltf,model/gltf-binary,model/gltf+json"
+          onChange={event => {
+            const file = event.target.files?.[0];
+            if (file && typeof URL?.createObjectURL === "function") update({ gltfUrl: URL.createObjectURL(file), name: selected.name || file.name });
+            event.target.value = "";
+          }} />
+      </label> : null}
       <div className="studio-3d-fields">
         {OBJECT_POSE_FIELDS.map(field => <ObjectNumber key={`${selected.id}-${field}`} field={field} value={selected[field]} playhead={playhead}
           onCommit={value => update({ [field]: value })} />)}

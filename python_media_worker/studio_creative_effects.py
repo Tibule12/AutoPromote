@@ -210,6 +210,10 @@ CREATIVE_EFFECT_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "subjectX": 50.0,
         "subjectY": 50.0,
         "subjectRadius": 34.0,
+        "gravity": 0.25,
+        "turbulence": 0.45,
+        "emitterX": 50.0,
+        "emitterY": 55.0,
         "seed": 53,
     },
 }
@@ -320,6 +324,10 @@ CREATIVE_EFFECT_BOUNDS: Dict[str, Dict[str, Tuple[float, float]]] = {
         "subjectX": (15.0, 85.0),
         "subjectY": (15.0, 85.0),
         "subjectRadius": (15.0, 65.0),
+        "gravity": (-1.0, 2.0),
+        "turbulence": (0.0, 2.0),
+        "emitterX": (5.0, 95.0),
+        "emitterY": (5.0, 95.0),
     },
 }
 
@@ -1361,6 +1369,46 @@ def render_kinetic_typography_rgba(
     time: float,
 ) -> Image.Image:
     w, h = src_rgba.size
+    local_t = max(0.0, time - float(effect["startTime"]))
+    px = (clamp(params.get("x"), 10.0, 90.0, 50.0) / 100.0) * w
+    py = (clamp(params.get("y"), 10.0, 90.0, 72.0) / 100.0) * h
+    scale = clamp(params.get("scale"), 0.4, 2.5, 1.0)
+    rot_deg = clamp(params.get("rotation"), -45.0, 45.0, 0.0)
+    font_size = max(16, round(clamp(params.get("fontSize"), 20.0, 120.0, 54.0) * (h / 720.0) * scale))
+    font = _load_kinetic_font(str(params.get("fontFamily", "Inter")), font_size)
+    style = str(params.get("style", "bounce"))
+    base_rgb = hex_to_rgb(params.get("color"), (255, 255, 255))
+    hi_rgb = hex_to_rgb(params.get("highlightColor"), (250, 204, 21))
+
+    if style == "scrolling_credits":
+        raw_str = str(params.get("text") or "DIRECTED BY AUTOPROMOTE\nVFX & COMPOSITING\nEXECUTIVE PRODUCER")
+        lines = [ln.strip() for ln in raw_str.splitlines() if ln.strip()]
+        if len(lines) <= 1:
+            toks = [t for t in raw_str.strip().split() if t]
+            lines = [" ".join(toks[i:i + 3]) for i in range(0, len(toks), 3)]
+        if not lines:
+            return src_rgba
+        dur = max(0.5, float(effect.get("duration") or 4.0))
+        stagger_val = clamp(params.get("staggerMs"), 40.0, 600.0, 220.0)
+        speed_factor = clamp(220.0 / stagger_val, 0.4, 2.5, 1.0)
+        prog = min(1.0, (local_t / dur) * speed_factor)
+        line_h = font_size * 1.45
+        total_h = len(lines) * line_h
+        base_y = h * 0.92 + (-total_h - h * 0.08 - h * 0.92) * prog
+        layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(layer)
+        for l_idx, line in enumerate(lines):
+            ly = base_y + l_idx * line_h
+            if ly < -line_h or ly > h + line_h:
+                continue
+            edge_fade = min(1.0, min(ly / max(1.0, h * 0.14), (h - ly) / max(1.0, h * 0.14)))
+            a_u8 = round(max(0.0, min(1.0, edge_fade)) * opacity * 255)
+            if a_u8 <= 2:
+                continue
+            txt_rgb = hi_rgb if l_idx % 2 == 0 else base_rgb
+            draw.text((px, ly), line, font=font, fill=txt_rgb + (a_u8,), stroke_width=max(2, round(font_size * 0.06)), stroke_fill=(0, 0, 0, round(a_u8 * 0.8)), anchor="mm")
+        return Image.alpha_composite(src_rgba, layer)
+
     word_timings = params.get("wordTimings")
     stagger_s = clamp(params.get("staggerMs"), 40.0, 600.0, 220.0) / 1000.0
     if isinstance(word_timings, list) and word_timings:
@@ -1371,23 +1419,12 @@ def render_kinetic_typography_rgba(
     if not words:
         return src_rgba
 
-    local_t = max(0.0, time - float(effect["startTime"]))
-    px = (clamp(params.get("x"), 10.0, 90.0, 50.0) / 100.0) * w
-    py = (clamp(params.get("y"), 10.0, 90.0, 72.0) / 100.0) * h
-    scale = clamp(params.get("scale"), 0.4, 2.5, 1.0)
-    rot_deg = clamp(params.get("rotation"), -45.0, 45.0, 0.0)
-    font_size = max(16, round(clamp(params.get("fontSize"), 20.0, 120.0, 54.0) * (h / 720.0) * scale))
-    font = _load_kinetic_font(str(params.get("fontFamily", "Inter")), font_size)
-
     layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(layer)
     space_w = font_size * 0.32
     word_widths = [max(4.0, float(draw.textbbox((0, 0), str(item.get("word") or ""), font=font)[2])) for item in words]
     total_w = sum(word_widths) + max(0, len(words) - 1) * space_w
 
-    style = str(params.get("style", "bounce"))
-    base_rgb = hex_to_rgb(params.get("color"), (255, 255, 255))
-    hi_rgb = hex_to_rgb(params.get("highlightColor"), (250, 204, 21))
     bg_rgb = hex_to_rgb(params.get("bgColor"), (15, 23, 42))
     show_bg = bool(params.get("showBg", True))
     cos_r, sin_r = math.cos(math.radians(rot_deg)), math.sin(math.radians(rot_deg))
@@ -1532,7 +1569,7 @@ def render_zoom_motion_blur_rgb(
         px = max(-max_px_x, min(max_px_x, (clamp(params.get("panX"), -30.0, 30.0, 0.0) / 100.0) * w * s_frac))
         py = max(-max_px_y, min(max_px_y, (clamp(params.get("panY"), -30.0, 30.0, 0.0) / 100.0) * h * s_frac))
         sample_arr = _transform_clamp_rgb(src_img, safe_zoom, focus_x, focus_y, px, py, rot_rad)
-        wt = 1.0 / (s + 1)
+        wt = 1.0
         accum += sample_arr * wt
         weight_sum += wt
 
@@ -1600,6 +1637,7 @@ def render_particle_overlays_rgb(
     opacity: float,
     params: Mapping[str, Any],
     time: float,
+    tracked_pose: Optional[Mapping[str, float]] = None,
 ) -> np.ndarray:
     h, w, _ = frame_rgb.shape
     count = max(10, min(200, round(finite(params.get("particleCount"), 75.0))))
@@ -1611,47 +1649,129 @@ def render_particle_overlays_rgb(
     confetti_cols = [(255, 94, 126), (56, 189, 248), (250, 204, 21), (74, 222, 128), (192, 132, 252)]
     p_type = str(params.get("particleType", "sparks"))
     direction = str(params.get("direction", "up"))
+    trk_dx = (float(tracked_pose["x"]) - 50.0) / 100.0 if tracked_pose and "x" in tracked_pose else 0.0
+    trk_dy = (float(tracked_pose["y"]) - 50.0) / 100.0 if tracked_pose and "y" in tracked_pose else 0.0
 
     p_layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    glow_layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(p_layer)
+    glow_draw = ImageDraw.Draw(glow_layer)
     rand = mulberry32(hash_seed(f"pt-{int(params.get('seed', 53))}"))
+    gravity = clamp(params.get("gravity"), -1.0, 2.0, 0.25)
+    turbulence = clamp(params.get("turbulence"), 0.0, 2.0, 0.45)
+    em_x = clamp(params.get("emitterX"), 5.0, 95.0, 50.0) / 100.0
+    em_y = clamp(params.get("emitterY"), 5.0, 95.0, 55.0) / 100.0
+    uses_bloom = p_type in {"sparks", "glitter", "fire_embers", "shockwave"}
+
+    if p_type == "shockwave":
+        cycle_t = (local_t * 0.72) % 1.0
+        ring_r = max(6.0, cycle_t * math.hypot(w, h) * 0.52)
+        ring_a = max(0, min(255, round((1.0 - cycle_t) * 0.85 * opacity * 255)))
+        ex = (em_x + trk_dx) * w
+        ey = (em_y + trk_dy) * h
+        glow_w = max(6, round(p_size * 2.2))
+        glow_draw.ellipse([ex - ring_r, ey - ring_r, ex + ring_r, ey + ring_r], outline=c1 + (round(ring_a * 0.72),), width=glow_w)
+        glow_draw.ellipse([ex - ring_r * 0.94, ey - ring_r * 0.94, ex + ring_r * 0.94, ey + ring_r * 0.94], outline=c2 + (round(ring_a * 0.45),), width=max(3, round(p_size)))
+        draw.ellipse([ex - ring_r, ey - ring_r, ex + ring_r, ey + ring_r], outline=(255, 250, 238, round(ring_a * 0.65)), width=max(1, round(p_size * 0.35)))
+
     for i in range(count):
         x0, y0 = rand(), rand()
-        p_scale = 0.55 + rand() * 0.9
+        ember_mix = rand()
+        p_scale = (0.28 + (ember_mix ** 1.7) * 1.15) if p_type == "fire_embers" else (0.55 + ember_mix * 0.9)
         phase = rand() * 6.283
         v_jit = 0.65 + rand() * 0.7
-        vx, vy = (rand() - 0.5) * 0.14, -0.35 * v_jit
-        if direction == "down":
-            vy = 0.35 * v_jit
-        elif direction == "left":
-            vx, vy = -0.38 * v_jit, (rand() - 0.5) * 0.12
-        elif direction == "right":
-            vx, vy = 0.38 * v_jit, (rand() - 0.5) * 0.12
-        elif direction == "radial_float":
-            vx, vy = math.cos(phase) * 0.18, math.sin(phase) * 0.18
+        dvx, dvy = 0.0, -0.35
+        if p_type == "fire_embers":
+            life = (local_t * (0.45 + v_jit * 0.35) + rand()) % 1.0
+            bx = em_x + (x0 - 0.5) * 0.68
+            by = em_y + (y0 - 0.5) * 0.28 + 0.16
+            vy_rise = -(0.46 + v_jit * 0.32)
+            curl = math.sin(local_t * 3.8 + phase) * 0.055 * turbulence + math.cos(life * 5.0 + phase) * 0.025 * turbulence
+            wx = bx + trk_dx + curl
+            wy = by + trk_dy + vy_rise * life + 0.5 * (-0.18 + gravity * 0.15) * life * life
+            dvx = math.cos(local_t * 3.8 + phase) * 0.18 * turbulence
+            dvy = vy_rise + (-0.18 + gravity * 0.15) * life
+        elif p_type in {"shockwave", "glass_shatter"}:
+            burst_t = (local_t * 0.72 + (0.0 if p_type == "glass_shatter" else rand() * 0.12)) % 1.4
+            spd = 0.32 + v_jit * 0.55
+            svx = math.cos(phase) * spd
+            svy = math.sin(phase) * spd * (0.85 if p_type == "glass_shatter" else 1.0) - (0.12 if p_type == "glass_shatter" else 0.0)
+            wx = em_x + trk_dx + (x0 - 0.5) * 0.14 + svx * burst_t + math.sin(phase + burst_t * 4.0) * 0.015 * turbulence
+            wy = em_y + trk_dy + (y0 - 0.5) * 0.14 + svy * burst_t + 0.5 * max(0.05, gravity) * 0.65 * burst_t * burst_t
+            dvx, dvy = svx, svy + max(0.05, gravity) * 0.65 * burst_t
+        else:
+            vx, vy = (rand() - 0.5) * 0.14, -0.35 * v_jit
+            if direction == "down":
+                vy = 0.35 * v_jit
+            elif direction == "left":
+                vx, vy = -0.38 * v_jit, (rand() - 0.5) * 0.12
+            elif direction == "right":
+                vx, vy = 0.38 * v_jit, (rand() - 0.5) * 0.12
+            elif direction == "radial_float":
+                vx, vy = math.cos(phase) * 0.18, math.sin(phase) * 0.18
 
-        wx = ((x0 + vx * local_t + math.sin(local_t * 2.2 + phase) * 0.025) % 1.12) - 0.06
-        wy = ((y0 + vy * local_t) % 1.12) - 0.06
+            wx = ((x0 + trk_dx + vx * local_t + math.sin(local_t * 2.2 + phase) * 0.025 * max(0.4, turbulence)) % 1.12) - 0.06
+            wy = ((y0 + trk_dy + vy * local_t + 0.08 * gravity * math.sin(local_t + phase)) % 1.12) - 0.06
+            dvx, dvy = vx, vy
         px, py = wx * w, wy * h
-        r = max(1.5, p_size * p_scale * (3.2 if p_type == "smoke" else 0.65))
-        col = confetti_cols[i % len(confetti_cols)] if p_type == "confetti" else (c2 if i % 3 == 0 else c1)
-        p_alpha = opacity * ((0.4 + 0.6 * abs(math.sin(local_t * 6.0 + phase))) if p_type == "glitter" else (0.24 if p_type == "smoke" else 0.85))
+        r = max(1.0, p_size * p_scale * (3.2 if p_type == "smoke" else (1.45 if p_type == "glass_shatter" else (0.52 if p_type == "fire_embers" else 0.65))))
+        col = confetti_cols[i % len(confetti_cols)] if p_type == "confetti" else ((210, 236, 255) if p_type == "glass_shatter" else (c2 if i % 3 == 0 else c1))
+        life_fade = (math.sin(max(0.0, min(1.0, life)) * math.pi) ** 0.45) if p_type == "fire_embers" else 1.0
+        p_alpha = opacity * life_fade * ((0.4 + 0.6 * abs(math.sin(local_t * 6.0 + phase))) if p_type == "glitter" else (0.24 if p_type == "smoke" else 0.88))
         a_u8 = max(0, min(255, round(p_alpha * 255)))
         if p_type == "confetti":
-            draw.rectangle([px - r, py - r * 0.5, px + r, py + r * 0.5], fill=col + (a_u8,))
-        elif p_type in {"sparks", "glitter"}:
-            draw.ellipse([px - r * 1.6, py - r * 1.6, px + r * 1.6, py + r * 1.6], fill=col + (round(a_u8 * 0.55),))
-            draw.ellipse([px - r * 0.6, py - r * 0.6, px + r * 0.6, py + r * 0.6], fill=(255, 255, 255, a_u8))
+            rot = local_t * 3.5 + phase
+            cr, sr = math.cos(rot), math.sin(rot)
+            hw, hh = r, r * 0.5
+            pts = [
+                (px + (-hw * cr - (-hh) * sr), py + (-hw * sr + (-hh) * cr)),
+                (px + (hw * cr - (-hh) * sr), py + (hw * sr + (-hh) * cr)),
+                (px + (hw * cr - hh * sr), py + (hw * sr + hh * cr)),
+                (px + (-hw * cr - hh * sr), py + (-hw * sr + hh * cr)),
+            ]
+            draw.polygon(pts, fill=col + (a_u8,))
+        elif p_type == "glass_shatter":
+            rot = local_t * (2.5 + (i % 5)) + phase
+            cr, sr = math.cos(rot), math.sin(rot)
+            raw_poly = [(-r, -r * 0.45), (r * 0.9, -r * 0.7), (r * 0.65, r * 0.85), (-r * 0.55, r * 0.5)]
+            pts = [(px + ox * cr - oy * sr, py + ox * sr + oy * cr) for ox, oy in raw_poly]
+            draw.polygon(pts, fill=col + (round(a_u8 * 0.62),), outline=(255, 255, 255, min(255, round(a_u8 * 1.05))))
+        elif uses_bloom:
+            v_mag = max(0.05, math.hypot(dvx, dvy))
+            ux, uy = dvx / v_mag, dvy / v_mag
+            streak = r * (2.6 if p_type in {"fire_embers", "sparks"} else 1.2)
+            glow_r = r * (3.1 if p_type == "fire_embers" else 2.0)
+            glow_a = min(255, round(a_u8 * (1.0 if p_type == "fire_embers" else 0.85)))
+            glow_draw.ellipse([px - glow_r, py - glow_r, px + glow_r, py + glow_r], fill=col + (glow_a,))
+            inner_glow_r = r * 1.45
+            glow_draw.ellipse([px - inner_glow_r, py - inner_glow_r, px + inner_glow_r, py + inner_glow_r], fill=c2 + (min(255, round(a_u8 * 0.95)),))
+            core_w = max(1, round(r * 0.52))
+            core_col = (255, 214, 130, min(255, round(a_u8 * 0.92))) if p_type == "fire_embers" else (255, 248, 224, min(255, round(a_u8 * 0.95)))
+            draw.line([px - ux * streak * 0.42, py - uy * streak * 0.42, px + ux * streak * 0.58, py + uy * streak * 0.58], fill=core_col, width=core_w)
+            core_r = max(0.7, r * 0.30)
+            draw.ellipse([px - core_r, py - core_r, px + core_r, py + core_r], fill=(255, 240, 195, a_u8))
+        elif p_type in {"smoke", "dust"}:
+            for ring_scale, mult in ((1.0, 0.22), (0.68, 0.42), (0.38, 0.65)):
+                rad = r * ring_scale
+                draw.ellipse([px - rad, py - rad, px + rad, py + rad], fill=col + (round(a_u8 * mult),))
         else:
             draw.ellipse([px - r, py - r, px + r, py + r], fill=col + (a_u8,))
 
-    if str(params.get("maskMode")) == "behind_subject":
+    if uses_bloom:
+        blur_r = max(2.2, p_size * (0.95 if p_type == "shockwave" else 0.72))
+        bloomed = glow_layer.filter(ImageFilter.GaussianBlur(blur_r))
+        core_soft = p_layer.filter(ImageFilter.GaussianBlur(0.85)) if p_type == "fire_embers" else p_layer
+        p_layer = Image.alpha_composite(bloomed, core_soft)
+
+    mask_mode = str(params.get("maskMode", "full_frame"))
+    if mask_mode in {"behind_subject", "front_of_subject"}:
         subj_mask = compute_freeze_cutout_mask(
             frame_rgb,
             {"maskMode": "auto_subject", "subjectX": params.get("subjectX", 50.0), "subjectY": params.get("subjectY", 50.0), "subjectRadius": params.get("subjectRadius", 34.0), "feather": 14.0},
         )
         p_arr = np.asarray(p_layer, dtype=np.uint8).copy()
-        p_arr[:, :, 3] = np.clip(p_arr[:, :, 3].astype(np.float32) * (1.0 - subj_mask.astype(np.float32) / 255.0), 0, 255).astype(np.uint8)
+        keep = (subj_mask.astype(np.float32) / 255.0) if mask_mode == "front_of_subject" else (1.0 - subj_mask.astype(np.float32) / 255.0)
+        p_arr[:, :, 3] = np.clip(p_arr[:, :, 3].astype(np.float32) * keep, 0, 255).astype(np.uint8)
         p_layer = Image.fromarray(p_arr, mode="RGBA")
 
     p_np = np.asarray(p_layer, dtype=np.float32)
@@ -1752,7 +1872,7 @@ def apply_creative_effects_to_frame(
         elif eid == "flash_camera_shake":
             current = render_flash_camera_shake_rgb(current, eff, opacity, params, time, beat_markers=beat_markers)
         elif eid == "particle_overlays":
-            current = render_particle_overlays_rgb(current, eff, opacity, params, time)
+            current = render_particle_overlays_rgb(current, eff, opacity, params, time, tracked_pose=pose or None)
     return current
 
 
@@ -1919,7 +2039,7 @@ def render_creative_effects_video(
         enc_cmd.extend(["-i", input_path, "-map", "0:v:0", "-map", "1:a:0", "-c:a", "copy"])
     else:
         enc_cmd.extend(["-map", "0:v:0", "-an"])
-    enc_cmd.extend(["-c:v", "libx264", "-preset", "veryfast", "-crf", "18", "-pix_fmt", "yuv420p", "-shortest", "-movflags", "+faststart", output_path])
+    enc_cmd.extend(["-c:v", "libx264", "-preset", "veryfast", "-crf", "18", "-pix_fmt", "yuv420p", "-movflags", "+faststart", output_path])
     enc_proc = subprocess.Popen(enc_cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
 
     frame_bytes = w * h * 3

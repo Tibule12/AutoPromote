@@ -5,6 +5,7 @@ import {
 } from "./studio3DModel";
 import "./studio3D.css";
 import { getStudioCapability } from "../studioCapabilities";
+import { estimate3DCameraMatchmoveKeyframes } from "../studioPlanarTracker";
 import Studio3DObjectEditor from "./Studio3DObjectEditor";
 
 const uniqueId = () => `studio-3d-${globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`}`;
@@ -31,8 +32,9 @@ function SelectControl({ label, value, options, onChange, disabled = false, unav
   </label>;
 }
 
-export default function Studio3DPanel({ scenes = [], onChange, focusId, onSelect, playhead = 0, duration = 60, onSeek, onUploadAsset, onGeneratePreview, onRestorePreview, previewState, projectMedia = [] }) {
+export default function Studio3DPanel({ scenes = [], onChange, focusId, onSelect, playhead = 0, duration = 60, onSeek, onUploadAsset, onGeneratePreview, onRestorePreview, previewState, projectMedia = [], videoRef = null }) {
   const [mode, setMode] = useState("basic");
+  const [matchmoveState, setMatchmoveState] = useState({ status: "idle", message: "" });
   const selected = useMemo(() => scenes.find(scene => scene.id === focusId) || scenes[0], [scenes, focusId]);
   const scene = selected ? normalizeStudio3DScene(selected) : null;
   const change = patch => {
@@ -77,6 +79,28 @@ export default function Studio3DPanel({ scenes = [], onChange, focusId, onSelect
     };
     change({ keyframes: [...scene.keyframes.filter(item => Math.abs(item.time - time) > 0.025), frame] });
     onSeek?.(time);
+  };
+  const runCameraMatchmove = async () => {
+    if (!scene) return;
+    const vid = videoRef?.current;
+    if (!vid || !vid.videoWidth) {
+      setMatchmoveState({ status: "error", message: "Load video frames in the preview monitor before matchmoving." });
+      return;
+    }
+    setMatchmoveState({ status: "running", message: "Solving 3D camera parallax path…" });
+    try {
+      const solved = await estimate3DCameraMatchmoveKeyframes({
+        videoElement: vid,
+        baseScene: scene,
+        startTime: Number(scene.startTime || 0),
+        duration: Math.max(0.5, Math.min(6, Number(scene.duration || 3))),
+        fps: 6,
+      });
+      change({ keyframes: solved });
+      setMatchmoveState({ status: "ready", message: `Solved ${solved.length} 3D camera matchmove keyframes.` });
+    } catch (err) {
+      setMatchmoveState({ status: "error", message: err?.message || "3D camera matchmove failed." });
+    }
   };
 
   return <section className="studio-3d-panel" aria-label="3D Motion designer" data-testid="studio-3d-panel">
@@ -144,7 +168,13 @@ export default function Studio3DPanel({ scenes = [], onChange, focusId, onSelect
         <label className="studio-3d-control"><span>Light colour</span><input type="color" value={scene.lightColor} onChange={event => change({ lightColor: event.target.value })} /></label>
         {[ ["Shadows", "shadows"], ["Reflections", "reflections"], ["Enabled", "enabled"] ].map(([label, field]) => <label className="studio-3d-check" key={field}><input type="checkbox" disabled={UNSUPPORTED_FINAL_FIELDS.has(field)} title={UNSUPPORTED_FINAL_FIELDS.has(field) ? unavailableTitle : undefined} checked={scene[field]} onChange={event => change({ [field]: event.target.checked })} />{label}</label>)}
         <div className="studio-3d-keyframes wide">
-          <button type="button" onClick={addPoseKeyframe}>Add pose keyframe at {Number(playhead).toFixed(2)}s</button>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            <button type="button" onClick={addPoseKeyframe}>Add pose keyframe at {Number(playhead).toFixed(2)}s</button>
+            <button type="button" data-testid="studio-3d-matchmove-btn" onClick={runCameraMatchmove} disabled={matchmoveState.status === "running"}>
+              {matchmoveState.status === "running" ? "Matchmoving camera…" : "Matchmove from Video"}
+            </button>
+          </div>
+          {matchmoveState.message ? <small>{matchmoveState.message}</small> : null}
           {scene.keyframes.length ? <div aria-label="3D pose keyframes">
             {scene.keyframes.map((frame, index) => <div key={frame.id}>
               <button type="button" onClick={() => onSeek?.(frame.time)}>Pose {index + 1} · {frame.time.toFixed(2)}s</button>

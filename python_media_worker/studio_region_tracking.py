@@ -11,7 +11,10 @@ import struct
 import hashlib
 from pathlib import Path
 
-import cv2
+try:
+    import cv2
+except ImportError:
+    cv2 = None
 import numpy as np
 
 try:
@@ -291,3 +294,256 @@ def track_frames(frames,times,mask,target='texture',scene_samples=None,face_cont
     return {'version':1,'engine':'programme-lk-ransac-v1','keyframes':sorted(keys,key=lambda k:k['time']),
         'observations':observations,'reviewRequired':True,'stopReason':stop,
         'requestedRange':[min(times),max(times)],'trackedSamples':len(observations)+1,'stopMetrics':stop_metrics}
+
+
+def track_polygon_mask_vertices(frames, times, initial_points, search_radius=12, half_patch=7):
+    """Track polygon mask vertices across grayscale/RGB frames using OpenCV LK or NumPy patch consensus."""
+    if len(frames) < 1 or len(frames) != len(times):
+        raise ValueError("Mask tracking requires matching frames and timestamps")
+    if len(initial_points) < 3 or len(initial_points) > 64:
+        raise ValueError("Polygon mask tracking requires 3 to 64 vertices")
+
+    def to_gray(frame):
+        arr = np.asarray(frame)
+        if arr.ndim == 2:
+            return arr.astype(np.float32)
+        return (arr[:, :, 0] * 0.299 + arr[:, :, 1] * 0.587 + arr[:, :, 2] * 0.114).astype(np.float32)
+
+    h, w = to_gray(frames[0]).shape
+    pts = np.array([[float(px) * w / 100.0, float(py) * h / 100.0] for px, py in initial_points], dtype=np.float32)
+    prev = to_gray(frames[0])
+    keyframes = []
+    for idx, (vx, vy) in enumerate(pts):
+        keyframes.append({"property": f"maskPoint{idx}X", "time": float(times[0]), "value": round(float(vx / w * 100.0), 3), "easing": "linear"})
+        keyframes.append({"property": f"maskPoint{idx}Y", "time": float(times[0]), "value": round(float(vy / h * 100.0), 3), "easing": "linear"})
+
+    for f_idx in range(1, len(frames)):
+        curr = to_gray(frames[f_idx])
+        if cv2 is not None:
+            p0 = pts.reshape(-1, 1, 2)
+            p1, st, _ = cv2.calcOpticalFlowPyrLK(prev.astype(np.uint8), curr.astype(np.uint8), p0, None, winSize=(21, 21), maxLevel=3)
+            if p1 is not None and st is not None:
+                good = st.ravel() == 1
+                deltas = p1.reshape(-1, 2) - pts
+                med = np.median(deltas[good], axis=0) if np.any(good) else np.zeros(2, dtype=np.float32)
+                for i in range(len(pts)):
+                    d = deltas[i] if good[i] and np.linalg.norm(deltas[i] - med) <= 8.0 else med
+                    pts[i, 0] = np.clip(pts[i, 0] + d[0], -w * 0.5, w * 1.5)
+                    pts[i, 1] = np.clip(pts[i, 1] + d[1], -h * 0.5, h * 1.5)
+        else:
+            deltas = []
+            sads = []
+            for vx, vy in pts:
+                ix, iy = int(round(float(vx))), int(round(float(vy)))
+                x0, x1 = max(0, ix - half_patch), min(w, ix + half_patch + 1)
+                y0, y1 = max(0, iy - half_patch), min(h, iy + half_patch + 1)
+                if x1 - x0 < 3 or y1 - y0 < 3:
+                    deltas.append((0.0, 0.0)); sads.append(999.0); continue
+                tpl = prev[y0:y1, x0:x1]
+                best = (999.0, 0, 0)
+                for dy in range(-search_radius, search_radius + 1):
+                    ny0, ny1 = y0 + dy, y1 + dy
+                    if ny0 < 0 or ny1 > h:
+                        continue
+                    for dx in range(-search_radius, search_radius + 1):
+                        nx0, nx1 = x0 + dx, x1 + dx
+                        if nx0 < 0 or nx1 > w:
+                            continue
+                        sad = float(np.mean(np.abs(tpl - curr[ny0:ny1, nx0:nx1])))
+                        if sad < best[0]:
+                            best = (sad, dx, dy)
+                deltas.append((float(best[1]), float(best[2]))); sads.append(best[0])
+            arr_d = np.array(deltas, dtype=np.float32)
+            med = np.median(arr_d, axis=0)
+            for i in range(len(pts)):
+                use_d = arr_d[i] if sads[i] <= 26.0 and float(np.linalg.norm(arr_d[i] - med)) <= 7.0 else med
+                pts[i, 0] = np.clip(pts[i, 0] + use_d[0], -w * 0.5, w * 1.5)
+                pts[i, 1] = np.clip(pts[i, 1] + use_d[1], -h * 0.5, h * 1.5)
+        prev = curr
+        t = float(times[f_idx])
+        for idx, (vx, vy) in enumerate(pts):
+            keyframes.append({"property": f"maskPoint{idx}X", "time": t, "value": round(float(vx / w * 100.0), 3), "easing": "linear"})
+            keyframes.append({"property": f"maskPoint{idx}Y", "time": t, "value": round(float(vy / h * 100.0), 3), "easing": "linear"})
+    return {"version": 1, "engine": "polygon-lk-patch-v1", "keyframes": keyframes, "trackedSamples": len(frames)}
+
+
+def solve_homography_dlt(src_pts, dst_pts):
+    """Solve 8-DOF planar homography H (dst ~ H * src) from >= 4 correspondences."""
+    src = np.asarray(src_pts, dtype=np.float64)
+    dst = np.asarray(dst_pts, dtype=np.float64)
+    if len(src) < 4 or len(src) != len(dst):
+        raise ValueError("Homography requires at least 4 matching point pairs")
+    a_rows = []
+    for (x, y), (u, v) in zip(src, dst):
+        a_rows.append([x, y, 1.0, 0.0, 0.0, 0.0, -u * x, -u * y, -u])
+        a_rows.append([0.0, 0.0, 0.0, x, y, 1.0, -v * x, -v * y, -v])
+    a_mat = np.asarray(a_rows, dtype=np.float64)
+    _, _, vt = np.linalg.svd(a_mat)
+    h = vt[-1].reshape(3, 3)
+    if abs(h[2, 2]) < 1e-10:
+        return np.eye(3, dtype=np.float64)
+    return h / h[2, 2]
+
+
+def apply_homography(h_mat, pts):
+    arr = np.asarray(pts, dtype=np.float64)
+    single = arr.ndim == 1
+    if single:
+        arr = arr[None, :]
+    ones = np.ones((len(arr), 1), dtype=np.float64)
+    homog = (h_mat @ np.hstack([arr, ones]).T).T
+    denom = np.where(np.abs(homog[:, 2:3]) < 1e-8, 1e-8, homog[:, 2:3])
+    res = homog[:, :2] / denom
+    return res[0] if single else res
+
+
+def _sample_quad_grid(corners_px, cols=4, rows=4):
+    tl, tr, br, bl = [np.asarray(c, dtype=np.float64) for c in corners_px]
+    pts = list(corners_px)
+    for r in range(rows):
+        v = (r + 0.5) / rows
+        for c in range(cols):
+            u = (c + 0.5) / cols
+            p = (1 - u) * (1 - v) * tl + u * (1 - v) * tr + u * v * br + (1 - u) * v * bl
+            pts.append((float(p[0]), float(p[1])))
+    return np.asarray(pts, dtype=np.float64)
+
+
+def track_planar_corners(frames, times, initial_corners, search_radius=12, half_patch=5):
+    """Track 4 planar corners across video frames using OpenCV RANSAC homography or NumPy DLT consensus."""
+    if len(frames) < 1 or len(frames) != len(times):
+        raise ValueError("Planar tracking requires matching frames and timestamps")
+    if len(initial_corners) != 4:
+        raise ValueError("Planar tracking requires 4 corner percentages")
+
+    def to_gray(frame):
+        arr = np.asarray(frame)
+        if arr.ndim == 2:
+            return arr.astype(np.float32)
+        return (arr[:, :, 0] * 0.299 + arr[:, :, 1] * 0.587 + arr[:, :, 2] * 0.114).astype(np.float32)
+
+    h_img, w_img = to_gray(frames[0]).shape
+    corners = np.array([[float(cx) * w_img / 100.0, float(cy) * h_img / 100.0] for cx, cy in initial_corners], dtype=np.float64)
+    prev = to_gray(frames[0])
+    keyframes = [{"property": "perspectiveProgress", "time": float(times[0]), "value": 100.0, "easing": "linear"}]
+    for idx, (px, py) in enumerate(corners):
+        keyframes.append({"property": f"planeCorner{idx}X", "time": float(times[0]), "value": round(float(px / w_img * 100.0), 3), "easing": "linear"})
+        keyframes.append({"property": f"planeCorner{idx}Y", "time": float(times[0]), "value": round(float(py / h_img * 100.0), 3), "easing": "linear"})
+
+    for f_idx in range(1, len(frames)):
+        curr = to_gray(frames[f_idx])
+        grid = _sample_quad_grid(corners, 4, 4)
+        if cv2 is not None:
+            p0 = grid.astype(np.float32).reshape(-1, 1, 2)
+            p1, st, _ = cv2.calcOpticalFlowPyrLK(prev.astype(np.uint8), curr.astype(np.uint8), p0, None, winSize=(21, 21), maxLevel=3)
+            if p1 is not None and st is not None:
+                good = st.ravel() == 1
+                if np.count_nonzero(good) >= 4:
+                    h_mat, _ = cv2.findHomography(grid[good], p1.reshape(-1, 2)[good].astype(np.float64), cv2.RANSAC, 3.0)
+                    if h_mat is not None:
+                        corners = apply_homography(h_mat, corners)
+        else:
+            src_good, dst_good = [], []
+            for gx, gy in grid:
+                ix, iy = int(round(gx)), int(round(gy))
+                x0, x1 = max(0, ix - half_patch), min(w_img, ix + half_patch + 1)
+                y0, y1 = max(0, iy - half_patch), min(h_img, iy + half_patch + 1)
+                if x1 - x0 < 3 or y1 - y0 < 3:
+                    continue
+                tpl = prev[y0:y1, x0:x1]
+                best = (999.0, 0, 0)
+                for dy in range(-search_radius, search_radius + 1, 2):
+                    ny0, ny1 = y0 + dy, y1 + dy
+                    if ny0 < 0 or ny1 > h_img:
+                        continue
+                    for dx in range(-search_radius, search_radius + 1, 2):
+                        nx0, nx1 = x0 + dx, x1 + dx
+                        if nx0 < 0 or nx1 > w_img:
+                            continue
+                        sad = float(np.mean(np.abs(tpl - curr[ny0:ny1, nx0:nx1])))
+                        if sad < best[0]:
+                            best = (sad, dx, dy)
+                cdx, cdy = best[1], best[2]
+                for dy in range(cdy - 1, cdy + 2):
+                    ny0, ny1 = y0 + dy, y1 + dy
+                    if ny0 < 0 or ny1 > h_img:
+                        continue
+                    for dx in range(cdx - 1, cdx + 2):
+                        nx0, nx1 = x0 + dx, x1 + dx
+                        if nx0 < 0 or nx1 > w_img:
+                            continue
+                        sad = float(np.mean(np.abs(tpl - curr[ny0:ny1, nx0:nx1])))
+                        if sad < best[0]:
+                            best = (sad, dx, dy)
+                if best[0] < 32.0:
+                    src_good.append([gx, gy])
+                    dst_good.append([gx + best[1], gy + best[2]])
+            if len(src_good) >= 4:
+                src_arr = np.asarray(src_good, dtype=np.float64)
+                dst_arr = np.asarray(dst_good, dtype=np.float64)
+                disp = dst_arr - src_arr
+                med = np.median(disp, axis=0)
+                inliers = np.linalg.norm(disp - med, axis=1) <= 6.0
+                if np.count_nonzero(inliers) >= 4:
+                    h_mat = solve_homography_dlt(src_arr[inliers], dst_arr[inliers])
+                    corners = apply_homography(h_mat, corners)
+                else:
+                    corners = corners + med
+        corners[:, 0] = np.clip(corners[:, 0], 0.0, float(w_img))
+        corners[:, 1] = np.clip(corners[:, 1], 0.0, float(h_img))
+        prev = curr
+        t = float(times[f_idx])
+        for idx, (px, py) in enumerate(corners):
+            keyframes.append({"property": f"planeCorner{idx}X", "time": t, "value": round(float(px / w_img * 100.0), 3), "easing": "linear"})
+            keyframes.append({"property": f"planeCorner{idx}Y", "time": t, "value": round(float(py / h_img * 100.0), 3), "easing": "linear"})
+    return {"version": 1, "engine": "planar-dlt-v1", "keyframes": keyframes, "trackedSamples": len(frames)}
+
+
+def estimate_camera_motion_track(frames, times, base_pose=None):
+    """Estimate smooth 3D camera pan/tilt/dolly offsets across video frames for 3D scene matchmove."""
+    if len(frames) < 1 or len(frames) != len(times):
+        raise ValueError("Camera matchmove requires matching frames and timestamps")
+    pose0 = dict(base_pose or {})
+    bx = float(pose0.get("x", 50.0))
+    by = float(pose0.get("y", 50.0))
+    bz = float(pose0.get("z", 0.0))
+    bscale = float(pose0.get("scale", 1.0))
+    brx = float(pose0.get("rotationX", 0.0))
+    bry = float(pose0.get("rotationY", 0.0))
+    brz = float(pose0.get("rotationZ", 0.0))
+    gray0 = np.asarray(frames[0], dtype=np.float32)
+    if gray0.ndim == 3:
+        gray0 = 0.299 * gray0[:, :, 0] + 0.587 * gray0[:, :, 1] + 0.114 * gray0[:, :, 2]
+    h, w = gray0.shape
+    anchors = np.array([[w * 0.25, h * 0.25], [w * 0.75, h * 0.25], [w * 0.75, h * 0.75], [w * 0.25, h * 0.75]], dtype=np.float64)
+    init_pct = [[25.0, 25.0], [75.0, 25.0], [75.0, 75.0], [25.0, 75.0]]
+    planar = track_planar_corners(frames, times, init_pct)
+    keyframes = []
+    for idx_t, t in enumerate(times):
+        t_f = float(t)
+        c_pts = []
+        for ci in range(4):
+            cx = next(k["value"] for k in planar["keyframes"] if k["property"] == f"planeCorner{ci}X" and abs(k["time"] - t_f) < 1e-4)
+            cy = next(k["value"] for k in planar["keyframes"] if k["property"] == f"planeCorner{ci}Y" and abs(k["time"] - t_f) < 1e-4)
+            c_pts.append([cx, cy])
+        c_arr = np.asarray(c_pts, dtype=np.float64)
+        centre = c_arr.mean(axis=0)
+        span_w = max(5.0, float(np.linalg.norm(c_arr[1] - c_arr[0])))
+        scale_ratio = max(0.4, min(2.2, span_w / 50.0))
+        dx_pct = float(centre[0] - 50.0)
+        dy_pct = float(centre[1] - 50.0)
+        keyframes.append({
+            "id": f"cam-mm-{idx_t}",
+            "time": t_f,
+            "easing": "linear",
+            "values": {
+                "x": max(5.0, min(95.0, round(bx + dx_pct, 2))),
+                "y": max(5.0, min(95.0, round(by + dy_pct, 2))),
+                "z": max(-4.0, min(4.0, round(bz + (scale_ratio - 1.0) * 2.5, 3))),
+                "scale": max(0.2, min(3.0, round(bscale * scale_ratio, 3))),
+                "rotationX": round(brx, 2),
+                "rotationY": max(-180.0, min(180.0, round(bry - dx_pct * 0.45, 2))),
+                "rotationZ": round(brz, 2),
+            },
+        })
+    return {"version": 1, "engine": "camera-matchmove-v1", "keyframes": keyframes}

@@ -206,6 +206,11 @@ test("creative studio styles render distinct pills, bloom, Y-hop, serif duo, kin
   });
   expect(bounce.activeWord.transform).toContain("translateY");
 
+  const sticker = getCaptionPreviewStyles("sticker", 1, "#ffb33d");
+  expect(sticker.activeWord.background).toBe("#f8fbfd");
+  expect(sticker.activeWord.color).toBe("#14101c");
+  expect(sticker.activeWord.border).toContain("#ffb33d");
+
   expect(sliceTypewriterWord("Creators", 0.25, false)).toBe("Cr");
   expect(sliceTypewriterWord("Creators", 0.25, true)).toBe("Creators");
 });

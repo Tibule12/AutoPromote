@@ -9,6 +9,7 @@ import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPa
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { Reflector } from "three/examples/jsm/objects/Reflector.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import studioFont from "./helvetiker_bold.typeface.json";
 import { buildMergedInterTextGeometry } from "./studio3DBrandGeometry";
 import {
@@ -106,6 +107,50 @@ function makeGroup(scene) {
   const group = new THREE.Group();
   if (scene.template === "object_scene") {
     group.userData.sceneObjects = scene.objects.map(object => {
+      if (object.shape === "gltf") {
+        const container = new THREE.Group();
+        container.name = object.name;
+        const proxyMesh = new THREE.Mesh(
+          new THREE.OctahedronGeometry(0.9, 1),
+          materialFor({ ...scene, primaryColor: object.color, glowColor: object.color, material: object.material || scene.material, surfaceRoughness: object.roughness })
+        );
+        proxyMesh.castShadow = scene.shadows !== false;
+        proxyMesh.receiveShadow = scene.shadows !== false;
+        container.add(proxyMesh);
+        if (object.gltfUrl) {
+          try {
+            const loader = new GLTFLoader();
+            loader.load(
+              object.gltfUrl,
+              gltf => {
+                const loaded = gltf?.scene;
+                if (!loaded) return;
+                const box = new THREE.Box3().setFromObject(loaded);
+                const size = new THREE.Vector3();
+                box.getSize(size);
+                const maxDim = Math.max(0.01, size.x, size.y, size.z);
+                const center = new THREE.Vector3();
+                box.getCenter(center);
+                loaded.position.sub(center);
+                loaded.scale.multiplyScalar(2.0 / maxDim);
+                loaded.traverse(node => {
+                  if (node.isMesh) {
+                    node.castShadow = scene.shadows !== false;
+                    node.receiveShadow = scene.shadows !== false;
+                  }
+                });
+                container.remove(proxyMesh);
+                proxyMesh.geometry?.dispose?.();
+                container.add(loaded);
+              },
+              undefined,
+              () => {}
+            );
+          } catch (_e) {}
+        }
+        group.add(container);
+        return { object, mesh: container };
+      }
       let geometry;
       if (object.shape === "ribbon") {
         const data = ribbonMesh(object.ribbon);

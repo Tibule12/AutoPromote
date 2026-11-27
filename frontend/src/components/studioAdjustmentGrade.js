@@ -46,7 +46,7 @@ export function compileStudioAdjustmentGrade(layer) {
   const recolor=advanced.recolor?.enabled?advanced.recolor:null;
   if(recolor&&(!/^#[a-f0-9]{6}$/i.test(recolor.color)||typeof recolor.strength!=='number'||!Number.isFinite(recolor.strength)||recolor.strength<0||recolor.strength>1))throw Error('Choose a valid selected-area colour and amount.');
   if(clone?.enabled && (!mask || ['dx','dy','strength'].some(k=>typeof clone[k]!=='number'||!Number.isFinite(clone[k])) || Math.abs(clone.dx)>1 || Math.abs(clone.dy)>1 || clone.strength<0 || clone.strength>1))throw Error('Choose a valid clean patch inside the picture.');
-  if(clone?.enabled&&clone.mode!==undefined&&!['clone','heal'].includes(clone.mode))throw Error('Choose clone or heal.');
+  if(clone?.enabled&&clone.mode!==undefined&&!['clone','heal','temporal_clean_plate'].includes(clone.mode))throw Error('Choose clone, heal or temporal clean-plate.');
   if(clone?.enabled&&clone.mode==='heal'&&(!Number.isFinite(clone.radius)||clone.radius<.001||clone.radius>.08))throw Error('Choose a valid healing detail radius.');
   if (advanced.powerWindow?.enabled) {
     color.powerWindow = { ...advanced.powerWindow };

@@ -1,0 +1,324 @@
+{
+  "total_styles_verified": 26,
+  "styles": [
+    "rainbow",
+    "watch_me",
+    "wall_type",
+    "story_pop",
+    "bold_pop",
+    "karaoke",
+    "glow",
+    "bounce",
+    "minimal",
+    "headline",
+    "boxed",
+    "comic",
+    "gradient",
+    "typewriter",
+    "editorial",
+    "sticker",
+    "marker",
+    "glass",
+    "newsroom",
+    "luxury",
+    "retro",
+    "word_pill",
+    "spring_slam",
+    "neon_bloom",
+    "editorial_duo",
+    "kinetic_bar"
+  ],
+  "pydantic_word_timing_roundtrip": {
+    "preserved_pause_word_timing": true,
+    "paused_word_start_after_pydantic": 2.1,
+    "expected_paused_word_start": 2.1,
+    "caption_segment_fields": [
+      "caption_accent",
+      "caption_icon",
+      "caption_placement",
+      "caption_x",
+      "caption_y",
+      "end_time",
+      "id",
+      "language",
+      "language_confidence",
+      "language_label",
+      "languages",
+      "review_required",
+      "speaker",
+      "speaker_label",
+      "start_time",
+      "text",
+      "text_review_required",
+      "text_reviewed",
+      "translated_to_english",
+      "wordTimings",
+      "word_timings",
+      "words"
+    ]
+  },
+  "behind_subject_png": "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/behind_subject_caption_real_host.png",
+  "worker_exports": [
+    {
+      "name": "word_pill_9x16",
+      "style": "word_pill",
+      "aspect": "9:16",
+      "mp4": "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/mp4_exports/word_pill_9x16.mp4",
+      "duration": 10.5,
+      "streams": [
+        [
+          "video",
+          1080,
+          1920
+        ],
+        [
+          "audio",
+          null,
+          null
+        ]
+      ],
+      "frames": [
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/word_pill_9x16_t2.25.png",
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/word_pill_9x16_t4.90.png"
+      ]
+    },
+    {
+      "name": "editorial_duo_16x9",
+      "style": "editorial_duo",
+      "aspect": "16:9",
+      "mp4": "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/mp4_exports/editorial_duo_16x9.mp4",
+      "duration": 10.5,
+      "streams": [
+        [
+          "video",
+          1920,
+          1080
+        ],
+        [
+          "audio",
+          null,
+          null
+        ]
+      ],
+      "frames": [
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/editorial_duo_16x9_t2.25.png",
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/editorial_duo_16x9_t4.90.png",
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/editorial_duo_16x9_t6.60.png",
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/editorial_duo_16x9_t8.60.png"
+      ]
+    },
+    {
+      "name": "editorial_duo_9x16",
+      "style": "editorial_duo",
+      "aspect": "9:16",
+      "mp4": "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/mp4_exports/editorial_duo_9x16.mp4",
+      "duration": 10.5,
+      "streams": [
+        [
+          "video",
+          1080,
+          1920
+        ],
+        [
+          "audio",
+          null,
+          null
+        ]
+      ],
+      "frames": [
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/editorial_duo_9x16_t2.25.png",
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/editorial_duo_9x16_t4.90.png",
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/editorial_duo_9x16_t6.60.png",
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/editorial_duo_9x16_t8.60.png"
+      ]
+    },
+    {
+      "name": "wall_type_9x16",
+      "style": "wall_type",
+      "aspect": "9:16",
+      "mp4": "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/mp4_exports/wall_type_9x16.mp4",
+      "duration": 10.5,
+      "streams": [
+        [
+          "video",
+          1080,
+          1920
+        ],
+        [
+          "audio",
+          null,
+          null
+        ]
+      ],
+      "frames": [
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/wall_type_9x16_t2.25.png",
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/wall_type_9x16_t4.90.png"
+      ]
+    },
+    {
+      "name": "story_pop_9x16",
+      "style": "story_pop",
+      "aspect": "9:16",
+      "mp4": "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/mp4_exports/story_pop_9x16.mp4",
+      "duration": 10.5,
+      "streams": [
+        [
+          "video",
+          1080,
+          1920
+        ],
+        [
+          "audio",
+          null,
+          null
+        ]
+      ],
+      "frames": [
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/story_pop_9x16_t2.25.png",
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/story_pop_9x16_t4.90.png",
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/story_pop_9x16_t6.60.png",
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/story_pop_9x16_t8.60.png"
+      ]
+    },
+    {
+      "name": "retro_9x16",
+      "style": "retro",
+      "aspect": "9:16",
+      "mp4": "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/mp4_exports/retro_9x16.mp4",
+      "duration": 10.5,
+      "streams": [
+        [
+          "video",
+          1080,
+          1920
+        ],
+        [
+          "audio",
+          null,
+          null
+        ]
+      ],
+      "frames": [
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/retro_9x16_t2.25.png",
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/retro_9x16_t4.90.png"
+      ]
+    },
+    {
+      "name": "sticker_9x16",
+      "style": "sticker",
+      "aspect": "9:16",
+      "mp4": "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/mp4_exports/sticker_9x16.mp4",
+      "duration": 10.5,
+      "streams": [
+        [
+          "video",
+          1080,
+          1920
+        ],
+        [
+          "audio",
+          null,
+          null
+        ]
+      ],
+      "frames": [
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/sticker_9x16_t2.25.png",
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/sticker_9x16_t4.90.png",
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/sticker_9x16_t6.60.png",
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/sticker_9x16_t8.60.png"
+      ]
+    },
+    {
+      "name": "luxury_16x9",
+      "style": "luxury",
+      "aspect": "16:9",
+      "mp4": "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/mp4_exports/luxury_16x9.mp4",
+      "duration": 10.5,
+      "streams": [
+        [
+          "video",
+          1920,
+          1080
+        ],
+        [
+          "audio",
+          null,
+          null
+        ]
+      ],
+      "frames": [
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/luxury_16x9_t2.25.png",
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/luxury_16x9_t4.90.png"
+      ]
+    },
+    {
+      "name": "newsroom_9x16",
+      "style": "newsroom",
+      "aspect": "9:16",
+      "mp4": "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/mp4_exports/newsroom_9x16.mp4",
+      "duration": 10.5,
+      "streams": [
+        [
+          "video",
+          1080,
+          1920
+        ],
+        [
+          "audio",
+          null,
+          null
+        ]
+      ],
+      "frames": [
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/newsroom_9x16_t2.25.png",
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/newsroom_9x16_t4.90.png"
+      ]
+    },
+    {
+      "name": "spring_slam_9x16",
+      "style": "spring_slam",
+      "aspect": "9:16",
+      "mp4": "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/mp4_exports/spring_slam_9x16.mp4",
+      "duration": 10.5,
+      "streams": [
+        [
+          "video",
+          1080,
+          1920
+        ],
+        [
+          "audio",
+          null,
+          null
+        ]
+      ],
+      "frames": [
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/spring_slam_9x16_t2.25.png",
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/spring_slam_9x16_t4.90.png"
+      ]
+    },
+    {
+      "name": "word_pill_16x9",
+      "style": "word_pill",
+      "aspect": "16:9",
+      "mp4": "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/mp4_exports/word_pill_16x9.mp4",
+      "duration": 10.5,
+      "streams": [
+        [
+          "video",
+          1920,
+          1080
+        ],
+        [
+          "audio",
+          null,
+          null
+        ]
+      ],
+      "frames": [
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/word_pill_16x9_t2.25.png",
+        "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-style-results/export_frames/word_pill_16x9_t4.90.png"
+      ]
+    }
+  ]
+}

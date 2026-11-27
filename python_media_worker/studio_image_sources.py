@@ -100,7 +100,7 @@ def materialize_inline_image(source, destination):
     if mime=='image/svg+xml':
         if re.search(br'<!DOCTYPE|<!ENTITY',payload,re.I):raise ValueError('SVG must be self-contained')
         root=ET.fromstring(payload)
-        allowed={'svg','g','defs','rect','circle','ellipse','path','polygon','polyline','line','text','tspan','linearGradient','radialGradient','stop','clipPath','mask'}
+        allowed={'svg','g','defs','rect','circle','ellipse','path','polygon','polyline','line','text','tspan','linearGradient','radialGradient','stop','clipPath','mask','filter','feGaussianBlur','feMerge','feMergeNode','feColorMatrix','feComponentTransfer','feFuncA'}
         for node in root.iter():
             if node.tag.rsplit('}',1)[-1] not in allowed:raise ValueError('Unsupported SVG element')
             for key,value in node.attrib.items():

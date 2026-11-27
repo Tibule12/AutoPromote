@@ -6115,7 +6115,7 @@ describe("ViralClipStudio timeline sequencing", () => {
 
   test("original audio 200 percent stays in the editor and restores attenuation through the same bus", async () => {
     const previousContext = window.AudioContext;
-    const context = require('./fixtures/studioAudioGraph').gainTestContext();
+    const context = require('../__fixtures__/studioAudioGraph').gainTestContext();
     window.AudioContext = jest.fn(() => context);
     let editor;
     try {

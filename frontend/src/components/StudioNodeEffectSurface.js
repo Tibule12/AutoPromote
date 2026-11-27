@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useRef } from 'react';
-import { hasStudioNodeSurface, paintStudioNodeSurface, studioNodeFilteredSurface } from './studioNodeEffects';
+import { applyEdgeLightWrapAndLinear, applyMeshGridWarp, applyScreenGlareReflection, hasStudioNodeSurface, paintStudioNodeSurface, studioNodeFilteredSurface } from './studioNodeEffects';
 import {projectStudioCanvas} from './studioPerspective';
 import {evaluateWorldLayerPose} from './studioCompRigging';
 import { watchStudioProgrammeFrames } from './studioSourcePreview';
@@ -20,31 +20,78 @@ export default function StudioNodeEffectSurface({ layer, videoRef, mapTime, time
       const state=latest.current;
       const source=image || (video?.dataset.sharedProgrammeFrame==='true'&&shared?.dataset.sourceTime!==undefined?shared:video);
       if(!source||(image&&!image.complete)||(source===video&&(video.seeking||video.readyState<2)))return;
-      // Paused inspection uses the delivery raster before scaling to the
-      // monitor, as the main programme does. Moving paint keeps its bounded
-      // display raster. Effect radii and keyer edges therefore retain detail.
-      const animatedPixels=state.layer.displacementWarp?.enabled||state.keyframes.some(key=>String(key.targetId)===String(state.layer.id)&&
-        /^(planeCorner|perspectiveProgress|maskPoint|strokeStart|strokeEnd|strokeOffset)/.test(key.property));
-      // A still's cached delivery bitmap is already ready when Play starts.
-      // Keep those pixels through playback instead of rebuilding its key,
-      // homography and glow just to obtain a smaller version of the same image.
+      const layerKeys=(state.keyframes||[]).filter(key=>String(key.targetId)===String(state.layer.id));
+      const animatedPixels=state.layer.displacementWarp?.enabled||state.layer.motionBlur?.enabled||state.layer.lightWrap?.enabled||state.layer.screenReplace?.enabled||state.layer.meshWarp?.enabled||layerKeys.some(key=>
+        /^(planeCorner|perspectiveProgress|maskPoint|strokeStart|strokeEnd|strokeOffset|keySimilarity|keySmoothness|keySpill|keyChoke)/.test(key.property));
       const density=clock?.paused||(image&&!animatedPixels)?Math.max(1,Number(state.programmeHeight)/displayHeight):1;
       const w=Math.max(2,Math.round(width*density)),h=Math.max(2,Math.round(height*density));
       const programmeHeight=displayHeight*density;
       const at=state.mapTime?state.mapTime(sourceTime):state.time;
-      const pose=state.layer.perspective?evaluateWorldLayerPose(state.layer,state.overlays,state.keyframes,at,state.mainTransform):null;
-      const staticKey=image&&!state.layer.displacementWarp?.enabled
-        ? JSON.stringify([image.currentSrc||image.src,image.naturalWidth,image.naturalHeight,state.layer,w,h,programmeHeight,pose?.perspective,pose?.perspectiveProgress]) : null;
+      const needPose=Boolean(state.layer.perspective||state.layer.motionBlur?.enabled||layerKeys.length);
+      const pose=needPose?evaluateWorldLayerPose(state.layer,state.overlays,state.keyframes,at,state.mainTransform):null;
+      const staticKey=image&&!state.layer.displacementWarp?.enabled&&!state.layer.lightWrap?.enabled&&!state.layer.screenReplace?.enabled&&!state.layer.meshWarp?.enabled&&!(state.layer.motionBlur?.enabled&&layerKeys.length)
+        ? JSON.stringify([image.currentSrc||image.src,image.naturalWidth,image.naturalHeight,state.layer,w,h,programmeHeight,pose?.perspective,pose?.perspectiveProgress,pose?.keySimilarity,pose?.keySmoothness,pose?.keySpill,pose?.keyChoke]) : null;
       const reused=staticKey&&paintedRef.current?.canvas===canvas&&paintedRef.current.key===staticKey;
       let padding=reused?paintedRef.current.padding:0;
       try {if(!reused){
         if(local.width!==w)local.width=w;if(local.height!==h)local.height=h;
-        if(!paintStudioNodeSurface(local,source,state.layer,at,programmeHeight))return;
+        const doMotionBlur=Boolean(state.layer.motionBlur?.enabled&&layerKeys.length);
+        const mbSamples=doMotionBlur?Math.max(2,Math.min(5,Math.round(Number(state.layer.motionBlur?.samples||3)))):1;
+        const mbShutter=Math.max(0.05,Math.min(1,Number(state.layer.motionBlur?.shutter??0.5)))/30;
+        if(mbSamples===1){
+          if(!paintStudioNodeSurface(local,source,state.layer,at,programmeHeight,pose))return;
+        }else{
+          const accum=new Float32Array(w*h*4);
+          const lCtx=local.getContext('2d',{willReadFrequently:true});
+          for(let s=0;s<mbSamples;s++){
+            const sampleAt=Math.max(0,at-(mbSamples-1-s)*mbShutter);
+            const samplePose=evaluateWorldLayerPose(state.layer,state.overlays,state.keyframes,sampleAt,state.mainTransform);
+            if(!paintStudioNodeSurface(local,source,state.layer,sampleAt,programmeHeight,samplePose))return;
+            if(state.layer.perspective)projectStudioCanvas(local,samplePose?.perspective||state.layer.perspective,samplePose?.perspectiveProgress??100);
+            const d=lCtx.getImageData(0,0,w,h).data;
+            const wt=1/mbSamples;
+            for(let p=0;p<w*h;p++){const i=p*4,a=(d[i+3]/255)*wt;accum[i]+=d[i]*a;accum[i+1]+=d[i+1]*a;accum[i+2]+=d[i+2]*a;accum[i+3]+=d[i+3]*wt;}
+          }
+          const imgOut=lCtx.createImageData(w,h);
+          for(let p=0;p<w*h;p++){const i=p*4,a=accum[i+3],sa=a/255;imgOut.data[i]=sa>0.001?Math.min(255,Math.round(accum[i]/sa)):0;imgOut.data[i+1]=sa>0.001?Math.min(255,Math.round(accum[i+1]/sa)):0;imgOut.data[i+2]=sa>0.001?Math.min(255,Math.round(accum[i+2]/sa)):0;imgOut.data[i+3]=Math.min(255,Math.round(a));}
+          lCtx.putImageData(imgOut,0,0);
+        }
         if((state.layer.frameShape||'round')!=='edge'&&state.layer.bRollMode!=='fullscreen'){
           const ctx=local.getContext('2d'),radius=Math.max(12,Math.min(48,Number(state.layer.borderRadius??28)))/400;
           ctx.globalCompositeOperation='destination-in';ctx.fillStyle='white';ctx.beginPath();ctx.roundRect(0,0,w,h,[{x:w*radius,y:h*radius}]);ctx.fill();ctx.globalCompositeOperation='source-over';
         }
-        if(state.layer.perspective)projectStudioCanvas(local,pose?.perspective||state.layer.perspective,pose?.perspectiveProgress??100);
+        if(state.layer.meshWarp?.enabled){
+          const mCtx=local.getContext('2d',{willReadFrequently:true});
+          const mImg=mCtx.getImageData(0,0,w,h);
+          applyMeshGridWarp(mImg.data,w,h,state.layer.meshWarp,at,programmeHeight/720);
+          mCtx.putImageData(mImg,0,0);
+        }
+        if(state.layer.perspective&&mbSamples===1)projectStudioCanvas(local,pose?.perspective||state.layer.perspective,pose?.perspectiveProgress??100);
+        if(state.layer.lightWrap?.enabled||state.layer.screenReplace?.enabled){
+          const bgEl=stage?.querySelector?.('[data-testid="studio-programme-canvas"], canvas, video');
+          if(bgEl){
+            const bgCanvas=document.createElement('canvas');bgCanvas.width=w;bgCanvas.height=h;
+            const bgCtx=bgCanvas.getContext('2d',{willReadFrequently:true});
+            const sRect=stage.getBoundingClientRect(),nRect=node.getBoundingClientRect();
+            const bgW=bgEl.width||bgEl.videoWidth||0,bgH=bgEl.height||bgEl.videoHeight||0;
+            if(sRect.width>0&&sRect.height>0&&bgW>0&&bgH>0){
+              const sx=((nRect.left-sRect.left)/sRect.width)*bgW,sy=((nRect.top-sRect.top)/sRect.height)*bgH;
+              const sw=(nRect.width/sRect.width)*bgW,sh=(nRect.height/sRect.height)*bgH;
+              try{
+                bgCtx.drawImage(bgEl,Math.max(0,sx),Math.max(0,sy),Math.max(1,sw),Math.max(1,sh),0,0,w,h);
+                const lCtx=local.getContext('2d',{willReadFrequently:true});
+                const fgImg=lCtx.getImageData(0,0,w,h),bgImg=bgCtx.getImageData(0,0,w,h);
+                if(state.layer.lightWrap?.enabled||state.layer.linearLight){
+                  applyEdgeLightWrapAndLinear(fgImg.data,bgImg.data,w,h,{...(state.layer.lightWrap||{intensity:0}),linearLight:!!state.layer.linearLight,units:programmeHeight/720});
+                }
+                if(state.layer.screenReplace?.enabled){
+                  applyScreenGlareReflection(fgImg.data,bgImg.data,w,h,state.layer.screenReplace.glarePreserve??0.35);
+                }
+                lCtx.putImageData(fgImg,0,0);
+              }catch(_e){}
+            }
+          }
+        }
         const filtered=studioNodeFilteredSurface(local,state.layer,programmeHeight/720,!!state.layer.mask?.enabled);padding=filtered.padding;
         if(canvas.width!==filtered.canvas.width)canvas.width=filtered.canvas.width;if(canvas.height!==filtered.canvas.height)canvas.height=filtered.canvas.height;
         const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(filtered.canvas,0,0);

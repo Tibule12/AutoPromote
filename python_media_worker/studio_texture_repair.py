@@ -12,7 +12,7 @@ def validate_repair(clone):
         value=clone.get(field)
         if type(value)not in(int,float)or not math.isfinite(value):raise ValueError('Invalid clean patch')
     if abs(clone['dx'])>1 or abs(clone['dy'])>1 or not 0<=clone['strength']<=1:raise ValueError('Invalid clean patch')
-    if clone.get('mode','clone')not in('clone','heal'):raise ValueError('Choose clone or heal')
+    if clone.get('mode','clone')not in('clone','heal','temporal_clean_plate'):raise ValueError('Choose clone, heal or temporal clean-plate')
     follow=clone.get('follow')
     if follow is not None:
         if not isinstance(follow,dict):raise ValueError('Invalid repair reference')
@@ -71,6 +71,15 @@ def repair_bounds(clone,mask,width,height,padding):
 def build_texture_repair_filter(effects,prefix):
     clone=effects.get('clone_patch')or{}
     if not clone.get('enabled')or clone.get('strength')==0:return ''
+    if clone.get('mode') == 'temporal_clean_plate':
+        if effects.get('_worker_clean_plate_applied'):
+            return ''
+        # When called directly without temporal pre-pass, run a gentle soft median clean blend.
+        mask=effects.get('selective_mask')
+        if not mask:raise ValueError('Temporal clean-plate repair needs a selected-area mask')
+        validate_selective_mask(mask);validate_repair(clone)
+        strength=float(clone['strength'])
+        return f"format=gbrp,split=2[{prefix}cpbase][{prefix}cpblur];[{prefix}cpblur]avgblur=sizeX=9:sizeY=9[{prefix}cpclean];[{prefix}cpbase][{prefix}cpclean]blend=all_expr='A*(1-{strength:.9f})+B*{strength:.9f}'"
     mask=effects.get('selective_mask')
     if not mask:raise ValueError('Clone correction needs a selected-area mask')
     validate_selective_mask(mask);validate_repair(clone)
@@ -112,3 +121,79 @@ def build_texture_repair_filter(effects,prefix):
         graph=head+f",split=2[{prefix}base][{prefix}input];[{prefix}input]geq={channels}[{prefix}cloned];[{prefix}base][{prefix}cloned]blend=all_expr='A*(1-{strength:.9f})+B*{strength:.9f}'"
     if cropped:graph+=f'[{prefix}repaired];[{prefix}full][{prefix}repaired]overlay=x={box[0]}:y={box[1]}:format=gbrp:eof_action=pass'
     return graph
+
+
+def render_temporal_clean_plate_video(input_path, output_path, mask, *, start_time=0.0, duration=None, search_radius=18, feather_px=6, strength=1.0, window_half=3):
+    """Multi-frame aligned temporal clean-plate object removal inside a selective_mask region."""
+    import json
+    import subprocess
+    import numpy as np
+    from PIL import Image
+    try:
+        from .studio_selective_mask import validate_selective_mask, mask_coverage
+        from .studio_environment_vfx import synthesize_temporal_clean_plate_rgb
+    except ImportError:
+        from studio_selective_mask import validate_selective_mask, mask_coverage
+        from studio_environment_vfx import synthesize_temporal_clean_plate_rgb
+
+    validate_selective_mask(mask)
+    probe = json.loads(subprocess.check_output([
+        "ffprobe", "-v", "error", "-show_streams", "-show_format", "-of", "json", str(input_path)
+    ]))
+    v_stream = next(s for s in probe["streams"] if s.get("codec_type") == "video")
+    width, height = int(v_stream["width"]), int(v_stream["height"])
+    has_audio = any(s.get("codec_type") == "audio" for s in probe["streams"])
+    rate_parts = str(v_stream.get("avg_frame_rate") or v_stream.get("r_frame_rate") or "30/1").split("/")
+    fps = max(1.0, float(rate_parts[0]) / max(1.0, float(rate_parts[1] if len(rate_parts) > 1 else 1)))
+    total_dur = float((probe.get("format") or {}).get("duration") or v_stream.get("duration") or 0)
+    end_time = (start_time + duration) if duration else total_dur
+
+    raw_bytes = subprocess.check_output([
+        "ffmpeg", "-nostdin", "-v", "error", "-i", str(input_path), "-f", "rawvideo", "-pix_fmt", "rgb24", "pipe:1"
+    ])
+    frame_bytes = width * height * 3
+    n_frames = len(raw_bytes) // frame_bytes
+    if n_frames <= 0:
+        raise ValueError("Input video produced no frames for temporal clean-plate")
+    frames = [np.frombuffer(raw_bytes[i * frame_bytes:(i + 1) * frame_bytes], dtype=np.uint8).reshape((height, width, 3)) for i in range(n_frames)]
+    masks = [mask_coverage(mask, width, height, max(0.0, (i / fps) - start_time), _validated=True) for i in range(n_frames)]
+
+    enc_cmd = [
+        "ffmpeg", "-nostdin", "-v", "error",
+        "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{width}x{height}", "-r", f"{fps:.6f}", "-i", "pipe:0",
+    ]
+    if has_audio:
+        enc_cmd.extend(["-i", str(input_path), "-map", "0:v:0", "-map", "1:a:0", "-c:a", "copy", "-shortest"])
+    else:
+        enc_cmd.extend(["-map", "0:v:0", "-an"])
+    enc_cmd.extend(["-c:v", "libx264", "-preset", "veryfast", "-crf", "18", "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y", str(output_path)])
+
+    amt = max(0.0, min(1.0, float(strength)))
+    encoder = subprocess.Popen(enc_cmd, stdin=subprocess.PIPE)
+    try:
+        for i in range(n_frames):
+            t = i / fps
+            if t < start_time or (end_time > 0 and t >= end_time) or amt <= 0.005:
+                out_frame = frames[i]
+            else:
+                lo = max(0, i - window_half)
+                hi = min(n_frames, i + window_half + 1)
+                cleaned = synthesize_temporal_clean_plate_rgb(
+                    frames[lo:hi],
+                    masks[lo:hi],
+                    target_index=i - lo,
+                    search_radius=search_radius,
+                    feather_px=feather_px,
+                )
+                if amt < 0.999:
+                    out_frame = np.clip(np.rint(frames[i].astype(np.float32) * (1.0 - amt) + cleaned.astype(np.float32) * amt), 0, 255).astype(np.uint8)
+                else:
+                    out_frame = cleaned
+            encoder.stdin.write(out_frame.tobytes())
+        encoder.stdin.close()
+        if encoder.wait(timeout=120):
+            raise RuntimeError("Temporal clean-plate encoder failed")
+    finally:
+        if encoder.poll() is None:
+            encoder.kill()
+    return str(output_path)

@@ -413,6 +413,7 @@ export const buildViralRenderData = ({
   }
   addDefined(payload, "caption_coverage_mode", extraOptions.captionCoverageMode, String);
   addDefined(payload, "caption_review_copy", extraOptions.captionReviewCopy, Boolean);
+  addDefined(payload, "caption_avoid_subjects", extraOptions.captionAvoidSubjects, Boolean);
   addDefined(
     payload,
     "translate_captions_to_english",

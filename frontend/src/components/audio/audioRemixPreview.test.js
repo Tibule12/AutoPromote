@@ -1,6 +1,6 @@
 import { applyStudioMediaGain, disposeAudioRemixPreview, ensureAudioRemixPreview, updateAudioRemixPreview } from "./audioRemixPreview";
 import { applyAudioRemixPreset, DEFAULT_AUDIO_REMIX } from "./audioRemixModel";
-import { gainTestContext } from "../__tests__/fixtures/studioAudioGraph";
+import { gainTestContext } from "../__fixtures__/studioAudioGraph";
 
 describe("Studio native media bus gain", () => {
   const previousContext = window.AudioContext;

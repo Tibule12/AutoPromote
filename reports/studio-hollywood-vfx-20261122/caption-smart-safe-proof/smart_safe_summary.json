@@ -1,0 +1,288 @@
+{
+  "host_16x9_summary": {
+    "cuesAnalyzed": 5,
+    "averageSafetyScore": 0.824,
+    "facesDetectedCues": 5,
+    "adjustedCues": 5,
+    "zeroFaceOverlapCues": 5
+  },
+  "host_16x9_decisions": [
+    {
+      "cue": "Hello my lovely viewers at home.",
+      "placement": "side_right",
+      "safety": {
+        "placement": "side_right",
+        "xPct": 79.0,
+        "yPct": 49.0,
+        "faceOverlap": 0.0,
+        "bodyOverlap": 0.1336,
+        "edgeClutter": 0.2805,
+        "safetyScore": 0.836,
+        "blockedZones": [
+          "top_right",
+          "bottom_center",
+          "bottom_left",
+          "shoulder_left",
+          "top_center",
+          "top_left",
+          "background_center",
+          "side_left",
+          "background_left"
+        ],
+        "safe": true,
+        "facesDetected": 1,
+        "faces": [
+          [
+            0.2682,
+            0.1517,
+            0.3767,
+            0.4345,
+            0.898
+          ]
+        ],
+        "bodies": [
+          [
+            0.1907,
+            0.3969,
+            0.4542,
+            1.0
+          ]
+        ]
+      }
+    },
+    {
+      "cue": "It has truly been a long time.",
+      "placement": "side_right",
+      "safety": {
+        "placement": "side_right",
+        "xPct": 79.0,
+        "yPct": 49.0,
+        "faceOverlap": 0.0,
+        "bodyOverlap": 0.1282,
+        "edgeClutter": 0.2823,
+        "safetyScore": 0.84,
+        "blockedZones": [
+          "top_right",
+          "bottom_center",
+          "bottom_left",
+          "shoulder_left",
+          "top_center",
+          "top_left",
+          "background_center",
+          "side_left",
+          "background_left"
+        ],
+        "safe": true,
+        "facesDetected": 1,
+        "faces": [
+          [
+            0.2824,
+            0.1668,
+            0.3914,
+            0.443,
+            0.91
+          ]
+        ],
+        "bodies": [
+          [
+            0.2044,
+            0.4063,
+            0.4694,
+            1.0
+          ]
+        ]
+      }
+    },
+    {
+      "cue": "I have missed you so much,",
+      "placement": "side_right",
+      "safety": {
+        "placement": "side_right",
+        "xPct": 79.0,
+        "yPct": 49.0,
+        "faceOverlap": 0.0,
+        "bodyOverlap": 0.1328,
+        "edgeClutter": 0.2811,
+        "safetyScore": 0.837,
+        "blockedZones": [
+          "top_right",
+          "bottom_center",
+          "bottom_left",
+          "top_center",
+          "shoulder_left",
+          "top_left",
+          "background_center",
+          "background_left",
+          "side_left"
+        ],
+        "safe": true,
+        "facesDetected": 1,
+        "faces": [
+          [
+            0.2754,
+            0.1681,
+            0.3828,
+            0.4513,
+            0.918
+          ]
+        ],
+        "bodies": [
+          [
+            0.1986,
+            0.4136,
+            0.4596,
+            1.0
+          ]
+        ]
+      }
+    },
+    {
+      "cue": "and I hope you missed us as well.",
+      "placement": "custom",
+      "safety": {
+        "placement": "custom",
+        "xPct": 16.0,
+        "yPct": 10.0,
+        "faceOverlap": 0.0222,
+        "bodyOverlap": 0.3109,
+        "edgeClutter": 0.1688,
+        "safetyScore": 0.65,
+        "blockedZones": [
+          "bottom_left",
+          "shoulder_right",
+          "bottom_center",
+          "bottom_right",
+          "shoulder_left",
+          "top_left",
+          "background_left",
+          "side_left",
+          "side_right",
+          "top_center",
+          "background_center",
+          "top_right",
+          "background_right"
+        ],
+        "safe": true,
+        "facesDetected": 1,
+        "faces": [
+          [
+            0.5646,
+            0.0741,
+            0.7124,
+            0.4091,
+            0.91
+          ]
+        ],
+        "bodies": [
+          [
+            0.4589,
+            0.3646,
+            0.8181,
+            1.0
+          ]
+        ]
+      }
+    },
+    {
+      "cue": "We are thrilled to tell you we are back!",
+      "placement": "side_left",
+      "safety": {
+        "placement": "side_left",
+        "xPct": 21.0,
+        "yPct": 49.0,
+        "faceOverlap": 0.0,
+        "bodyOverlap": 0.0,
+        "edgeClutter": 0.2401,
+        "safetyScore": 0.957,
+        "blockedZones": [
+          "top_left",
+          "bottom_center",
+          "bottom_right",
+          "shoulder_right",
+          "top_center",
+          "background_center",
+          "side_right",
+          "top_right",
+          "background_right"
+        ],
+        "safe": true,
+        "facesDetected": 1,
+        "faces": [
+          [
+            0.579,
+            0.0583,
+            0.7478,
+            0.4396,
+            0.938
+          ]
+        ],
+        "bodies": [
+          [
+            0.4583,
+            0.3889,
+            0.8685,
+            1.0
+          ]
+        ]
+      }
+    }
+  ],
+  "host_9x16_summary": {
+    "cuesAnalyzed": 5,
+    "averageSafetyScore": 0.711,
+    "facesDetectedCues": 3,
+    "adjustedCues": 5,
+    "zeroFaceOverlapCues": 4
+  },
+  "moving_speaker_summary": {
+    "cuesAnalyzed": 4,
+    "averageSafetyScore": 0.952,
+    "facesDetectedCues": 4,
+    "adjustedCues": 4,
+    "zeroFaceOverlapCues": 4
+  },
+  "moving_speaker_decisions": [
+    {
+      "cue": "Speaker sits on the left side",
+      "placement": "top_center",
+      "faceOverlap": 0.0,
+      "bodyOverlap": 0.0
+    },
+    {
+      "cue": "Now speaker moved to the right",
+      "placement": "top_center",
+      "faceOverlap": 0.0,
+      "bodyOverlap": 0.0
+    },
+    {
+      "cue": "Bottom center is blocked now",
+      "placement": "top_center",
+      "faceOverlap": 0.0,
+      "bodyOverlap": 0.0
+    },
+    {
+      "cue": "Top wall is blocked dodge down",
+      "placement": "top_left",
+      "faceOverlap": 0.0,
+      "bodyOverlap": 0.2225
+    }
+  ],
+  "exports": [
+    {
+      "name": "smart_safe_host_16x9",
+      "mp4": "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-smart-safe-proof/mp4_exports/smart_safe_host_16x9.mp4"
+    },
+    {
+      "name": "smart_safe_host_9x16",
+      "mp4": "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-smart-safe-proof/mp4_exports/smart_safe_host_9x16.mp4"
+    },
+    {
+      "name": "smart_safe_moving_16x9",
+      "mp4": "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-smart-safe-proof/mp4_exports/smart_safe_moving_16x9.mp4"
+    },
+    {
+      "name": "naive_unaware_moving_16x9",
+      "mp4": "/home/tibule12/Projects/AutoPromte/AutoPromote-creative-effects-20261122/reports/studio-hollywood-vfx-20261122/caption-smart-safe-proof/mp4_exports/naive_unaware_moving_16x9.mp4"
+    }
+  ]
+}

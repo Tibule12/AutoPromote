@@ -19,6 +19,7 @@ import { studioLayerEntries } from "./studioLayerOrder";
 import {
   MOTION_DRIVER_PROPERTIES,
   bakeLayerMotionToKeyframes,
+  evaluateWorldLayerPose,
   layerHasActiveMotionDrivers,
   layerRequiresWorldBake,
   validateStudioMotionDrivers,
@@ -177,6 +178,15 @@ export const compileStudioFinishForRender = document => {
       ...(activeRevitalizer ? { revitalizer: activeRevitalizer } : {}),
       qualifier: null,
     }),
+    sky_replace: fx.skyReplace?.enabled && fx.skyReplace.preset && fx.skyReplace.preset !== "none" ? {
+      enabled: true,
+      preset: String(fx.skyReplace.preset),
+      horizon_pct: Math.max(15, Math.min(95, Number(fx.skyReplace.horizonPct ?? 64) || 64)),
+      threshold: Math.max(0.05, Math.min(0.95, Number(fx.skyReplace.threshold ?? 0.48) || 0.48)),
+      softness: Math.max(0.04, Math.min(0.6, Number(fx.skyReplace.softness ?? 0.22) || 0.22)),
+      blend: Math.max(0, Math.min(1, Number(fx.skyReplace.blend ?? 0.92) || 0.92)),
+      temperature_match: Math.max(0, Math.min(1, Number(fx.skyReplace.tempMatch ?? fx.skyReplace.temperatureMatch ?? 0.32) || 0.32)),
+    } : null,
     power_window: activePowerWindow ? { ...activePowerWindow } : null,
     hsl_qualifier: activeQualifier ? { ...activeQualifier } : null,
     node_mask: compileStudioNodeMask(adv.maskSourceNodeId || fx.maskSourceNodeId, state.overlays, adv.maskInvert),
@@ -193,7 +203,12 @@ export const compileStudioFinishForRender = document => {
       halation: fx.halation, film_emulation: fx.filmEmulation,
       vhs_tracking: fx.vhsTracking, light_leak: fx.lightLeak,
       dream_glow: fx.dreamGlow ?? 0, anamorphic_flare: fx.anamorphicFlare ?? 0,
-      lens_blur: fx.lensBlur ?? 0 },
+      lens_blur: fx.lensBlur ?? 0,
+      lens_distortion: Number(fx.lensDistortion ?? 0) || 0,
+      rack_focus: Number(fx.rackFocus ?? 0) || 0,
+      focus_distance: fx.focusDistance ?? 0.5,
+      atmospheric_haze: Number(fx.atmosphericHaze ?? 0) || 0,
+      haze_color: fx.hazeColor || "#cbd5e1" },
     visualizer: { ...state.podcastVisualizer, source: "original_speech" },
     keyframes: (state.finishKeyframes || []).map(key => ({ id: key.id,
       time: Number(key.time || 0), values: { ...key.values }, interpolation: "linear" })),
@@ -217,9 +232,42 @@ export const compileStudioFinishForRender = document => {
           const sourceLayer = eff.tracking?.enabled && eff.tracking?.sourceLayerId
             ? (state.overlays || []).find(o => String(o.id) === String(eff.tracking.sourceLayerId))
             : null;
-          const sourceKeys = eff.tracking?.enabled && eff.tracking?.sourceLayerId
+          const needsSourceBake = sourceLayer && (
+            layerRequiresWorldBake(sourceLayer, state.overlays, state.mainTransform) ||
+            (Array.isArray(sourceLayer.parameterLinks) && sourceLayer.parameterLinks.length > 0)
+          );
+          let sourceBase = sourceLayer
+            ? { x: Number(sourceLayer.x ?? 50), y: Number(sourceLayer.y ?? 50), scale: Number(sourceLayer.scale ?? 1), rotation: Number(sourceLayer.rotation ?? 0) }
+            : { x: 50, y: 50, scale: 1, rotation: 0 };
+          let sourceKeys = eff.tracking?.enabled && eff.tracking?.sourceLayerId
             ? allKeys.filter(k => String(k.targetId) === String(eff.tracking.sourceLayerId))
             : [];
+          if (needsSourceBake) {
+            const sampleTimes = Array.from(new Set([
+              0,
+              ...allKeys.map(k => Number(k.time || 0)),
+              Number(eff.startTime || 0),
+              Number(eff.startTime || 0) + Number(eff.duration || 0),
+            ])).sort((a, b) => a - b);
+            const initWorld = evaluateWorldLayerPose(sourceLayer, state.overlays, allKeys, sampleTimes[0], state.mainTransform);
+            sourceBase = {
+              x: Number(initWorld.x),
+              y: Number(initWorld.y),
+              scale: Number(initWorld.scale),
+              rotation: Number(initWorld.rotation),
+            };
+            sourceKeys = sampleTimes.flatMap(t => {
+              const world = evaluateWorldLayerPose(sourceLayer, state.overlays, allKeys, t, state.mainTransform);
+              return ["x", "y", "scale", "rotation"].map(prop => ({
+                id: `baked-trk-${eff.id}-${prop}-${t}`,
+                targetId: String(sourceLayer.id),
+                property: prop,
+                time: t,
+                value: Number(world[prop]),
+                easing: "linear",
+              }));
+            });
+          }
           return {
             ...eff,
             motion_keyframes: effKeys,
@@ -227,9 +275,7 @@ export const compileStudioFinishForRender = document => {
               ? {
                   tracking: {
                     ...eff.tracking,
-                    source_base: sourceLayer
-                      ? { x: Number(sourceLayer.x ?? 50), y: Number(sourceLayer.y ?? 50), scale: Number(sourceLayer.scale ?? 1), rotation: Number(sourceLayer.rotation ?? 0) }
-                      : { x: 50, y: 50, scale: 1, rotation: 0 },
+                    source_base: sourceBase,
                     source_keyframes: sourceKeys,
                   },
                 }
@@ -366,6 +412,29 @@ export const compileStudioCompositionForRender = document => {
             x: Number(layer.layerShadow?.x || 0), y: Number(layer.layerShadow?.y || 0) },
           motion_blur: { enabled: !!layer.motionBlur?.enabled, samples: Number(layer.motionBlur?.samples || 1),
             shutter: Number(layer.motionBlur?.shutter || 0) },
+          ...(layer.lightWrap?.enabled ? {
+            light_wrap: {
+              enabled: true,
+              intensity: Math.max(0, Math.min(1, Number(layer.lightWrap.intensity ?? 0.45) || 0)),
+              radius: Math.max(1, Math.min(60, Number(layer.lightWrap.radius ?? 14) || 14)),
+            },
+          } : {}),
+          ...(layer.screenReplace?.enabled ? {
+            screen_replace: {
+              enabled: true,
+              glare_preserve: Math.max(0, Math.min(1, Number(layer.screenReplace.glarePreserve ?? 0.35) || 0)),
+            },
+          } : {}),
+          ...(layer.linearLight ? { linear_light: true } : {}),
+          ...(layer.meshWarp?.enabled ? {
+            mesh_warp: {
+              enabled: true,
+              strength: Math.max(-1, Math.min(1, Number(layer.meshWarp.strength ?? 0.35) || 0)),
+              pinch: Math.max(-1, Math.min(1, Number(layer.meshWarp.pinch ?? 0) || 0)),
+              rows: Math.max(2, Math.min(8, Math.round(Number(layer.meshWarp.rows ?? 4) || 4))),
+              cols: Math.max(2, Math.min(8, Math.round(Number(layer.meshWarp.cols ?? 4) || 4))),
+            },
+          } : {}),
           ...(layer.scrapbookFrame?.enabled ? { scrapbook_frame: JSON.parse(JSON.stringify(layer.scrapbookFrame)) } : {}),
         },
         motion_keyframes: effectiveKeys

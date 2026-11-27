@@ -70,8 +70,72 @@ def interpolate_layer_value(layer, property_name, time, fallback):
     return automation_segment_value(first, last, progress, {"easing": "ease_in_out", **right})
 
 
+def _cubic_bezier_mask_points(pts, handles, w, h, steps=12):
+    out = []
+    n = len(pts)
+    def unpack_handle(item):
+        if isinstance(item, dict):
+            hin = item.get('in') or [0, 0]
+            hout = item.get('out') or [0, 0]
+            return float(hin[0] or 0), float(hin[1] or 0), float(hout[0] or 0), float(hout[1] or 0)
+        if isinstance(item, (list, tuple)) and len(item) >= 4:
+            return float(item[0] or 0), float(item[1] or 0), float(item[2] or 0), float(item[3] or 0)
+        return 0.0, 0.0, 0.0, 0.0
+    for i in range(n):
+        nxt = (i + 1) % n
+        x0, y0 = pts[i]
+        x3, y3 = pts[nxt]
+        _, _, ox, oy = unpack_handle(handles[i] if i < len(handles) else None)
+        ix, iy, _, _ = unpack_handle(handles[nxt] if nxt < len(handles) else None)
+        if abs(ox) < 1e-4 and abs(oy) < 1e-4 and abs(ix) < 1e-4 and abs(iy) < 1e-4:
+            out.append((x0 * w / 100, y0 * h / 100))
+            continue
+        c1x, c1y = x0 + ox, y0 + oy
+        c2x, c2y = x3 + ix, y3 + iy
+        for s in range(steps):
+            u = s / steps
+            m = 1.0 - u
+            b0, b1, b2, b3 = m * m * m, 3 * m * m * u, 3 * m * u * u, u * u * u
+            out.append((
+                (b0 * x0 + b1 * c1x + b2 * c2x + b3 * x3) * w / 100,
+                (b0 * y0 + b1 * c1y + b2 * c2y + b3 * y3) * h / 100,
+            ))
+    return out
+
+
+def _node_spec_for_pose(spec, pose):
+    if not spec or spec.get("version") != 1 or not pose:
+        return spec
+    changed = any(k in pose for k in ("key_similarity", "key_smoothness", "key_spill", "key_choke"))
+    if not changed:
+        return spec
+    key = dict(spec["key"])
+    if "key_similarity" in pose:
+        key["similarity"] = max(0.02, min(1.0, float(pose["key_similarity"])))
+    if "key_smoothness" in pose:
+        key["smoothness"] = max(0.0, min(1.0, float(pose["key_smoothness"])))
+    if "key_spill" in pose:
+        key["spill"] = max(0.0, min(1.0, float(pose["key_spill"])))
+    if "key_choke" in pose:
+        key["choke"] = max(-20.0, min(20.0, float(pose["key_choke"])))
+    return {**spec, "key": key}
+
+
 def layer_pose(layer, overlay, time):
     base = (layer or {}).get("base_transform") or {}
+    node_key = (((layer or {}).get("effects") or {}).get("node") or {}).get("key") or {}
+    keyer_channels = {}
+    if node_key.get("enabled"):
+        layer_keys = (layer or {}).get("motion_keyframes") or []
+        key_props = {str(k.get("property")) for k in layer_keys}
+        if "keySimilarity" in key_props:
+            keyer_channels["key_similarity"] = interpolate_layer_value(layer, "keySimilarity", time, node_key.get("similarity", 0.32))
+        if "keySmoothness" in key_props:
+            keyer_channels["key_smoothness"] = interpolate_layer_value(layer, "keySmoothness", time, node_key.get("smoothness", 0.14))
+        if "keySpill" in key_props:
+            keyer_channels["key_spill"] = interpolate_layer_value(layer, "keySpill", time, node_key.get("spill", 0.48))
+        if "keyChoke" in key_props:
+            keyer_channels["key_choke"] = interpolate_layer_value(layer, "keyChoke", time, node_key.get("choke", 0))
     return {
         **({'mask_path': animated_mask_path(layer,time)} if ((layer or {}).get('effects') or {}).get('mask',{}).get('shape')=='polygon' else {}),
         **({'perspective_progress': max(0,min(100,interpolate_layer_value(layer,'perspectiveProgress',time,base.get('perspective_progress',100)))),
@@ -79,6 +143,7 @@ def layer_pose(layer, overlay, time):
                 [interpolate_layer_value(layer,f'planeCorner{i}{axis}',time,p[j]) for j,axis in enumerate(('X','Y'))]
                 for i,p in enumerate(validate_perspective(layer['perspective'])['corners'])]}} if (layer or {}).get('perspective') else {}),
         **({"text_progress": max(0, min(100, interpolate_layer_value(layer, "textProgress", time, base.get("text_progress", 100))))} if (layer or {}).get("text_animator") else {}),
+        **keyer_channels,
         "x": interpolate_layer_value(layer, "x", time, base.get("x", _get(overlay, "x", 50))),
         "y": interpolate_layer_value(layer, "y", time, base.get("y", _get(overlay, "y", 50))),
         "scale": max(.01, interpolate_layer_value(layer, "scale", time, base.get("scale", _get(overlay, "scale", 1)))),
@@ -153,17 +218,28 @@ def layer_clip_mask(size, mask, crop_x=0, crop_y=0, feather_scale=1):
     elif shape == "polygon":
         path = str(mask.get("path") or "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)")
         match = re.fullmatch(r"polygon\((.{1,2048})\)", path.strip())
-        points = []
+        raw_pts = []
         for pair in match.group(1).split(",") if match else []:
             point = re.fullmatch(r"\s*(-?\d+(?:\.\d+)?)%\s+(-?\d+(?:\.\d+)?)%\s*", pair)
             if not point:
                 raise ValueError("Layer mask requires a percentage polygon")
-            points.append((float(point[1]) * w / 100, float(point[2]) * h / 100))
-        if not 3 <= len(points) <= 64:
+            raw_pts.append((float(point[1]), float(point[2])))
+        if not 3 <= len(raw_pts) <= 64:
             raise ValueError("Layer polygon mask requires 3 to 64 points")
+        handles = mask.get("bezierHandles")
+        if isinstance(handles, list) and len(handles) == len(raw_pts):
+            points = _cubic_bezier_mask_points(raw_pts, handles, w, h)
+        else:
+            points = [(px * w / 100, py * h / 100) for px, py in raw_pts]
         draw.polygon(points, fill=255)
-    elif shape == "rectangle":
+    elif shape == "diamond":
         left, top = w * crop_x / 100, h * crop_y / 100
+        right, bottom = w - left, h - top
+        draw.polygon([(w / 2, top), (right, h / 2), (w / 2, bottom), (left, h / 2)], fill=255)
+    elif shape in ("rectangle", "inset"):
+        eff_x = max(crop_x, 10) if shape == "inset" else crop_x
+        eff_y = max(crop_y, 10) if shape == "inset" else crop_y
+        left, top = w * eff_x / 100, h * eff_y / 100
         right, bottom = w - left, h - top
         radius = max(0, min(50, finite(mask.get("radius", 6), 6))) if enabled else 0
         rx, ry = min(w * radius / 100, (right - left) / 2), min(h * radius / 100, (bottom - top) / 2)
@@ -212,6 +288,16 @@ def _effect_layer(alpha, color, opacity, blur):
     return result
 
 
+def _transform_rgba(image, size, matrix):
+    rgba = image if image.mode == "RGBA" else image.convert("RGBA")
+    return rgba.convert("RGBa").transform(size, Image.Transform.AFFINE, matrix, Image.Resampling.BICUBIC).convert("RGBA")
+
+
+def _rotate_rgba(image, angle, center):
+    rgba = image if image.mode == "RGBA" else image.convert("RGBA")
+    return rgba.convert("RGBa").rotate(angle, Image.Resampling.BICUBIC, center=center).convert("RGBA")
+
+
 def _bounded_text_pose(artwork, overlay, layer, pose, canvas_size, sample_opacity):
     """Project an unfiltered title directly into its bounded canvas.
 
@@ -232,9 +318,9 @@ def _bounded_text_pose(artwork, overlay, layer, pose, canvas_size, sample_opacit
     x, y = width * pose['x'] / 100, height * pose['y'] / 100
     angle = math.radians(pose['rotation'])
     cosine, sine = math.cos(angle), math.sin(angle)
-    projected = artwork.transform(canvas_size, Image.Transform.AFFINE,
+    projected = _transform_rgba(artwork, canvas_size,
         (cosine, sine, anchor_x - cosine*x - sine*y,
-         -sine, cosine, anchor_y + sine*x - cosine*y), Image.Resampling.BICUBIC)
+         -sine, cosine, anchor_y + sine*x - cosine*y))
     opacity = max(0, min(1, pose['opacity'] * sample_opacity))
     if opacity < 1:
         projected.putalpha(projected.getchannel('A').point(lambda value: round(value * opacity)))
@@ -292,10 +378,12 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1, *, 
     box.alpha_composite(artwork, ((box_width - artwork.width) // 2, (box_height - artwork.height) // 2))
     artwork = colorize_media(box, ((layer or {}).get("effects") or {}).get("colorize"))
     try:
-        from .studio_node_effects import apply_node_effects
+        from .studio_node_effects import apply_node_effects, apply_mesh_grid_warp
     except ImportError:
-        from studio_node_effects import apply_node_effects
-    artwork = apply_node_effects(artwork, ((layer or {}).get('effects') or {}).get('node'), pose.get('_programme_time', 0), canvas_height / 720 * pose['scale'])
+        from studio_node_effects import apply_node_effects, apply_mesh_grid_warp
+    node_spec = _node_spec_for_pose(((layer or {}).get('effects') or {}).get('node'), pose)
+    artwork = apply_node_effects(artwork, node_spec, pose.get('_programme_time', 0), canvas_height / 720 * pose['scale'])
+    artwork = apply_mesh_grid_warp(artwork, ((layer or {}).get('effects') or {}).get('mesh_warp'), pose.get('_programme_time', 0), canvas_height / 720 * pose['scale'])
     bounded_title = _bounded_text_pose(artwork, overlay, layer, pose, canvas_size, sample_opacity)
     if bounded_title is not None:
         return bounded_title
@@ -369,7 +457,7 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1, *, 
         padded.alpha_composite(artwork, (padding,padding))
         matrix = (c, s, ax-c*ax-s*ay-c*x-s*y-left+padding,
                   -s, c, ay+s*ax-c*ay+s*x-c*y-top+padding)
-        warped = padded.transform(canvas_size, Image.Transform.AFFINE, matrix, Image.Resampling.BICUBIC)
+        warped = _transform_rgba(padded, canvas_size, matrix)
         opacity = max(0, min(1, pose["opacity"] * sample_opacity))
         if opacity < 1:
             warped.putalpha(warped.getchannel("A").point(lambda value: round(value*opacity)))
@@ -461,14 +549,14 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1, *, 
         ax,ay = anchor
         x = round(canvas_width*pose['x']/100-original_anchor[0])+surface_origin[0]
         y = round(canvas_height*pose['y']/100-original_anchor[1])+surface_origin[1]
-        composed = composed.transform(canvas_size,Image.Transform.AFFINE,
-            (c,s,ax-c*ax-s*ay-c*x-s*y,-s,c,ay+s*ax-c*ay+s*x-c*y),Image.Resampling.BICUBIC)
+        composed = _transform_rgba(composed, canvas_size,
+            (c,s,ax-c*ax-s*ay-c*x-s*y,-s,c,ay+s*ax-c*ay+s*x-c*y))
         opacity=max(0,min(1,pose['opacity']*sample_opacity))
         if opacity<1:composed.putalpha(composed.getchannel('A').point(lambda value:round(value*opacity)))
         destination=Image.new('RGBA',canvas_size);destination.alpha_composite(composed)
         return destination
     if abs(pose["rotation"]) > .001:
-        composed = composed.rotate(-pose["rotation"], Image.Resampling.BICUBIC, center=anchor)
+        composed = _rotate_rgba(composed, -pose["rotation"], anchor)
     # Native CSS opacity applies after filtering the entire layer. Fading only
     # the artwork leaves shadow/glow visible at zero opacity and changes the
     # group's coverage at intermediate keyframes, including motion-blur samples.

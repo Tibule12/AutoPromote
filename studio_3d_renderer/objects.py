@@ -2,7 +2,7 @@
 import math
 import re
 
-SHAPES = {"box", "sphere", "torus", "cylinder", "icosphere", "ribbon", "plane"}
+SHAPES = {"box", "sphere", "torus", "cylinder", "icosphere", "ribbon", "plane", "gltf"}
 RIBBON_DEFAULTS = dict(path="knot", width=.55, thickness=.065, wave=.65, lobes=3, twists=1, speed=.3, phase=0)
 RIBBON_BOUNDS = dict(width=(.1, 1.2), thickness=(.015, .2), wave=(0, 1.2), lobes=(1, 6), twists=(-3, 3), speed=(-1, 1), phase=(0, 360))
 FIELDS = ("x", "y", "z", "scaleX", "scaleY", "scaleZ", "rotationX", "rotationY", "rotationZ")
@@ -25,8 +25,14 @@ def validate_objects(objects, duration):
     ids, total = set(), 0
     identity = lambda value: isinstance(value, str) and re.fullmatch(r"[A-Za-z0-9_-]{1,80}", value)
     for item in objects:
-        if not isinstance(item, dict) or set(item) - {"id", "name", "shape", "color", "material", "bevel", "roughness", "ribbon", "keyframes", *FIELDS}:
+        if not isinstance(item, dict) or set(item) - {"id", "name", "shape", "color", "material", "bevel", "roughness", "ribbon", "gltfUrl", "gltfPath", "keyframes", *FIELDS}:
             raise ValueError("Invalid scene object fields")
+        if "gltfPath" in item:
+            if item.get("shape") != "gltf" or not isinstance(item["gltfPath"], str) or ".." in item["gltfPath"] or not re.fullmatch(r"[A-Za-z0-9_./-]{1,260}\.(glb|gltf)", item["gltfPath"]):
+                raise ValueError("Invalid glTF model reference")
+        if "gltfUrl" in item:
+            if item.get("shape") != "gltf" or not isinstance(item["gltfUrl"], str) or len(item["gltfUrl"]) > 2048:
+                raise ValueError("Invalid glTF URL")
         if not identity(item.get("id")) or item["id"] in ids or not isinstance(item.get("name"), str) or len(item["name"]) > 80 or re.search(r"[\x00-\x1f<>]", item["name"]) or item.get("shape") not in SHAPES or not re.fullmatch(r"#[a-fA-F0-9]{6}", item.get("color", "")):
             raise ValueError("Invalid scene object identity or appearance")
         ids.add(item["id"])
@@ -158,6 +164,15 @@ def build_objects(scene, root, material_factory):
         elif shape == "cylinder":
             # Blender's cylinder is along Z; the preview uses the same axis.
             bpy.ops.mesh.primitive_cylinder_add(vertices=48, radius=1, depth=2)
+        elif shape == "gltf" and item.get("gltfPath"):
+            bpy.ops.import_scene.gltf(filepath=item["gltfPath"])
+            imported = bpy.context.selected_objects
+            obj = bpy.data.objects.new(item["name"], None)
+            bpy.context.collection.objects.link(obj)
+            for child in imported:
+                child.parent = obj
+            result.append((obj, item))
+            continue
         elif shape == "icosphere":
             bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=1)
         else:
