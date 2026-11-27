@@ -1,4 +1,5 @@
 import React from "react";
+import { isPlatformVisible } from '../config/platformVisibility';
 import MetaConnectionRequirementsNotice from "../components/MetaConnectionRequirementsNotice";
 
 const ProfilePanel = ({
@@ -117,7 +118,7 @@ const ProfilePanel = ({
       handler: handleConnectPinterest,
       helper: "Connect Pinterest to create pins and boards.",
     },
-  ];
+  ].filter(item => isPlatformVisible(item.id));
   const connectedPlatforms = connectionDefinitions.filter(item => item.status?.connected);
 
   return (
@@ -327,7 +328,7 @@ const ProfilePanel = ({
                     "instagram",
                     "snapchat",
                     "pinterest",
-                  ].map(platform => (
+                  ].filter(isPlatformVisible).map(platform => (
                     <label key={platform}>
                       <input
                         type="checkbox"

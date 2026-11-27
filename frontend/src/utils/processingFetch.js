@@ -1,4 +1,5 @@
 import { auth } from "../firebaseClient";
+import { getMediaAuthToken } from './mediaAuth';
 import { API_BASE_URL } from "../config";
 import activation from '../config/freeFirstActivation.json';
 const operations = {
@@ -29,7 +30,7 @@ export async function processingFetch(url, options, fetcher, transportOptions) {
     return fetcher(url, options, transportOptions);
   if (!operation || String(options.method || "GET").toUpperCase() !== "POST")
     return fetcher(url, options, transportOptions);
-  const token = await auth.currentUser?.getIdToken();
+  const token = await auth.currentUser?.getIdToken() || await getMediaAuthToken();
   if (!token) throw Error("Sign in to check processing capacity.");
   const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
   const response = await fetch(`${API_BASE_URL}/api/usage/processing/quote`, {

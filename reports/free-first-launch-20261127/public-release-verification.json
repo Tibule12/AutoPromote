@@ -1,0 +1,93 @@
+{
+  "status": "Free-and-Plus-live",
+  "publicOrigin": "https://autopromote.org",
+  "verifiedApiCommit": "2f175989bfba0689ccac941b0c83fe8a2360ec0e",
+  "freeWorkflow": {
+    "ordinaryRegisteredVerifiedAccount": true,
+    "localEditSavedAndColdReopened": true,
+    "localEditTokenDeduction": 0,
+    "exportTokens": 40,
+    "remainingTokens": 60,
+    "durationSeconds": 60,
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "downloadBytes": 40424838,
+    "downloadSha256": "0f2edacefea42d2be9b47cfbcd6ab19b59b1655c9d6e8cd0cb2d97ef761c92b9",
+    "fullDecodePassed": true,
+    "completePlaybackEnded": true,
+    "singleCloudAttempt": true,
+    "estimatedCloudUsd": 0.114055,
+    "actualAttributedInvoiceUsd": null
+  },
+  "payment": {
+    "completedChargeUsd": 4.99,
+    "currency": "USD",
+    "merchantFeeUsd": 0.54,
+    "merchantNetUsd": 4.45,
+    "priceAndOwnerVerified": true,
+    "providerSignatureVerifiedEvents": [
+      "BILLING.SUBSCRIPTION.ACTIVATED",
+      "PAYMENT.SALE.COMPLETED",
+      "BILLING.SUBSCRIPTION.CANCELLED"
+    ],
+    "singleTestRenewalStopped": true,
+    "paidAccessThrough": "2026-12-27T10:00:00.000Z",
+    "otherAgreementsModified": 0
+  },
+  "qualification": {
+    "nativeQ1Q7EstimatedCloudUsd": 2.818021,
+    "ordinaryPublicExportAttemptsEstimatedCloudUsd": 0.218465,
+    "combinedEstimatedCloudUsd": 3.036486,
+    "approvedMaximumUsd": 5,
+    "actualAttributedInvoiceUsd": null
+  },
+  "limits": {
+    "freeTokens": 100,
+    "freeResetHours": 144,
+    "freeRolling30Days": 500,
+    "plusTokens": 500,
+    "plusResetHours": 24,
+    "plusRolling30Days": 2000,
+    "monthlyCreativeUsd": 10,
+    "dailyCreativeUsd": 2,
+    "dailyExternalAiUsd": 0.05,
+    "paidConcurrency": 1
+  },
+  "codeql": {
+    "commit": "2f175989bfba0689ccac941b0c83fe8a2360ec0e",
+    "run": 46054057768,
+    "conclusion": "success",
+    "alertsVerifiedFixed": [
+      1271,
+      1272,
+      1273,
+      1274,
+      1275,
+      1276,
+      1277,
+      1278,
+      1279,
+      1280,
+      1269,
+      1270,
+      1265,
+      1266,
+      1267
+    ]
+  },
+  "followup": {
+    "processingTopups": "implemented and locally tested; deployment pending",
+    "hiddenConnections": [
+      "snapchat",
+      "twitter",
+      "pinterest",
+      "spotify"
+    ],
+    "remainingActions": [
+      "full emulator rerun",
+      "corrected Playwright rerun"
+    ]
+  },
+  "existingProjectsEducationWalletsTesterCreditsAndPublicationsPreserved": true
+}

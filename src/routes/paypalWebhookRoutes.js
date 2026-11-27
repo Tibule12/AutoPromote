@@ -263,6 +263,9 @@ router.post(
 
     // Minimal event routing and subscription lifecycle handling
     try {
+      if(['PAYMENT.CAPTURE.REFUNDED','PAYMENT.CAPTURE.REVERSED'].includes(event.event_type))
+        await require('../services/payments/processingTopups').reconcileTopupRefund(event,{db,
+          ledger:require('../services/processingTokens/runtime').service()});
       if (["PAYMENT.SALE.REFUNDED", "PAYMENT.SALE.REVERSED", "BILLING.SUBSCRIPTION.PAYMENT.FAILED"].includes(event.event_type)) {
         const lifecycle = require("../services/payments/subscriptionLifecycle");
         const base = process.env.PAYPAL_MODE === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
@@ -313,6 +316,8 @@ router.post(
           rawId: event.id,
         });
         if (orderId) {
+          const topup=(await db.collection('processing_topup_orders').doc(orderId).get()).data();
+          if(topup?.userId)await require('../services/payments/processingTopups').production().capture(topup.userId,orderId);
           await db.collection("payments").doc(orderId).set(
             {
               status: "captured",

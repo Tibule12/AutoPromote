@@ -1605,6 +1605,7 @@ try {
     console.log("⚠️ Assistant routes mount failed:", e.message);
   }
   app.use("/api/publishing-destinations", require("./routes/communityPublishingRoutes"));
+  app.use('/api/processing-topups',require('./routes/processingTopupRoutes'));
   // The generic /:platform/webhook must never consume payment notifications.
   app.use("/api/paypal", paypalWebhookRoutes);
   // Mount generic platform routes under /api so frontend placeholder endpoints like

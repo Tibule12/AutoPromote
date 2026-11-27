@@ -291,7 +291,9 @@ describe("VideoEditor camera-angle handoff", () => {
   });
 
   test("sends the selected timeline source storage path to the render backend", async () => {
+    jest.spyOn(window,'confirm').mockReturnValue(true);
     global.fetch = jest.fn(url => {
+      if(String(url).endsWith('/api/usage/processing/quote'))return Promise.resolve({ok:true,status:200,json:async()=>({estimate:{tokens:40}})});
       if (String(url).endsWith("/api/media/credits")) return Promise.resolve(creditResponse);
       if (String(url).endsWith("/api/media/process")) {
         return Promise.resolve({

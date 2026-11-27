@@ -53,6 +53,7 @@ describe("ViralScanner guided clip selection", () => {
     global.fetch = jest.fn((url, options = {}) => {
       const requestUrl = String(url);
       const method = String(options.method || "GET").toUpperCase();
+      if(requestUrl.includes('/api/usage/processing/quote'))return Promise.resolve({ok:true,status:200,json:async()=>({estimate:{tokens:20}})});
 
       if (requestUrl.includes("/api/analytics/clip-scanner-cache") && method === "GET") {
         if (!cache) {
@@ -129,6 +130,7 @@ describe("ViralScanner guided clip selection", () => {
   }
 
   beforeEach(() => {
+    jest.spyOn(window,'confirm').mockReturnValue(true);
     global.fetch = jest.fn();
     uploadTemporaryVideoSource.mockImplementation(async ({ file, onProgress }) => {
       onProgress?.(file.size, file.size);
@@ -353,6 +355,7 @@ describe("ViralScanner guided clip selection", () => {
     global.fetch = jest.fn((url, options = {}) => {
       const requestUrl = String(url);
       const method = String(options.method || "GET").toUpperCase();
+      if(requestUrl.includes('/api/usage/processing/quote'))return Promise.resolve({ok:true,status:200,json:async()=>({estimate:{tokens:20}})});
 
       if (requestUrl.includes("/api/analytics/clip-scanner-cache") && method === "GET") {
         return Promise.resolve({ ok: false, status: 404, json: async () => ({}) });

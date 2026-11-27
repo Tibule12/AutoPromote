@@ -1,4 +1,5 @@
 import React from "react";
+import { isPlatformVisible, visiblePlatformSummary } from '../config/platformVisibility';
 import toast from "react-hot-toast";
 import { auth } from "../firebaseClient";
 import { API_ENDPOINTS } from "../config";
@@ -35,19 +36,15 @@ const ConnectionsPanel = ({
   // --- Network Strength Calculation ---
   const countConnected = [
     discordStatus?.connected,
-    spotifyStatus?.connected,
     redditStatus?.connected,
     youtubeStatus?.connected,
-    twitterStatus?.connected,
     tiktokStatus?.connected,
     facebookStatus?.connected,
     linkedinStatus?.connected,
-    snapchatStatus?.connected,
     telegramStatus?.connected,
-    pinterestStatus?.connected,
   ].filter(Boolean).length;
 
-  const totalPlatforms = 11;
+  const totalPlatforms = 7;
   const networkStrength = Math.round((countConnected / totalPlatforms) * 100);
 
   let strengthLabel = "Offline";
@@ -218,6 +215,7 @@ const ConnectionsPanel = ({
         </div>
       </div>
       <div style={{ display: "grid", gap: ".75rem" }}>
+        {isPlatformVisible('twitter') && (
         <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
           {twitterStatus?.connected ? (
             <>
@@ -290,6 +288,7 @@ const ConnectionsPanel = ({
             </div>
           )}
         </div>
+        )}
         <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
           {tiktokStatus?.connected ? (
             <>
@@ -407,6 +406,7 @@ const ConnectionsPanel = ({
           facebookStatus={facebookStatus}
           style={{ marginTop: 0 }}
         />
+        {isPlatformVisible('snapchat') && (
         <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
           {snapchatStatus?.connected ? (
             <>
@@ -435,6 +435,7 @@ const ConnectionsPanel = ({
             </>
           )}
         </div>
+        )}
         <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
           {facebookStatus?.connected ? (
             <>
@@ -647,6 +648,7 @@ const ConnectionsPanel = ({
             </>
           )}
         </div>
+        {isPlatformVisible('spotify') && (
         <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
           {spotifyStatus?.connected ? (
             <>
@@ -677,6 +679,7 @@ const ConnectionsPanel = ({
             </>
           )}
         </div>
+        )}
         <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
           {redditStatus?.connected ? (
             <>
@@ -793,6 +796,7 @@ const ConnectionsPanel = ({
             </>
           )}
         </div>
+        {isPlatformVisible('pinterest') && (
         <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
           {pinterestStatus?.connected ? (
             <>
@@ -821,6 +825,7 @@ const ConnectionsPanel = ({
             </>
           )}
         </div>
+        )}
       </div>
       <div style={{ marginTop: ".75rem" }}>
         <h4>Aggregated Platform Summary</h4>
@@ -833,7 +838,7 @@ const ConnectionsPanel = ({
             overflow: "auto",
           }}
         >
-          {JSON.stringify(platformSummary, null, 2)}
+          {JSON.stringify(visiblePlatformSummary(platformSummary), null, 2)}
         </pre>
       </div>
     </section>

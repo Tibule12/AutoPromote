@@ -3,6 +3,7 @@ import CommunityDestinationPicker from "../components/CommunityDestinationPicker
 import ExplainButton from "../components/ExplainButton";
 import MetaConnectionRequirementsNotice from "../components/MetaConnectionRequirementsNotice";
 import PlatformIcon from "../components/PlatformIcon";
+import { isPlatformVisible, visiblePlatformSummary } from '../config/platformVisibility';
 
 const PLATFORM_CONFIG = [
   {
@@ -65,7 +66,7 @@ const PLATFORM_CONFIG = [
     label: "Pinterest",
     helper: "Create pins and publish to approved boards.",
   },
-];
+].filter(platform => isPlatformVisible(platform.id));
 
 const ConnectionsPanelRedesign = ({
   platformSummary,
@@ -256,7 +257,7 @@ const ConnectionsPanelRedesign = ({
             title="Meta publishing requirements"
             facebookStatus={facebookStatus}
           />
-          {twitterStatus?.oauth1_missing && (
+          {isPlatformVisible('twitter') && twitterStatus?.oauth1_missing && (
             <div className="connection-warning">
               <strong>X video uploads need OAuth1</strong>
               <small>Reconnect X and approve the media-upload permissions before publishing.</small>
@@ -265,7 +266,7 @@ const ConnectionsPanelRedesign = ({
               </button>
             </div>
           )}
-          <pre>{JSON.stringify(platformSummary, null, 2)}</pre>
+          <pre>{JSON.stringify(visiblePlatformSummary(platformSummary), null, 2)}</pre>
         </div>
       </details>
     </section>

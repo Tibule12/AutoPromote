@@ -185,6 +185,9 @@ function normalizeConnectionMap(connectionDocs, userData) {
 }
 
 function workspaceConnections(req, payload) {
+  const visible=key=>!['twitter','snapchat','spotify','pinterest'].includes(key);
+  payload={...payload,summary:Object.fromEntries(Object.entries(payload.summary||{}).filter(([key])=>visible(key))),
+    raw:Object.fromEntries(Object.entries(payload.raw||{}).filter(([key])=>visible(key)))};
   if (!req.workspaceId || req.workspaceRole === "owner") return payload;
   const allowed = req.workspace?.sharedPlatforms || [];
   return { ...payload, summary: Object.fromEntries(Object.entries(payload.summary || {}).map(([key, value]) => [key, allowed.includes(key) ? value : { connected: false }])),

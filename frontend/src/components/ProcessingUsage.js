@@ -17,6 +17,8 @@ export default function ProcessingUsage({ usage, purchasedCredits, promotionalCr
       <p>
         {usage.remaining} of {usage.allowance} processing tokens available
       </p>
+      <p>Purchased processing tokens: {usage.purchasedRemainingTokens||0} available{usage.purchasedReservedTokens?` · ${usage.purchasedReservedTokens} reserved`:''}. These do not expire or reset.</p>
+      {usage.purchasedDebtTokens>0&&<p role="status">A refunded purchase has {usage.purchasedDebtTokens} previously used tokens to reconcile. Your renewable allowance remains separate.</p>}
       <p>
         Next reset:{" "}
         <time dateTime={usage.nextResetAt}>
@@ -27,7 +29,7 @@ export default function ProcessingUsage({ usage, purchasedCredits, promotionalCr
         </time>
       </p>
       <p>
-        Rolling 30-day limit: {usage.rollingSpentTokens} spent · {usage.reservedTokens} reserved ·{" "}
+        Rolling 30-day allowance: {usage.rollingSpentTokens} spent · {usage.reservedTokens} reserved ·{" "}
         {usage.rolling30DayLimit} maximum
       </p>
       <p>
@@ -37,7 +39,7 @@ export default function ProcessingUsage({ usage, purchasedCredits, promotionalCr
           : "Usage measurement pending"}{" "}
         · {(storage.limitBytes / 1073741824).toFixed(0)} GB {usage.provisional ? 'proposed capacity' : 'capacity'}
       </p>
-      {usage.remaining === 0 && (
+      {usage.remaining === 0 && !usage.purchasedRemainingTokens && (
         <p role="status">
           {usage.exhaustionReason === "rolling"
             ? "Your rolling 30-day processing capacity is currently used. An allowance reset does not clear earlier usage."

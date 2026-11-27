@@ -4,42 +4,12 @@ import ConnectionsPanel from "../UserDashboardTabs/ConnectionsPanel";
 import { mapTikTokStatusResponse } from "../hooks/usePlatformStatus";
 
 describe("ConnectionsPanel display and disconnect", () => {
-  test("shows username for connected Twitter and calls disconnect handler", () => {
-    const handleDisconnect = jest.fn();
-    const platformSummary = { summary: { twitter: { username: "bob" } } };
-    render(
-      <ConnectionsPanel
-        platformSummary={platformSummary}
-        twitterStatus={{ connected: true, identity: { username: "bob" } }}
-        tiktokStatus={{ connected: false }}
-        youtubeStatus={{ connected: false }}
-        spotifyStatus={{ connected: false }}
-        redditStatus={{ connected: false }}
-        discordStatus={{ connected: false }}
-        facebookStatus={{ connected: false }}
-        linkedinStatus={{ connected: false }}
-        snapchatStatus={{ connected: false }}
-        telegramStatus={{ connected: false }}
-        pinterestStatus={{ connected: false }}
-        handleConnectTwitter={() => {}}
-        handleConnectTikTok={() => {}}
-        handleConnectYouTube={() => {}}
-        handleConnectSpotify={() => {}}
-        handleConnectReddit={() => {}}
-        handleConnectDiscord={() => {}}
-        handleConnectFacebook={() => {}}
-        handleConnectLinkedin={() => {}}
-        handleConnectSnapchat={() => {}}
-        handleConnectTelegram={() => {}}
-        handleConnectPinterest={() => {}}
-        handleDisconnectPlatform={handleDisconnect}
-      />
-    );
-    // The UI shows the twitter handle as @bob, check for that
-    expect(screen.getByText(/@bob/)).toBeInTheDocument();
-    const disconnectBtn = screen.getByLabelText(/Disconnect Twitter/i);
-    fireEvent.click(disconnectBtn);
-    expect(handleDisconnect).toHaveBeenCalledWith("twitter");
+  test("hides all four withdrawn connections even when connected, including diagnostics", () => {
+    render(<ConnectionsPanel platformSummary={{summary:{twitter:{username:'hidden-handle'},snapchat:{connected:true},spotify:{connected:true},pinterest:{connected:true}}}}
+      twitterStatus={{connected:true,identity:{username:'hidden-handle'},oauth1_missing:true}}
+      snapchatStatus={{connected:true}} spotifyStatus={{connected:true}} pinterestStatus={{connected:true}} />);
+    for(const name of ['Twitter','Snapchat','Spotify','Pinterest','hidden-handle'])expect(screen.queryByText(new RegExp(name,'i'))).not.toBeInTheDocument();
+    expect(screen.queryByRole('button',{name:/Connect (Twitter|Snapchat|Spotify|Pinterest)/i})).not.toBeInTheDocument();
   });
 
   test("shows upload-ready note for aggregate TikTok payload with publish scopes", () => {

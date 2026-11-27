@@ -27208,16 +27208,17 @@
   },
   "freeFirstFundedLaunch20261127": {
     "date": "2026-11-27",
-    "scope": "27 November funded launch: Q1–Q7 pass with real60s CPU/GPU films,184s Finder/33.9s export, word-timed speech/audio extraction, one real caption API response, two exact PRIVATE YouTube publications and actual cancellation/fresh-controller409 replay. A normal public account registers, verifies email and signs in. Free100/144h/500 rolling and PlusUSD4.99/500 daily/2000 rolling remain fixed. Eight pinned profiles and USD2/day, USD10/month, USD0.05 AI/day and one execution are provisioned. API/client activation is being deployed with new Plus sales closed until the prepared single live checkout is paid and verified.105 financial/security cases, real transport/output decode, existing integration and strict client builds pass. No buyer charge or verified public subscription rollout yet. Existing wallets, agreements, projects, Education and held publications are preserved. Derived cameras do not prove independent physical capture; caption review flags and historical failures remain. Keep17/9/1/2/0/0, typography13/16 and S02/S04/S03; no creative readiness promotion. See reports/free-first-launch-20261127/README.md.",
+    "scope": "27 November live launch: the public Free account registers, verifies email, saves/reopens a real edit and exports/downloads a60s1080p30 native film for40 tokens (100→60), with a complete decode and real-time playback. The singleUSD4.99 Plus payment, exact account ownership, signed activation/payment/cancellation and paid period are verified; the test renewal is stopped. Purchases are open underUSD2/day,USD10/month,USD0.05 AI/day and one execution. Q1–Q7 pass; combined conservative cloud estimatesUSD3.036486 stay belowUSD5 (no attributed invoice). The15 reported CodeQL alerts are verified fixed on main. Owner-requested one-time processing top-ups and four hidden connections are being qualified for deployment; full emulator/Playwright follow-up remains. Existing wallets, tester credits, agreements, projects, Education and held publications remain. Keep17/9/1/2/0/0, typography13/16 and S02/S04/S03; no creative readiness promotion. See reports/free-first-launch-20261127/public-release-verification.json.",
     "evidenceRefs": [
       "reports/free-first-launch-20261127/README.md",
-      "reports/free-first-launch-20261127/approval-and-status.json"
+      "reports/free-first-launch-20261127/approval-and-status.json",
+      "reports/free-first-launch-20261127/public-release-verification.json"
     ],
     "readinessPromotion": false,
     "nextTaskId": "S02",
-    "buyerCharged": false,
-    "subscriptionDeployed": false,
+    "buyerCharged": true,
+    "subscriptionDeployed": true,
     "qualificationSequencePassed": true,
-    "paidCheckoutExecuted": false
+    "paidCheckoutExecuted": true
   }
 }

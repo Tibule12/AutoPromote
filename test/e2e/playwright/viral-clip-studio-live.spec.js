@@ -215,6 +215,8 @@ const assertMediaHasAudio = mediaPath => {
 };
 
 const installAppRoutes = async (page, sourcePath = liveSourcePath) => {
+  if(!page.listenerCount('dialog'))page.on('dialog',dialog=>dialog.accept());
+  await page.route('**/api/usage/processing/quote',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({estimate:{tokens:40}})}));
   const sourceBody = fs.readFileSync(sourcePath);
   const state = {
     sourceUpload: { started: false, bytes: 0, completed: false },
@@ -551,7 +553,6 @@ test("records playable voice-over, edits takes, restores audio after reload and 
   const state = await installAppRoutes(page);
   const errors = [];
   page.on("pageerror", error => errors.push(error.message));
-  page.on("dialog", dialog => dialog.accept());
   await page.addInitScript(() => {
     window.__E2E_BYPASS = true;
     window.__E2E_TEST_TOKEN = "e2e-test-token";
@@ -703,7 +704,6 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
   const state = await installAppRoutes(page);
   const errors = [];
   page.on("pageerror", error => errors.push(error.message));
-  page.on("dialog", dialog => dialog.accept());
   await page.addInitScript(() => {
     window.__E2E_BYPASS = true;
     window.__E2E_TEST_TOKEN = "e2e-test-token";
@@ -1018,7 +1018,6 @@ test("records the focused Motion workflow and verifies its export payload", asyn
   const state = await installAppRoutes(page);
   const errors = [];
   page.on("pageerror", error => errors.push(error.message));
-  page.on("dialog", dialog => dialog.accept());
   await page.addInitScript(() => {
     window.__E2E_BYPASS = true;
     window.__E2E_TEST_TOKEN = "e2e-test-token";
@@ -1118,7 +1117,6 @@ test("records imported logo layer design and verifies preview-to-export keyframe
   const state = await installAppRoutes(page);
   const errors = [];
   page.on("pageerror", error => errors.push(error.message));
-  page.on("dialog", dialog => dialog.accept());
   await page.addInitScript(() => {
     window.__E2E_BYPASS = true;
     window.__E2E_TEST_TOKEN = "e2e-test-token";

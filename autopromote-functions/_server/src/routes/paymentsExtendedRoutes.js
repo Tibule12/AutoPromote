@@ -104,6 +104,12 @@ async function getSyncedCreditBalance(userId) {
 
 router.post("/credits/create-order", authMiddleware, async (req, res) => {
   try {
+    if(require('../services/processingTokens/runtime').enabled()){
+      if(req.user?.claims?.email_verified!==true)return res.status(403).json({error:'VERIFIED_ACCOUNT_REQUIRED'});
+      if(process.env.PLUS_PURCHASES_ENABLED!=='true')return res.status(503).json({error:'PURCHASES_UNAVAILABLE'});
+      const result=await require('../services/payments/processingTopups').production().create(req.userId||req.user.uid,req.body.packageId);
+      return res.json({...result,id:result.orderId});
+    }
     const { packageId } = req.body;
     const pack = PACKAGES[packageId];
     if (!pack) return res.status(400).json({ error: "Invalid package ID" });
@@ -131,6 +137,11 @@ router.post("/credits/create-order", authMiddleware, async (req, res) => {
 
 router.post("/credits/capture-order", authMiddleware, async (req, res) => {
   try {
+    if(require('../services/processingTokens/runtime').enabled()){
+      if(req.user?.claims?.email_verified!==true)return res.status(403).json({error:'VERIFIED_ACCOUNT_REQUIRED'});
+      const result=await require('../services/payments/processingTopups').production().capture(req.userId||req.user.uid,req.body.orderID);
+      return res.json({success:true,...result,newCredits:result.tokensAdded,balance:result.processing.totalAvailableTokens});
+    }
     const { orderID, packageId } = req.body;
     const userId = (req.user && req.user.uid) || req.userId;
     if (!userId) {
@@ -259,6 +270,7 @@ const USD_TO_ZAR = 18.5;
 
 router.post("/payfast/init", authMiddleware, async (req, res) => {
   try {
+    if(require('../services/processingTokens/runtime').enabled())return res.status(409).json({error:'USE_PAYPAL_PROCESSING_TOPUP',message:'Processing-token top-ups use PayPal. Existing paid orders remain valid.'});
     const { packageId, returnUrl, cancelUrl, returnPath, cancelPath } = req.body || {};
     const pack = PACKAGES[packageId];
     if (!pack) return res.status(400).json({ error: "Invalid package ID" });

@@ -113,10 +113,15 @@ function createProcessingService({
     const rollingRemainingTokens = Math.max(0,
       p.rolling30DayTokens - spentTokens - a.reservedTokens);
     const remaining = Math.min(cycleRemainingTokens, rollingRemainingTokens);
+    const purchasedRemainingTokens=Math.max(0,(a.purchasedTokens||0)-(a.reservedPurchasedTokens||0));
     return {
       planId: a.planId,
       allowance: a.cycleAllowance,
       remaining,
+      purchasedRemainingTokens,
+      purchasedReservedTokens:a.reservedPurchasedTokens||0,
+      purchasedDebtTokens:Math.max(0,-(a.purchasedTokens||0)),
+      totalAvailableTokens:remaining+purchasedRemainingTokens,
       remainingPercent: Math.round((100 * remaining) / a.cycleAllowance),
       cycleRemainingTokens,
       rollingRemainingTokens,
@@ -179,6 +184,58 @@ function createProcessingService({
   }
   return {
     jobCollectionName: `${namespace}_jobs`,
+    // Payment verification is server-only. This transaction shares the same
+    // account authority as reservations, so resets/captures/replays cannot lose
+    // purchased tokens or change any historical legacy wallet.
+    async applyTopup(uid,{orderId,captureId}) {
+      identifier(orderId);identifier(captureId);
+      return db.runTransaction(async tx=>{
+        const intentRef=ref('topup_orders',orderId),claimRef=ref('topup_captures',captureId);
+        const [intentSnap,claim]=await tx.getAll(intentRef,claimRef);
+        const intent=intentSnap.data(),pack=require('../payments/processingTopupCatalog').PACKS[intent?.packageId];
+        if(!intent||intent.userId!==uid||intent.captureId!==captureId||intent.paymentVerified!==true||!pack||
+           intent.amount!==pack.price||intent.currency!=='USD')fail('VERIFIED_TOPUP_REQUIRED',409);
+        if(intent.revoked===true)fail('PAYMENT_REVOKED',409);
+        const previous=claim.data();
+        if(previous&&(previous.userId!==uid||previous.orderId!==orderId))fail('TOPUP_OWNER_MISMATCH',403);
+        if(previous?.credited)return{tokensAdded:0,duplicate:true};
+        const {a,time}=await load(tx,uid);
+        const tokensAdded=pack.tokens-(previous?.revokedTokens||0);
+        a.purchasedTokens=(a.purchasedTokens||0)+tokensAdded;
+        if(!Number.isSafeInteger(a.purchasedTokens))fail('INVALID_PURCHASED_BALANCE',503);
+        a.userId=uid;
+        tx.set(account(uid),a);
+        tx.set(claimRef,{...previous,userId:uid,orderId,captureId,packageId:pack.id,tokens:pack.tokens,credited:true,creditedAt:time});
+        tx.update(intentRef,{state:'credited',creditedAt:time});
+        return{tokensAdded,duplicate:false};
+      });
+    },
+    async revokeTopup(captureId,{orderId,refundId,tokens}={}) {
+      identifier(captureId);
+      identifier(refundId);
+      return db.runTransaction(async tx=>{
+        const claimRef=ref('topup_captures',captureId),claim=(await tx.get(claimRef)).data();
+        orderId=claim?.orderId||orderId;if(!orderId)return{unrelated:true};
+        const intentRef=ref('topup_orders',identifier(orderId)),intent=(await tx.get(intentRef)).data();
+        if(!intent||intent.captureId&&intent.captureId!==captureId)return{unrelated:true};
+        const pack=require('../payments/processingTopupCatalog').PACKS[intent.packageId];
+        if(!pack)fail('INVALID_TOPUP_PACKAGE',409);
+        if(claim?.refundIds?.includes(refundId))return{duplicate:true};
+        if((claim?.refundIds?.length||0)>100)fail('REFUND_RECONCILIATION_REQUIRED',503);
+        const previous=claim?.revokedTokens||0;
+        const revokedTokens=Math.min(pack.tokens,previous+(tokens===undefined?pack.tokens:integer(tokens,'REFUND_TOKENS',1)));
+        const {a,time}=await load(tx,intent.userId);
+        a.userId=intent.userId;
+        // Keep a signed debt if refunded tokens have already been used or held;
+        // a late worker settlement or another purchase cannot recreate them.
+        if(claim?.credited)a.purchasedTokens=(a.purchasedTokens||0)-(revokedTokens-previous);
+        tx.set(account(intent.userId),a);
+        tx.set(claimRef,{...claim,userId:intent.userId,orderId,captureId,tokens:pack.tokens,
+          revokedTokens,refundIds:[...(claim?.refundIds||[]),refundId],revokedAt:time});
+        tx.update(intentRef,{...(revokedTokens===pack.tokens?{revoked:true}:{}),revokedTokens,revokedAt:time});
+        return{revoked:true};
+      });
+    },
     quote: priced,
     async purchaseCapacity(requiredMicros) {
       integer(requiredMicros, "PURCHASE_CAPACITY", 1);
@@ -332,7 +389,9 @@ function createProcessingService({
         if (activeCounted && (a.active >= caps.maxActiveUser || g.active >= caps.maxActive))
           fail("CONCURRENT_JOB_LIMIT", 429);
         if (a.history.length >= caps.maxEventsPerUser) fail("USAGE_EVENT_LIMIT", 429);
-        if (q.tokens > summary(a, time).remaining) fail("PROCESSING_ALLOWANCE_REACHED", 429);
+        const available=summary(a,time);
+        if(q.tokens>available.totalAvailableTokens)fail('PROCESSING_ALLOWANCE_REACHED',429);
+        const renewableTokens=Math.min(q.tokens,available.remaining),purchasedTokens=q.tokens-renewableTokens;
         // All outstanding work remains a liability across calendar and allowance resets.
         if (
           (g.days[day] || 0) + g.reservedMicros + q.maxMicros > caps.dailyMicros ||
@@ -350,12 +409,13 @@ function createProcessingService({
         )
           fail("EXTERNAL_API_BUDGET", 429);
         if (
-          a.history.reduce((s, e) => s + e.tokens, 0) + a.reservedTokens + q.tokens >
+          a.history.reduce((s, e) => s + e.tokens, 0) + a.reservedTokens + renewableTokens >
           p.rolling30DayTokens
         )
           fail("ROLLING_PROCESSING_BUDGET", 429);
         a.userId = uid;
-        a.reservedTokens += q.tokens;
+        a.reservedTokens += renewableTokens;
+        a.reservedPurchasedTokens=(a.reservedPurchasedTokens||0)+purchasedTokens;
         a.reservedMicros += q.maxMicros;
         if (activeCounted) a.active++;
         g.reservedMicros += q.maxMicros;
@@ -371,6 +431,7 @@ function createProcessingService({
           ...(legacyCashOnly ? { legacyCashOnly: true } : {}),
           fingerprint,
           tokens: q.tokens,
+          renewableTokens,purchasedTokens,
           tokenPricing: q.tokenPricing,
           maxMicros: q.maxMicros,
           maxSeconds: q.maxSeconds,
@@ -450,14 +511,20 @@ function createProcessingService({
           : integer(consumedTokens, "CONSUMED_TOKENS")) : 0;
         if (consumed > r.tokens) fail("TOKEN_QUOTE_EXCEEDED", 409);
         // A refund belongs to the original cycle. Never inflate a later allowance.
-        if (r.cycleStart === a.cycleStart) a.used += consumed;
-        a.reservedTokens -= r.tokens;
+        const renewableConsumed=Math.min(consumed,r.renewableTokens??r.tokens);
+        const purchasedConsumed=consumed-renewableConsumed;
+        if (r.cycleStart === a.cycleStart) a.used += renewableConsumed;
+        a.reservedTokens -= r.renewableTokens??r.tokens;
+        a.reservedPurchasedTokens=(a.reservedPurchasedTokens||0)-(r.purchasedTokens||0);
+        a.purchasedTokens=(a.purchasedTokens||0)-purchasedConsumed;
         integer(a.reservedTokens, "TOKEN_HOLD");
+        integer(a.reservedPurchasedTokens,'PURCHASED_TOKEN_HOLD');
         // Records created before deferred dispatch always owned a slot.
         if (r.activeCounted !== false) a.active--;
         a.reservedMicros -= r.maxMicros;
         a.history.push({ at: time, micros: actualMicros,
-          tokens: quoted ? consumed : Math.ceil(actualMicros / TOKEN_MICROS), requestId });
+          tokens: quoted ? renewableConsumed : Math.ceil(actualMicros / TOKEN_MICROS),
+          purchasedTokens:purchasedConsumed,requestId });
         if (r.activeCounted !== false) g.active--;
         g.reservedMicros -= r.maxMicros;
         if (r.planId === 'free') g.freeReservedMicros -= r.maxMicros;

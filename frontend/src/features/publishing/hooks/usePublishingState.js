@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { isPlatformVisible } from '../../../config/platformVisibility';
 
 /**
  * Manages the state for the Unified Publisher.
@@ -35,7 +36,7 @@ export const usePublishingState = (initialPlatforms = []) => {
 
   // --- Platform Selection ---
   // valid values: "tiktok", "youtube", "instagram", "facebook", "linkedin", "twitter", "pinterest"
-  const [selectedPlatforms, setSelectedPlatforms] = useState(initialPlatforms);
+  const [selectedPlatforms, setSelectedPlatforms] = useState(initialPlatforms.filter(isPlatformVisible));
 
   // --- Platform Specific Data (Overrides) ---
   // Structure: { tiktok: { privacy: "public", commercial: false, ... }, youtube: { ... } }
@@ -44,6 +45,7 @@ export const usePublishingState = (initialPlatforms = []) => {
   // --- Actions ---
 
   const togglePlatform = useCallback(platformId => {
+    if(!isPlatformVisible(platformId))return;
     setSelectedPlatforms(prev => {
       if (prev.includes(platformId)) {
         return prev.filter(p => p !== platformId);

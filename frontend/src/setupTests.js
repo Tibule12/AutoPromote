@@ -37,9 +37,10 @@ if (typeof global.fetch === "undefined") {
       blob: () => Promise.resolve(new Blob([])),
     })
   );
-  global.Request = class Request {};
-  global.Response = class Response {};
-  global.Headers = class Headers {};
+  const webFetch=require('node-fetch');
+  global.Request = webFetch.Request;
+  global.Response = webFetch.Response;
+  global.Headers = webFetch.Headers;
 }
 
 // Mock Canvas getContext for MemeticComposerPanel (jsdom doesn't fully support 2d context)

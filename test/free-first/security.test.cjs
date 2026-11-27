@@ -182,6 +182,9 @@ test("client SDK cannot edit balances, subscriptions, token ledger or claim owne
         "processing_control",
         "processing_jobs",
         "processing_events",
+        "processing_topup_orders",
+        "processing_topup_sessions",
+        "processing_topup_captures",
         "paypal_subscription_claims",
       ]) {
         await assertFails(

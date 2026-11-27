@@ -3,12 +3,22 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebaseClient";
 import { API_BASE_URL } from "../config";
 import ProcessingUsage from "./ProcessingUsage";
+import ProcessingTopups from './ProcessingTopups';
 import { startVisiblePoller } from "../utils/visiblePoller";
 import offers from "../config/subscriptionOffers.json";
 import { paypalSubscriptionReturn, clearPaypalSubscriptionReturn } from '../utils/paypalReturn';
+import { getRuntimeE2EToken } from '../utils/mediaAuth';
 import "./PayPalSubscriptionPanel.css";
 import "./BillingContrast.css";
 const api = path => `${API_BASE_URL || ""}${path}`;
+function localBrowserFixtureUser(){
+  const token=getRuntimeE2EToken();if(!token)return null;
+  // Reuse the existing page+API-loopback-only browser fixture identity. An
+  // Internet origin can never turn a localStorage profile into payment auth.
+  try{const saved=JSON.parse(localStorage.getItem('user')||'null');
+    return saved?.uid?{uid:saved.uid,getIdToken:async()=>token}:null;
+  }catch{return null;}
+}
 export default function PayPalSubscriptionPanel({
   compact = false,
   onClose,
@@ -16,7 +26,7 @@ export default function PayPalSubscriptionPanel({
   onUpgradeSuccess,
 }) {
   const [plans, setPlans] = useState(offers);
-  const [user, setUser] = useState(auth.currentUser);
+  const [user, setUser] = useState(()=>auth.currentUser||localBrowserFixtureUser());
   const [subscription, setSubscription] = useState(null);
   const [usage, setUsage] = useState(null);
   const [balances, setBalances] = useState({});
@@ -30,7 +40,7 @@ export default function PayPalSubscriptionPanel({
   const usageOwner = useRef(null);
   const upgradeCallback = useRef(onUpgradeSuccess);
   useEffect(() => { upgradeCallback.current = onUpgradeSuccess; }, [onUpgradeSuccess]);
-  useEffect(() => onAuthStateChanged(auth, setUser), []);
+  useEffect(() => onAuthStateChanged(auth, value=>setUser(value||localBrowserFixtureUser())), []);
   useEffect(() => {
     let live = true;
     fetch(api("/api/paypal-subscriptions/plans"))
@@ -268,6 +278,7 @@ export default function PayPalSubscriptionPanel({
           promotionalCredits={balances.promotionalCredits}
         />
       )}
+      <ProcessingTopups user={user} onUpdated={()=>setRefreshRevision(value=>value+1)}/>
       {subscription?.planId && !["free", "plus"].includes(subscription.planId) && (
         <p>
           Your existing subscription agreement and resource entitlements are retained. No automatic

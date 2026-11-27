@@ -25,6 +25,7 @@ describe("ViralScanner saved Cam Combiner source", () => {
   const originalPause = window.HTMLMediaElement.prototype.pause;
 
   beforeEach(() => {
+    jest.spyOn(window,'confirm').mockReturnValue(true);
     Object.defineProperty(window.HTMLMediaElement.prototype, "play", {
       configurable: true,
       writable: true,
@@ -39,6 +40,7 @@ describe("ViralScanner saved Cam Combiner source", () => {
     global.fetch = jest.fn((url, options = {}) => {
       const requestUrl = String(url);
       const method = String(options.method || "GET").toUpperCase();
+      if(requestUrl.includes('/api/usage/processing/quote'))return Promise.resolve({ok:true,status:200,json:async()=>({estimate:{tokens:20}})});
       if (requestUrl.includes("/api/analytics/clip-scanner-cache") && method === "GET") {
         return Promise.resolve({ ok: false, status: 404, json: async () => ({}) });
       }

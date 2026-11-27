@@ -3,6 +3,7 @@ import { auth } from "../firebaseClient";
 import { API_ENDPOINTS } from "../config";
 import { cachedFetch } from "../utils/requestCache";
 import { getActiveWorkspaceId, withWorkspaceHeaders } from "../utils/workspace";
+import { isPlatformVisible, visiblePlatformSummary } from '../config/platformVisibility';
 
 const DEFAULT_STATUS = { connected: false, meta: null };
 
@@ -147,7 +148,7 @@ const PLATFORM_CONFIG = {
   },
 };
 
-const PLATFORM_NAMES = Object.keys(PLATFORM_CONFIG);
+const PLATFORM_NAMES = Object.keys(PLATFORM_CONFIG).filter(isPlatformVisible);
 
 /**
  * Custom hook that manages connection status for all social platforms.
@@ -165,6 +166,7 @@ export default function usePlatformStatus() {
   const [platformSummary, setPlatformSummary] = useState({ platforms: {} });
 
   const setStatus = useCallback((platform, data) => {
+    if(!isPlatformVisible(platform))return;
     setStatuses(prev => ({ ...prev, [platform]: data }));
   }, []);
 
@@ -173,6 +175,7 @@ export default function usePlatformStatus() {
    */
   const loadPlatformStatus = useCallback(
     async platformName => {
+      if(!isPlatformVisible(platformName))return;
       const config = PLATFORM_CONFIG[platformName];
       if (!config) return;
 
@@ -272,7 +275,7 @@ export default function usePlatformStatus() {
         }
       });
       setStatuses(prev => ({ ...prev, ...newStatuses }));
-      setPlatformSummary(data);
+      setPlatformSummary(visiblePlatformSummary(data));
     } catch (err) {
       console.error("Error loading unified platform statuses:", err);
     }

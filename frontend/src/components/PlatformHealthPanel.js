@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { API_BASE_URL } from "../config";
 import { auth } from "../firebaseClient";
 import { startVisiblePoller } from "../utils/visiblePoller";
+import { visiblePlatformSummary } from '../config/platformVisibility';
 import "../AdminDashboard.css"; // Reuse card styles
 
 function PlatformHealthPanel() {
@@ -25,7 +26,7 @@ function PlatformHealthPanel() {
       const data = await res.json();
       if (signal?.aborted) return;
       if (data.success) {
-        setPlatforms(data.platforms);
+        setPlatforms(visiblePlatformSummary(data.platforms));
         setError(null);
       } else {
         setError(data.error || "Failed to load platform status");

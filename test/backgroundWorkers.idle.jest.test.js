@@ -34,12 +34,13 @@ beforeEach(() => {
 });
 afterEach(() => { delete process.env.FREE_FIRST_USAGE_ENABLED; });
 
-test("renewable publishing cannot dequeue or upload without a reserved dispatcher context", async () => {
+test("renewable queue discovery can return no work; paid dispatch still requires its funded context", async () => {
   process.env.FREE_FIRST_USAGE_ENABLED = "true";
   mockTasks.mockResolvedValue(true);
-  await expect(processNextPlatformTask()).rejects.toMatchObject({code:"BOUNDED_PROCESSING_ADAPTER_REQUIRED"});
-  await expect(processNextYouTubeTask()).rejects.toMatchObject({code:"BOUNDED_PROCESSING_ADAPTER_REQUIRED"});
-  expect(mockCollection).not.toHaveBeenCalled();
+  expect(await processNextPlatformTask()).toBeNull();
+  expect(await processNextYouTubeTask()).toBeNull();
+  expect(mockCollection).toHaveBeenCalledTimes(2);
+  expect(()=>require('../src/services/processingTokens/runtime').assertDispatch()).toThrow('BOUNDED_PROCESSING_ADAPTER_REQUIRED');
 });
 
 test("idle publishing workers stop before queue/content scans", async () => {
