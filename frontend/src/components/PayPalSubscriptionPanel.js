@@ -925,7 +925,7 @@ const PayPalSubscriptionPanel = ({
       {!compact && (!showPlanComparison || Boolean(authUser)) && (
         <div className="paypal-sdk-notice neutral">
           {paypalConfig?.currency ? `Billing currency: ${paypalConfig.currency}. ` : ""}
-          Subscription activation happens immediately after PayPal approval.
+          Subscription activation requires server-verified payment. PayPal approval alone does not activate a paid plan.
         </div>
       )}
 
@@ -1003,7 +1003,7 @@ const PayPalSubscriptionPanel = ({
               </div>
               <div>
                 <dt>Activation</dt>
-                <dd>After PayPal approval</dd>
+                <dd>After verified payment</dd>
               </div>
             </dl>
           </aside>

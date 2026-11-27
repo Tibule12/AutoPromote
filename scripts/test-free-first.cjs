@@ -30,7 +30,7 @@ const { once } = require("node:events");
       "--project_id",
       env.UNIFIED_CREDITS_PROJECT_ID,
       "--rules",
-      path.resolve("firestore.rules"),
+      path.resolve(process.env.FREE_FIRST_RULES_FILE || "firestore.rules"),
     ],
     { env, cwd: scratch, stdio: ["ignore", "pipe", "pipe"] }
   );
