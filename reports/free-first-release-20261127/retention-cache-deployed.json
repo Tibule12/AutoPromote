@@ -1,0 +1,45 @@
+{
+  "checkedAtUtc": "2026-11-27T04:51:38.158351+00:00",
+  "versions": [
+    {
+      "origin": "https://api.autopromote.org",
+      "status": 200,
+      "version": {
+        "ok": true,
+        "version": "1.2.0",
+        "commit": "6690909415043deff3662dd94d6db6fb581bda9e",
+        "securityPolicy": "security-owner-bootstrap-20261027",
+        "generatedAt": "2026-11-27T04:51:32.799Z"
+      }
+    },
+    {
+      "origin": "https://autopromote.onrender.com",
+      "status": 200,
+      "version": {
+        "ok": true,
+        "version": "1.2.0",
+        "commit": "6690909415043deff3662dd94d6db6fb581bda9e",
+        "securityPolicy": "security-owner-bootstrap-20261027",
+        "generatedAt": "2026-11-27T04:51:33.186Z"
+      }
+    }
+  ],
+  "financialRules": {
+    "ruleset": "projects/autopromote-cc6d3/rulesets/c371aaf1-5824-4b76-8759-23f6533e54e7",
+    "sha256": "176ad0acd047e6b4f748787e2fe845d767531c9c70c598e601b5a5910a2cf07d",
+    "stillMatchesPublishedDelta": true
+  },
+  "pipeline": {
+    "conclusion": "success",
+    "headSha": "6690909415043deff3662dd94d6db6fb581bda9e",
+    "status": "completed",
+    "url": "https://github.com/Tibule12/AutoPromote/actions/runs/45941819929"
+  },
+  "runtimeVerified": true,
+  "warmCycleReadReductionVerified": false,
+  "invoiceReductionVerified": false,
+  "priceOrHostingPlanChanged": false,
+  "productionBalancesModified": false,
+  "paidCreativeWorkloadsStarted": 0,
+  "productionResourceDeletes": 0
+}

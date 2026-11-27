@@ -27758,13 +27758,14 @@
       "reports/free-first-release-20261127/production-after.json",
       "reports/free-first-release-20261127/firestore-rules-release.json",
       "reports/free-first-release-20261127/retention-cache-local.json",
-      "reports/free-first-release-20261127/allowance-qualification.json"
+      "reports/free-first-release-20261127/allowance-qualification.json",
+      "reports/free-first-release-20261127/retention-cache-deployed.json"
     ],
     "readinessPromotion": false,
     "nextTaskId": "S02",
     "verified": [
       "PR560 deployed on both production API origins; financial-only Rules delta published and read back.",
-      "Negative-only retention cache passes real repeated-cycle and safety tests; PR561 release qualification.",
+      "PR561 negative-only retention cache passes full release checks and serves669090941 on both API origins; repeated local cycles558 to143 reads. Live warm-cycle and invoice comparisons remain unverified.",
       "Renewable Cloud Run adapter/native admission and authenticated billing UI tested locally with provider fixtures; activation off."
     ],
     "remaining": [

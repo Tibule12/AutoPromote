@@ -1,0 +1,22 @@
+{
+  "recordedAtUtc": "2026-11-27T04:46:35.702697+00:00",
+  "pullRequest": {
+    "mergeCommit": {
+      "oid": "6690909415043deff3662dd94d6db6fb581bda9e"
+    },
+    "mergedAt": "2026-11-27T04:45:45Z",
+    "state": "MERGED",
+    "url": "https://github.com/Tibule12/AutoPromote/pull/561"
+  },
+  "reviewHead": "2fad89b1538bd20514311cf042954121828e3b57",
+  "testedAndMergedTreesMatch": true,
+  "tree": "8ddbcde76e39da456d135bfcecf0036504c54188",
+  "lastPendingSuite": {
+    "conclusion": "success",
+    "status": "completed",
+    "url": "https://github.com/Tibule12/AutoPromote/actions/runs/45939997384"
+  },
+  "allPullRequestChecksPassed": true,
+  "productionWorkerBuildRequested": false,
+  "paidCreativeWorkloadsStarted": 0
+}

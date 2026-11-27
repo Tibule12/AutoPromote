@@ -16,7 +16,7 @@
 - [x] Observe a complete live cleanup cycle. Record query improvement and zero
   repeated content writes/trigger delivery; do not claim document-read savings.
 
-## 2. Retention document-read follow-up — PR561
+## 2. Retention document-read follow-up — PR561 deployed
 
 - [x] Implement bounded negative-only cache; preserve fresh deletion checks.
 - [x] Prove six real-emulator scans:558→143 document reads, zero writes/deletions.
@@ -24,7 +24,10 @@
   future publication expiry, fresh dry runs and uncached truncation/errors.
 - [x] Pass12 isolated emulator and21 existing scheduling/upload/background cases.
 - [x] Push PR561; backend/security/cache, frontend build, CI and scanning pass.
-- [ ] Record final merge/runtime identity after remaining release checks.
+- [x] All release checks pass; PR561 is merged as
+  `6690909415043deff3662dd94d6db6fb581bda9e`. Both public API origins now serve
+  that exact revision. Production pipeline succeeds; financial Rules delta is
+  read back unchanged. See retention-cache-deployed.json.
 - [ ] Observe both cold and warm production cycles; compare complete windows
   with Monitoring lag and other applications disclosed. Invoice savings remain
   unknown until provider usage/billing reflects the change.
@@ -113,6 +116,10 @@ processing was initiated. Do not enable Free with all useful operations refused.
   ID; no product/plan creation, activation or merchant transaction performed.
 - [ ] Qualify merchant sandbox lifecycle, actual fee/FX/tax terms, paid activation,
   renewal, failure, cancellation, reordered webhook, refund and reversal cases.
+- [ ] Integrate current main (including released Education and independent cost/
+  security changes) into the feature branch through a reviewed merge; resolve
+  overlaps and rerun source-lock, financial, welcome and authenticated checks.
+  Do not copy the entire older feature tree over current main.
 - [ ] Complete stage5/6 before enabling the new catalog/checkout and adapters.
 - [ ] With separate explicit activation approval, create/read back inactive live
   objects; configure IDs/webhook/origins; verify exact terms; activate the approved

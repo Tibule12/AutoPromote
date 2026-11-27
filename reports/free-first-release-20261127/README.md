@@ -8,9 +8,10 @@ remain excluded. No subscription prices or six-day Free reset were changed.
 
 ## Released independently
 
-[PR560](https://github.com/Tibule12/AutoPromote/pull/560) is merged and serves
-`2c92c8c978acac837dfa97f7082c9a08dd964539` on both API origins. It removes
-unchanged retention writes, batches sparse dependency queries, coalesces
+[PR560](https://github.com/Tibule12/AutoPromote/pull/560) was merged and verified at
+`2c92c8c978acac837dfa97f7082c9a08dd964539` on both API origins. The follow-up
+PR561 is now also deployed at `6690909415043deff3662dd94d6db6fb581bda9e`.
+The first release removes unchanged retention writes, batches sparse dependency queries, coalesces
 nonfinancial counters and diagnostics, pauses hidden diagnostic polling/listeners
 and excludes passive account polling from optional background demand. Publisher,
 Scheduler and creative processing are preserved. The existing payment path now
@@ -47,8 +48,11 @@ media. Content changes invalidate the cache; future known publication deadlines
 expire entries precisely. Dry runs refresh, errors and incomplete scans are not
 cached, and deletion always retains fresh transactional/ownership/generation
 checks. Dependency-only changes may postpone cleanup by at most one hour.
-Publishing and scheduling do not use this cache. See the staged checklist for
-its exact release status.
+Publishing and scheduling do not use this cache. All PR561 release checks passed before merge, including the full emulator and
+browser suites; the production pipeline completed successfully. Both API origins
+serve the exact merged revision, and the financial Rules source hash still
+matches. [Deployment receipt](retention-cache-deployed.json). A cold/warm-cycle
+production read comparison and invoice reduction are not yet verified.
 
 [Six actual emulator maintenance cycles](retention-cache-local.json) read 558
 versus143 documents (74.37% fewer), with zero writes and no media deletion.
@@ -185,3 +189,14 @@ reviewable code, sanitized measurements and hash manifests; portable before
 sources are pinned under `test/free-first/baselines`. To rerun the actual-output
 transfer case, supply the retained SHA256-matching60s film at its documented local
 report path. A shallow checkout alone does not contain that private test source.
+
+The proposal renews the Plus usage window every 24 hours; PayPal billing is
+monthly. Counts per usage renewal are therefore distinct from paid subscription
+renewals and the rolling 30-day ceiling. Automated native regressions also execute
+bounded synthetic CPU fixtures; those do not count as new meaningful workflows.
+
+The final source snapshot is pushed as `bb0be0c85` on the existing feature branch.
+Its broad remote suite is recorded separately in [feature CI](feature-remote-ci.json);
+the unmerged migration remains disabled. Both independent production releases
+have completed their release checks. The final receipt commit changes only
+documentation/measurements and is locally validated without another deployment.

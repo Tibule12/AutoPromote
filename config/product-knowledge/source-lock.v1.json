@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Finalize independent release report and portable before/after evidence with production migration disabled.",
-  "reviewed_at": "2026-11-27T04:34:34.064Z",
+  "reason": "Record both verified production cost/security deployments; preserve disabled Free/Plus and explicit missing warm-cycle/merchant/worker proofs.",
+  "reviewed_at": "2026-11-27T04:52:31.681Z",
   "catalog_sha256": "eecc391b0e634e380f0b393842ba8a83bc3f8c12b6cbd72f46e427a2a634e270",
   "sources": [
     {
@@ -819,11 +819,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "21fc2547516d83e1ade71b06c774bb62d942e3b1e025fdf0b97ceb75c1d87bf1"
+      "sha256": "bbc582fd072fc8023b55f4410a4a08860cea140c9f45cde6ac04e68a5eead1f6"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "0e3ab6886579721e98fd5107eaebdcf0cd8bab9ede09bc0f99e885b8a4547814"
+      "sha256": "f91e5b87c1293b921e58ade7938ffce34e3a72f492424f47a7192b745394f587"
     },
     {
       "path": "worker.js",

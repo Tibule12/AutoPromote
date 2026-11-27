@@ -1,0 +1,27 @@
+{
+  "checkedAtUtc": "2026-11-27T04:45:49.908146+00:00",
+  "versions": [
+    {
+      "origin": "https://api.autopromote.org",
+      "status": 200,
+      "data": {
+        "ok": true,
+        "version": "1.2.0",
+        "commit": "2c92c8c978acac837dfa97f7082c9a08dd964539",
+        "securityPolicy": "security-owner-bootstrap-20261027",
+        "generatedAt": "2026-11-27T04:45:49.324Z"
+      }
+    },
+    {
+      "origin": "https://autopromote.onrender.com",
+      "status": 200,
+      "data": {
+        "ok": true,
+        "version": "1.2.0",
+        "commit": "2c92c8c978acac837dfa97f7082c9a08dd964539",
+        "securityPolicy": "security-owner-bootstrap-20261027",
+        "generatedAt": "2026-11-27T04:45:49.726Z"
+      }
+    }
+  ]
+}
