@@ -1,4 +1,39 @@
 require("dotenv").config(); // Load environment variables from .env file
+const { requestLogPath } = require("./utils/logSanitizer");
+const backgroundActivity = require("./services/backgroundActivityService");
+const backgroundWork = require("./services/backgroundWorkService");
+
+// Render environment values are strings and may acquire whitespace when copied
+// from the dashboard. Canonicalize the flag once so every health check and
+// background loop reads the same value. Keep the historical misspelling as a
+// compatibility fallback.
+const rawBackgroundJobsFlag =
+  process.env.ENABLE_BACKGROUND_JOBS ?? process.env.ENABLE_BACKROUND_JOBS;
+const isRenderRuntime = [
+  process.env.RENDER,
+  process.env.RENDER_SERVICE_ID,
+  process.env.RENDER_EXTERNAL_HOSTNAME,
+].some(value => String(value || "").trim().length > 0);
+const isDedicatedProductionApi =
+  process.env.NODE_ENV === "production" &&
+  !process.env.K_SERVICE &&
+  !process.env.FUNCTION_TARGET &&
+  !process.env.AWS_LAMBDA_FUNCTION_NAME &&
+  !process.env.VERCEL;
+
+if (isRenderRuntime || isDedicatedProductionApi) {
+  // This dedicated API is AutoPromote's scheduler host. Do not let duplicate
+  // or stale host configuration silently turn off storage cleanup. Serverless
+  // runtimes are excluded above because they cannot own durable intervals.
+  process.env.ENABLE_BACKGROUND_JOBS = "true";
+  if (String(rawBackgroundJobsFlag || "").trim().toLowerCase() !== "true") {
+    console.warn(
+      "[startup] Dedicated production API received background jobs as disabled; forcing them on."
+    );
+  }
+} else if (rawBackgroundJobsFlag !== undefined) {
+  process.env.ENABLE_BACKGROUND_JOBS = String(rawBackgroundJobsFlag).trim().toLowerCase();
+}
 // Bootstrap: ensure Firebase service account env is materialized as a credentials file
 require("./bootstrap");
 // This helps hosts (Render, Docker) that only provide the JSON via env var instead of a file path.
@@ -155,7 +190,9 @@ const LAT_SAMPLE_SIZE = parseInt(process.env.LAT_SAMPLE_SIZE || "500", 10); // k
 let __latSamples = new Array(LAT_SAMPLE_SIZE);
 let __latIndex = 0;
 let __latCount = 0;
+let __latVersion = 0;
 function recordLatency(ms) {
+  __latVersion++;
   __latSamples[__latIndex] = ms;
   __latIndex = (__latIndex + 1) % LAT_SAMPLE_SIZE;
   if (__latCount < LAT_SAMPLE_SIZE) __latCount++;
@@ -356,9 +393,9 @@ function slowRequestLogger(req, res, next) {
   const started = Date.now();
   res.once("finish", () => {
     const dur = Date.now() - started;
-    recordLatency(dur);
+    if (!/^\/(?:api\/)?health(?:\/|$)/.test(req.path || "")) recordLatency(dur);
     if (dur >= SLOW_REQ_MS) {
-      logger.warn("[slow]", req.method, req.originalUrl, dur + "ms", "status=", res.statusCode);
+      logger.warn("[slow]", req.method, requestLogPath(req.originalUrl), dur + "ms", "status=", res.statusCode);
     }
   });
   next();
@@ -369,6 +406,7 @@ function slowRequestLogger(req, res, next) {
 // -------------------------------------------------
 const MICRO_CACHE_TTL_MS = parseInt(process.env.MICRO_STATUS_CACHE_TTL_MS || "300", 10); // 300ms default (override via env)
 const __microCache = new Map(); // key -> { expiry, payload, contentType }
+const { statusRequestCacheKey } = require("./middlewares/platformStatusPolicy");
 function microCache(req, res, next) {
   if (MICRO_CACHE_TTL_MS <= 0) return next();
   if (req.method !== "GET") return next();
@@ -385,7 +423,8 @@ function microCache(req, res, next) {
     "/api/status/aggregate",
   ];
   if (!allow.includes(req.path)) return next();
-  const entry = __microCache.get(req.path);
+  const cacheKey = statusRequestCacheKey(req);
+  const entry = __microCache.get(cacheKey);
   if (entry && entry.expiry > Date.now()) {
     res.setHeader("x-micro-cache", "HIT");
     res.setHeader("x-micro-cache-ttl-ms", MICRO_CACHE_TTL_MS.toString());
@@ -395,11 +434,14 @@ function microCache(req, res, next) {
   const originalSend = res.send.bind(res);
   res.send = body => {
     try {
-      __microCache.set(req.path, {
-        expiry: Date.now() + MICRO_CACHE_TTL_MS,
-        payload: body,
-        contentType: res.get("Content-Type"),
-      });
+      if (res.statusCode < 400) {
+        if (__microCache.size >= 200) __microCache.delete(__microCache.keys().next().value);
+        __microCache.set(cacheKey, {
+          expiry: Date.now() + MICRO_CACHE_TTL_MS,
+          payload: body,
+          contentType: res.get("Content-Type"),
+        });
+      }
     } catch (_) {}
     res.setHeader("x-micro-cache", "MISS");
     res.setHeader("x-micro-cache-ttl-ms", MICRO_CACHE_TTL_MS.toString());
@@ -502,6 +544,12 @@ try {
   authMiddleware = require("./authMiddleware");
 } catch (e) {
   authMiddleware = (req, res, next) => next();
+}
+let workspaceScope;
+try {
+  workspaceScope = require("./middlewares/workspaceScope");
+} catch (e) {
+  workspaceScope = (req, res, next) => next();
 }
 const viralGrowthRoutes = require("./routes/viralGrowthRoutes");
 const engagementRoutes = require("./routes/engagementRoutes");
@@ -841,6 +889,7 @@ try {
   void storage;
 
   const app = express();
+  app.use(require("./services/infrastructureTelemetry").middleware);
 
   // Temporary diagnostic route to check route loading
   app.get("/api/debug/routes", (req, res) => {
@@ -940,80 +989,25 @@ try {
   } catch (_) {
     /* optional */
   }
-  // Access log middleware - logs a single line per request with useful correlation fields
-  app.use((req, res, next) => {
-    try {
-      const start = Date.now();
-      const originalSend = res.send.bind(res);
-      let bytes = 0;
-      // wrap send to capture response size (best-effort)
-      res.send = function (body) {
-        try {
-          if (typeof body === "string") bytes = Buffer.byteLength(body, "utf8");
-          else if (Buffer.isBuffer(body)) bytes = body.length;
-          else bytes = Buffer.byteLength(JSON.stringify(body || ""), "utf8");
-        } catch (_) {
-          bytes = 0;
-        }
-        return originalSend(body);
+  // Keep console/file request records identical and free of query credentials.
+  const appendAccessLine = process.env.LOG_EVENTS_TO_FILE === "true"
+    ? (() => {
+      const fs = require("node:fs/promises");
+      const path = require("node:path");
+      const directory = path.join(__dirname, "../logs");
+      let ready;
+      return (line, timestamp) => {
+        ready ||= fs.mkdir(directory, { recursive: true }).catch(() => { ready = null; });
+        Promise.resolve(ready).then(() => fs.appendFile(
+          path.join(directory, `access-${timestamp.slice(0, 10)}.log`), line + "\n"
+        )).catch(() => {});
       };
-      res.once("finish", () => {
-        try {
-          const duration = Date.now() - start;
-          const ip =
-            req.headers["x-forwarded-for"] ||
-            req.ip ||
-            (req.connection && req.connection.remoteAddress) ||
-            "";
-          const ua = req.headers["user-agent"] || "";
-          const ts = new Date().toISOString();
-          const uaClean = ua.replace(/"/g, "");
-          const line =
-            "[ACCESS] ts=" +
-            ts +
-            " " +
-            req.method +
-            " " +
-            req.originalUrl +
-            " status=" +
-            res.statusCode +
-            ' requestID="' +
-            (req.requestId || "") +
-            '" clientIP="' +
-            ip +
-            '" responseTimeMS=' +
-            duration +
-            " responseBytes=" +
-            bytes +
-            ' userAgent="' +
-            uaClean +
-            '"';
-          logger.info(line);
-          // Optional: write access log line to a daily file for security evidence (enable with LOG_EVENTS_TO_FILE=true)
-          try {
-            if (process.env.LOG_EVENTS_TO_FILE === "true") {
-              const fs = require("fs");
-              const p = require("path");
-              const dir = p.join(__dirname, "../logs");
-              try {
-                fs.mkdirSync(dir, { recursive: true });
-              } catch (_) {
-                /* ignore */
-              }
-              const day = ts.slice(0, 10); // YYYY-MM-DD
-              const file = p.join(dir, `access-${day}.log`);
-              fs.appendFile(file, line + "\n", () => {});
-            }
-          } catch (_) {
-            /* ignore file logging errors */
-          }
-        } catch (_) {}
-      });
-    } catch (_) {}
-    next();
-  });
+    })()
+    : undefined;
+  app.use(require("./middlewares/accessLog")(logger, appendAccessLine));
 
   app.use(slowRequestLogger);
+  app.use((req, res, next) => backgroundActivity.middleware(req, res, next));
   // Lazy warmup trigger (will start warmup if not already and early request hits)
   try {
     app.use(ensureWarmup);
@@ -1053,7 +1047,7 @@ try {
       } catch (e) {}
       // Quick override: allow all origins when explicitly requested via env.
       // Use only for development/testing. Setting this in production is dangerous.
-      if (process.env.CORS_ALLOW_ALL === "true") {
+      if (process.env.CORS_ALLOW_ALL === "true" && !require("./utils/authAuthority").isHostedRuntime()) {
         try {
           logger.warn("[cors] CORS_ALLOW_ALL=true — allowing all origins (override)");
         } catch (e) {}
@@ -1093,11 +1087,14 @@ try {
       "X-Requested-With",
       "x-correlation-id",
       "x-request-id",
+      "X-Workspace-Id",
       "X-File-Name",
       "X-Media-Type",
       "x-file-name",
       "x-media-type",
     ],
+    // Browser upload queues must be able to read the server cooldown.
+    exposedHeaders: ["Retry-After"],
     credentials: true,
     optionsSuccessStatus: 204,
   };
@@ -1252,7 +1249,12 @@ try {
   // Apply helmet (relaxed CSP off for React inline styles) & compression if available
   // Note: Second helmet call removed to avoid conflicts with the first comprehensive configuration
   if (compression) app.use(compression());
+  // Public documentation has its own 8kb parser and 30/minute limiter. Mount it
+  // before the media-sized parser and remote account/API limiter: help requires
+  // neither project payloads nor remote billing/worker infrastructure.
+  app.use('/api/product-assistance', require('./routes/productAssistanceRoutes')());
   // Discord interactions require the raw body for signature verification, so parse them before the global JSON middleware.
+  app.use(require("./utils/mediaTransferBudget").admitLargeStructuredBody);
   app.use(
     "/api/discord/interactions",
     express.json({
@@ -1262,6 +1264,12 @@ try {
       },
     })
   );
+  // Director review envelopes are intentionally small even though media APIs
+  // use a larger global JSON limit.
+  app.use("/api/studio/director/reviews", express.json({ limit: "24kb" }));
+  // Canonical project revisions are bounded below Firestore's document limit.
+  app.use("/api/studio/director/projects/revisions", express.json({ limit: "550kb" }));
+  app.use("/api/studio/director/projects/intelligence", express.json({ limit: "270kb" }));
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ extended: true, limit: "50mb", parameterLimit: 1000 }));
 
@@ -1297,9 +1305,41 @@ try {
     app.use("/api/auth", codeqlLimiter.auth);
   }
   app.use("/api/users", userRoutes);
+  // Founder workflow is disabled by default and remains authenticated,
+  // explicitly admin-only and founder-allowlisted even when enabled.
+  app.use("/api/admin/content-factory", require("./routes/adminContentFactoryRoutes"));
   if (codeqlLimiter && codeqlLimiter.writes) {
     app.use("/api/users", codeqlLimiter.writes);
   }
+  app.use(
+    "/api/studio/director/reviews",
+    routeLimiter({ windowHint: "studio_director_reviews" }),
+    codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (_req, _res, next) => next(),
+    require("./routes/studioDirectorReviewRoutes")
+  );
+  app.use(
+    "/api/studio/director/projects/revisions",
+    routeLimiter({ windowHint: "studio_director_project_revisions" }),
+    codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (_req, _res, next) => next(),
+    require("./routes/studioProjectRevisionRoutes")
+  );
+  app.use(
+    "/api/studio/director/projects/intelligence",
+    routeLimiter({ windowHint: "studio_project_intelligence" }),
+    codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (_req, _res, next) => next(),
+    require("./routes/studioProjectIntelligenceRoutes")
+  );
+  app.use(
+    "/api/studio/director/creative-plan",
+    routeLimiter({ windowHint: "studio_director_creative_plan" }),
+    codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (_req, _res, next) => next(),
+    require("./routes/studioDirectorCreativeRoutes")
+  );
+  app.use(
+    "/api/studio/director/analysis-artifacts",
+    routeLimiter({ windowHint: "studio_analysis_artifacts" }),
+    require("./routes/studioAnalysisArtifactRoutes")
+  );
   // Require latest terms before allowing access to content routes
   if (requireAcceptedTerms) {
     app.use(
@@ -1307,13 +1347,26 @@ try {
       routeLimiter({ windowHint: "content" }),
       authMiddleware,
       requireAcceptedTerms({ version: process.env.REQUIRED_TERMS_VERSION || "AUTOPROMOTE-v1.0" }),
+      workspaceScope,
       contentRoutes
     );
   } else {
-    app.use("/api/content", routeLimiter({ windowHint: "content" }), contentRoutes);
+    app.use(
+      "/api/content",
+      routeLimiter({ windowHint: "content" }),
+      authMiddleware,
+      workspaceScope,
+      contentRoutes
+    );
   }
   app.use("/api/sounds", soundRoutes);
-  app.use("/api/analytics", routeLimiter({ windowHint: "analytics" }), analyticsRoutes);
+  app.use(
+    "/api/analytics",
+    routeLimiter({ windowHint: "analytics" }),
+    authMiddleware,
+    workspaceScope,
+    analyticsRoutes
+  );
   app.use("/api/admin", routeLimiter({ windowHint: "admin" }), adminRoutes);
   app.use("/api/admin/security", adminSecurityRoutes);
   app.use("/api/admin/analytics", adminAnalyticsRoutes);
@@ -1343,8 +1396,8 @@ try {
   } catch (e) {
     console.warn("aggregateStatusRoutes mount failed:", e.message);
   }
-  // Only mount admin test routes in non-production environments
-  if (process.env.NODE_ENV !== "production") {
+  // Hosted runtimes must never expose local administrator setup routes.
+  if (!require("./utils/authAuthority").isHostedRuntime()) {
     try {
       app.use("/api", adminTestRoutes);
     } catch (e) {
@@ -1415,6 +1468,8 @@ try {
     "/api/platform",
     routeLimiter({ windowHint: "platform" }),
     codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req, res, next) => next(),
+    authMiddleware,
+    workspaceScope,
     platformConnectionsRoutes
   );
   console.log("🚏 Platform connections routes mounted at /api/platform");
@@ -1504,6 +1559,7 @@ try {
   } catch (e) {
     console.log("⚠️ Assistant routes mount failed:", e.message);
   }
+  app.use("/api/publishing-destinations", require("./routes/communityPublishingRoutes"));
   // Mount generic platform routes under /api so frontend placeholder endpoints like
   // /api/spotify/auth/start and /api/spotify/status are handled by the generic router.
   try {
@@ -1576,14 +1632,8 @@ try {
     console.warn("Content quality check route not available:", e.message);
   }
 
-  // AI Video Generator (Idea-to-Video)
-  try {
-    const aiVideoRoutes = require("./routes/aiVideoRoutes");
-    app.use("/api/ai-video", aiVideoRoutes);
-    console.log("🎬 AI Video routes mounted at /api/ai-video");
-  } catch (e) {
-    console.warn("AI Video routes failed to mount:", e.message);
-  }
+  // Former standalone generator: never dispatch or charge, including from stale clients.
+  app.use("/api/ai-video", require("./retiredFeatureResponse"));
 
   // AI Media Processing (Credit-Based)
   try {
@@ -2084,6 +2134,7 @@ try {
       pkgVersion = require("../package.json").version;
     } catch (_) {}
     const commit =
+      process.env.RENDER_GIT_COMMIT ||
       process.env.GIT_COMMIT ||
       process.env.COMMIT_HASH ||
       process.env.VERCEL_GIT_COMMIT_SHA ||
@@ -2092,6 +2143,7 @@ try {
       ok: true,
       version: pkgVersion,
       commit,
+      securityPolicy: require("./config/trustedAdminPolicy.json").version,
       generatedAt: new Date().toISOString(),
     });
   });
@@ -2155,13 +2207,26 @@ try {
   try {
     const { monitorEventLoopDelay } = require("perf_hooks");
     const eld = monitorEventLoopDelay({ resolution: 20 });
+    const { performance } = require("perf_hooks");
+    let previousCpu = process.cpuUsage();
+    let previousLoop = performance.eventLoopUtilization();
     eld.enable();
     setInterval(() => {
       const mean = Math.round(eld.mean / 1e6); // ms
       const max = Math.round(eld.max / 1e6);
+      const cpu = process.cpuUsage();
+      const loop = performance.eventLoopUtilization();
+      const utilization = performance.eventLoopUtilization(loop, previousLoop).utilization;
       if (mean > 50 || max > 200) {
-        console.warn("[perf][event-loop] mean=%dms max=%dms", mean, max);
+        console.warn("[perf][event-loop]", {
+          meanMs: mean, maxMs: max,
+          cpuMs: Math.round((cpu.user + cpu.system - previousCpu.user - previousCpu.system) / 1000),
+          utilizationPercent: Math.round(utilization * 100),
+          rssMiB: Math.round(process.memoryUsage().rss / 1048576),
+        });
       }
+      previousCpu = cpu;
+      previousLoop = loop;
       // reset stats to avoid unbounded memory
       eld.reset();
     }, 15_000);
@@ -2276,6 +2341,8 @@ try {
         process.env.VERCEL_GIT_COMMIT_SHA ||
         null;
       extended.diagnostics.backgroundJobsEnabled = process.env.ENABLE_BACKGROUND_JOBS === "true";
+      extended.diagnostics.mediaTransfers = require("./utils/mediaTransferBudget").transfers.snapshot();
+      extended.diagnostics.apiProcessesPublishingTasks = process.env.API_PROCESS_PUBLISHING_TASKS !== "false";
 
       // OpenAI configuration status
       extended.diagnostics.openai = {
@@ -2939,10 +3006,13 @@ try {
 
   // Leader election: only one instance (the leader) should launch intervals.
   let __isLeader = false;
+  // This ID must remain stable for the lifetime of the process. Generating a
+  // new UUID on every renewal makes the current leader look like a stranger
+  // and causes it to lose its own lease.
+  const backgroundLeaderId = require("crypto").randomUUID();
   const electLeader = async () => {
     try {
       const { db } = require("./firebaseAdmin");
-      const id = require("crypto").randomUUID();
       const doc = db.collection("system_locks").doc("bg_leader");
       const now = Date.now();
       const leaseMs = parseInt(process.env.LEADER_LEASE_MS || "120000", 10); // 2m lease
@@ -2951,14 +3021,18 @@ try {
         const v = snap.exists ? snap.data() : null;
         if (v && v.expiresAt && v.expiresAt > now) {
           // Existing leader valid
-          if (v.owner === id) {
+          if (v.owner === backgroundLeaderId) {
             tx.update(doc, { expiresAt: now + leaseMs });
             __isLeader = true;
           } else {
             __isLeader = false;
           }
         } else {
-          tx.set(doc, { owner: id, expiresAt: now + leaseMs, renewedAt: now });
+          tx.set(doc, {
+            owner: backgroundLeaderId,
+            expiresAt: now + leaseMs,
+            renewedAt: now,
+          });
           __isLeader = true;
         }
       });
@@ -3003,7 +3077,8 @@ try {
   };
 
   if (ENABLE_BACKGROUND) {
-    console.log("🛠  Background job runner enabled.");
+    backgroundActivity.start();
+    console.log("🛠  Background job runner enabled (idle scans sleep until work or feature use).");
     try {
       const { pollYouTubeStatsBatch } = require("./services/youtubeStatsPoller");
       const { pollPlatformPostMetricsBatch } = require("./services/platformStatsPoller");
@@ -3018,12 +3093,16 @@ try {
       let statsRunning = false;
       let taskRunning = false;
       let platformMetricsRunning = false;
+      let lastStatsPollAt = 0;
+      let lastPlatformMetricsAt = 0;
 
-      setInterval(async () => {
-        if (statsRunning) return; // skip overlapping
+      const runStatsPoller = async () => {
+        if (statsRunning || !backgroundActivity.active("analytics") ||
+            Date.now() - lastStatsPollAt < STATS_POLL_INTERVAL_MS) return; // idle: no lock or scan
         const ok = await acquireLock("statsPoller", STATS_POLL_INTERVAL_MS * 2).catch(() => false);
         if (!ok) return; // another instance owns lock
         statsRunning = true;
+        lastStatsPollAt = Date.now();
         try {
           const jitter = require("crypto").randomInt(0, 250);
           if (jitter) await new Promise(r => setTimeout(r, jitter));
@@ -3057,16 +3136,24 @@ try {
         } finally {
           statsRunning = false;
         }
-      }, STATS_POLL_INTERVAL_MS).unref();
+      };
+      setInterval(runStatsPoller, STATS_POLL_INTERVAL_MS).unref();
+      backgroundActivity.onActive("analytics", runStatsPoller);
 
       setInterval(async () => {
         if (taskRunning) return;
-        const ok = await acquireLock("promotionTasks", TASK_PROCESS_INTERVAL_MS * 2).catch(
-          () => false
-        );
-        if (!ok) return;
         taskRunning = true;
         try {
+          const publishingHere = process.env.API_PROCESS_PUBLISHING_TASKS !== "false";
+          const taskTypes = publishingHere ? ["youtube_upload", "platform_post", "media_transform"] : ["media_transform"];
+          const work = await Promise.all(taskTypes.map(type => backgroundWork.hasTasks(type))).catch(error => {
+            console.warn("[BG][tasks] Work listener unavailable:", error.message); return [];
+          });
+          if (!work.some(Boolean)) return;
+          const ok = await acquireLock("promotionTasks", TASK_PROCESS_INTERVAL_MS * 2).catch(
+            () => false
+          );
+          if (!ok) return;
           const jitter = require("crypto").randomInt(0, 250);
           if (jitter) await new Promise(r => setTimeout(r, jitter));
           let processed = 0;
@@ -3074,10 +3161,10 @@ try {
           const MAX_BATCH = 5;
           const mt = require("./services/mediaTransform");
           for (let i = 0; i < MAX_BATCH; i++) {
-            const yt = await processNextYouTubeTask();
-            const pf = await processNextPlatformTask();
+            const yt = publishingHere ? await processNextYouTubeTask({ background: true }) : null;
+            const pf = publishingHere ? await processNextPlatformTask({ background: true }) : null;
             if (mt && typeof mt.processNextMediaTransformTask === "function") {
-              await mt.processNextMediaTransformTask();
+              await mt.processNextMediaTransformTask({ background: true });
             }
             if (!yt && !pf) break;
             processed += (yt ? 1 : 0) + (pf ? 1 : 0);
@@ -3110,13 +3197,15 @@ try {
         }
       }, TASK_PROCESS_INTERVAL_MS).unref();
 
-      setInterval(async () => {
-        if (platformMetricsRunning) return;
+      const runPlatformMetrics = async () => {
+        if (platformMetricsRunning || !backgroundActivity.active("analytics") ||
+            Date.now() - lastPlatformMetricsAt < PLATFORM_STATS_POLL_INTERVAL_MS) return;
         const ok = await acquireLock("platformMetrics", PLATFORM_STATS_POLL_INTERVAL_MS * 2).catch(
           () => false
         );
         if (!ok) return;
         platformMetricsRunning = true;
+        lastPlatformMetricsAt = Date.now();
         try {
           const jitter = require("crypto").randomInt(0, 250);
           if (jitter) await new Promise(r => setTimeout(r, jitter));
@@ -3148,7 +3237,9 @@ try {
         } finally {
           platformMetricsRunning = false;
         }
-      }, PLATFORM_STATS_POLL_INTERVAL_MS).unref();
+      };
+      setInterval(runPlatformMetrics, PLATFORM_STATS_POLL_INTERVAL_MS).unref();
+      backgroundActivity.onActive("analytics", runPlatformMetrics);
 
       // Cleanup old oauth_states docs (stale PKCE state) to reduce clutter
       try {
@@ -3189,6 +3280,7 @@ try {
         const { acquireLock } = require("./services/workerLockService");
         setInterval(async () => {
           try {
+            if (!await backgroundWork.hasRows("earnings:pending", "earnings_events", "processed", false)) return;
             const locked = await acquireLock(
               "earningsAggregator",
               EARNINGS_AGG_INTERVAL_MS * 2
@@ -3238,7 +3330,7 @@ try {
       setInterval(async () => {
         try {
           const now = Date.now();
-          const snap = await db.collection("system_locks").limit(200).get();
+          const snap = await db.collection("system_locks").where("expiresAt", "<", now - 60000).select("expiresAt").limit(100).get();
           const batch = db.batch();
           let removed = 0;
           snap.forEach(d => {
@@ -3264,9 +3356,9 @@ try {
       }, LOCK_CLEAN_INTERVAL_MS).unref();
 
       // Bandit auto-tuning, exploration factor, and alerts loops guarded by leader flag
-      const leaderInterval = (fn, ms) => {
+      const leaderInterval = (fn, ms, { onDemand = true, category = "analytics" } = {}) => {
         setInterval(() => {
-          if (!__isLeader) return;
+          if (!__isLeader || (onDemand && !backgroundActivity.active(category))) return;
           fn();
         }, ms).unref();
       };
@@ -3361,6 +3453,7 @@ try {
           const paypalPayoutService = require("./services/paypalPayoutService");
           leaderInterval(async () => {
             try {
+              if (!await backgroundWork.hasRows("payouts:pending", "payouts", "status", "pending")) return;
               const processed = await paypalPayoutService.processPendingPayouts(50);
               if (processed && processed.processed)
                 console.log("[BG][payouts] processed", processed.processed, "pending payouts");
@@ -3385,7 +3478,7 @@ try {
                 });
               } catch (_) {}
             }
-          }, PAYOUTS_PROCESS_INTERVAL_MS);
+          }, PAYOUTS_PROCESS_INTERVAL_MS, { onDemand: false });
         } catch (e) {
           console.log("[BG][payouts] skipped: payout service not found", e.message);
         }
@@ -3400,23 +3493,14 @@ try {
         process.env.LAT_SNAPSHOT_INTERVAL_MS || "60000",
         10
       );
+      const persistLatencySnapshot = require("./services/latencySnapshotService").createLatencySnapshotWriter({ db });
       leaderInterval(async () => {
-        const stats = getLatencyStats();
-        if (!stats.count) return;
         try {
-          await db.collection("system_latency_snapshots").add({ at: Date.now(), stats });
-          // Prune older docs beyond 200
-          const snap = await db.collection("system_latency_snapshots").orderBy("at", "asc").get();
-          if (snap.size > 220) {
-            const excess = snap.docs.slice(0, snap.size - 200);
-            const batch = db.batch();
-            excess.forEach(d => batch.delete(d.ref));
-            await batch.commit();
-          }
+          await persistLatencySnapshot(__latVersion, getLatencyStats());
         } catch (e) {
           console.warn("[BG][latency-snapshot] error:", e.message);
         }
-      }, LAT_SNAPSHOT_INTERVAL_MS);
+      }, LAT_SNAPSHOT_INTERVAL_MS, { category: "general" });
     } catch (e) {
       console.warn("⚠️ Background job initialization failed:", e.message);
     }
@@ -3491,7 +3575,7 @@ if (process.env.SCHEDULER_ENABLED !== "false" && !isTestEnv) {
     const isLeader = (global.__bgLeader && global.__bgLeader.isLeader()) || false;
     if (!isLeader && process.env.ENABLE_BACKGROUND_JOBS === "true") return;
     try {
-      await promotionService.processDueSchedules();
+      await promotionService.processDueSchedules({ background: true });
     } catch (e) {
       console.error("[Scheduler] ⚠️ Interval Check Failed:", e.message);
     }
@@ -3503,7 +3587,7 @@ if (process.env.SCHEDULER_ENABLED !== "false" && !isTestEnv) {
     setInterval(
       async () => {
         const isLeader = (global.__bgLeader && global.__bgLeader.isLeader()) || false;
-        if (!isLeader) return;
+        if (!isLeader || !backgroundActivity.active("analytics")) return;
         try {
           const { analyzeAndScheduleReposts } = require("./services/repostSchedulerService");
           const result = await analyzeAndScheduleReposts({ limit: 10 });
@@ -3533,10 +3617,12 @@ if (process.env.SCHEDULER_ENABLED !== "false" && !isTestEnv) {
             cleanupTempUploads,
             cleanupExpiredSourceUploads,
             cleanupExpiredMulticamRenders,
+            cleanupPublishedVideos,
           } = require("./services/storageCleanupService");
           await cleanupTempUploads();
           await cleanupExpiredSourceUploads();
           await cleanupExpiredMulticamRenders();
+          await cleanupPublishedVideos();
 
           try {
             const {

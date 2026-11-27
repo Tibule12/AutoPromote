@@ -889,6 +889,7 @@ try {
   void storage;
 
   const app = express();
+  app.use(require("./services/infrastructureTelemetry").middleware);
 
   // Temporary diagnostic route to check route loading
   app.get("/api/debug/routes", (req, res) => {

@@ -6,6 +6,11 @@ const { db, admin } = require("../firebaseAdmin");
 const os = require("os");
 const fs = require("fs");
 const path = require("path");
+const telemetryCache = require("../middlewares/telemetryReadCache").createTelemetryReadCache();
+router.get("/runtime-profile", authMiddleware, adminOnly, (_req, res) => {
+  res.set("Cache-Control", "private, no-store");
+  res.json({success:true,profile:require("../services/infrastructureTelemetry").snapshot()});
+});
 
 // Get system health metrics
 router.get("/health", authMiddleware, adminOnly, async (req, res) => {
@@ -41,7 +46,7 @@ router.get("/health", authMiddleware, adminOnly, async (req, res) => {
 });
 
 // Get recent errors
-router.get("/errors", authMiddleware, adminOnly, async (req, res) => {
+router.get("/errors", authMiddleware, adminOnly, telemetryCache.middleware, async (req, res) => {
   try {
     const { limit = 100, severity } = req.query;
 
@@ -161,7 +166,7 @@ router.get("/audit-logs", authMiddleware, adminOnly, async (req, res) => {
 });
 
 // Get API metrics
-router.get("/api-metrics", authMiddleware, adminOnly, async (req, res) => {
+router.get("/api-metrics", authMiddleware, adminOnly, telemetryCache.middleware, async (req, res) => {
   try {
     const { timeframe = "24h" } = req.query;
 
@@ -229,7 +234,7 @@ router.get("/api-metrics", authMiddleware, adminOnly, async (req, res) => {
 });
 
 // Get real-time activity feed
-router.get("/activity", authMiddleware, adminOnly, async (req, res) => {
+router.get("/activity", authMiddleware, adminOnly, telemetryCache.middleware, async (req, res) => {
   try {
     const { limit = 50 } = req.query;
 
@@ -240,13 +245,16 @@ router.get("/activity", authMiddleware, adminOnly, async (req, res) => {
       .get();
 
     const activities = [];
+    const users = new Map();
     for (const doc of snapshot.docs) {
       const activityData = doc.data();
 
       // Get user info if available
       let userData = null;
       if (activityData.userId) {
-        const userDoc = await db.collection("users").doc(activityData.userId).get();
+        if (!users.has(activityData.userId))
+          users.set(activityData.userId, await db.collection("users").doc(activityData.userId).get());
+        const userDoc = users.get(activityData.userId);
         if (userDoc.exists) {
           const user = userDoc.data();
           userData = {
@@ -273,7 +281,7 @@ router.get("/activity", authMiddleware, adminOnly, async (req, res) => {
 });
 
 // Get Firebase usage stats
-router.get("/firebase-usage", authMiddleware, adminOnly, async (req, res) => {
+router.get("/firebase-usage", authMiddleware, adminOnly, telemetryCache.middleware, async (req, res) => {
   try {
     // Get collection sizes
     const collections = [
@@ -314,6 +322,7 @@ router.get("/firebase-usage", authMiddleware, adminOnly, async (req, res) => {
 
 // Clear cache (if implemented)
 router.post("/cache/clear", authMiddleware, adminOnly, async (req, res) => {
+  telemetryCache.clear();
   try {
     // Add cache clearing logic here if you have Redis or similar
     // For now, just log the action

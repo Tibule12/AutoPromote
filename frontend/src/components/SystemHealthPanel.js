@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { API_BASE_URL } from "../config";
 import { auth } from "../firebaseClient";
 import LiveLogViewer from "./LiveLogViewer";
+import { startVisiblePoller } from "../utils/visiblePoller";
 
 function SystemHealthPanel() {
   const [health, setHealth] = useState(null);
@@ -15,35 +16,44 @@ function SystemHealthPanel() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [history, setHistory] = useState([]);
   const [scanResults, setScanResults] = useState(null);
+  const initialScanRequested = useRef(false);
+  const pending = useRef(false);
 
   useEffect(() => {
-    fetchAllData();
-
-    if (autoRefresh) {
-      const interval = setInterval(fetchAllData, 10000); // Refresh every 10 seconds
-      return () => clearInterval(interval);
-    }
+    return startVisiblePoller(signal => {
+      const includeScan = !initialScanRequested.current;
+      initialScanRequested.current = true;
+      return fetchAllData({ signal, includeScan });
+    }, 10000, { repeat: autoRefresh });
   }, [autoRefresh]);
 
-  const fetchAllData = async () => {
+  const fetchAllData = async ({ signal, includeScan = true } = {}) => {
+    if (pending.current) return;
+    pending.current = true;
     try {
       const token = await auth.currentUser?.getIdToken();
+      if (!token) return;
 
       const [healthRes, diagnosticsRes, errorsRes, metricsRes, activityRes] = await Promise.all([
         fetch(`${API_BASE_URL}/api/admin/system/health`, {
           headers: { Authorization: `Bearer ${token}` },
+          signal,
         }),
         fetch(`${API_BASE_URL}/api/diagnostics/health`, {
           headers: { Authorization: `Bearer ${token}` },
+          signal,
         }),
         fetch(`${API_BASE_URL}/api/admin/system/errors?limit=20`, {
           headers: { Authorization: `Bearer ${token}` },
+          signal,
         }),
         fetch(`${API_BASE_URL}/api/admin/system/api-metrics?timeframe=24h`, {
           headers: { Authorization: `Bearer ${token}` },
+          signal,
         }),
         fetch(`${API_BASE_URL}/api/admin/system/activity?limit=20`, {
           headers: { Authorization: `Bearer ${token}` },
+          signal,
         }),
       ]);
 
@@ -63,16 +73,19 @@ function SystemHealthPanel() {
       if (metricsData.success) setApiMetrics(metricsData.metrics);
       if (activityData.success) setActivities(activityData.activities);
 
+      if (signal?.aborted) return;
       setLoading(false);
       // Run integration scan: attempt admin-level scan and fallback to user-level
-      try {
+      if (includeScan) try {
         const attemptAdmin = await fetch(`${API_BASE_URL}/api/diagnostics/scan?dashboard=admin`, {
           headers: { Authorization: `Bearer ${token}` },
+          signal,
         });
         let scanResp = attemptAdmin;
         if (attemptAdmin.status === 403) {
           scanResp = await fetch(`${API_BASE_URL}/api/diagnostics/scan?dashboard=user`, {
             headers: { Authorization: `Bearer ${token}` },
+          signal,
           });
         }
         const scanData = await scanResp.json();
@@ -83,8 +96,11 @@ function SystemHealthPanel() {
         console.error("Scan failed:", e);
       }
     } catch (error) {
-      console.error("Error fetching system data:", error);
+      if (error.name !== "AbortError") console.error("Error fetching system data:", error);
       setLoading(false);
+    } finally {
+      if (includeScan && signal?.aborted) initialScanRequested.current = false;
+      pending.current = false;
     }
   };
 
@@ -138,7 +154,7 @@ function SystemHealthPanel() {
           />
           <span>Auto-refresh (10s)</span>
         </label>
-        <button onClick={fetchAllData} style={refreshButtonStyle}>
+        <button onClick={() => fetchAllData()} style={refreshButtonStyle}>
           🔄 Refresh Now
         </button>
         {isAdmin && (

@@ -1,22 +1,18 @@
 const { storage, db } = require("../firebaseAdmin");
 const { cleanupSourceFile, extractOwnedStoragePathFromUrl } = require("../utils/cleanupSource");
+const {
+  shouldDeleteTemporaryObject,
+  toMillis,
+} = require("./storageRetentionPolicy");
 
 const SOURCE_UPLOAD_RETENTION_DAYS = parseInt(process.env.SOURCE_UPLOAD_RETENTION_DAYS || "14", 10);
 const TEMP_SCAN_RETENTION_MINUTES = parseInt(process.env.TEMP_SCAN_RETENTION_MINUTES || "20", 10);
 const MULTICAM_MASTER_RETENTION_DAYS = parseInt(
-  process.env.MULTICAM_MASTER_RETENTION_DAYS || "4",
+  process.env.MULTICAM_MASTER_RETENTION_DAYS || "7",
   10
-) || 4;
+) || 7;
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_SCAN_LIMIT = parseInt(process.env.SOURCE_UPLOAD_RETENTION_SCAN_LIMIT || "200", 10);
-
-function toMillis(value) {
-  if (!value) return 0;
-  if (typeof value?.toDate === "function") return value.toDate().getTime();
-  if (value instanceof Date) return value.getTime();
-  const parsed = Date.parse(value);
-  return Number.isNaN(parsed) ? 0 : parsed;
-}
 
 function extractStoragePathFromUrl(fileUrl) {
   return extractOwnedStoragePathFromUrl(fileUrl);
@@ -25,12 +21,15 @@ function extractStoragePathFromUrl(fileUrl) {
 function getMulticamStoragePaths(data = {}) {
   const result = data.result || {};
   const candidates = [
+    // The active delivery URL is authoritative. Recovery/repair flows can
+    // replace an object while a legacy top-level path still references the
+    // previous generation; download routes must try the live URL first.
+    extractStoragePathFromUrl(data.outputUrl || data.output_url || result.url || result.output_url),
     data.outputStoragePath,
     data.output_storage_path,
     data.storagePath,
     result.outputStoragePath,
     result.output_storage_path,
-    extractStoragePathFromUrl(data.outputUrl || data.output_url || result.url || result.output_url),
     data.thumbnailStoragePath,
     data.thumbnail_storage_path,
     result.thumbnailStoragePath,
@@ -38,10 +37,21 @@ function getMulticamStoragePaths(data = {}) {
     extractStoragePathFromUrl(
       data.thumbnailUrl || data.thumbnail_url || result.thumbnailUrl || result.thumbnail_url
     ),
+    data.manifestStoragePath,
+    data.manifest_storage_path,
+    result.manifestStoragePath,
+    result.manifest_storage_path,
+    extractStoragePathFromUrl(
+      data.manifestUrl || data.manifest_url || result.manifestUrl || result.manifest_url
+    ),
   ];
 
   return Array.from(new Set(candidates.filter(Boolean))).filter(path => {
-    return path.startsWith("processed/multicam_") || path.startsWith("processed/thumbnails/multicam_");
+    return (
+      path.startsWith("processed/multicam_") ||
+      path.startsWith("processed/thumbnails/multicam_") ||
+      path.startsWith("processed/manifests/multicam_")
+    );
   });
 }
 
@@ -122,7 +132,27 @@ async function reconcileRetentionState(docRef, data, sourceState, cleanupResult)
     return;
   }
 
+  const sameState = current => current?.sourceRetentionStatus === baseUpdate.sourceRetentionStatus &&
+    current?.sourceRetentionDays === baseUpdate.sourceRetentionDays &&
+    current?.storagePath === baseUpdate.storagePath &&
+    toMillis(current?.sourceDeleteAfter) === toMillis(baseUpdate.sourceDeleteAfter);
+  // UpdatedAt describes a retention STATE change. Rewriting identical held /
+  // pending outcomes used to wake all four content-update Functions each pass.
+  if (sameState(data)) return false;
+  if (docRef.firestore?.runTransaction) {
+    return docRef.firestore.runTransaction(async transaction => {
+      const snapshot = await transaction.get(docRef);
+      if (!snapshot.exists) return false;
+      const current = snapshot.data();
+      const fresh = resolveSourceUploadState(docRef.id, current);
+      if (!fresh || fresh.sourceUrl !== sourceState.sourceUrl || fresh.storagePath !== sourceState.storagePath ||
+          fresh.deleteAfterIso !== sourceState.deleteAfterIso || sameState(current)) return false;
+      transaction.set(docRef, baseUpdate, { merge: true });
+      return true;
+    });
+  }
   await docRef.set(baseUpdate, { merge: true });
+  return true;
 }
 
 /**
@@ -155,6 +185,11 @@ async function cleanupTempUploads() {
       label: "multicam external audio",
     },
     {
+      prefix: "temp/multicam-ingest/",
+      retentionMs: 3 * ONE_DAY_MS,
+      label: "multicam original ingest",
+    },
+    {
       prefix: "temp_scans/",
       retentionMs: TEMP_SCAN_RETENTION_MINUTES * 60 * 1000,
       label: "scanner upload",
@@ -177,12 +212,11 @@ async function cleanupTempUploads() {
         if (file.name === config.prefix) return;
 
         const [metadata] = await file.getMetadata();
-        const createdTime = new Date(metadata.timeCreated).getTime();
-        const metadataExpiry = toMillis(metadata.metadata?.expiresAt || metadata.metadata?.deleteAfter);
-        const fileNameExpiryMatch = file.name.match(/\/(\d{12,})_/);
-        const fileNameExpiry = fileNameExpiryMatch ? Number(fileNameExpiryMatch[1]) : 0;
-        const explicitExpiry = metadataExpiry || fileNameExpiry;
-        const shouldDelete = explicitExpiry > 0 ? now >= explicitExpiry : now - createdTime > config.retentionMs;
+        const shouldDelete = shouldDeleteTemporaryObject({
+          metadata,
+          now,
+          retentionMs: config.retentionMs,
+        });
 
         if (shouldDelete) {
           console.log(`[StorageCleanup] Deleting old ${config.label} file: ${file.name}`);
@@ -345,6 +379,19 @@ async function cleanupExpiredMulticamRenders() {
           deletedStoragePaths: deleteResults,
           outputUrl: null,
           output_url: null,
+          thumbnailUrl: null,
+          thumbnail_url: null,
+          manifestUrl: null,
+          manifest_url: null,
+          result: {
+            url: null,
+            outputUrl: null,
+            output_url: null,
+            thumbnailUrl: null,
+            thumbnail_url: null,
+            manifestUrl: null,
+            manifest_url: null,
+          },
         },
         { merge: true }
       );
@@ -359,7 +406,15 @@ async function cleanupExpiredMulticamRenders() {
 }
 
 module.exports = {
+  reconcileRetentionState,
+  cleanupPublishedVideos: async (options = {}) => {
+    if (!storage || !db) return [];
+    return require("./publishedVideoRetention").cleanupPublishedVideos({
+      ...options, db, storage, extractPath: extractOwnedStoragePathFromUrl,
+    });
+  },
   cleanupTempUploads,
   cleanupExpiredSourceUploads,
   cleanupExpiredMulticamRenders,
+  getMulticamStoragePaths,
 };
