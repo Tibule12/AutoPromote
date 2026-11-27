@@ -1,4 +1,5 @@
 const fs=require('node:fs'),path=require('node:path');
+const rateLimit=require('express-rate-limit');
 const PRIVATE='/home/tibule12/.local/share/autopromote-qa/free-first-launch-20261127';
 const env=require('dotenv').parse(fs.readFileSync('/home/tibule12/Projects/AutoPromte/AutoPromote/.env'));
 for(const[k,v]of Object.entries(env))if(/^(FIREBASE_|GOOGLE_|OPENAI_)/.test(k))process.env[k]=v;
@@ -23,7 +24,7 @@ async function main(){
  const ref=db.collection('users').doc(uid);
  if(!(await ref.get()).exists)await ref.create({name:'Free AI caption qualification',subscriptionTier:'free',credits:0,qualificationAccount:true});
  const runtime=require('../src/services/processingTokens/runtime');const service=runtime.service();
- const express=require('express'),http=require('supertest');const app=express();app.use(express.json());
+ const express=require('express'),http=require('supertest');const app=express();app.use(rateLimit({windowMs:60000,max:5}));app.use(express.json());
  app.use(require('../src/middlewares/processingBudgetMiddleware').createProcessingGuard({service,adapters:runtime.adapters,
   authenticate:(req,res,next)=>{req.user={uid,claims:{email_verified:true}};req.userId=uid;next();}}));
  app.post('/api/captions/generate',async(req,res)=>{

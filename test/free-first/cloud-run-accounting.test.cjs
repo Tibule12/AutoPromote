@@ -1,5 +1,6 @@
 const {test,after}=require('node:test'),assert=require('node:assert/strict'),crypto=require('node:crypto');
 const express=require('express'),http=require('supertest');
+const rateLimit=require('express-rate-limit');
 const {createSandboxDatabase}=require('../../src/services/unifiedCredits/runtime');
 const {createProcessingService}=require('../../src/services/processingTokens/service');
 const {createCloudRunAdapter}=require('../../src/services/processingTokens/cloudRunAdapter');
@@ -22,7 +23,7 @@ async function fixture({qualified=true}={}) {
  if(qualified)await db.collection('processing_worker_qualifications').doc(profile.qualificationId).set({approved:true,profileDigest:digest(profile),expiresAt:new Date(Date.now()+3600000).toISOString(),workerContract:'renewable-cam-v1',sourceAndOutputBoundsVerified:true,networkAndStorageBoundsVerified:true,terminationAndHostLossVerified:true});
  await db.collection('video_edits').doc(nativeJobId).set({userId:uid,status:'queued',multicamRequest:{sources:[{url:'gs://owned/a'},{url:'gs://owned/b'}],overlap_duration:60,segments:[{start:0,end:60}]},creditReceipt:{processingTokens:true,deferredSettlement:true,requestId}});
  const adapter=createCloudRunAdapter({db,profile,request,inspectOutput:async()=>({generation:'verified-generation',bytes:26000000})});
- const app=express();app.use(express.json());app.use(createProcessingGuard({service,adapters:{'multicam.render':adapter},authenticate:(q,r,n)=>{q.user={uid,claims:{email_verified:true}};q.userId=uid;n();}}));
+ const app=express();app.use(rateLimit({windowMs:60000,max:300}));app.use(express.json());app.use(createProcessingGuard({service,adapters:{'multicam.render':adapter},authenticate:(q,r,n)=>{q.user={uid,claims:{email_verified:true}};q.userId=uid;n();}}));
  app.post('/api/media/render-multicam',async(q,r)=>{try{const result=await cloud.executeMulticamRenderJob({jobId:nativeJobId,dispatchToken:'owned-dispatch-token-at-least-16',preferredDevice:'cpu'});r.json({jobId:nativeJobId,...result});}catch(error){r.status(error.status||503).json({error:error.code||error.message});}});
  const submit=(changes={})=>http(app).post('/api/media/render-multicam').set('Idempotency-Key',requestId).set('X-Processing-Tokens-Approved','80').send({sources:[{url:'owned-a'},{url:'owned-b'}],overlap_duration:60,segments:[{start:0,end:60}],...changes});
  return {uid,requestId,nativeJobId,profile,service,adapter,job,template,calls,submit,get submitted(){return submitted;},finish:async(success=true)=>{executions=[{name:profile.job+'/executions/one',job:profile.job,uid:'provider-execution-uid',taskCount:1,template:{...template,containers:[{...template.containers[0],env:submitted.overrides.containerOverrides[0].env}]},createTime:new Date(Date.now()-1000).toISOString(),completionTime:new Date().toISOString(),succeededCount:success?1:0,failedCount:success?0:1,conditions:[{type:'Completed',state:success?'CONDITION_SUCCEEDED':'CONDITION_FAILED'}]}];await db.collection('video_edits').doc(nativeJobId).set({status:success?'completed':'failed'},{merge:true});}};

@@ -18,10 +18,15 @@ function classifyPublishingError(error = "") {
   if (known.includes(error?.errorClass)) return error.errorClass;
   const status = error?.status || error?.statusCode;
   const message = String(error?.message || error).toLowerCase();
+  const tokenAt = message.indexOf('access token');
+  const noValidAt = message.indexOf('no valid ');
+  const expiredToken = tokenAt !== -1 && message.indexOf('expir', tokenAt + 12) !== -1;
+  const missingToken = noValidAt !== -1 && message.indexOf('access token', noValidAt + 9) !== -1;
   if (
     status === 401 ||
     status === 403 ||
-    /expired_access_token|invalid_access_token|invalid_grant|invalid_token|access token.*expir|no valid .*access token|reconnect|unauthorized/.test(
+    expiredToken || missingToken ||
+    /expired_access_token|invalid_access_token|invalid_grant|invalid_token|reconnect|unauthorized/.test(
       message
     ) ||
     /(?:"status"\s*:\s*|status=)(401|403)\b/.test(message)

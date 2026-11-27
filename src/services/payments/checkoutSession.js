@@ -13,7 +13,7 @@ async function createOwnedCheckout({ db, userId, planId, paypalPlanId, returnUrl
   const session = await db.runTransaction(async tx => {
     const [previous, subscription] = await tx.getAll(ref, db.collection('user_subscriptions').doc(userId));
     const sub = subscription.data();
-    if (sub?.paypalSubscriptionId && ['active', 'cancel_at_period_end'].includes(sub.status) &&
+    if (sub?.paypalSubscriptionId && ['active', 'cancel_at_period_end', 'cancelled', 'canceled'].includes(sub.status) &&
         Date.parse(sub.expiresAt || sub.nextBillingDate || '') > now())
       fail('SUBSCRIPTION_ALREADY_ACTIVE', 409);
     const existing = previous.data();

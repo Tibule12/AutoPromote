@@ -1,6 +1,7 @@
 const { test, after } = require("node:test");
 const assert = require("node:assert/strict");
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 const request = require("supertest");
 const { createSandboxDatabase } = require("../../src/services/unifiedCredits/runtime");
 const db = createSandboxDatabase();
@@ -17,6 +18,7 @@ cache("../../src/authMiddleware", (req, res, next) => {
   next();
 });
 const app = express();
+app.use(rateLimit({windowMs:60000,max:300}));
 app.use(express.json());
 app.use("/api/usage", require("../../src/routes/usageRoutes"));
 after(async () => db.terminate());
@@ -44,6 +46,7 @@ test("processing guard refuses an unbounded expensive worker and client test hea
   const runtime = require("../../src/services/processingTokens/runtime");
   process.env.FREE_FIRST_USAGE_ENABLED = "true";
   const guarded = express();
+  guarded.use(rateLimit({windowMs:60000,max:300}));
   guarded.use(express.json());
   guarded.use(
     createProcessingGuard({
@@ -94,7 +97,7 @@ test("default transactional entitlement resolver reads server billing and reject
 });
 test('a verified-looking profile field cannot replace the trusted token verification claim', async () => {
   const {createProcessingGuard}=require('../../src/middlewares/processingBudgetMiddleware');
-  const app=express();app.use(express.json());
+  const app=express();app.use(rateLimit({windowMs:60000,max:300}));app.use(express.json());
   app.use(createProcessingGuard({service:{quote:()=>{throw Error('must not quote');}},authenticate:(req,_res,next)=>{
     req.user={uid:'spoof',email_verified:true,claims:{email_verified:false}};next();
   }}));
@@ -113,6 +116,7 @@ test("support assistant keeps built-in help available without bypassing external
     process.env.FREE_FIRST_USAGE_ENABLED = "true";
     global.fetch = async () => { externalCalls++; throw Error("unexpected provider request"); };
     const support = express();
+    support.use(rateLimit({windowMs:60000,max:300}));
     support.use(express.json());
     support.use("/api/assistant", require("../../src/authMiddleware"), require("../../src/routes/assistantRoutes"));
     const response = await request(support).post("/api/assistant/query")

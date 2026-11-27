@@ -2,6 +2,7 @@ const { test, after } = require('node:test');
 const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const http = require('supertest');
 const axios = require('axios');
 const { createSandboxDatabase } = require('../../src/services/unifiedCredits/runtime');
@@ -67,7 +68,7 @@ async function fixture({ funded = true, lost = false, success = true, render = f
     return { data: { name: p.job, etag: 'pinned', template: { taskCount: 1, parallelism: 1, template } } };
   };
   const adapter = createNativeWorkerAdapter({ db, profile: p, request });
-  const app = express(); app.use(express.json());
+  const app = express(); app.use(rateLimit({windowMs:60000,max:300})); app.use(express.json());
   app.use(createProcessingGuard({ service, authenticate: (req, res, next) => {
     req.user = { uid, claims: { email_verified: true } }; next(); }, adapters: { select: () => adapter } }));
   app.post(route, async (req, res) => {

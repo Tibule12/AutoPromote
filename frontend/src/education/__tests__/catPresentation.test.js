@@ -1,5 +1,5 @@
 import React from 'react';
-import { render,screen,waitFor } from '@testing-library/react';
+import { render,screen,waitFor,fireEvent,within } from '@testing-library/react';
 import CatLearningPath from '../CatLearningPath';
 import cat from '../catCatalog.json';
 import { visibleEducationLessons } from '../educationCatalog';
@@ -7,3 +7,19 @@ jest.mock('../educationCatalog',()=>({EDUCATION_PREVIEW:false,educationRoute:p=>
 beforeEach(()=>{global.fetch=jest.fn().mockResolvedValue({ok:true,text:async()=>'<h1>Page</h1>'});});
 afterEach(()=>{delete global.fetch;});
 test('the public presentation exposes six working CAT lessons without claiming learner or curriculum approval',async()=>{const {container}=render(<CatLearningPath route="cat"/>);expect(container.querySelectorAll('video')).toHaveLength(12);expect(screen.getByRole('link',{name:'Download everything ↓'})).toHaveAttribute('href',cat.presentationRelease.packUrl);expect(screen.getByText(/no formal curriculum approval claimed/i)).toBeInTheDocument();expect(cat.presentationRelease.curriculumApproval).toBe(false);expect(cat.presentationRelease.learnerEnrolment).toBe(false);expect(visibleEducationLessons()).toHaveLength(0);await waitFor(()=>expect(global.fetch).toHaveBeenCalledTimes(6));});
+test('HTML examples select trusted lesson files and ignore injected option text while retaining sandboxed output and literal source',async()=>{
+ const {container}=render(<CatLearningPath route="cat"/>);
+ await waitFor(()=>expect(global.fetch).toHaveBeenCalledTimes(6));
+ const select=screen.getByLabelText('HTML example for lesson 2');
+ const lesson=select.closest('.cat-working-page');
+ fireEvent.change(select,{target:{value:'broken.html'}});
+ await waitFor(()=>expect(lesson.querySelector('iframe')).toHaveAttribute('src','/education/cat-html-v1/html-images-links/broken.html'));
+ const injected=document.createElement('option');injected.value='../../untrusted.html?x=<img src=x onerror=alert(1)>';injected.textContent=injected.value;select.appendChild(injected);
+ fireEvent.change(select,{target:{value:injected.value}});
+ await waitFor(()=>expect(lesson.querySelector('iframe')).toHaveAttribute('src','/education/cat-html-v1/html-images-links/index.html'));
+ expect(lesson.querySelector('iframe')).toHaveAttribute('sandbox','');
+ expect(within(lesson).getByRole('link',{name:'Download this HTML file ↓'})).toHaveAttribute('href','/education/cat-html-v1/html-images-links/index.html');
+ expect(global.fetch.mock.calls.every(([url])=>!url.includes('untrusted'))).toBe(true);
+ expect(container.querySelector('pre h1')).toBeNull();
+ expect(within(lesson).getByLabelText('HTML source for lesson 2')).toHaveTextContent('<h1>Page</h1>');
+});

@@ -2,6 +2,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const rateLimit = require('express-rate-limit');
 const ROOT = path.resolve(__dirname, '..');
 const PRIVATE = '/home/tibule12/.local/share/autopromote-qa/free-first-launch-20261127';
 const dotenv = require('dotenv');
@@ -118,7 +119,7 @@ async function main() {
       if(!fs.existsSync(path.join(PRIVATE,'Q7-cancellation.private.json')))throw Error('Actual cancellation receipt required');
       const terminal=(await request({method:'GET',url:'https://run.googleapis.com/v2/'+binding.executionName})).data;
       if(terminal.cancelledCount!==1)throw Error('Provider-confirmed cancelled task required');
-      const replayApp=express();replayApp.use(express.json());
+      const replayApp=express();replayApp.use(rateLimit({windowMs:60000,max:20}));replayApp.use(express.json());
       replayApp.use(createProcessingGuard({service,adapters:{select:()=>adapter},authenticate:(req,res,next)=>{
         req.user={uid:saved.uid,claims:{email_verified:true}};next();}}));
       replayApp.post(route,(_req,res)=>res.status(500).json({error:'DUPLICATE_REACHED_DISPATCH'}));
@@ -247,7 +248,7 @@ async function main() {
     allowedRequests:[{userId:uid,requestId,fingerprint}],maximumMicros:profile.maxMicros,
     note:'Specific owner-funded test authorization; not a production qualification receipt.'});
   const adapter=createNativeWorkerAdapter({db,profile,request});
-  const app=express();app.use(express.json({limit:'1mb'}));
+  const app=express();app.use(rateLimit({windowMs:60000,max:20}));app.use(express.json({limit:'1mb'}));
   app.use(createProcessingGuard({service,adapters:{select:()=>adapter},authenticate:(req,res,next)=>{
     req.user={uid,claims:{email_verified:true}};req.userId=uid;next(); }}));
   app.post(route,async(req,res)=>{try{

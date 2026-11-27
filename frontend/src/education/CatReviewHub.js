@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { EDUCATION_PREVIEW, educationRoute } from './educationCatalog';
 const BASE = '/education/cat-html-v1/';
 const NOTES_KEY = 'autopromote.education.cat.review.v1';
-const file = (lesson, name) => `${BASE}${lesson.id}/${name}`;
+const file = (lesson, name) => `${BASE}${encodeURIComponent(lesson.id)}/${encodeURIComponent(name)}`;
 const variants = lesson => lesson.variants || (lesson.number === 2 ? ['index.html', 'broken.html', 'about.html'] : lesson.number === 3 ? ['index.html', 'ordered.html'] : ['index.html']);
 const scrollTo = id => document.getElementById(id)?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
 
@@ -20,7 +20,7 @@ function WorkingPage({ lesson }) {
     return () => controller.abort();
   }, [lesson, selected]);
   return <div className="cat-working-page">
-    <div className="cat-file-bar"><label>Example file<select aria-label={`HTML example for lesson ${lesson.number}`} value={selected} onChange={event => setSelected(event.target.value)}>{variants(lesson).map(name => <option key={name}>{name}</option>)}</select></label><a href={file(lesson, selected)} download>Download this HTML file ↓</a><a href={file(lesson, selected)} target="_blank" rel="noreferrer">Open in a browser ↗</a></div>
+    <div className="cat-file-bar"><label>Example file<select aria-label={`HTML example for lesson ${lesson.number}`} value={selected} onChange={event => setSelected(variants(lesson)[event.currentTarget.selectedIndex] || 'index.html')}>{variants(lesson).map(name => <option key={name}>{name}</option>)}</select></label><a href={file(lesson, selected)} download>Download this HTML file ↓</a><a href={file(lesson, selected)} target="_blank" rel="noreferrer">Open in a browser ↗</a></div>
     <div className="cat-code-browser"><div><h4>Actual HTML source</h4>{error ? <p role="alert">{error}</p> : <pre tabIndex={0} aria-label={`HTML source for lesson ${lesson.number}`}>{source || 'Loading the HTML file…'}</pre>}</div><div><h4>Live browser output</h4><iframe key={selected} title={`Working webpage for lesson ${lesson.number}`} src={file(lesson, selected)} sandbox="" loading="lazy" /></div></div>
     <p className="edu-small">This browser runs the supplied HTML file. The Studio film shows how editable graphics explain the relationship between that code and its output.</p>
   </div>;

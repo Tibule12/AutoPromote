@@ -6,6 +6,7 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 const request = require("supertest");
 const axios = require("axios");
 const { createSandboxDatabase } = require("../../src/services/unifiedCredits/runtime");
@@ -46,6 +47,7 @@ test(
     const bytes = fs.readFileSync(source),
       contentHash = crypto.createHash("sha256").update(bytes).digest("hex");
     const sources = express();
+    sources.use(rateLimit({windowMs:60000,max:300}));
     sources.get("/owned-source.mp4", (_req, res) => res.sendFile(source));
     const server = sources.listen(0, "127.0.0.1");
     await new Promise(r => server.once("listening", r));
@@ -86,6 +88,7 @@ test(
       };
       const adapter = createLocalAdapter({ db, worker, resolveSource: async () => descriptor });
       const app = express();
+      app.use(rateLimit({windowMs:60000,max:300}));
       app.use(express.json());
       app.use(
         createProcessingGuard({

@@ -1,5 +1,16 @@
 const { classifyPublishingError, publishingError } = require("../publishingTaskErrors");
 const { accessTokenExpiresAt } = require("../connectionTokenExpiry");
+const {execFileSync}=require('node:child_process');
+
+test.each(['access token has expired','No valid YouTube access token is available','Invalid_Grant'])('keeps terminal token errors out of publication retries: %s',message=>{
+  expect(classifyPublishingError(message)).toBe('auth');
+});
+test('classifies a large adversarial provider error within a bounded process deadline',()=>{
+  const output=execFileSync(process.execPath,['-e',
+    "const {classifyPublishingError}=require(process.argv[1]);process.stdout.write(classifyPublishingError('no valid '.repeat(30000)+'network timeout'));",
+    require.resolve('../publishingTaskErrors')],{timeout:2000,encoding:'utf8'});
+  expect(output).toBe('transient');
+});
 
 test("the exact LinkedIn failure is terminal auth rather than generic retry", () => {
   const error = new Error(

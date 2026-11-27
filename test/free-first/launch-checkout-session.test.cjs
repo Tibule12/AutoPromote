@@ -43,6 +43,15 @@ test('active legacy agreements prevent a second purchase and preserve the existi
   assert.equal(f.posts, 0);
   assert.deepEqual((await db.collection('user_subscriptions').doc(f.input.userId).get()).data(), legacy);
 });
+test('stopping renewal does not permit a second charge during the existing paid period',async()=>{
+ const f=fixture();
+ const paid={paypalSubscriptionId:'I-PAID',planId:'plus',status:'cancelled',paymentVerified:true,
+  expiresAt:new Date(Date.now()+29*86400000).toISOString()};
+ await db.collection('user_subscriptions').doc(f.input.userId).set(paid);
+ await assert.rejects(createOwnedCheckout(f.input),{code:'SUBSCRIPTION_ALREADY_ACTIVE'});
+ assert.equal(f.posts,0);
+ assert.deepEqual((await db.collection('user_subscriptions').doc(f.input.userId).get()).data(),paid);
+});
 test('approval is owner-bound and an ended provider agreement requires another explicit checkout action', async () => {
   const f = fixture(); await createOwnedCheckout(f.input);
   f.remote.custom_id = 'another-owner';

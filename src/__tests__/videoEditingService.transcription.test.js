@@ -51,6 +51,7 @@ describe("Studio caption job results", () => {
     expect(mockPost).toHaveBeenCalledWith(
       expect.stringMatching(/\/transcribe$/),
       {
+        job_id: "caption-job",
         video_url: "https://signed.example/WhatsApp%20Video.mp4",
         translate_to_english: "false",
         source_language: "auto",
@@ -81,6 +82,7 @@ describe("Studio caption job results", () => {
     );
 
     expect(mockPost.mock.calls[0][1]).toEqual({
+      job_id: "caption-job",
       video_url: "https://signed.example/video.mp4",
       translate_to_english: "true",
       source_language: "auto",
