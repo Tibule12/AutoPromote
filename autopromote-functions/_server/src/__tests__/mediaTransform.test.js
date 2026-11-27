@@ -3,7 +3,7 @@ const {
   processNextMediaTransformTask,
   __testables,
 } = require("../services/mediaTransform");
-const admin = require("../firebaseAdmin").admin;
+const { admin, db } = require("../firebaseAdmin");
 const stream = require("stream");
 
 // Mock fluent-ffmpeg for media processing
@@ -21,9 +21,11 @@ jest.mock("fluent-ffmpeg", () => {
     audioChannels: jest.fn().mockReturnThis(),
     size: jest.fn().mockReturnThis(),
     run: jest.fn(),
-    save: jest.fn(function (output) {
+    save: jest.fn(function (_output) {
       // Simulate async completion
-      setTimeout(() => {
+      // Jest's shared setup unreferences global timers; keep this simulated
+      // subprocess completion alive so the suite cannot exit before assertions.
+      require("node:timers").setTimeout(() => {
         if (this._onEnd) this._onEnd();
       }, 10);
       return this;
@@ -53,6 +55,25 @@ jest.mock("fluent-ffmpeg", () => {
 jest.mock("ffmpeg-static", () => "ffmpeg", { virtual: true });
 
 describe("mediaTransform", () => {
+  const previousTransaction = db.runTransaction;
+  beforeAll(() => {
+    // The in-memory fixture needs transaction support now that enqueue and
+    // retention share a content write. Commit only after the handler succeeds.
+    db.runTransaction = async handler => {
+      const writes = [];
+      const result = await handler({
+        get: ref => ref.get(),
+        set: (ref, value, options) => writes.push(() => ref.set(value, options)),
+      });
+      for (const write of writes) await write();
+      return result;
+    };
+  });
+  afterAll(() => {
+    if (previousTransaction) db.runTransaction = previousTransaction;
+    else delete db.runTransaction;
+  });
+
   it("accepts generated subtitle paths when building the ffmpeg subtitles filter", () => {
     const filter = __testables.buildSubtitleOverlayFilter(
       "/tmp/repost-captions-content_123-task-456.srt",
@@ -92,7 +113,8 @@ describe("mediaTransform", () => {
     };
     admin.storage = jest.fn(() => ({ bucket: () => bucket }));
 
-    // Enqueue a task
+    await db.collection("content").doc("test-content").set({ user_id: "user1" });
+    // Enqueue a task against actual available content in the fixture.
     const task = await enqueueMediaTransformTask({
       contentId: "test-content",
       uid: "user1",
@@ -100,10 +122,32 @@ describe("mediaTransform", () => {
       url: "https://example.com/media.mp4",
     });
     expect(task).toBeDefined();
+    expect((await db.collection("content").doc("test-content").get()).data()).toHaveProperty(
+      "lastMediaDependencyAt"
+    );
     // Process the queued task
     const res = await processNextMediaTransformTask();
     expect(res).toBeDefined();
     expect(res.success).toBe(true);
     // expect(res.processedUrl).toBeDefined(); // The service updates the content doc, doesn't return the URL directly
   }, 20000);
+
+  it("rejects a new transform after published-media deletion has been claimed", async () => {
+    await db.collection("content").doc("expired-transform-source").set({
+      user_id: "user1",
+      storageRetentionStatus: "deleting_after_publication",
+    });
+    await expect(
+      enqueueMediaTransformTask({
+        contentId: "expired-transform-source",
+        uid: "user1",
+        url: "https://example.com/expired.mp4",
+      })
+    ).rejects.toMatchObject({ code: "PUBLISHED_MEDIA_EXPIRED", status: 409 });
+    const tasks = await db
+      .collection("promotion_tasks")
+      .where("contentId", "==", "expired-transform-source")
+      .get();
+    expect(tasks.empty).toBe(true);
+  });
 });

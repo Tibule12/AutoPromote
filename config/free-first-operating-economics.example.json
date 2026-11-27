@@ -1,0 +1,604 @@
+{
+  "currency": "USD",
+  "priceMicros": 4990000,
+  "feeBasisPoints": 440,
+  "feeFixedMicros": 300000,
+  "feeBasis": "unverified merchant-country/cross-border/FX sensitivity; no actual fee statement available",
+  "activeFreeFraction": 0.4,
+  "advertisingRevenueMicros": 0,
+  "investmentMicros": 0,
+  "financialApproval": false,
+  "includesHostingAutoScale": false,
+  "basis": "Complete service ownership schema, mixed observed quantities and explicit reference assumptions. No claim of current invoice total or finite all-in production bound.",
+  "identityPlatformTier1Sensitivity": [
+    {
+      "upTo": 50000,
+      "microsPerUser": 0
+    },
+    {
+      "upTo": 100000,
+      "microsPerUser": 5500
+    },
+    {
+      "upTo": 1000000,
+      "microsPerUser": 4600
+    },
+    {
+      "upTo": 10000000,
+      "microsPerUser": 3200
+    },
+    {
+      "upTo": null,
+      "microsPerUser": 2500
+    }
+  ],
+  "components": [
+    {
+      "key": "render.backend",
+      "service": "Render backend",
+      "scope": "fixed",
+      "unit": "instance-month",
+      "rateMicros": 7000000,
+      "quantities": {
+        "average": 1,
+        "maximum": 1
+      },
+      "includedInProcessingTokens": false,
+      "basis": "historical $7 server receipt line + published smallest paid-compute reference; current instance plan/count unavailable",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "render.worker",
+      "service": "Render background worker",
+      "scope": "fixed",
+      "unit": "instance-month",
+      "rateMicros": 7000000,
+      "quantities": {
+        "average": 0,
+        "maximum": 0
+      },
+      "includedInProcessingTokens": false,
+      "basis": "No additional worker assumed; add one only after measured isolation/capacity need. Current dedicated worker inventory unavailable.",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "render.workspace",
+      "service": "Render workspace",
+      "scope": "fixed",
+      "unit": "workspace-month",
+      "rateMicros": 25000000,
+      "quantities": {
+        "average": 0,
+        "maximum": 0
+      },
+      "includedInProcessingTokens": false,
+      "basis": "Hobby workspace assumed; current Pro workspace reference is $25 plus compute, historical March workspace receipt was $29. Current tier unavailable.",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "render.cron",
+      "service": "Render diagnostic cron",
+      "scope": "fixed",
+      "unit": "job-month",
+      "rateMicros": 1000000,
+      "quantities": {
+        "average": 1,
+        "maximum": 1
+      },
+      "includedInProcessingTokens": false,
+      "basis": "historical cron exists; current $1/job monthly minimum reference, execution overage not bounded",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "render.disks",
+      "service": "Render persistent disk",
+      "scope": "fixed",
+      "unit": "GB-month",
+      "rateMicros": 250000,
+      "quantities": {
+        "average": 0,
+        "maximum": 0
+      },
+      "includedInProcessingTokens": false,
+      "basis": "No persistent disk assumed: owned media is already in GCS. Provisioning a disk is not required by this model.",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "render.builds",
+      "service": "Render pipeline",
+      "scope": "fixed",
+      "unit": "excess build-minute",
+      "rateMicros": 5000,
+      "quantities": {
+        "average": 0,
+        "maximum": 0
+      },
+      "includedInProcessingTokens": false,
+      "basis": "November notice confirms >350 of 500 included minutes, not overage. Zero overage is a scenario, not a verified final bill.",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "artifact.storage",
+      "service": "Artifact Registry",
+      "scope": "fixed",
+      "unit": "GiB-month",
+      "rateMicros": 100000,
+      "quantities": {
+        "average": 160.081132,
+        "maximum": 160.081132
+      },
+      "includedInProcessingTokens": false,
+      "basis": "current repository metadata footprint held for 30 days at $0.10/GiB-month; not historical billed average; shared thulani repository included conservatively; free quota not assumed",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "cloudbuild.pipeline",
+      "service": "Cloud Build",
+      "scope": "fixed",
+      "unit": "e2-highcpu-8 minute",
+      "rateMicros": 15600,
+      "quantities": {
+        "average": 20,
+        "maximum": 20
+      },
+      "includedInProcessingTokens": false,
+      "basis": "20 E2_HIGHCPU_8 minutes planning sensitivity; five observed completed builds total about 12 minutes plus one cancelled build without start time. No paid build started here.",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "gcs.legacy",
+      "service": "Google Cloud Storage existing assets",
+      "scope": "fixed",
+      "unit": "GiB-month",
+      "rateMicros": 20000,
+      "quantities": {
+        "average": 53.73,
+        "maximum": 53.73
+      },
+      "includedInProcessingTokens": false,
+      "basis": "existing bucket footprint held 30 days, before class/soft-delete/attribution reconciliation; NEW operation media already in tokens",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "firestore.idle.reads",
+      "service": "Firestore idle control plane",
+      "scope": "fixed",
+      "unit": "document read",
+      "rateMicros": 0.3,
+      "quantities": {
+        "average": 1000000,
+        "maximum": 1000000
+      },
+      "includedInProcessingTokens": false,
+      "basis": "idle share assumed; measured aggregate 32.3M reads cannot be split into idle vs active from Monitoring",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "firestore.idle.writes",
+      "service": "Firestore idle control plane",
+      "scope": "fixed",
+      "unit": "document write",
+      "rateMicros": 0.9,
+      "quantities": {
+        "average": 100000,
+        "maximum": 100000
+      },
+      "includedInProcessingTokens": false,
+      "basis": "idle share assumed, includes leader renewals/health records; daily free tier not assumed",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "functions.idle",
+      "service": "Firebase Functions control plane",
+      "scope": "fixed",
+      "unit": "modeled idle overhead USD",
+      "rateMicros": 1000000,
+      "quantities": {
+        "average": 2,
+        "maximum": 2
+      },
+      "includedInProcessingTokens": false,
+      "basis": "placeholder for invocation/compute/network; measured counts are not execution-cost attribution; no Gen2 Cloud Run double count",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "scheduler.jobs",
+      "service": "Cloud Scheduler",
+      "scope": "fixed",
+      "unit": "job-month",
+      "rateMicros": 100000,
+      "quantities": {
+        "average": 0,
+        "maximum": 0
+      },
+      "includedInProcessingTokens": false,
+      "basis": "us-central1 inventory empty; other locations/account free tier not assumed",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "tasks.idle",
+      "service": "Cloud Tasks",
+      "scope": "fixed",
+      "unit": "million operations",
+      "rateMicros": 400000,
+      "quantities": {
+        "average": 0,
+        "maximum": 0
+      },
+      "includedInProcessingTokens": false,
+      "basis": "observed queue paused and no attempt time series; new operation queue costs included in processing tokens, not added here",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "monitoring.custom",
+      "service": "Monitoring custom metrics/API",
+      "scope": "fixed",
+      "unit": "modeled overhead USD",
+      "rateMicros": 1000000,
+      "quantities": {
+        "average": 0,
+        "maximum": 0
+      },
+      "includedInProcessingTokens": false,
+      "basis": "Built-in Google metrics have no ingestion fee; custom metrics/API/alert overages unavailable and covered only by separate contingency.",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "logging.overhead",
+      "service": "Logging nonprocessing baseline",
+      "scope": "fixed",
+      "unit": "modeled overhead USD",
+      "rateMicros": 1000000,
+      "quantities": {
+        "average": 0,
+        "maximum": 0
+      },
+      "includedInProcessingTokens": false,
+      "basis": "observed 17.28 GiB aggregate below 50 GiB/project tier; growth/extended retention remains unbounded and needs observation",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "dns.domain",
+      "service": "Domain/DNS",
+      "scope": "fixed",
+      "unit": "month",
+      "rateMicros": 2000000,
+      "quantities": {
+        "average": 1,
+        "maximum": 1
+      },
+      "includedInProcessingTokens": false,
+      "basis": "annual renewal amortization assumption; no registrar invoice found",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "sentry.plan",
+      "service": "Sentry / other observability",
+      "scope": "fixed",
+      "unit": "month",
+      "rateMicros": 10000000,
+      "quantities": {
+        "average": 0,
+        "maximum": 0
+      },
+      "includedInProcessingTokens": false,
+      "basis": "DSN configured but no paid Sentry subscription verified; zero is an explicit scenario assumption, unknowns covered by contingency.",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "unknown.contingency",
+      "service": "Unattributed services reserve",
+      "scope": "fixed",
+      "unit": "month",
+      "rateMicros": 25000000,
+      "quantities": {
+        "average": 1,
+        "maximum": 1
+      },
+      "includedInProcessingTokens": false,
+      "basis": "explicit $25 sensitivity allowance for unknowns, NOT a verified upper bound",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "accounts.documents",
+      "service": "Firestore account/project metadata",
+      "scope": "registered",
+      "unit": "GiB-month",
+      "rateMicros": 150000,
+      "quantities": {
+        "average": 0.0001220703125,
+        "maximum": 0.0001220703125
+      },
+      "includedInProcessingTokens": false,
+      "basis": "64 KiB documents + 64 KiB indexes per registered user; excludes media/job data covered by tokens",
+      "costDomain": "account"
+    },
+    {
+      "key": "accounts.email",
+      "service": "Onboarding email amortization",
+      "scope": "registered",
+      "unit": "recipient",
+      "rateMicros": 500,
+      "quantities": {
+        "average": 0.05,
+        "maximum": 0.05
+      },
+      "includedInProcessingTokens": false,
+      "basis": "monthly cohort assumption; $0.0005/recipient is unverified provider/credit-expiry sensitivity",
+      "costDomain": "account"
+    },
+    {
+      "key": "activeFree.reads",
+      "service": "Firestore interactive reads/listener deliveries",
+      "scope": "activeFree",
+      "unit": "document read",
+      "rateMicros": 0.3,
+      "quantities": {
+        "average": 3000,
+        "maximum": 30000
+      },
+      "includedInProcessingTokens": false,
+      "basis": "per active user scenario incl reconnects; does not count listeners again as a separate charged product; excludes operation-ledger reads",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "activeFree.writes",
+      "service": "Firestore interactive writes",
+      "scope": "activeFree",
+      "unit": "document write",
+      "rateMicros": 0.9,
+      "quantities": {
+        "average": 100,
+        "maximum": 1000
+      },
+      "includedInProcessingTokens": false,
+      "basis": "explicit sensitivity assumption; not an invoice",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "activeFree.deletes",
+      "service": "Firestore deletes",
+      "scope": "activeFree",
+      "unit": "document delete",
+      "rateMicros": 0.1,
+      "quantities": {
+        "average": 10,
+        "maximum": 100
+      },
+      "includedInProcessingTokens": false,
+      "basis": "explicit sensitivity assumption; not an invoice",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "activeFree.metadata",
+      "service": "Firestore active project metadata/indexes",
+      "scope": "activeFree",
+      "unit": "GiB-month",
+      "rateMicros": 150000,
+      "quantities": {
+        "average": 0.02,
+        "maximum": 0.2
+      },
+      "includedInProcessingTokens": false,
+      "basis": "project metadata only; excludes GCS media and transient operation records",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "activeFree.hosting",
+      "service": "Firebase Hosting static App delivery",
+      "scope": "activeFree",
+      "unit": "GB transfer",
+      "rateMicros": 150000,
+      "quantities": {
+        "average": 0.05,
+        "maximum": 0.5
+      },
+      "includedInProcessingTokens": false,
+      "basis": "static App/control assets only; operation movie downloads included in tokens; no daily free quota assumed",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "activeFree.api",
+      "service": "Render API control responses",
+      "scope": "activeFree",
+      "unit": "GB transfer",
+      "rateMicros": 150000,
+      "quantities": {
+        "average": 0.02,
+        "maximum": 0.2
+      },
+      "includedInProcessingTokens": false,
+      "basis": "JSON/control-plane responses only; media proxy/download transfer included in tokens; account-level bandwidth allowance not assumed",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "activeFree.email",
+      "service": "Transactional email",
+      "scope": "activeFree",
+      "unit": "recipient",
+      "rateMicros": 500,
+      "quantities": {
+        "average": 2,
+        "maximum": 20
+      },
+      "includedInProcessingTokens": false,
+      "basis": "unverified $0.0005/recipient sensitivity incl expiring credits; no messages sent by audit",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "activeFree.functions",
+      "service": "Firebase Functions interactive control plane",
+      "scope": "activeFree",
+      "unit": "invocation + assumed compute",
+      "rateMicros": 0.5,
+      "quantities": {
+        "average": 20,
+        "maximum": 200
+      },
+      "includedInProcessingTokens": false,
+      "basis": "modeled unit including short compute; invocation count alone is not a measured price; processing-trigger invocations excluded",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "paying.reads",
+      "service": "Firestore interactive reads/listener deliveries",
+      "scope": "paying",
+      "unit": "document read",
+      "rateMicros": 0.3,
+      "quantities": {
+        "average": 14000,
+        "maximum": 70000
+      },
+      "includedInProcessingTokens": false,
+      "basis": "per active user scenario incl reconnects; does not count listeners again as a separate charged product; excludes operation-ledger reads",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "paying.writes",
+      "service": "Firestore interactive writes",
+      "scope": "paying",
+      "unit": "document write",
+      "rateMicros": 0.9,
+      "quantities": {
+        "average": 500,
+        "maximum": 2500
+      },
+      "includedInProcessingTokens": false,
+      "basis": "explicit sensitivity assumption; not an invoice",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "paying.deletes",
+      "service": "Firestore deletes",
+      "scope": "paying",
+      "unit": "document delete",
+      "rateMicros": 0.1,
+      "quantities": {
+        "average": 50,
+        "maximum": 250
+      },
+      "includedInProcessingTokens": false,
+      "basis": "explicit sensitivity assumption; not an invoice",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "paying.metadata",
+      "service": "Firestore active project metadata/indexes",
+      "scope": "paying",
+      "unit": "GiB-month",
+      "rateMicros": 150000,
+      "quantities": {
+        "average": 0.05,
+        "maximum": 0.25
+      },
+      "includedInProcessingTokens": false,
+      "basis": "project metadata only; excludes GCS media and transient operation records",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "paying.hosting",
+      "service": "Firebase Hosting static App delivery",
+      "scope": "paying",
+      "unit": "GB transfer",
+      "rateMicros": 150000,
+      "quantities": {
+        "average": 0.1,
+        "maximum": 0.5
+      },
+      "includedInProcessingTokens": false,
+      "basis": "static App/control assets only; operation movie downloads included in tokens; no daily free quota assumed",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "paying.api",
+      "service": "Render API control responses",
+      "scope": "paying",
+      "unit": "GB transfer",
+      "rateMicros": 150000,
+      "quantities": {
+        "average": 0.05,
+        "maximum": 0.25
+      },
+      "includedInProcessingTokens": false,
+      "basis": "JSON/control-plane responses only; media proxy/download transfer included in tokens; account-level bandwidth allowance not assumed",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "paying.email",
+      "service": "Transactional email",
+      "scope": "paying",
+      "unit": "recipient",
+      "rateMicros": 500,
+      "quantities": {
+        "average": 5,
+        "maximum": 25
+      },
+      "includedInProcessingTokens": false,
+      "basis": "unverified $0.0005/recipient sensitivity incl expiring credits; no messages sent by audit",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "paying.functions",
+      "service": "Firebase Functions interactive control plane",
+      "scope": "paying",
+      "unit": "invocation + assumed compute",
+      "rateMicros": 0.5,
+      "quantities": {
+        "average": 100,
+        "maximum": 500
+      },
+      "includedInProcessingTokens": false,
+      "basis": "modeled unit including short compute; invocation count alone is not a measured price; processing-trigger invocations excluded",
+      "costDomain": "controlPlane"
+    },
+    {
+      "key": "tokens.free",
+      "service": "All processing operations for active Free",
+      "scope": "processingFree",
+      "unit": "USD budget consumed",
+      "rateMicros": 1000000,
+      "quantities": {
+        "average": 0.06,
+        "maximum": 0.5
+      },
+      "includedInProcessingTokens": true,
+      "basis": "usage assumption for average; proposed 500-token/rolling-30-day ceiling for stress. Includes ALL job compute/media storage/transfer/job DB/provider calls/retries ONCE",
+      "costDomain": "operation"
+    },
+    {
+      "key": "tokens.plus",
+      "service": "All processing operations for Plus",
+      "scope": "processingPlus",
+      "unit": "USD budget consumed",
+      "rateMicros": 1000000,
+      "quantities": {
+        "average": 0.5,
+        "maximum": 2
+      },
+      "includedInProcessingTokens": true,
+      "basis": "usage assumption for average; proposed 2000-token/rolling-30-day ceiling for stress. Includes job expenses ONCE; ceiling remains provisional",
+      "costDomain": "operation"
+    }
+  ],
+  "unpricedOrUnverified": [
+    "current Render plans/bandwidth/scaling/disks/workspace allocation",
+    "Firestore document/index bytes after diagnostic metric follow-up and daily billing attribution",
+    "Authentication upgrade configuration/actual MAU/SMS mix",
+    "Firebase Hosting sites/releases/traffic and custom domains",
+    "Functions execution-time/GB-s rounding and network",
+    "Artifact Registry current-metadata vs older Monitoring mismatch and shared repository ownership",
+    "logging growth/custom metric quotas",
+    "external AI consumed usage and provider fees",
+    "email invoices/active provider and credit expiry",
+    "PayPal actual merchant rate/FX/refunds/chargebacks/taxes",
+    "Data Connect queries, Secret Manager accesses, App Check reCAPTCHA, Persona KYC and X API plan/usage",
+    "registrar/DNS renewals and employee/support/legal costs"
+  ],
+  "renderHostingReference": {
+    "backendMonthlyUsd": 7,
+    "cronMonthlyUsd": 1,
+    "referenceSource": "https://render.com/pricing",
+    "currentPlanVerified": false,
+    "inference": "Historical $7 server receipt line is consistent with 0.5c-512mb / legacy Starter. Current service assignment and replicas are not authenticated."
+  }
+}

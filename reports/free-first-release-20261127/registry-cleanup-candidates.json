@@ -1,0 +1,3240 @@
+{
+  "capturedAtUtc": "2026-11-27T03:16:03.884747+00:00",
+  "images": [
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:003a597a597067eff61174151245daf14eba4f24ab489b5154a320e40b0d1190",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:00eef821f52d01fc731dd30f8440394e3b9ef81dffb272cfccbef0032cb43aa0",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:049b8b71c69f3ea918dc3e69ca9b848608561436ab2d156c388edbf24882384f",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 8,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:055cf7338de8371643409d7acfd4de3ed53c7e61338061732f5df1e7e626cb4d",
+      "tags": [
+        "gpu-primary-20261120-731f77be8e"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:09459f275db82a5aaa5f8921c4f664732c19c005c88c10544c4ba97dcf60b732",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:1a276b3a88bd9c37598902f874e0c99f3e49329cd2f009065990dfd674a3d99b",
+      "tags": [
+        "e71a2962011d5fed8a2892bb54960ddd7f77f4c1",
+        "latest"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age",
+        "Named release/current/rollback tag"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:28c5641b9eeffa4744a5097b76d7d214e5449dcedcc224fa31530980cf370f0e",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 8,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:2ae9245c9dfd82938c3b9b4e5881fd997636bc1f8690157f7e4290b99f833ada",
+      "tags": [
+        "4916f39a7c6e0d8dbb8ca5018420a639363d5cbc"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:2e163a873dcc1d452db7aa591e62a7b1fff17485a4b27ba1d89ab995cfe60e0f",
+      "tags": [
+        "92e45bbb79251de202bd6b37373dcac0acb8bf14"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 91,
+      "status": "conditional_candidate",
+      "keepReasons": [],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:2e5445e06284ac2f6f41ba8c745babbbd60fa1bede9e6e8633efbb331632dd6f",
+      "tags": [
+        "0801a29dc9605cf8c7e2d45b773267e805c0bf9d"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 35,
+      "status": "conditional_candidate",
+      "keepReasons": [],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:36b5f46bca4e56d853c4637929b9c024399c7ec2c64e66e2862e572a7617579d",
+      "tags": [
+        "165dbe328c7da65051a4b37f73797d8b919ec88f"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 35,
+      "status": "conditional_candidate",
+      "keepReasons": [],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:3e10cc514a270b1fe8b292a4c07178ae2d5730a0722e1af4930dfbb63a4ee3e0",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:3fd52a59387ffe7efa0a23f1f12b2190d793752f023fb5229cbc87838ead01cb",
+      "tags": [
+        "3dff28b2bd109ad7299d4e5788978cc6c190ce7c"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 71,
+      "status": "conditional_candidate",
+      "keepReasons": [],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:41cdcb113ec04780c4b5774ae1513bc9e3a17f4011609f8d19d878cc21aa1bb1",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:5883c255abb04cf0ed92d61a9208a50e29e09a5a1b0acfc891aab1b42470cb88",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:5c97f1a535d6fa03fa2842586f3698cc77c78189aa01f553131d96bfc7f2cf48",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:5f7601e9249a247de02a6e365db728582e606bf8c8706b7cab9aac4d2163eac8",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:618f11395111dd11ae67d964b9593b0e8a0eabf6fd8b926df4c5bb8ff682bd04",
+      "tags": [
+        "206367089510b732699d866f9f85671f852f5313"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 8,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:7da314f6a389c5be79d3636e4653728fab67238166d60917c2c0a4ec63d2537b",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:8064b8b0f3521fa6e736b39fba0578a6df05cb4bd5bcf7938cc72b16d0c19964",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:83773df0bb349327d2331d156083cd30c0775d39e076051b9def4d2898858136",
+      "tags": [
+        "10d551825a100197d3251a6e53a88493bf488c2c"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:87dbc1b330e577a3c7eacb7dcb2e74a979584e2af46c7596499be3c2c6aed10f",
+      "tags": [
+        "d9eed6d479774ecd0afd072c405d73eec4cf3979"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 44,
+      "status": "conditional_candidate",
+      "keepReasons": [],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:8910dce5642cad29c72cc5767933c2892a1adbe09b0fc3bb2195f788419dc711",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:a0b49c5ffa5e6987744425cceee0ed82bf94be8a7153c609258ced612c0968e2",
+      "tags": [
+        "121e1521b880b369567b9d68f95fd26de1bb22b9"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:adcf632a1a83aaab9fa6a2714dc1f1cc1ad1678b4548bf0d638f5529d145678c",
+      "tags": [
+        "gpu-primary-final-20261120-1331dd7a97"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:c4964b27fee72cedd67458dcaab0a08ec8a88473a4c15ca778d9eeede2b70d80",
+      "tags": [
+        "8bcaad4c26fa3926aba4cfbd6de78f6b74a23970"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:d9801b4728d9d5c604967fdb790e2aac9d0c12f2a5646f2605a2b3615e6a65e1",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:d9ca9208d2bdf015d96d558882cfcf0adab6ea003fd667a960716d7e9f1004ef",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:00774ca797049fa00e9986581ece971ff9f56db15815437e188181c04331ebfc",
+      "tags": [
+        "165dbe328c7da65051a4b37f73797d8b919ec88f"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 35,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:0be637ba741d4a44452ed2ccc8ff3214ab6b445a513f5b64fb4b01f25eb47e58",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 8,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:0d79b27a6c64b99ea73d7225479e09d5785a623751378bc2ddfef00c6ee800f8",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:1cddc575bef2821281d3d11c2eeb44103a3a9f192eebe7e5a8b83195aeb2b773",
+      "tags": [
+        "e71a2962011d5fed8a2892bb54960ddd7f77f4c1",
+        "latest"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age",
+        "Named release/current/rollback tag"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:25b0233ea89b3e9986754beb60a622309bda92d1f6ac43cc2034ea4df2859c10",
+      "tags": [
+        "582c0e6d53235521b82bef475b8330b98ece32ff"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 105,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:2d751501783e918c1d9c153d27a7263ed56a9bee323862d24d747685fa9b8e91",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 8,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:328e126d54b87811f01d749bd583cff5a58c454035b82c26c45b303d69fd0bb0",
+      "tags": [
+        "4916f39a7c6e0d8dbb8ca5018420a639363d5cbc"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:4c7ffda0b247edffa6bedf31e872e9b6a1c72f406d37b953d22b4c9e129d786d",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:4caa684a0921b2f4db9242453c58fd58c40bfd6c03a4b450e657b77c6f768f1b",
+      "tags": [
+        "gpu-primary-final-20261120-1331dd7a97"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:4eea12b09e3cf7e7db08c8f6318e0fadb6c41499dcc9bfafb984ac3d98b4a9f7",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:64ed4a1b5c3d72880690417e1bd8d4e06976959b650e369a1744fa59489f7b42",
+      "tags": [
+        "121e1521b880b369567b9d68f95fd26de1bb22b9"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:6a3c6f206cfebb9d5a5c1ac692d3ccb1a3826c3d69c5b95c57a0a8d37f41caa9",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:717131b00f14e1c48c66ab33b1bb604b83225d7f84d8df5269ef7816e4511290",
+      "tags": [
+        "d9eed6d479774ecd0afd072c405d73eec4cf3979"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 44,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:7a666a4dfab96c36465c4847ddfc7d9499c8fc40f02716b1bb627da8df910c7f",
+      "tags": [
+        "ed57d68b0efed4595fa49c70137ccaa567ae6c26"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 105,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:818bdb5ad5797918d3e492eb6a39b6ed743b0bba91f120fd840143076f94fdb8",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:820df00ac5eae9e1b7d88635d08278a0e0fae6cd514e65ae66c189df388c37f4",
+      "tags": [
+        "6d6bee8ab47be51fc38a4fd570a45195875e8cde"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 96,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:82a3378b190f3d370807dfda319607c79aecc4fd45dec7b357335da19b23e57b",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:9b531bd0265fdf9f5f74e69b41b1e8da8add48fad7b98a8b5aebdce743234830",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:9f7601c2da32a68fb0f2138a2c0812a3dc8bc1ac8e237251d33906d874b614d9",
+      "tags": [
+        "deceb7e5390baab3069332e53e6eac3606b52e77"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 96,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:a1788352394ff741dbbe1c3b3cd1adb757f7dc1034dc6d9aaa3ba9497296e15f",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:a629e16fc508555dd981b55ffc70ffbeec919c00935c13fbef2dbd8dacd27b14",
+      "tags": [
+        "206367089510b732699d866f9f85671f852f5313"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 8,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:b22992829f2aff47c291041910fe7d25f209e396874886be988292b4bf21c82a",
+      "tags": [
+        "3e5e050b2c7592ddfb25fcecd902171a3c0e615f"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 96,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:bc4a1efbfa161dce1680255e3231d00ccdc5c3dad137733b547462359d66dd04",
+      "tags": [
+        "8bcaad4c26fa3926aba4cfbd6de78f6b74a23970"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:bd70ec91a52b9b0453e64841effa2749768e18d69abbf4ba77374e0811989b21",
+      "tags": [
+        "92e45bbb79251de202bd6b37373dcac0acb8bf14"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 91,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:c0a62a2dcb10f7e1a10e8b34610a0ad338db59131bd91b1d331d718dcda51fdf",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:c2860dd36205396322db6dff42ef0873346eb4eee7a3bebcbcea7e49e4052e57",
+      "tags": [
+        "9ab789a309a3946702c94b496097276386ca2932"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 105,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:c39ccab406d5fd0db1f66bc258f673d98ccd9f7ebe83f2422c8facb7cfdda664",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:c6f5619a25f27570a9413ec1c0847a211001f75649996a6d04db0ec9d5a4c43f",
+      "tags": [
+        "3dff28b2bd109ad7299d4e5788978cc6c190ce7c"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 71,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:c742856b56faf23046df4150c0093ffd994b684faf96c9671a223bbbd18154f2",
+      "tags": [
+        "gpu-primary-20261120-731f77be8e"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:d5958de7752165469364814e3f1a13437c8b86b13db702ce248bf2184841b241",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:e1ecb36e9781c7f7e06a1c519aaf331c8578b2c4c57a786c8f06ee1eca528e3f",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:eb5fa278aaafcde64e8ffec70e9deca072277a732c36315ccbf6ebdf9b783513",
+      "tags": [
+        "10d551825a100197d3251a6e53a88493bf488c2c"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:f162132d21f7aa03cb6bff859601c7a6c5fa5f9ddf7332ca322bdd8dc60e7a9a",
+      "tags": [
+        "43448fb968916ac22f4d156da7def5f21dbcd7f6"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 105,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:f953cfb28d2b02a675b1d5129bd1c38a8c7f927f1dba10c40831cb80ae8ffd45",
+      "tags": [
+        "0801a29dc9605cf8c7e2d45b773267e805c0bf9d"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 35,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-fast@sha256:f96cc7f4faa3636f85fbc1f6ea406ae57561a5ae0d781161eb41271e72ae2569",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-gpu@sha256:0bc59e039b106d6d9111d4f1229c298dd459454dcd4d8674d06913d046e298db",
+      "tags": [
+        "8bcaad4c26fa3926aba4cfbd6de78f6b74a23970"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-gpu@sha256:1eebe94fd36f983d200f7da604298364e4305f1ffdde27bcc4aa86f69727fab2",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-gpu@sha256:61a2c7c2d96e79eb6ade532ab54f3bc44352702dd5b7c06a79780e530c6d7812",
+      "tags": [
+        "e71a2962011d5fed8a2892bb54960ddd7f77f4c1"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-gpu@sha256:79c6e0870562b95cde0234604517591475ce5a3a91acc855e7c304ac019bfad2",
+      "tags": [
+        "121e1521b880b369567b9d68f95fd26de1bb22b9"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-gpu@sha256:7eb6207ef05ab6b20598cbe4943c81092c8424f5ddec004f25f60554d7be9b77",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-gpu@sha256:8c6b8b15610066b3e199719304984d5722f7f23d16b64b8d1e07dd5b1d933490",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-gpu@sha256:8d1ef46c7a6d21ddc6cd3e2b66a181c874ec07a2c26f91a8fa19e423865c4eb7",
+      "tags": [
+        "gpu-primary-20261120-731f77be8e"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-gpu@sha256:90f4a8435f61560e577f8aaaaaabe44f6aa5fdec704bd8eba841f7b7fb1938de",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-gpu@sha256:91046fd7aaedd1ac10a556f5e11eedb38f44e7bfdec95690172fbcf6a2fc8048",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-gpu@sha256:eca0bc5904e11c6d4724644e0d4c336292199ece5ffeef2cecf6815cec80cccb",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker-gpu@sha256:ee4d66caa84ac73d9e02f4d192b2717e9805c79a3b719df0488a3b0ca96e3839",
+      "tags": [
+        "gpu-primary-final-20261120-1331dd7a97"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:319b9fbca252f8f40cbae2dbae8c341a1a7c75c06d03b3662071ac83188b861c",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:33a8d3f6633737f3204f1e2edfafb5c6701ff3d20279cf67c4dcbb640a54932d",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:39fc7d4465c3d5ba7118a9c6251c33744321e1ebc44755360a899e11e88ae635",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:45fd23f53c8805a1ff529d1cc6cfdc5a169689cdfe1e484860b82a964de4bbde",
+      "tags": [
+        "dd4b80a6a936b7c7bd94b557edf3428f0fb37a76"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:4985bfef1d09a15be6f6708bbeb28f52cfb72a24353aed450410ad82c4a0e154",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 5,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:5d5c249eae8fd5537f9563ffd83554a4b619d211eef7b58de7b0495f45c328e5",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:63b7540ca4642050926dc5f9590b0610f623d71eae635253283bb32eb0a35534",
+      "tags": [
+        "8bcaad4c26fa3926aba4cfbd6de78f6b74a23970"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:67d6a51f90a7c0469a5dbe212fc8c7ee325cc1014cf511cee28f9e7a6d8e4537",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:7440007301e743f36221210009f9f2ad670787ea9d0e32c8e7bbcc09dc71df7d",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 5,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:77281019f653de8d4d769c0100cfba618020263a356e05b726ab69f054cc8b46",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:7cb61bd6ffe1ff468a7ff33b38bc0b5dbce7f77f4b17c06097378d5e89b85daf",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:815adc282a77ddb2e6c675f20cb9f3630d610bba43dbc0a91528dc10a03805cf",
+      "tags": [
+        "10d551825a100197d3251a6e53a88493bf488c2c"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:92490a30b062976f1023e75439e2675cfdfb7b489aa56aeaee8b01ce38f0f26b",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:926ee302495ef8f1ab6220dc615cd8281a2d09852600ba4cf92111d75dc35d7f",
+      "tags": [
+        "abd7354fdf75f7a6df5050e1ace3776469e5b6e3"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:93c2a77c8a539a4d199c374ec941c92aedd9177b184a73b3969be38b0b7794dd",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 8,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:9b7477f056202a8214d30cea9f2e0829c56822e4bd88d2314be39c78dbafe0b5",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:c043660f99eba1239f45bb681ffabfda5faad37c0dfc77bdfd08d30e9b3a7281",
+      "tags": [
+        "9d43b618934f62fa3e046fa86b562eacdb742c11"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 5,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:c122b706bbcf287107234cdec36a9daec196e7228fe20bbce0448860b97aa767",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:c615237fede4fb30ec11a68770e0e8e552d6708bcab409ee2a7d7380f3acb616",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:c6fcf8045f582a0cff6f107f31d5e4f7c1f30ad7704c5c3251032033a245798c",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:cb7aa82dc9eae6ef66ef44a3650dbdbce08b32f62b9894948d02851097e25afb",
+      "tags": [
+        "506de43b30e6838157f2ff3e057fe982455ffa1c"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:d2286bb756e1add9d7f3b8f2029f83905721e00779a04fdda16c384cdd0bd84d",
+      "tags": [
+        "121e1521b880b369567b9d68f95fd26de1bb22b9"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:e4b3d553fa2753e87d49bf87112b93185d94f25757aaaf512bc9f60fce9375cd",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:e4c3de6301853e21fba69cbda7996f2f7c3752a940b6e292b57e94eedd28296b",
+      "tags": [
+        "4916f39a7c6e0d8dbb8ca5018420a639363d5cbc"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:ebfbdfdc2fe358ef2214b6bf2983a1c28640dc47d0efcdc3fd06c2864bd92d93",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:eec828151e5299fea90ab90e9139017bd63f7d769603e8c52a1b185c45b94d48",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 8,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-gpu@sha256:fcc1e1705e6cd75ec3403eb570490c1b67242d210c8bed7c5b8b6020f832c187",
+      "tags": [
+        "4e274e632df291b3b85e53d2e96b6ca0ef4d4e04"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 8,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:09ec6b14ad2e344a6b5c81d39e36e6ef0fa7305da5ccc623b474f923b035c2e0",
+      "tags": [
+        "b6aac275c0c05ab89956d854d51256087a328349"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 70,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:0b8edc64d533aa2f12e13284f441530d341663c31465a66b96a3652d91d75380",
+      "tags": [
+        "fbbbc231302695dbdb882494ce808403c0e2df25"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 104,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:0c6a21a05a1141e3d0d1bac2b115adda46d32c25cfbad19fda4cd08bb86b93ba",
+      "tags": [
+        "abd7354fdf75f7a6df5050e1ace3776469e5b6e3"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:0c808ca06f4912601294680de151956aca310703693fcef059d8e98488ed2f26",
+      "tags": [
+        "caption-audio-20260919"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 68,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:0f1d9153a7c13b22d09fd223cf4b6659268ebee1b85d1e2964d2c5e03a934f0d",
+      "tags": [
+        "51ad8dd53a94625df8f48c7f3ea50f346bca4526"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 68,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:0fdfee5ae012aa9bafe74b80ba16e4d9c2aab1841c81b636cc1a3c19160d1087",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 9,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:115f34c51861539d07ac9d3f87dafcc8f2e4e58c0e1169adbea643f61f8f69ce",
+      "tags": [
+        "f70333f1d9ed94a93c842fc27e24d7e1bb4500cf"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 89,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:156bf0e7d51363eca2f7817c434b8d60607b432deef2db4dd61b33023b021d4c",
+      "tags": [
+        "caption-audio-v2-20260919"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 68,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:199e50bf20c3f83fc87f70504b0ada6d9478aeafcd72bec58a7dfc2ff6836680",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:1d1f6949092ad0d7ba90e6a86a0fceaeabd7f22584f01294178eb27f69a7249d",
+      "tags": [
+        "0801a29dc9605cf8c7e2d45b773267e805c0bf9d"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 35,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:1e6d8a20582cf2ba90f8c33cea56a031b8730c1b1d7a5c493447791c04950cef",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 8,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:1f4bb4e475097e2dd336e0cc4b507498f7cb761d0ffe91ae10c76e0dc75bc66a",
+      "tags": [
+        "10d551825a100197d3251a6e53a88493bf488c2c"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:2a037df7b5935816caf8f4a8c3ee43cbcbe1ec3802bcadcab076cdbc57758767",
+      "tags": [
+        "b067deead2fcae91ef5b7574db1ee40758ae087d"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 24,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:2a7ed4ca05ce5b2f34037542d9371a551267445815381f254190409f3bb4e63b",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:2b9904f07e9bba08eb04d1379836f086ebc931bb41ee23ab89b20cfaa1fac611",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:2cef52d8c90a290d9859da59d44f26047981548596f1f25079d000f8ff850a4d",
+      "tags": [
+        "435d5824977991faae9e1b9a2c6caa5b1fab3498"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 91,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:2f6bacfbfc22258b814e53051917d332912794e285c85045a721b85a9a6cb181",
+      "tags": [
+        "a8ae44b81969c3c8c3a30bcead3164c38764c91e"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 59,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:31d401642b45782e01bdff77a8fa43dd9236a323ed046e5bf53debb2ce2df635",
+      "tags": [
+        "ed57d68b0efed4595fa49c70137ccaa567ae6c26"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 105,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:372d7b5979b7c2e6c09a7e6296d184bd907487ae8be63aae045028fff59e7e57",
+      "tags": [
+        "8cb8357af9518c3f9b51948d89d7232714095224"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 68,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:3cd5e7553947b5d168fe3c51bedb61879f41a431de1b531c4d9f48249d7366c2",
+      "tags": [
+        "c723b1001481eb4201479745b04285e207805e1a"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 59,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:3cf6bd0f02097f4eca6bda5942a4c88a4f87b53f90c527f0a372abdb9823dbdb",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 8,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:3d452d7a486c0ff5d69023124b13fc61c0ecbd5c92ee23efb5a89822dba10a2d",
+      "tags": [
+        "077b32695edd7e17e29963b4677fc4ef423ee6a4"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 68,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:493a660d71cbefb2fe28c48f3395e3a71e630de70e7359000493ec59ce2a4417",
+      "tags": [
+        "d9eed6d479774ecd0afd072c405d73eec4cf3979"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 44,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:4a32a7d2f73dd53665484e3f7d1e725bfc3d77354a12149930ce583cb489d1ea",
+      "tags": [
+        "32b7391bfe4acdaa7a14973fbbf3b5cc4c742d5d"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 68,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:4b7cd775d66faaaf3c227efe1c1391c6b523ad53de1922821f7e9dc8809828ab",
+      "tags": [
+        "53d2aaaa9aa8f3eba8ab8fef18c81f88461e50ed"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 9,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:4c3cb037ee943c5d9cee88461838191a388308a7adfaed4bca545da5e0cbd278",
+      "tags": [
+        "b4c427a3a852b762e4989c45847a5b78965fb92f"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 89,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:4fd7b5146d7bfb3b3713f371932b235c8d8da39553690ce0f2e2f60c61b3c5bf",
+      "tags": [
+        "4a5313aed5011baac3bb78748e509c38dfbc61b8"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 35,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:50b29b0bc5fbabf1d249ca9a4db73b1087bc73065aa81d1252461814dd13bd96",
+      "tags": [
+        "7498c20b598239f66a1811eca7296310430a9aeb"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 67,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:59d482ca2f6fd3fd221105b235c4287fba18339e51644de98c2c163ff84fa082",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 19,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:64473e683f119c3c33c89846d5902f0af0f10ab32e1fd4b5411986a21ebe36eb",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:695226496f0de11e64e24e5630279c6a1bfee436db628f5589b7c44d56411495",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:6baecb18868110f171f55d814762ada87c5dee473218d5750a72f2ed71ade8da",
+      "tags": [
+        "7498c20b"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 67,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:6d5fdcc4dc92c39a0c84ff686c459644506e8d563720dcc431048474f62738b9",
+      "tags": [
+        "3fd196e5015fd8efcd8e050bbf04b54c6cfbfbf7"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 21,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:7145bcaf8b2f17534fdd132a18321cc4654e01c7678ff05cffe69d1ef36e0505",
+      "tags": [
+        "4d0edd4c"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 67,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:73ced8b9bd6eb940b8573abfc84d72078e09ee0335d0ed4bbcce7f2201b9da3c",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:767a29c63fcd8e5564af88fb68917d77dd74bf0acac831522dd413c3c84b4c91",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:7769e89bb2b62fa8c1df4cb186ad17ec43dda21bbaf7aad320e21f3efd34f819",
+      "tags": [
+        "89f04b1cd150c7b2888fb0716d1fa28fbbbce0d3"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 68,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:789cc2744c3e8363ac12ed0dddfb92f00e6d253cd5903f2fe9c58867eb7e2749",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 5,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:7a80235b4b879982afc52ac83bc5a95846a95b3947d619fb9d926b6f26d09469",
+      "tags": [
+        "c33bc938061850b2051d4a35a0660e15e2666d8c"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 68,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:7bb41a791be0f01a5e33268148b7a5983b57f11a36d9f061258c202cd0707f41",
+      "tags": [
+        "4fe44fee89b38d55e0f4d9269a12a7d3e85aad40"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 97,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:7d3177fb98500060b52cfbf2d65885ba147030637993fca4a792df1c537aa9f7",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:7f558318ba1dd97988e093f14de9bce0ce43f7e1facd927cad4c70ebe6318d9b",
+      "tags": [
+        "8111978e4681f6f2b83bdabb6f1b816732ff973e"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 67,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:8221f425014e75f80c7409ecdd7c3cbd727ea826ea2972a27ab456cb3672210e",
+      "tags": [
+        "edb136aa3303087aeac941554212d0234c1e1eaf"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 21,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:835498abd0a2ee05c892d4b59aa5262ba9241c41801763940002aa0f3f0c3d0f",
+      "tags": [
+        "lean-20260731-v2"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 118,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:8da543e4c103b20be19319e72030013e4776ea9cbc36a0f399052c8fa8a90efc",
+      "tags": [
+        "4916f39a7c6e0d8dbb8ca5018420a639363d5cbc"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:92e13b4750ef91b0f4f1632b544ae9877fb500470c5ad27812c96bcc6a8f17c9",
+      "tags": [
+        "1c8a5c29b6af56f4a4314602c39877db49e995b7"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 59,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:930cf389860c4a9f3985c402112b71bafa7dd8196f962a3765440ef16b5b8c02",
+      "tags": [
+        "4d0edd4c00c46ad72d44ea8bf36b98af0b6efd64"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 67,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:96836734cd799b1bfb9496ff7036d20707cff85b74e45d8698558791268ea2ac",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 5,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:9905157f45daa97bb8c209bea508db9681be939c7079951d993ee33ae63c9dd6",
+      "tags": [
+        "452ebf1328e46f8daf004a9e91e969e9590f2b6b"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 68,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:9ce3a27768e46c897692d04fa7ebce9f240e1a16fa45bde5b7596c10b398b116",
+      "tags": [
+        "de82363b12704396e66a828408fad97ba1ff61fd"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 36,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:9cfbe6453c604c87941cb69feb481fa2f3409a9a132e8b431bca57381665a564",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:9e7c1ff0fc425321d2651b62efead2c79feebc87072cf97f724e3dcaeead6b70",
+      "tags": [
+        "e78fe6b9e566aa7df175a15ecb5c0e755d9d3f73"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 20,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:a0d102a68ccfaf350a0a473c727084cb4f935e93b6853d8b3c74aa4d0916256d",
+      "tags": [
+        "206367089510b732699d866f9f85671f852f5313"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 8,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:a0e318ac4067c2adb545d697d131f963f3da35e050f0f539739ac141812318ed",
+      "tags": [
+        "ce82bb907c858896d84a368d2b497dae6c65e746"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 19,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:a5ce6956bdc610f0a68f75346ebbdedc21b1bd2fadec825f6d7fb6692bbb9874",
+      "tags": [
+        "4e274e632df291b3b85e53d2e96b6ca0ef4d4e04"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 8,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:a6c3ad8b860b59aa2b9298cb47f262317a41fe306afbe28075ae464bf5dbe4bc",
+      "tags": [
+        "121e1521b880b369567b9d68f95fd26de1bb22b9"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:ac4ad97844bf0270413da70dd5c625ea3e607abfb03a5d753d33d9af0503a1d7",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 8,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:acbf6d4b0e02e05eb7c0615a5262669948fea3f7939c1b250b39542cb14d7a6c",
+      "tags": [
+        "10a61b4e016706fda263dacd96f39a6882575ebe"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 16,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:aced5dc2ea928c8f1d202e5cf38c0b8d4793c31dd454d8240273316a9b456c55",
+      "tags": [
+        "5230ff4f28d0cafce080173785104f88fa32ebd0"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:adf4f27eae7e1c685d05913779f0e306cc8235b4aa3c54e1cf960aabee8bf823",
+      "tags": [
+        "2104f86fd725c3ede4411aa26e1f1b675ff9c71d"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 98,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:af8b9df5f5f083b4371357c3f43878d28146b202fb10ffbf5c948c224a72178a",
+      "tags": [
+        "a18047e1aae7946aeffee5944d93106c08a6be3c"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 61,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:afb5ccae51f8b7b3e872c4c963ca4099dcb54ef3c0b7f14b347d66d5e12b2e11",
+      "tags": [
+        "2614de6b980a3d024559f29020a8dd55505aae77"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 91,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:b17b3dce2e3c1078d7a312642f3a4229bbdbdd21911394ca0b6576858606e857",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:b4de7752c2cd3efb00f9a826316b96525bc2a06ba77f9c335510c1782dd4f057",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 9,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:b74e8776ca427979cab59fa57e15e89a0f3d8a680ae0eb4b7975e4f9b9e1dba5",
+      "tags": [
+        "5365de82f3a6caeeaeb848c642bf4d8c41d3f00a"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 90,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:b7add4fe912afa8007cd543185a63360db45e50973e6d505b952790cb8a9d85e",
+      "tags": [
+        "506de43b30e6838157f2ff3e057fe982455ffa1c"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:b808040551795c5c2a2c27e84445d762fd32c1f92e77e90468f17f2877a75893",
+      "tags": [
+        "latest"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 111,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Named release/current/rollback tag"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:bab91a7db1f47a9b3446a260d4c5706d2f4c24ccecac4badfacbc04bac8760de",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:bf8f8aa48a0c4e51820a4ee4e9a3673fe80153edb628d8c6ff9fd6288111ae17",
+      "tags": [
+        "4a10badae046e0545c318712cb1cbf0e709f310c"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 91,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:c1a90f72e4d7da067f12396b14270dd71cc43ab5e17448f66a49b96d973b3a41",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:c462538983d7cd1ad238c1d3188e4749e4da5dccf4d2e2d59df29f6f41e0a55c",
+      "tags": [
+        "9d43b618934f62fa3e046fa86b562eacdb742c11"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 5,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:c6cddd9e016949ee11835f722fb3bfd7722cfb755e91cc986f8badafbff5597b",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 4,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:c720ddfebad9dbb2a702b1b8c47368e373469e57c104bb42566b31c9734dad7c",
+      "tags": [
+        "2e7a494e6bb55e73c2885379ccfa741487f1c7dc"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 90,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:c76c9e1db585f2c67dabb3813f5ae230f21ce00391e6f2bab7c5e73b430e0791",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 16,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:c8b9c37d00b8e134a6c3c36e16e75f9dafb3d395ec8a631a50fa6c8da6ded8ea",
+      "tags": [
+        "68976aaf9a298f2a7a32e85197e38008be97a061"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 69,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:d429e28482dead33e5cc6db96b1d3a9f3d8fc0954b53c185f8a63dde671ff7ff",
+      "tags": [
+        "dd4b80a6a936b7c7bd94b557edf3428f0fb37a76"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:d687d50b86e2564a5fd4436e434d253c6dc6d6e9916aebce99b33a0701f4ad0f",
+      "tags": [
+        "8bcaad4c26fa3926aba4cfbd6de78f6b74a23970"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:d8e4f7266cedb65cb6867fe478bde5fca1517d58301b160b0994153e34af10bf",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:d966e64877573fb9b4c67b67f3f078996dfa542d8cd4b5dbb8de3c4d7d7ec192",
+      "tags": [
+        "d27821caa7e69970616dfc4cf1f52025282109d9"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 59,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:d9d298828c82f678bdcbd50bde3f1565b389895a251b50ac3f5dc18cf8a7b290",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 8,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:dbb953dd81accabc2a79d8e7c28e45bef833038cdcd773b3fe3a531272fad770",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:e4b72da5cd61cc0b575c1ded5c925e1ef795b4adf8e14e8fe51e15a1cd13393d",
+      "tags": [
+        "165dbe328c7da65051a4b37f73797d8b919ec88f"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 35,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:e5b33a9dd5ea21be5613533a203e96f47af295b8343fca8e426dd1cae44ebcd9",
+      "tags": [
+        "2c8c666daefe1567005875328a76d9581330cd93"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 35,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:e92689474618d91e415f0805cfeb6fd23f75eb48cb59188e03b6d0bb4c87bcf4",
+      "tags": [
+        "6c3eed37c42209f09f50cdf929ed1c9d9e6f13b4"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 105,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:ec12fca8c8c4831c34cbc5ed82538fcef21c7b01004a164e935f24b0056f5cf5",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 6,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:ec77f91d96606d677346437627911924cd0319ed835792587ed34d7b5184ec29",
+      "tags": [
+        "fa93babd1b0ce3c3b0a1304e20b7549fb6b3f418"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 104,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:ed6b7ce2c8765fe65fbb54871f09a7745807579bcdeae97ce6be8297d6f1a183",
+      "tags": [
+        "777c271c3fe6c8c33ee912af5dde41bcb2747cf5"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 91,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:f5f11cd0b9805967723e161235b0ac681a5a2152e7ef8b5bbf5649e0e8ca8482",
+      "tags": [
+        "133b49f9e9875bcd336eb92b4950e401ae98e508"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 104,
+      "status": "keep",
+      "keepReasons": [
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:f957f503db6c5f1181bb4b6e575f84527e154f2888d73da419179f59a883882f",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 19,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/media-worker-v1@sha256:fbfad82455246e7220daa8340423b1dff56596c82cbaaaa2a74933c38a1f1624",
+      "tags": [],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 16,
+      "status": "keep",
+      "keepReasons": [
+        "Younger than thirty days or unknown age",
+        "Reachable from retained manifest/index/subject"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/multicam-lipsync-repair@sha256:c51aa10ffd817d6cd0dda08d40363dc4dafa5241218f26d6e736380712ddc2fa",
+      "tags": [
+        "latest"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "ageDays": 96,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Named release/current/rollback tag"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-base@sha256:10dadd3acb2374a59267cd06b106c22e68f5eb40b277763e2cc7f0ec2ece80fa",
+      "tags": [
+        "v1-20261009"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 48,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-segmentation@sha256:24fadddc014806cdcdfa3b53a6479f893fd038dd81c2d1f0f3828b415d7aebb4",
+      "tags": [
+        "source-c832111faefb73c5"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 48,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-segmentation@sha256:5b85e04fac391f180bbdaedf6e0d44659014c7793e369bfe7e5bc57d01107c1a",
+      "tags": [
+        "v1-20261009"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 48,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-segmentation@sha256:a4740582e2cf7f3e0d2ed2021dd7202525ae9200ed1c238c0b68acbb1cb4c83f",
+      "tags": [
+        "source-b687dc391b68b8c2"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 48,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-segmentation@sha256:fe9c28582d15186c3306a5eafee64b47e72cc557789ba2e81aae90e59a48f25a",
+      "tags": [
+        "source-14ef553e85860610"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 48,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-tracking-cpu@sha256:139dea4e984f02f9eac1a4199cd5697d4abf5e615024a08b3ad0eb995431d522",
+      "tags": [
+        "source-b687dc391b68b8c2"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 48,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-tracking-cpu@sha256:4d8b3867d14e37c3962c3cd0fe9f017028cbdbea1a3cf2e29b257333b6f8bffd",
+      "tags": [
+        "source-c832111faefb73c5"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 48,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-tracking-cpu@sha256:7be4f3a58814c7fb9aefb831011372370e6e7a721cb4913e5efb28ea6003a670",
+      "tags": [
+        "v1-20261009"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 48,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-video@sha256:3e79bf6be5e86253340f5cae41494209a1da869da191acbe2ce4dd9d0784e652",
+      "tags": [
+        "source-b687dc391b68b8c2"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 48,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-video@sha256:51e4e736de0a9b530e1e50febbcfc6b52968a2bcd9df5b959d01eac8edf21510",
+      "tags": [
+        "source-34d29b0983770abe"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 48,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-video@sha256:710b0c5cc7c76494d1ee5e861148a7d7dbe2e2c8bcaf6e5d1fc0ddd5e11c3bd8",
+      "tags": [
+        "source-c832111faefb73c5"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 48,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-video@sha256:a78a2c20d1d0cdb589374839d025edf227716d7649ebd5365ecd6a05300d9a54",
+      "tags": [
+        "v1-20261009"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 48,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-vision@sha256:4c402158afea52d7d9a8f3ba3c4afca23f039e8f870369f9006dfb6b9de5850c",
+      "tags": [
+        "v1-20261009"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 48,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-vision@sha256:4f89a1232bf2168594ffb5b369319948e8fcdc965eac865e657c50bdfe4ffa4b",
+      "tags": [
+        "source-0105f85656c570cc"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 48,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-vision@sha256:a6ec6965babfd356d5e1550aec4e76956301fac8c77f4331144fcf7ec32975e5",
+      "tags": [
+        "source-b687dc391b68b8c2"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 48,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-vision@sha256:b20050a777b6ccb53f162949e8e96e5ab4d95a19a88f482939e57109f1f889b4",
+      "tags": [
+        "source-c832111faefb73c5"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 48,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/media-worker-gpu@sha256:01be7c11fe3b1773ceb979e5ddd3261f1424e3a2cabe5d08053a450958a391b0",
+      "tags": [
+        "recovery-20261119-v2"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 8,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/media-worker-gpu@sha256:0add97867774aa0e62de6d3a25a609c6abcabec580063ff7b440d727a686bf2a",
+      "tags": [
+        "recovery-20261119-v1"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 8,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/media-worker-gpu@sha256:0d516cc42ae6dbc9f41f9251d3e910ad1e146c5b80a6fc0b3a9f36d61b336764",
+      "tags": [
+        "recovery-20261119-v3"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 8,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Observed current or retained GCP deployment/execution reference",
+        "Younger than thirty days or unknown age"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/thulani-api@sha256:1c78cd2eaffaf5fde046fa9750261aebbde8c4b436579a2c36531865e548e715",
+      "tags": [
+        "cam-durable-final-20260710"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 139,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/viral-studio-3d-renderer@sha256:6b97198c6770c8f211caf8b018be7dc85290035ba5a3922580a4a324179ed522",
+      "tags": [
+        "agent-20260916c"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 71,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Observed current or retained GCP deployment/execution reference"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/viral-studio-3d-renderer@sha256:6e5dc25e91405a00437883a9da0ffc34fb3336f495c64bd6ba36aeab5d2a82b9",
+      "tags": [
+        "agent-20260916b"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 71,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/viral-studio-3d-renderer@sha256:eb966edbc878fc8e937b5ad46e0c73210e1a4135246f6bf7c9b016b6930b44c8",
+      "tags": [
+        "agent-20260916"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 71,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    },
+    {
+      "uri": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/worker@sha256:a8ab7a92fd623790fce2ed59f1a5da11f52bc22fa31ccdb0330d38cd56b46fa6",
+      "tags": [
+        "latest"
+      ],
+      "repository": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "ageDays": 177,
+      "status": "keep",
+      "keepReasons": [
+        "Five newest build roots per package / rollback",
+        "Observed current or retained GCP deployment/execution reference",
+        "Named release/current/rollback tag"
+      ],
+      "deletionApproved": false,
+      "externalOwnershipConfirmed": false
+    }
+  ],
+  "kept": 211,
+  "candidates": 5,
+  "missingManifestEdges": [],
+  "completeGetCoverage": true,
+  "externalConsumerInventoryComplete": false,
+  "candidateSetUniqueFileBytes": 7697487832,
+  "candidateSetUniqueGiB": 7.168844185769558,
+  "uniqueFiles": [
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/cam-combiner-worker%2Fmanifests%2Fsha256:87dbc1b330e577a3c7eacb7dcb2e74a979584e2af46c7596499be3c2c6aed10f",
+      "sizeBytes": 2839
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:8bee091c95591ad268c6384bc44575fda5619eeab467a0615285a48c98da9388",
+      "sizeBytes": 170061601
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:5b550ac73897fb29982eb86f445e8e865becab535abdcc8ef299adf54818e415",
+      "sizeBytes": 93
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:f6e1d945791ab2efb7c3f49f51f849d390faca1eb5e19237145475eaa76a08b1",
+      "sizeBytes": 364
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:b54bcc8e47a15c530067061dd2c7090f286a50a04f009cc9fae786c8889f6718",
+      "sizeBytes": 243356047
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:ef4ddf0e97b7da7919ea97d3624316d30cb5345c974981662ea9a87380fada3a",
+      "sizeBytes": 1123838086
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:4fc97e0ffd9cbbc6cc566af6cdbf09effd1a700449fac584f56f27413a0cd623",
+      "sizeBytes": 58177
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:7adbc040ea3ca5a6daff081999068e73c70fbf8c6364170ca01c44e9c9a058dc",
+      "sizeBytes": 4365626
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:8844a5af15a26ea9d84fc1b537979b7bf26725853ea2225b3a34adc246521640",
+      "sizeBytes": 109
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:1e331094755e229f1709f572ed75066d8f60b346fb6a190dce0c402582181dd0",
+      "sizeBytes": 8825
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/cam-combiner-worker%2Fmanifests%2Fsha256:3fd52a59387ffe7efa0a23f1f12b2190d793752f023fb5229cbc87838ead01cb",
+      "sizeBytes": 2839
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:65d5054e94c3f6d1fe17f8796264c7d575a29b1f0970989fe1ddbf51b4f2a47e",
+      "sizeBytes": 170078440
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:3ec6c78e9afd4195cd5caf8084a3400471ea8e19cdfba560923de1da8f0f10dc",
+      "sizeBytes": 93
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:d52dedc7ee8f81f6cd6e5a84baab8b30c481f434d3cd9b46e520b8ea061eecfc",
+      "sizeBytes": 364
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:fbf9a8dafc414e2bbeb11db941c84415976fb929db2a29e70ad076c29f903d6b",
+      "sizeBytes": 241871581
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:b25df2dbed936ae10d9c973feb79168fcb7887e2f01d452d7013762b38cbc434",
+      "sizeBytes": 1123838235
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:161afc4248dbffdb2e0f720e8767e34ea4be13add613103cb279d037e4810c8e",
+      "sizeBytes": 58773
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:02f7751e88c36f8f2a359c7f66e0cdf11aaa6be0dfb1110cf2db4b90addfb57e",
+      "sizeBytes": 2405235
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:78742d79ba2833be15dd8d51dfae0e27488e8ffc967ac8a3c66b45cbe107a9d4",
+      "sizeBytes": 108
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:3712d72be2c86c3f038290125a10170be27f06372a82b3dcf0ee392b1e356ba5",
+      "sizeBytes": 8824
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/cam-combiner-worker%2Fmanifests%2Fsha256:36b5f46bca4e56d853c4637929b9c024399c7ec2c64e66e2862e572a7617579d",
+      "sizeBytes": 2839
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:b0050276d25bdacf984366e6b9e9a044a1620410d00d83e3d61d72cdea98f000",
+      "sizeBytes": 170075604
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:063d82f7594fae3abc3183c59cb16861016143067ae15ece49d8592228deea20",
+      "sizeBytes": 93
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:a7ae07ea2b19fb82074a75fcc8a4e569d009a527d90c3fc56c5ed118d291ea05",
+      "sizeBytes": 376
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:e241bdb762a36e667b509496ea93b195510aaa7853198e2e1edfe71862818ed5",
+      "sizeBytes": 241747845
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:8555b6d979f5923c4c57cac5e0962896a9ce7ceba46ef6013fa5fd028d0ff5a3",
+      "sizeBytes": 1123838122
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:69c94153dcd18b7b81c8673ac33679cee7785d777680fd1d6652c6169453934a",
+      "sizeBytes": 59355
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:da721240668686c7ffb5aca03e205db222ef1a5c38b3159fb5d344811d050fde",
+      "sizeBytes": 4366512
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:6fd0eff55860998a2e2547b30f2dd7305a9abc2a874e7539018c0821b28badbe",
+      "sizeBytes": 108
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:7144328925ed6cc072ffe8bc212b805f444229c940f417f75294eb59f08abbcb",
+      "sizeBytes": 8824
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/cam-combiner-worker%2Fmanifests%2Fsha256:2e5445e06284ac2f6f41ba8c745babbbd60fa1bede9e6e8633efbb331632dd6f",
+      "sizeBytes": 2839
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:6d7e10b461c3e866cc6ab655dbf881882bc41fc6375d6e1b7846f0a3b02b739c",
+      "sizeBytes": 170075803
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:b23709fbd5ace903293a4c55a1c2e78a8ffba864533221128043303c2773d6b8",
+      "sizeBytes": 93
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:2943a75f117f7d32b353452659d98c8b16e56e12ec6fd5f1e752150812bb0396",
+      "sizeBytes": 376
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:3ad76a842851ca6d7b7f87074bc3d38934c1f3513d5eeb27b773792da7b88703",
+      "sizeBytes": 241746733
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:0690ccbbd6d03dde842572901971034bc1bac11e9ce1cc9bcea3e1d563403983",
+      "sizeBytes": 1123838193
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:fb766cb49383e73eebc3635c66f84ddd44606191f0b1042f22a77c33ba30aec1",
+      "sizeBytes": 57341
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:bf0f077a4cf16b4fdc01b99a2895d9350919bc16ed5936fee2a55c881fc308db",
+      "sizeBytes": 4425704
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:4d1758dc66ba0f081b0309efc61aa3213f1f396a7b0c6428375a265d5721b537",
+      "sizeBytes": 109
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:5c193d62d2918a592485436e6d999f721a4d58af432100f5cdff41828753a8ae",
+      "sizeBytes": 8824
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/cam-combiner-worker%2Fmanifests%2Fsha256:2e163a873dcc1d452db7aa591e62a7b1fff17485a4b27ba1d89ab995cfe60e0f",
+      "sizeBytes": 2842
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:e13f29402fd2c6b30a5b309e8fe072af0191792875e1d810af0d8e8a817c9894",
+      "sizeBytes": 170074986
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:49a7a982dae32b5dc933d1853590c3997d2592f9dd9b474f277646dd96c17c65",
+      "sizeBytes": 93
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:4ad06e278437f32a7616c5870d6aa4b5df271a0d935e387411c4a006d3810d6e",
+      "sizeBytes": 364
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:2c7ca52712379ff563c38711299e605e614885c5814c39a6b31f77ad0617f793",
+      "sizeBytes": 241546625
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:0b3e2f7841f8e18b0a558b3a47c999946f2de53e1c0855ef8cf3625c65625fef",
+      "sizeBytes": 445829988
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:651f1eae2276a975345bbcfd840f1c5ceea5ae49ad23db201d4c382267f567cd",
+      "sizeBytes": 678060808
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:476757952372c7602ebd32e350392e648604186920903bf1ad82c5c1d7b55d7d",
+      "sizeBytes": 1751251
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:69871f1df13ea1a901fa10d0ffa405c30335e0b884fc9b469195927957984006",
+      "sizeBytes": 109
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/files/sha256:6ce3406aae03ebcd2c6045a586804ccce7973182c00aa21ef467211199f1cd54",
+      "sizeBytes": 8814
+    }
+  ],
+  "providerFilesInspected": 1443,
+  "allProviderFileBytes": 171885806162,
+  "candidateBytesAreNonAdditive": true,
+  "confirmedReclaimableBytes": null,
+  "deleteEligible": 0,
+  "productionDeletes": 0,
+  "limitations": [
+    "Candidate-set byte count subtracts every file reachable from kept images, including shared layers, using provider file sizes. It is not the sum of image sizes.",
+    "External Render/other consumers need confirmation before candidates become unused. All deletions still require owner approval.",
+    "Unreferenced layers are garbage-collected by the provider later; invoice/storage reduction is not immediate or measured."
+  ]
+}

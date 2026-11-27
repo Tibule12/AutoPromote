@@ -226,7 +226,8 @@ const postToWorker = async (
 ) => {
   const primaryUrl = `${primaryWorkerUrl}${endpoint}`;
   try {
-    const requestConfig = await buildWorkerRequestConfig(primaryUrl, { timeout });
+    const identityConfig = await buildWorkerRequestConfig(primaryUrl, { timeout });
+    const requestConfig = await require("./services/unifiedCredits/workerTransport").applicationWorkerConfig(primaryUrl, payload, identityConfig);
     return await axios.post(primaryUrl, payload, requestConfig);
   } catch (error) {
     const canFallback =
@@ -355,7 +356,7 @@ const getViralScanPreflight = async userId => {
   if (!planAllowed) {
     code = "VIRAL_SCAN_PLAN_REQUIRED";
     message =
-      "Find Viral Clips requires an active Creator, Studio, Agency, or Founding Tester plan.";
+      "Find Viral Clips is available on Free and Plus, subject to processing capacity.";
   } else if (!canAfford) {
     code = "VIRAL_SCAN_CREDITS_REQUIRED";
     message = tierSnapshot.testerAccess

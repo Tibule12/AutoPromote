@@ -69,6 +69,7 @@ router.post("/query", async (req, res) => {
       process.env.ASSISTANT_PROVIDER || process.env.ASSISTANT_OPENAI_API_KEY ? "openai" : "builtin";
     if (provider === "openai" && process.env.ASSISTANT_OPENAI_API_KEY) {
       try {
+        require("../services/processingTokens/runtime").assertDispatch();
         const OPENAI_KEY = process.env.ASSISTANT_OPENAI_API_KEY;
         const OPENAI_BASE =
           process.env.ASSISTANT_OPENAI_API_BASE || "https://" + ["api", "openai", "com"].join(".");

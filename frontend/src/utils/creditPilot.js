@@ -1,3 +1,4 @@
+import { processingFetch } from "./processingFetch";
 import { auth } from "../firebaseClient";
 import { API_BASE_URL } from "../config";
 
@@ -101,7 +102,7 @@ function declined(message, code, status = 409) {
   });
 }
 export async function creditFetch(url, options = {}, fetcher = fetch, transportOptions) {
-  if (!creditPilotEnabled()) return fetcher(url, options, transportOptions);
+  if (!creditPilotEnabled()) return processingFetch(url, options, fetcher, transportOptions);
   const operation = pilotOperationFor(url, options.method || "GET");
   if (!operation) return fetcher(url, options, transportOptions);
   const user = auth.currentUser;

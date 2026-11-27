@@ -7,7 +7,6 @@ const crypto = require("crypto");
 const logger = require("../utils/logger");
 const paypalClient = require("./paypal");
 const performanceValidationEngine = require("./performanceValidationEngine");
-const viralMissionControl = require("./viralMissionControl"); // Integration for Organic Missions
 const { normalizePlanId, resolvePlan } = require("../config/subscriptionPlans");
 const { getEffectiveTierSnapshot } = require("./billingService");
 
@@ -39,7 +38,7 @@ function buildTierConfig(planId) {
     price: Number(plan.price) || 0,
     limits: {
       monthlyUploads: Number(plan.features?.uploads) || 0,
-      monthlyBoosts: Number(plan.features?.wolfHuntTasks) || 0,
+      monthlyBoosts: Number(plan.features?.monthlyPromotions) || 0,
       analytics: plan.features?.analytics || "basic",
       support: plan.features?.support || "Self-serve",
       platforms: plan.features?.platformLimit,
@@ -48,7 +47,6 @@ function buildTierConfig(planId) {
       `${plan.features?.monthlyCredits || 0} monthly AI credits`,
       `${plan.features?.uploads} monthly uploads`,
       `${plan.features?.platformLimit} connected platforms`,
-      `${Number(plan.features?.wolfHuntTasks) || 0} mission opportunities`,
       `${plan.features?.analytics || "Basic"} analytics`,
       `${plan.features?.support || "Self-serve"} support`,
     ],
@@ -265,7 +263,8 @@ class MonetizationService {
       };
 
       const tier = this.getTierConfig(tierId);
-      const limits = tier.limits;
+      const limits = { ...tier.limits,
+        monthlyUploads: effectiveSnapshot?.tier?.monthly_upload_cap ?? tier.limits.monthlyUploads };
 
       // Check monthly limits
       const canPerformAction = this.canPerformAction(subscription, action, limits);
@@ -499,77 +498,10 @@ class MonetizationService {
   }
 
   // Create paid boost
-  async createPaidBoost(userId, contentId, boostOptions) {
-    try {
-      const { platform, targetViews, duration, budget } = boostOptions;
-
-      // Check subscription limits
-      const limitsCheck = await this.checkSubscriptionLimits(userId, "boost");
-      if (!limitsCheck.canPerformAction) {
-        throw new Error("Boost limit exceeded. Upgrade your plan to boost more content.");
-      }
-
-      // Calculate boost cost
-      const boostCost = this.calculateBoostCost(platform, targetViews, duration);
-
-      // Check if user has enough credits/balance (SKIP for direct PayPal Flow)
-      // const hasCredits = await this.checkCreditBalance(userId, boostCost);
-      // if (!hasCredits) {
-      //   throw new Error(`Insufficient credits. Need ${boostCost} credits for this boost.`);
-      // }
-
-      // Process real payment for the boost request immediately (Pay-as-you-go)
-      const paymentResult = await this.processPayment(userId, boostCost, "paypal");
-
-      // Create boost record (pending payment)
-      const boost = {
-        userId,
-        contentId,
-        platform,
-        targetViews,
-        duration,
-        budget: budget || boostCost,
-        status: "pending_payment", // Changed from scheduled to pending
-        paymentOrderId: paymentResult.paymentId,
-        createdAt: new Date().toISOString(),
-        scheduledFor: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-        progress: {
-          views: 0,
-          engagements: 0,
-          spent: 0,
-        },
-      };
-
-      const boostRef = await db.collection("paid_boosts").add(boost);
-
-      // Return approval URL
-      if (paymentResult.status === "pending_approval") {
-        return {
-          success: false,
-          status: "pending_approval",
-          approvalUrl: paymentResult.approvalUrl,
-          boostId: boostRef.id,
-          message: "Please approve PayPal payment to deploy Mission Assets (Organic Crew).",
-        };
-      } else {
-        // Direct Payment Success (or simulation) - Launch Mission!
-        try {
-          // If payment succeeds immediately (no approval flow), launch the mission now.
-          await viralMissionControl.launchOperation(userId, {
-            contentId: contentId,
-            platform: platform,
-            type: "boost",
-            targetAmount: targetViews,
-          });
-          logger.info(`[Monetization] Mission Launched for ${userId} (BoostID: ${boostRef.id})`);
-        } catch (missionErr) {
-          logger.error("[Monetization] Failed to launch mission post-payment", missionErr);
-        }
-      }
-    } catch (error) {
-      console.error("Error creating paid boost:", error);
-      throw error;
-    }
+  async createPaidBoost() {
+    throw Object.assign(new Error('This engagement marketplace has been retired.'), {
+      code: 'FEATURE_RETIRED', statusCode: 410,
+    });
   }
 
   // Calculate boost cost

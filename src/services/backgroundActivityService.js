@@ -83,7 +83,11 @@ function createBackgroundActivity({
           !req.user?.uid ||
           res.statusCode >= 400 ||
           !path.startsWith("/api/") ||
-          /\/(health|status|credits|balance|notifications|recovery)(\/|$)/i.test(path)
+          /\/(health|status|credits|balance|notifications|recovery)(\/|$)/i.test(path) ||
+          // Account/allowance/connection polling must not turn into paid
+          // analytics demand or keep optional scans awake across hosts.
+          /^\/api\/(usage|auth|users?|profile|platform-connections)(\/|$)/i.test(path) ||
+          /^\/api\/platforms?\/connections(\/|$)/i.test(path)
         )
           return;
         void this.mark("general");

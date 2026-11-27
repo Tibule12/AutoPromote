@@ -1,0 +1,54 @@
+{
+  "scope": "actual local App and emulator identity; no production or provider publication",
+  "checks": [
+    {
+      "name": "real-public-pricing",
+      "width": 1440,
+      "twoPlans": true,
+      "noOverflow": true
+    },
+    {
+      "name": "real-public-pricing",
+      "width": 390,
+      "twoPlans": true,
+      "noOverflow": true
+    },
+    {
+      "name": "real-public-pricing",
+      "width": 360,
+      "twoPlans": true,
+      "noOverflow": true
+    }
+  ],
+  "errors": [],
+  "dialogs": [],
+  "before": {
+    "success": true,
+    "processing": {
+      "planId": "free",
+      "allowance": 100,
+      "remaining": 100,
+      "remainingPercent": 100,
+      "nextResetAt": "2026-12-02T17:43:27.035Z",
+      "rolling30DayLimit": 500,
+      "rollingSpentTokens": 0,
+      "reservedTokens": 0,
+      "storage": {
+        "usedBytes": 0,
+        "reservedBytes": 0,
+        "limitBytes": 1073741824,
+        "measured": false
+      },
+      "activeJobs": 0,
+      "localEditingAvailable": true,
+      "provisional": true,
+      "rollingAvailableAt": null,
+      "asOf": "2026-11-26T17:43:27.844Z"
+    },
+    "balances": {
+      "purchasedCredits": 20,
+      "promotionalCredits": null
+    }
+  },
+  "failure": "locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Open Creator Studio', exact: true })\u001b[22m\n"
+}

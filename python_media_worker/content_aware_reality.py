@@ -340,6 +340,11 @@ def build_grounded_scene_brief(
     if request_post is None:
         import requests
         request_post = requests.post
+    try:
+        from .processing_provider_budget import assert_provider_budget
+    except ImportError:
+        from processing_provider_budget import assert_provider_budget
+    assert_provider_budget()
     response = request_post(
         (os.getenv("OPENAI_API_BASE") or "https://api.openai.com") + "/v1/chat/completions",
         headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
@@ -378,6 +383,11 @@ def generate_environment_image(
     if request_post is None:
         import requests
         request_post = requests.post
+    try:
+        from .processing_provider_budget import assert_provider_budget
+    except ImportError:
+        from processing_provider_budget import assert_provider_budget
+    assert_provider_budget()
     response = request_post(
         (os.getenv("OPENAI_API_BASE") or "https://api.openai.com") + "/v1/images/generations",
         headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
@@ -453,6 +463,11 @@ def generate_studio_background_image(
     if request_post is None:
         import requests
         request_post = requests.post
+    try:
+        from .processing_provider_budget import assert_provider_budget
+    except ImportError:
+        from processing_provider_budget import assert_provider_budget
+    assert_provider_budget()
     response = request_post(
         (os.getenv("OPENAI_API_BASE") or "https://api.openai.com") + "/v1/images/edits",
         headers={"Authorization": f"Bearer {key}"},

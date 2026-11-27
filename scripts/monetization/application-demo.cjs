@@ -1,5 +1,5 @@
 // Owns fresh isolated emulators and the actual App build. No Firebase CLI login.
-require('../assert-local-studio-enabled.cjs');
+require("../assert-local-studio-enabled.cjs");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -21,12 +21,20 @@ async function main() {
     maxSourceSeconds: Number(process.env.CREDITS_DEMO_SOURCE_SECONDS || 30),
     maxExecutionSeconds: Number(process.env.CREDITS_DEMO_EXECUTION_SECONDS || 120),
   };
-  const localTestCredits=Number(process.env.CREDITS_DEMO_TEST_CREDITS || 15);
-  if (!Number.isInteger(localTestCredits)||localTestCredits<1||localTestCredits>200)
-    throw Error('Fresh local demo allowance must be 1–200 symbolic test credits.');
-  if (!Number.isInteger(localMediaLimits.maxSourceSeconds) || localMediaLimits.maxSourceSeconds < 1 || localMediaLimits.maxSourceSeconds > 120 ||
-      !Number.isInteger(localMediaLimits.maxExecutionSeconds) || localMediaLimits.maxExecutionSeconds < 1 || localMediaLimits.maxExecutionSeconds > 900)
-    throw Error('Local demo media limits must be bounded whole seconds (source <= 120, execution <= 900).');
+  const localTestCredits = Number(process.env.CREDITS_DEMO_TEST_CREDITS || 15);
+  if (!Number.isInteger(localTestCredits) || localTestCredits < 1 || localTestCredits > 200)
+    throw Error("Fresh local demo allowance must be 1–200 symbolic test credits.");
+  if (
+    !Number.isInteger(localMediaLimits.maxSourceSeconds) ||
+    localMediaLimits.maxSourceSeconds < 1 ||
+    localMediaLimits.maxSourceSeconds > 120 ||
+    !Number.isInteger(localMediaLimits.maxExecutionSeconds) ||
+    localMediaLimits.maxExecutionSeconds < 1 ||
+    localMediaLimits.maxExecutionSeconds > 900
+  )
+    throw Error(
+      "Local demo media limits must be bounded whole seconds (source <= 120, execution <= 900)."
+    );
   const reuse =
     process.argv[2] === "--reuse-build"
       ? JSON.parse(fs.readFileSync(path.join(process.argv[3], "config.json")))
@@ -52,6 +60,7 @@ async function main() {
         "LC_ALL",
         "TMPDIR",
         "NODE_PATH",
+        "FREE_FIRST_DEMO",
         "CREDITS_JAVA_BIN",
         "CREDITS_FIRESTORE_JAR",
         "CREDITS_PYTHON_BIN",
@@ -96,18 +105,46 @@ async function main() {
     OPENAI_LOGGING_ENABLED: "1",
     LOCAL_EDITING_CREDIT_BYPASS: "false",
   };
-  if(process.env.STUDIO_BACKGROUND_DEMO==='true') Object.assign(env,{
-    STUDIO_BACKGROUND_DEMO:'true',STUDIO_MODEL_RUNTIME_ENABLED:'true',STUDIO_MODEL_ARTIFACT_BUCKET:project,
-    ...(process.env.STUDIO_BACKGROUND_LONG_DEMO==='true'?{STUDIO_BACKGROUND_LONG_DEMO:'true'}:{}),
-    STUDIO_MODEL_LOCAL_CPU_ROOT:path.join(directory,'model-jobs'),
-    STUDIO_MODEL_LOCAL_CPU_MODEL_DIR:path.join(os.homedir(),'.cache/autopromote-model-runtime/sam21-small-pinned'),
-    STUDIO_MODEL_LOCAL_CPU_REFINEMENT_MODEL_DIR:path.join(os.homedir(),'.cache/autopromote-model-runtime/vitmatte-small-pinned'),
-    STUDIO_MODEL_LOCAL_CPU_DEPS_DIR:path.join(os.homedir(),'.cache/autopromote-model-runtime/sam-cpu-eval-deps'),
-    STUDIO_MODEL_LOCAL_CPU_EDGE_DEPS_DIR:path.join(os.homedir(),'.cache/autopromote-model-runtime/source-edge-deps-1.1.16'),
-    ...(process.env.STUDIO_BACKGROUND_MATTING_DEPS?{STUDIO_BACKGROUND_MATTING_DEPS:process.env.STUDIO_BACKGROUND_MATTING_DEPS}:{}),
-    STUDIO_SUBJECT_MASK_PREVIEW_ENABLED:'true',STUDIO_SUBJECT_MASK_PREVIEW_UIDS:'demo-pilot-alice',
-    CREDITS_PYTHON_BIN:process.env.CREDITS_PYTHON_BIN||path.resolve(root,'../AutoPromote/.venv/bin/python'),
-  });
+  if (process.env.FREE_FIRST_DEMO === "true")
+    Object.assign(env, {
+      FREE_FIRST_DEMO: "true",
+      FREE_FIRST_USAGE_ENABLED: "true",
+      UNIFIED_CREDITS_APPLICATION: "false",
+      LOCAL_EDITING_CREDIT_BYPASS: "false",
+    });
+  if (process.env.STUDIO_BACKGROUND_DEMO === "true")
+    Object.assign(env, {
+      STUDIO_BACKGROUND_DEMO: "true",
+      STUDIO_MODEL_RUNTIME_ENABLED: "true",
+      STUDIO_MODEL_ARTIFACT_BUCKET: project,
+      ...(process.env.STUDIO_BACKGROUND_LONG_DEMO === "true"
+        ? { STUDIO_BACKGROUND_LONG_DEMO: "true" }
+        : {}),
+      STUDIO_MODEL_LOCAL_CPU_ROOT: path.join(directory, "model-jobs"),
+      STUDIO_MODEL_LOCAL_CPU_MODEL_DIR: path.join(
+        os.homedir(),
+        ".cache/autopromote-model-runtime/sam21-small-pinned"
+      ),
+      STUDIO_MODEL_LOCAL_CPU_REFINEMENT_MODEL_DIR: path.join(
+        os.homedir(),
+        ".cache/autopromote-model-runtime/vitmatte-small-pinned"
+      ),
+      STUDIO_MODEL_LOCAL_CPU_DEPS_DIR: path.join(
+        os.homedir(),
+        ".cache/autopromote-model-runtime/sam-cpu-eval-deps"
+      ),
+      STUDIO_MODEL_LOCAL_CPU_EDGE_DEPS_DIR: path.join(
+        os.homedir(),
+        ".cache/autopromote-model-runtime/source-edge-deps-1.1.16"
+      ),
+      ...(process.env.STUDIO_BACKGROUND_MATTING_DEPS
+        ? { STUDIO_BACKGROUND_MATTING_DEPS: process.env.STUDIO_BACKGROUND_MATTING_DEPS }
+        : {}),
+      STUDIO_SUBJECT_MASK_PREVIEW_ENABLED: "true",
+      STUDIO_SUBJECT_MASK_PREVIEW_UIDS: "demo-pilot-alice",
+      CREDITS_PYTHON_BIN:
+        process.env.CREDITS_PYTHON_BIN || path.resolve(root, "../AutoPromote/.venv/bin/python"),
+    });
   for (const key of ["GOOGLE_APPLICATION_CREDENTIALS", "FIREBASE_TOKEN", "FIREBASE_CONFIG"])
     delete env[key];
   Object.assign(process.env, env);
@@ -203,13 +240,19 @@ async function main() {
     const { createSandboxDatabase } = require("../../src/services/unifiedCredits/runtime");
     const db = createSandboxDatabase();
     if (process.env.STUDIO_BACKGROUND_INPUT_FIXTURE) {
-      if (env.STUDIO_BACKGROUND_DEMO !== 'true') throw Error('Background fixture requires the isolated demo');
-      await require('../background-replacement/recover-input-fixture.cjs').restore({
-        fixture: process.env.STUDIO_BACKGROUND_INPUT_FIXTURE, storage, db,
+      if (env.STUDIO_BACKGROUND_DEMO !== "true")
+        throw Error("Background fixture requires the isolated demo");
+      await require("../background-replacement/recover-input-fixture.cjs").restore({
+        fixture: process.env.STUDIO_BACKGROUND_INPUT_FIXTURE,
+        storage,
+        db,
       });
     }
-    const cohort = ["demo-pilot-alice", "demo-pilot-empty",
-      ...(process.env.CREDITS_DEMO_CREATIVE_SECOND_USER === "true" ? ["demo-pilot-bob"] : [])];
+    const cohort = [
+      "demo-pilot-alice",
+      "demo-pilot-empty",
+      ...(process.env.CREDITS_DEMO_CREATIVE_SECOND_USER === "true" ? ["demo-pilot-bob"] : []),
+    ];
     const password = `Demo-${crypto.randomBytes(12).toString("hex")}!`;
     for (const uid of cohort) {
       await admin.auth().createUser({
@@ -250,9 +293,15 @@ async function main() {
       analysisTimeoutMs: 240000,
     });
     env.MEDIA_WORKER_URL = env.LOCAL_MEDIA_WORKER_URL = worker.origin;
-    if(env.STUDIO_BACKGROUND_DEMO==='true'){
-      subjectPreview=await require('../background-replacement/preview-provider.cjs').create({directory:path.join(directory,'subject-previews'),python:env.CREDITS_PYTHON_BIN,env,origin});
-      env.STUDIO_MODEL_VFX_URL=subjectPreview.url;env.STUDIO_MODEL_VFX_SECRET=subjectPreview.secret;
+    if (env.STUDIO_BACKGROUND_DEMO === "true") {
+      subjectPreview = await require("../background-replacement/preview-provider.cjs").create({
+        directory: path.join(directory, "subject-previews"),
+        python: env.CREDITS_PYTHON_BIN,
+        env,
+        origin,
+      });
+      env.STUDIO_MODEL_VFX_URL = subjectPreview.url;
+      env.STUDIO_MODEL_VFX_SECRET = subjectPreview.secret;
     }
 
     const policy = {
@@ -271,7 +320,8 @@ async function main() {
     for (const item of Object.values(policy.operations)) {
       item.baseMicros = 0;
       item.microsPerUnit = item.unit === "seconds" ? 10 : 1000;
-      if (item.unit === 'seconds') item.maxUnits=Math.max(item.maxUnits,localMediaLimits.maxExecutionSeconds);
+      if (item.unit === "seconds")
+        item.maxUnits = Math.max(item.maxUnits, localMediaLimits.maxExecutionSeconds);
     }
     const build = reuse?.build || path.join(directory, "build");
     const buildEnv = {
@@ -282,7 +332,9 @@ async function main() {
       CI: "false",
       REACT_APP_API_URL: origin,
       REACT_APP_API_BASE_URL: origin,
-      REACT_APP_CREDITS_PILOT: "true",
+      REACT_APP_CREDITS_PILOT: env.FREE_FIRST_DEMO === "true" ? "false" : "true",
+      REACT_APP_LOCAL_EMULATORS: "true",
+      REACT_APP_FREE_FIRST_USAGE: env.FREE_FIRST_DEMO === "true" ? "true" : "false",
       REACT_APP_FIREBASE_API_KEY: "demo-api-key",
       REACT_APP_FIREBASE_AUTH_DOMAIN: "127.0.0.1",
       REACT_APP_FIREBASE_PROJECT_ID: project,
@@ -293,7 +345,8 @@ async function main() {
       REACT_APP_CREDITS_FIRESTORE_EMULATOR: `http://127.0.0.1:${firestorePort}`,
       REACT_APP_CREDITS_STORAGE_EMULATOR: `http://127.0.0.1:${storagePort}`,
       REACT_APP_WELCOME_STUDIO_PREVIEW: "true",
-      REACT_APP_STUDIO_PRESENTED_FRAME_PREVIEW: process.env.CREDITS_DEMO_PRESENTED_FRAME_PREVIEW === 'true' ? 'true' : 'false',
+      REACT_APP_STUDIO_PRESENTED_FRAME_PREVIEW:
+        process.env.CREDITS_DEMO_PRESENTED_FRAME_PREVIEW === "true" ? "true" : "false",
     };
     const config = {
       env,
@@ -302,9 +355,15 @@ async function main() {
       origin,
       storageOrigin: `http://127.0.0.1:${storagePort}`,
       build,
+      ...(reuse?.previewOrigins ? { previewOrigins: reuse.previewOrigins } : {}),
       policy,
       sourceSecret: crypto.randomBytes(32).toString("hex"),
-      worker: { origin: worker.origin, token: worker.token, publicKey: worker.publicKey },
+      worker: {
+        origin: worker.origin,
+        token: worker.token,
+        publicKey: worker.publicKey,
+        timeoutMs: Number(process.env.CREDITS_LOCAL_RENDER_TIMEOUT_MS || 120000),
+      },
     };
     const configFile = path.join(directory, "config.json");
     fs.writeFileSync(path.join(directory, "build-env.json"), JSON.stringify(buildEnv), {

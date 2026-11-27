@@ -238,15 +238,6 @@ const REWARD_SHOP = {
     value: { credits: 10 },
   },
 
-  analytics_unlock: {
-    id: "analytics_unlock",
-    name: "Advanced Analytics (7 days)",
-    description: "Unlock advanced analytics dashboard",
-    cost: 1500,
-    icon: "📊",
-    type: "feature",
-    value: { duration: 7 },
-  },
 
   badge_showcase: {
     id: "badge_showcase",

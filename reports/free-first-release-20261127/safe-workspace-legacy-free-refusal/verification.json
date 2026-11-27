@@ -1,0 +1,11 @@
+{
+  "headless": true,
+  "muted": true,
+  "mockedResponses": false,
+  "checks": [
+    "ordinary emulator sign-in"
+  ],
+  "errors": [],
+  "paidOperations": 0,
+  "failure": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Graphics', exact: true }) to be visible\u001b[22m\n"
+}

@@ -8,7 +8,7 @@ const { getUserUsageStats } = require("./middlewares/usageLimitMiddleware");
 const { getCreditBreakdown } = require("./creditSystem");
 const { getEffectiveTierSnapshot } = require("./services/billingService");
 const {
-  SUBSCRIPTION_PLANS,
+  ALL_SUBSCRIPTION_PLANS: SUBSCRIPTION_PLANS,
   getPlanCapabilities,
   normalizePlanId,
   CREDIT_TOP_UP_PACKS,

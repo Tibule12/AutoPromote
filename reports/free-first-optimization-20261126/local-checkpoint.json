@@ -1,0 +1,11 @@
+{
+  "scope": "Private local emulator checkpoint; no production reads/writes",
+  "documentCount": 28,
+  "authUsers": 2,
+  "authSnapshot": true,
+  "storageSnapshot": true,
+  "privateLocation": "/home/tibule12/.cache/autopromote-free-first-20261126/optimization-final-checkpoint",
+  "completeOriginalReplayQualified": false,
+  "note": "Raw owned state retained; complete fresh-emulator/media-gateway restore not independently qualified.",
+  "signedWorkerSnapshot": true
+}

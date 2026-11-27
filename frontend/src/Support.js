@@ -4,7 +4,7 @@ import { auth } from "./firebaseClient";
 import { API_ENDPOINTS } from "./config";
 
 const DEFAULT_CAPABILITIES = {
-  planName: "Starter",
+  planName: "AutoPromote Free",
   support: {
     label: "Self-serve",
     ticketAccess: false,
@@ -149,8 +149,8 @@ const Support = () => {
       <div className="public-support">
         <h2 style={{ marginBottom: 8 }}>Support</h2>
         <p style={{ color: "#64748b", maxWidth: 760 }}>
-          Your support lane is tied to your active plan. Starter stays self-serve. Creator and above
-          can open tracked tickets with response handling that matches the listed plan level.
+          Your support lane is tied to your active plan. Free and Plus can open tracked tickets with
+          response handling that matches the listed plan level.
         </p>
 
         <div
@@ -219,8 +219,8 @@ const Support = () => {
           >
             <h3 style={{ marginTop: 0 }}>Sign in to access plan-aware support</h3>
             <p style={{ color: "#64748b" }}>
-              Signed-in paid plans can open tracked tickets here. If you are browsing publicly, use
-              email for general questions.
+              Signed-in Free and Plus accounts can open tracked tickets here. If you are browsing
+              publicly, use email for general questions.
             </p>
           </div>
         ) : capabilities.support.ticketAccess ? (
@@ -350,10 +350,10 @@ const Support = () => {
               background: "#fff",
             }}
           >
-            <h3 style={{ marginTop: 0 }}>Starter Plan Support</h3>
+            <h3 style={{ marginTop: 0 }}>AutoPromote Free Support</h3>
             <p style={{ color: "#64748b" }}>
-              Your current plan is self-serve only. Upgrade to Creator or higher to open tracked
-              support tickets from this page.
+              Your current plan is self-serve only. Contact support to open tracked support tickets
+              from this page.
             </p>
             <p style={{ color: "#64748b" }}>
               For general help in the meantime, email{" "}

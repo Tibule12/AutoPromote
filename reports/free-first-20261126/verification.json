@@ -1,0 +1,53 @@
+{
+  "branch": "feat/free-first-subscriptions-20261126",
+  "baseCommit": "d2d0d647d",
+  "tests": {
+    "freeFirst": {
+      "log": "tests-final.log",
+      "passed": 36,
+      "failures": false
+    },
+    "backendRegression": {
+      "log": "regression.log",
+      "passed": 29,
+      "failures": false
+    },
+    "frontendRegression": {
+      "log": "frontend-regression.log",
+      "passed": 12,
+      "failures": false
+    },
+    "unifiedRegression": {
+      "log": "unified-regression-final.log",
+      "passed": 14,
+      "failures": false
+    }
+  },
+  "actualApp": {
+    "editingBefore": 100,
+    "afterEditing": 100,
+    "afterNativeExport": 97,
+    "legacyWalletBefore": 20,
+    "legacyWalletAfter": 20,
+    "output": "studio-free-output.mp4",
+    "providerChargesStarted": false
+  },
+  "financialModelScenarios": 30,
+  "operationFamilies": 15,
+  "paidPriceApproved": false,
+  "productionDeployed": false,
+  "costAttribution": "unavailable; estimates explicitly separated from measured local/aggregate telemetry",
+  "totalUniquePassingCases": 91,
+  "financialBaselineDays": 30,
+  "calendar31DayStressIncluded": true,
+  "scopeLimitations": [
+    "The real signed-in App output is one second of synthetic technical media, not broad creative/workflow qualification.",
+    "Unbounded production CPU/GPU/provider adapters and complete storage/retention/download enforcement remain launch blockers.",
+    "Price, allowances and cost assumptions remain provisional without attributed billing and merchant fees."
+  ],
+  "localPreviewStopRequested": [
+    "owned Free-first emulator/worker demo",
+    "owned final static preview"
+  ],
+  "ownedLocalDemoStopped": true
+}

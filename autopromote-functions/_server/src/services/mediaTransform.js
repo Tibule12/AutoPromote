@@ -3,7 +3,8 @@ const ffmpeg = require("fluent-ffmpeg");
 const os = require("os");
 const path = require("path");
 const fs = require("fs");
-const { Readable } = require("stream");
+const { pipeline } = require("node:stream/promises");
+const { nodeReadable } = require("../utils/mediaStreams");
 const { v4: uuidv4 } = require("uuid"); // Ensure consistent uuid import
 const { extractOwnedStoragePathFromUrl } = require("../utils/cleanupSource");
 
@@ -64,31 +65,9 @@ async function downloadSourceMedia(data, destinationPath) {
   const res = await fetchFn(data.sourceUrl);
   if (!res.ok) throw new Error(`download_failed(${res.status})`);
 
-  const fileStream = fs.createWriteStream(destinationPath);
   const body = res.body;
   if (!body) throw new Error("download_failed(no_body)");
-
-  if (typeof body.pipe === "function") {
-    await new Promise((resolve, reject) => {
-      body.pipe(fileStream);
-      body.on("error", reject);
-      fileStream.on("finish", resolve);
-    });
-    return;
-  }
-
-  if (typeof body.getReader === "function") {
-    const nodeStream = Readable.fromWeb(body);
-    await new Promise((resolve, reject) => {
-      nodeStream.pipe(fileStream);
-      nodeStream.on("error", reject);
-      fileStream.on("finish", resolve);
-    });
-    return;
-  }
-
-  const buffer = Buffer.from(await res.arrayBuffer());
-  await fs.promises.writeFile(destinationPath, buffer);
+  await pipeline(nodeReadable(body), fs.createWriteStream(destinationPath));
 }
 
 async function enqueueMediaTransformTask({ contentId, uid, meta, url, sourceStoragePath }) {
@@ -107,7 +86,7 @@ async function enqueueMediaTransformTask({ contentId, uid, meta, url, sourceStor
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-  await ref.set(baseTask);
+  await require("./contentMediaDependency").writeMediaDependency(db, contentId, ref, baseTask);
   return { id: ref.id, ...baseTask };
 }
 
@@ -485,6 +464,7 @@ function processMedia(inputFile, outputFile, options = {}) {
 }
 
 async function processMediaTransformTaskDoc(doc) {
+  require("./processingTokens/runtime").assertDispatch();
   const data = doc.data();
 
   await doc.ref.update({ status: "processing", updatedAt: new Date().toISOString() });
@@ -754,7 +734,8 @@ async function processMediaTransformTaskDoc(doc) {
   }
 }
 
-async function processNextMediaTransformTask() {
+async function processNextMediaTransformTask({ background = false } = {}) {
+  if (background && !await require("./backgroundWorkService").hasTasks("media_transform")) return null;
   const snap = await db
     .collection("promotion_tasks")
     .where("type", "==", "media_transform")

@@ -1,0 +1,35 @@
+{
+  "source": "connected Gmail, read-only",
+  "messageId": "1a1f23e693a91253",
+  "sourceUrl": "https://mail.google.com/mail/u/0/#all/1a1f23e693a91253",
+  "senderDomain": "google.com",
+  "subject": "100% of budget reached",
+  "receivedUtc": "2026-11-19T05:18:58Z",
+  "receivedAfricaJohannesburg": "2026-11-19T07:18:58+02:00",
+  "budgetName": "Firebase Project autopromote-cc6d3",
+  "reportedBudgetAmount": 20,
+  "reportedCurrencySymbol": "$",
+  "isoCurrencyVerified": false,
+  "period": "November 2026",
+  "claim": "Provider alert reports that 100% of the displayed budget was reached",
+  "actualFinalInvoiceTotal": null,
+  "perOperationCosts": null,
+  "limitations": [
+    "This is a budget alert, not a final invoice.",
+    "Budget filters/credits/taxes/ISO currency and SKU/operation attribution are not included.",
+    "No division by request counts or conversion into a per-workflow measured cost."
+  ],
+  "searches": [
+    {
+      "query": "\"autopromote-cc6d3\" (invoice OR billing OR cost) after:2026/08/01",
+      "returned": 10,
+      "truncated": true
+    },
+    {
+      "query": "(from:google.com) (\"Google Cloud\" OR Firebase) (invoice OR \"payment receipt\") after:2026/09/01",
+      "returned": 0
+    }
+  ],
+  "messagesSent": 0,
+  "mailChanges": 0
+}

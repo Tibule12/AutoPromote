@@ -26,7 +26,11 @@ if (isRenderRuntime || isDedicatedProductionApi) {
   // or stale host configuration silently turn off storage cleanup. Serverless
   // runtimes are excluded above because they cannot own durable intervals.
   process.env.ENABLE_BACKGROUND_JOBS = "true";
-  if (String(rawBackgroundJobsFlag || "").trim().toLowerCase() !== "true") {
+  if (
+    String(rawBackgroundJobsFlag || "")
+      .trim()
+      .toLowerCase() !== "true"
+  ) {
     console.warn(
       "[startup] Dedicated production API received background jobs as disabled; forcing them on."
     );
@@ -356,14 +360,20 @@ function printMissingEnvOnce() {
   if (!process.env.RATE_LIMIT_GLOBAL_MAX) missing.push("RATE_LIMIT_GLOBAL_MAX");
   const canUseCloudRunApplicationDefault =
     !!process.env.K_SERVICE || !!process.env.GOOGLE_APPLICATION_CREDENTIALS;
-  if (!canUseCloudRunApplicationDefault && !process.env.FIREBASE_SERVICE_ACCOUNT_JSON && !process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
+  if (
+    !canUseCloudRunApplicationDefault &&
+    !process.env.FIREBASE_SERVICE_ACCOUNT_JSON &&
+    !process.env.FIREBASE_SERVICE_ACCOUNT_BASE64
+  ) {
     if (!process.env.FIREBASE_PROJECT_ID) missing.push("FIREBASE_PROJECT_ID");
     if (!process.env.FIREBASE_CLIENT_EMAIL) missing.push("FIREBASE_CLIENT_EMAIL");
     if (!process.env.FIREBASE_PRIVATE_KEY) missing.push("FIREBASE_PRIVATE_KEY");
   }
   if (missing.length) {
     console.warn("[startup] Missing recommended env vars:", missing.join(", "));
-    console.warn("  Continuing startup; routes that depend on missing configuration may be limited.");
+    console.warn(
+      "  Continuing startup; routes that depend on missing configuration may be limited."
+    );
   }
   const enabledFlag = process.env.ENABLE_BACKGROUND_JOBS === "true";
   const typoFlag = process.env.ENABLE_BACKROUND_JOBS === "true";
@@ -395,7 +405,14 @@ function slowRequestLogger(req, res, next) {
     const dur = Date.now() - started;
     if (!/^\/(?:api\/)?health(?:\/|$)/.test(req.path || "")) recordLatency(dur);
     if (dur >= SLOW_REQ_MS) {
-      logger.warn("[slow]", req.method, requestLogPath(req.originalUrl), dur + "ms", "status=", res.statusCode);
+      logger.warn(
+        "[slow]",
+        req.method,
+        requestLogPath(req.originalUrl),
+        dur + "ms",
+        "status=",
+        res.statusCode
+      );
     }
   });
   next();
@@ -889,6 +906,7 @@ try {
   void storage;
 
   const app = express();
+  app.use(require("./services/infrastructureTelemetry").middleware);
 
   // Temporary diagnostic route to check route loading
   app.get("/api/debug/routes", (req, res) => {
@@ -912,7 +930,9 @@ try {
   // Honor X-Forwarded-* headers from proxies without enabling permissive trust-proxy
   // behavior that weakens IP-based rate limiting.
   const trustProxySetting = String(
-    process.env.TRUST_PROXY_HOPS || process.env.TRUST_PROXY || (process.env.NODE_ENV === "production" ? "1" : "0")
+    process.env.TRUST_PROXY_HOPS ||
+      process.env.TRUST_PROXY ||
+      (process.env.NODE_ENV === "production" ? "1" : "0")
   )
     .trim()
     .toLowerCase();
@@ -922,7 +942,10 @@ try {
     app.set("trust proxy", 1);
   } else {
     const trustProxyHops = parseInt(trustProxySetting, 10);
-    app.set("trust proxy", Number.isFinite(trustProxyHops) && trustProxyHops > 0 ? trustProxyHops : 1);
+    app.set(
+      "trust proxy",
+      Number.isFinite(trustProxyHops) && trustProxyHops > 0 ? trustProxyHops : 1
+    );
   }
 
   // CodeQL-recognizable rate limiters (express-rate-limit). These are additive to our
@@ -989,20 +1012,28 @@ try {
     /* optional */
   }
   // Keep console/file request records identical and free of query credentials.
-  const appendAccessLine = process.env.LOG_EVENTS_TO_FILE === "true"
-    ? (() => {
-      const fs = require("node:fs/promises");
-      const path = require("node:path");
-      const directory = path.join(__dirname, "../logs");
-      let ready;
-      return (line, timestamp) => {
-        ready ||= fs.mkdir(directory, { recursive: true }).catch(() => { ready = null; });
-        Promise.resolve(ready).then(() => fs.appendFile(
-          path.join(directory, `access-${timestamp.slice(0, 10)}.log`), line + "\n"
-        )).catch(() => {});
-      };
-    })()
-    : undefined;
+  const appendAccessLine =
+    process.env.LOG_EVENTS_TO_FILE === "true"
+      ? (() => {
+          const fs = require("node:fs/promises");
+          const path = require("node:path");
+          const directory = path.join(__dirname, "../logs");
+          let ready;
+          return (line, timestamp) => {
+            ready ||= fs.mkdir(directory, { recursive: true }).catch(() => {
+              ready = null;
+            });
+            Promise.resolve(ready)
+              .then(() =>
+                fs.appendFile(
+                  path.join(directory, `access-${timestamp.slice(0, 10)}.log`),
+                  line + "\n"
+                )
+              )
+              .catch(() => {});
+          };
+        })()
+      : undefined;
   app.use(require("./middlewares/accessLog")(logger, appendAccessLine));
 
   app.use(slowRequestLogger);
@@ -1046,7 +1077,10 @@ try {
       } catch (e) {}
       // Quick override: allow all origins when explicitly requested via env.
       // Use only for development/testing. Setting this in production is dangerous.
-      if (process.env.CORS_ALLOW_ALL === "true" && !require("./utils/authAuthority").isHostedRuntime()) {
+      if (
+        process.env.CORS_ALLOW_ALL === "true" &&
+        !require("./utils/authAuthority").isHostedRuntime()
+      ) {
         try {
           logger.warn("[cors] CORS_ALLOW_ALL=true — allowing all origins (override)");
         } catch (e) {}
@@ -1251,7 +1285,7 @@ try {
   // Public documentation has its own 8kb parser and 30/minute limiter. Mount it
   // before the media-sized parser and remote account/API limiter: help requires
   // neither project payloads nor remote billing/worker infrastructure.
-  app.use('/api/product-assistance', require('./routes/productAssistanceRoutes')());
+  app.use("/api/product-assistance", require("./routes/productAssistanceRoutes")());
   // Discord interactions require the raw body for signature verification, so parse them before the global JSON middleware.
   app.use(require("./utils/mediaTransferBudget").admitLargeStructuredBody);
   app.use(
@@ -1299,6 +1333,14 @@ try {
     app.use("/api/", codeqlLimiter.general);
     console.log("✅ CodeQL general rate limiter applied at /api/");
   }
+  // Opt-in controlled migration: all mutating media processing must use bounded admission.
+  app.use(
+    require("./middlewares/processingBudgetMiddleware").createProcessingGuard({
+      service: require("./services/processingTokens/runtime").service(),
+      authenticate: require("./authMiddleware"),
+      adapters: require("./services/processingTokens/runtime").adapters,
+    })
+  );
   app.use("/api/auth", authRoutes);
   if (codeqlLimiter && codeqlLimiter.auth) {
     app.use("/api/auth", codeqlLimiter.auth);
@@ -2218,7 +2260,8 @@ try {
       const utilization = performance.eventLoopUtilization(loop, previousLoop).utilization;
       if (mean > 50 || max > 200) {
         console.warn("[perf][event-loop]", {
-          meanMs: mean, maxMs: max,
+          meanMs: mean,
+          maxMs: max,
           cpuMs: Math.round((cpu.user + cpu.system - previousCpu.user - previousCpu.system) / 1000),
           utilizationPercent: Math.round(utilization * 100),
           rssMiB: Math.round(process.memoryUsage().rss / 1048576),
@@ -2340,8 +2383,10 @@ try {
         process.env.VERCEL_GIT_COMMIT_SHA ||
         null;
       extended.diagnostics.backgroundJobsEnabled = process.env.ENABLE_BACKGROUND_JOBS === "true";
-      extended.diagnostics.mediaTransfers = require("./utils/mediaTransferBudget").transfers.snapshot();
-      extended.diagnostics.apiProcessesPublishingTasks = process.env.API_PROCESS_PUBLISHING_TASKS !== "false";
+      extended.diagnostics.mediaTransfers =
+        require("./utils/mediaTransferBudget").transfers.snapshot();
+      extended.diagnostics.apiProcessesPublishingTasks =
+        process.env.API_PROCESS_PUBLISHING_TASKS !== "false";
 
       // OpenAI configuration status
       extended.diagnostics.openai = {
@@ -3096,8 +3141,12 @@ try {
       let lastPlatformMetricsAt = 0;
 
       const runStatsPoller = async () => {
-        if (statsRunning || !backgroundActivity.active("analytics") ||
-            Date.now() - lastStatsPollAt < STATS_POLL_INTERVAL_MS) return; // idle: no lock or scan
+        if (
+          statsRunning ||
+          !backgroundActivity.active("analytics") ||
+          Date.now() - lastStatsPollAt < STATS_POLL_INTERVAL_MS
+        )
+          return; // idle: no lock or scan
         const ok = await acquireLock("statsPoller", STATS_POLL_INTERVAL_MS * 2).catch(() => false);
         if (!ok) return; // another instance owns lock
         statsRunning = true;
@@ -3144,9 +3193,14 @@ try {
         taskRunning = true;
         try {
           const publishingHere = process.env.API_PROCESS_PUBLISHING_TASKS !== "false";
-          const taskTypes = publishingHere ? ["youtube_upload", "platform_post", "media_transform"] : ["media_transform"];
-          const work = await Promise.all(taskTypes.map(type => backgroundWork.hasTasks(type))).catch(error => {
-            console.warn("[BG][tasks] Work listener unavailable:", error.message); return [];
+          const taskTypes = publishingHere
+            ? ["youtube_upload", "platform_post", "media_transform"]
+            : ["media_transform"];
+          const work = await Promise.all(
+            taskTypes.map(type => backgroundWork.hasTasks(type))
+          ).catch(error => {
+            console.warn("[BG][tasks] Work listener unavailable:", error.message);
+            return [];
           });
           if (!work.some(Boolean)) return;
           const ok = await acquireLock("promotionTasks", TASK_PROCESS_INTERVAL_MS * 2).catch(
@@ -3197,8 +3251,12 @@ try {
       }, TASK_PROCESS_INTERVAL_MS).unref();
 
       const runPlatformMetrics = async () => {
-        if (platformMetricsRunning || !backgroundActivity.active("analytics") ||
-            Date.now() - lastPlatformMetricsAt < PLATFORM_STATS_POLL_INTERVAL_MS) return;
+        if (
+          platformMetricsRunning ||
+          !backgroundActivity.active("analytics") ||
+          Date.now() - lastPlatformMetricsAt < PLATFORM_STATS_POLL_INTERVAL_MS
+        )
+          return;
         const ok = await acquireLock("platformMetrics", PLATFORM_STATS_POLL_INTERVAL_MS * 2).catch(
           () => false
         );
@@ -3279,7 +3337,15 @@ try {
         const { acquireLock } = require("./services/workerLockService");
         setInterval(async () => {
           try {
-            if (!await backgroundWork.hasRows("earnings:pending", "earnings_events", "processed", false)) return;
+            if (
+              !(await backgroundWork.hasRows(
+                "earnings:pending",
+                "earnings_events",
+                "processed",
+                false
+              ))
+            )
+              return;
             const locked = await acquireLock(
               "earningsAggregator",
               EARNINGS_AGG_INTERVAL_MS * 2
@@ -3329,7 +3395,12 @@ try {
       setInterval(async () => {
         try {
           const now = Date.now();
-          const snap = await db.collection("system_locks").where("expiresAt", "<", now - 60000).select("expiresAt").limit(100).get();
+          const snap = await db
+            .collection("system_locks")
+            .where("expiresAt", "<", now - 60000)
+            .select("expiresAt")
+            .limit(100)
+            .get();
           const batch = db.batch();
           let removed = 0;
           snap.forEach(d => {
@@ -3450,34 +3521,41 @@ try {
       if (payoutsEnabled) {
         try {
           const paypalPayoutService = require("./services/paypalPayoutService");
-          leaderInterval(async () => {
-            try {
-              if (!await backgroundWork.hasRows("payouts:pending", "payouts", "status", "pending")) return;
-              const processed = await paypalPayoutService.processPendingPayouts(50);
-              if (processed && processed.processed)
-                console.log("[BG][payouts] processed", processed.processed, "pending payouts");
+          leaderInterval(
+            async () => {
               try {
-                require("./services/metricsRecorder").incrCounter(
-                  "payouts.processed",
-                  processed.processed || 0
-                );
-              } catch (_) {}
-              try {
-                require("./services/statusRecorder").recordRun("payoutProcessor", {
-                  processed: processed.processed || 0,
-                  ok: true,
-                });
-              } catch (_) {}
-            } catch (e) {
-              console.warn("[BG][payouts] payout processing failed:", e && e.message);
-              try {
-                require("./services/statusRecorder").recordRun("payoutProcessor", {
-                  error: e.message,
-                  ok: false,
-                });
-              } catch (_) {}
-            }
-          }, PAYOUTS_PROCESS_INTERVAL_MS, { onDemand: false });
+                if (
+                  !(await backgroundWork.hasRows("payouts:pending", "payouts", "status", "pending"))
+                )
+                  return;
+                const processed = await paypalPayoutService.processPendingPayouts(50);
+                if (processed && processed.processed)
+                  console.log("[BG][payouts] processed", processed.processed, "pending payouts");
+                try {
+                  require("./services/metricsRecorder").incrCounter(
+                    "payouts.processed",
+                    processed.processed || 0
+                  );
+                } catch (_) {}
+                try {
+                  require("./services/statusRecorder").recordRun("payoutProcessor", {
+                    processed: processed.processed || 0,
+                    ok: true,
+                  });
+                } catch (_) {}
+              } catch (e) {
+                console.warn("[BG][payouts] payout processing failed:", e && e.message);
+                try {
+                  require("./services/statusRecorder").recordRun("payoutProcessor", {
+                    error: e.message,
+                    ok: false,
+                  });
+                } catch (_) {}
+              }
+            },
+            PAYOUTS_PROCESS_INTERVAL_MS,
+            { onDemand: false }
+          );
         } catch (e) {
           console.log("[BG][payouts] skipped: payout service not found", e.message);
         }
@@ -3492,14 +3570,19 @@ try {
         process.env.LAT_SNAPSHOT_INTERVAL_MS || "60000",
         10
       );
-      const persistLatencySnapshot = require("./services/latencySnapshotService").createLatencySnapshotWriter({ db });
-      leaderInterval(async () => {
-        try {
-          await persistLatencySnapshot(__latVersion, getLatencyStats());
-        } catch (e) {
-          console.warn("[BG][latency-snapshot] error:", e.message);
-        }
-      }, LAT_SNAPSHOT_INTERVAL_MS, { category: "general" });
+      const persistLatencySnapshot =
+        require("./services/latencySnapshotService").createLatencySnapshotWriter({ db });
+      leaderInterval(
+        async () => {
+          try {
+            await persistLatencySnapshot(__latVersion, getLatencyStats());
+          } catch (e) {
+            console.warn("[BG][latency-snapshot] error:", e.message);
+          }
+        },
+        LAT_SNAPSHOT_INTERVAL_MS,
+        { category: "general" }
+      );
     } catch (e) {
       console.warn("⚠️ Background job initialization failed:", e.message);
     }
@@ -3591,7 +3674,8 @@ if (process.env.SCHEDULER_ENABLED !== "false" && !isTestEnv) {
           const { analyzeAndScheduleReposts } = require("./services/repostSchedulerService");
           const result = await analyzeAndScheduleReposts({ limit: 10 });
           const scheduled = result?.scheduled || 0;
-          if (scheduled > 0) console.log(`[Scheduler] ♻️ Auto-cycled ${scheduled} posts due to view decay`);
+          if (scheduled > 0)
+            console.log(`[Scheduler] ♻️ Auto-cycled ${scheduled} posts due to view decay`);
         } catch (e) {
           console.warn("[Scheduler] ⚠️ Repost analysis failed:", e.message);
         }
@@ -3607,44 +3691,41 @@ if (process.env.SCHEDULER_ENABLED !== "false" && !isTestEnv) {
       process.env.STORAGE_CLEANUP_INTERVAL_MS || String(10 * 60 * 1000),
       10
     );
-    setInterval(
-      async () => {
-        const isLeader = (global.__bgLeader && global.__bgLeader.isLeader()) || false;
-        if (!isLeader) return;
+    setInterval(async () => {
+      const isLeader = (global.__bgLeader && global.__bgLeader.isLeader()) || false;
+      if (!isLeader) return;
+      try {
+        const {
+          cleanupTempUploads,
+          cleanupExpiredSourceUploads,
+          cleanupExpiredMulticamRenders,
+          cleanupPublishedVideos,
+        } = require("./services/storageCleanupService");
+        await cleanupTempUploads();
+        await cleanupExpiredSourceUploads();
+        await cleanupExpiredMulticamRenders();
+        await cleanupPublishedVideos();
+
         try {
           const {
-            cleanupTempUploads,
-            cleanupExpiredSourceUploads,
-            cleanupExpiredMulticamRenders,
-            cleanupPublishedVideos,
-          } = require("./services/storageCleanupService");
-          await cleanupTempUploads();
-          await cleanupExpiredSourceUploads();
-          await cleanupExpiredMulticamRenders();
-          await cleanupPublishedVideos();
-
-          try {
-            const {
-              notifyCompletedMulticamRenders,
-            } = require("./services/renderNotificationService");
-            await notifyCompletedMulticamRenders();
-          } catch (notifyErr) {
-            console.error("[Scheduler] ⚠️ Render completion emails failed:", notifyErr.message);
-          }
-
-          // Cleanup expired generated clips (older than 5 days)
-          try {
-            const videoClippingService = require("./services/videoClippingService");
-            await videoClippingService.cleanupExpiredClips();
-          } catch (clipErr) {
-            console.error("[Scheduler] ⚠️ Expired clip cleanup failed:", clipErr.message);
-          }
-        } catch (e) {
-          console.error("[Scheduler] ⚠️ Storage cleanup failed:", e.message);
+            notifyCompletedMulticamRenders,
+          } = require("./services/renderNotificationService");
+          await notifyCompletedMulticamRenders();
+        } catch (notifyErr) {
+          console.error("[Scheduler] ⚠️ Render completion emails failed:", notifyErr.message);
         }
-      },
-      storageCleanupIntervalMs
-    ).unref();
+
+        // Cleanup expired generated clips (older than 5 days)
+        try {
+          const videoClippingService = require("./services/videoClippingService");
+          await videoClippingService.cleanupExpiredClips();
+        } catch (clipErr) {
+          console.error("[Scheduler] ⚠️ Expired clip cleanup failed:", clipErr.message);
+        }
+      } catch (e) {
+        console.error("[Scheduler] ⚠️ Storage cleanup failed:", e.message);
+      }
+    }, storageCleanupIntervalMs).unref();
   }
 }
 

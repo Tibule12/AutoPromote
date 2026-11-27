@@ -1,4 +1,4 @@
-const SUBSCRIPTION_PLANS = {
+const LEGACY_SUBSCRIPTION_PLANS = {
   free: {
     id: "free",
     name: "Starter",
@@ -7,8 +7,7 @@ const SUBSCRIPTION_PLANS = {
       monthlyCredits: 15,
       uploads: 3,
       platformLimit: 1,
-      wolfHuntTasks: 3,
-      analytics: "Basic",
+      monthlyPromotions: 3,
       support: "Self-serve",
       multicam: false,
       teamSeats: 1,
@@ -23,8 +22,7 @@ const SUBSCRIPTION_PLANS = {
       monthlyCredits: 150,
       uploads: 20,
       platformLimit: 5,
-      wolfHuntTasks: 20,
-      analytics: "Workflow analytics",
+      monthlyPromotions: 20,
       support: "Email support",
       multicam: true,
       teamSeats: 1,
@@ -39,8 +37,7 @@ const SUBSCRIPTION_PLANS = {
       monthlyCredits: 500,
       uploads: 80,
       platformLimit: 6,
-      wolfHuntTasks: 100,
-      analytics: "Advanced insights",
+      monthlyPromotions: 100,
       support: "Priority support",
       multicam: true,
       teamSeats: 3,
@@ -55,14 +52,47 @@ const SUBSCRIPTION_PLANS = {
       monthlyCredits: 2000,
       uploads: 240,
       platformLimit: 6,
-      wolfHuntTasks: 500,
-      analytics: "Export-ready analytics",
+      monthlyPromotions: 500,
       support: "Priority support",
       multicam: true,
       teamSeats: 10,
     },
   },
 };
+
+// Legacy IDs remain resolvable for existing agreements and purchased-credit accounting.
+// They are never returned as new purchase options.
+const SHARED_FEATURES = {
+  monthlyCredits: 0,
+  uploads: 20,
+  platformLimit: 6,
+  monthlyPromotions: 30,
+  support: "Email support",
+  multicam: true,
+  teamSeats: 1,
+};
+const SUBSCRIPTION_PLANS = {
+  free: {
+    id: "free",
+    name: "AutoPromote Free",
+    price: 0,
+    currency: "USD",
+    provisional: true,
+    features: { ...SHARED_FEATURES },
+    processing: { tokens: 100, resetHours: 144, rolling30DayTokens: 500, storageBytes: 1073741824 },
+  },
+  plus: {
+    id: "plus",
+    name: "AutoPromote Plus",
+    price: 4.99,
+    currency: "USD",
+    provisional: true,
+    paypalPlanIdEnv: "PAYPAL_PLUS_PLAN_ID",
+    features: { ...SHARED_FEATURES, uploads: 80, monthlyPromotions: 150 },
+    processing: { tokens: 500, resetHours: 24, rolling30DayTokens: 2000, storageBytes: 5368709120 },
+  },
+};
+const ALL_SUBSCRIPTION_PLANS = { ...LEGACY_SUBSCRIPTION_PLANS, ...SUBSCRIPTION_PLANS };
 
 /**
  * Credit costs per media operation.
@@ -77,8 +107,6 @@ const CREDIT_COSTS = {
   transcribe: 3,
   hook: 3,
   music: 1,
-  "idea-video-preview": 5,
-  "idea-video-render": 25,
 };
 
 /**
@@ -99,7 +127,7 @@ const EDITING_FEATURE_CATALOG = {
     pythonWorker: true,
     usesStorage: true,
     creditOperation: "process",
-    limitModel: "monthly_credits_then_topups",
+    limitModel: "server_resource_allowance",
   },
   audioExtract: {
     label: "Audio Extraction",
@@ -108,7 +136,7 @@ const EDITING_FEATURE_CATALOG = {
     pythonWorker: true,
     usesStorage: true,
     creditOperation: "transcribe",
-    limitModel: "monthly_credits_then_topups",
+    limitModel: "server_resource_allowance",
   },
   multicam: {
     label: "Cam Combiner",
@@ -117,16 +145,16 @@ const EDITING_FEATURE_CATALOG = {
     pythonWorker: false,
     usesStorage: false,
     creditOperation: null,
-    limitModel: "included_on_paid_plans",
+    limitModel: "shared_tools",
   },
   autoDirector: {
     label: "Auto Director",
     clientSide: true,
-    backendProcessing: false,
+    backendProcessing: true,
     pythonWorker: false,
     usesStorage: false,
     creditOperation: null,
-    limitModel: "included_on_paid_plans",
+    limitModel: "shared_tools",
   },
   flowEdit: {
     label: "Flow Edit / Sync to Sound",
@@ -135,7 +163,7 @@ const EDITING_FEATURE_CATALOG = {
     pythonWorker: false,
     usesStorage: false,
     creditOperation: null,
-    limitModel: "included_on_paid_plans",
+    limitModel: "shared_tools",
   },
   thumbnailLab: {
     label: "Thumbnail Lab",
@@ -144,7 +172,7 @@ const EDITING_FEATURE_CATALOG = {
     pythonWorker: false,
     usesStorage: false,
     creditOperation: null,
-    limitModel: "included_on_paid_plans",
+    limitModel: "shared_tools",
   },
   findViralClips: {
     label: "Find Viral Clips",
@@ -153,7 +181,7 @@ const EDITING_FEATURE_CATALOG = {
     pythonWorker: false,
     usesStorage: true,
     creditOperation: "analyze",
-    limitModel: "monthly_credits_then_topups",
+    limitModel: "server_resource_allowance",
   },
   viralClipStudio: {
     label: "Viral Clip Studio",
@@ -162,7 +190,7 @@ const EDITING_FEATURE_CATALOG = {
     pythonWorker: false,
     usesStorage: false,
     creditOperation: null,
-    limitModel: "included_on_paid_plans",
+    limitModel: "shared_tools",
   },
   clipRender: {
     label: "Render Final Clip",
@@ -171,16 +199,7 @@ const EDITING_FEATURE_CATALOG = {
     pythonWorker: true,
     usesStorage: true,
     creditOperation: "render-clip",
-    limitModel: "monthly_credits_then_topups",
-  },
-  smartPromoSummary: {
-    label: "Smart Promo Summary",
-    clientSide: false,
-    backendProcessing: true,
-    pythonWorker: true,
-    usesStorage: true,
-    creditOperation: "promo-summary",
-    limitModel: "monthly_credits_then_topups",
+    limitModel: "server_resource_allowance",
   },
   videoProcessing: {
     label: "AI Video Processing",
@@ -189,7 +208,7 @@ const EDITING_FEATURE_CATALOG = {
     pythonWorker: true,
     usesStorage: true,
     creditOperation: "process",
-    limitModel: "monthly_credits_then_topups",
+    limitModel: "server_resource_allowance",
   },
   multicamRender: {
     label: "Server Multicam Render",
@@ -198,20 +217,13 @@ const EDITING_FEATURE_CATALOG = {
     pythonWorker: true,
     usesStorage: true,
     creditOperation: "render-multicam",
-    limitModel: "monthly_credits_then_topups",
+    limitModel: "server_resource_allowance",
   },
 };
 
 const PLAN_CAPABILITIES = {
   free: {
-    analytics: {
-      allowedRanges: ["24h", "7d"],
-      platformBreakdown: false,
-      recoveryLab: false,
-      canExport: false,
-      topContentLimit: 10,
-      summary: "Recent KPI snapshot for published content.",
-    },
+    recoveryLab: false,
     support: {
       ticketAccess: false,
       allowedPriorities: ["low"],
@@ -220,14 +232,7 @@ const PLAN_CAPABILITIES = {
     },
   },
   premium: {
-    analytics: {
-      allowedRanges: ["24h", "7d", "30d"],
-      platformBreakdown: true,
-      recoveryLab: false,
-      canExport: false,
-      topContentLimit: 25,
-      summary: "Workflow analytics with platform breakdown and 30-day history.",
-    },
+    recoveryLab: false,
     support: {
       ticketAccess: true,
       allowedPriorities: ["low", "medium"],
@@ -236,14 +241,7 @@ const PLAN_CAPABILITIES = {
     },
   },
   pro: {
-    analytics: {
-      allowedRanges: ["24h", "7d", "30d", "90d", "all"],
-      platformBreakdown: true,
-      recoveryLab: true,
-      canExport: false,
-      topContentLimit: 50,
-      summary: "Advanced insights with Recovery Lab access and full history.",
-    },
+    recoveryLab: true,
     support: {
       ticketAccess: true,
       allowedPriorities: ["low", "medium", "high"],
@@ -252,14 +250,7 @@ const PLAN_CAPABILITIES = {
     },
   },
   enterprise: {
-    analytics: {
-      allowedRanges: ["24h", "7d", "30d", "90d", "all"],
-      platformBreakdown: true,
-      recoveryLab: true,
-      canExport: true,
-      topContentLimit: 100,
-      summary: "Export-ready analytics with Recovery Lab.",
-    },
+    recoveryLab: true,
     support: {
       ticketAccess: true,
       allowedPriorities: ["low", "medium", "high"],
@@ -272,11 +263,11 @@ const PLAN_CAPABILITIES = {
 function normalizePlanId(value) {
   const raw = (value || "free").toString().trim().toLowerCase();
   if (raw === "basic") return "premium";
-  return SUBSCRIPTION_PLANS[raw] ? raw : "free";
+  return ALL_SUBSCRIPTION_PLANS[raw] ? raw : "free";
 }
 
 function resolvePlan(planId) {
-  return SUBSCRIPTION_PLANS[normalizePlanId(planId)] || SUBSCRIPTION_PLANS.free;
+  return ALL_SUBSCRIPTION_PLANS[normalizePlanId(planId)] || SUBSCRIPTION_PLANS.free;
 }
 
 function getUploadLimitForPlan(planId) {
@@ -285,19 +276,17 @@ function getUploadLimitForPlan(planId) {
 }
 
 function getPlatformLimitForPlan(planId) {
-  const limit = resolvePlan(planId).features.platformLimit;
-  return limit === "Unlimited" || limit === "unlimited" ? Infinity : Number(limit) || 1;
+  return 6;
 }
 
 function getPlanCapabilities(planId) {
   const normalizedPlanId = normalizePlanId(planId);
   const plan = resolvePlan(normalizedPlanId);
   const base = PLAN_CAPABILITIES[normalizedPlanId] || PLAN_CAPABILITIES.free;
-  const missionQuota = Number(plan.features.wolfHuntTasks);
-  const isPaidPlan = normalizedPlanId !== "free";
+
   const editing = Object.fromEntries(
     Object.entries(EDITING_FEATURE_CATALOG).map(([featureId, feature]) => {
-      const enabled = isPaidPlan;
+      const enabled = true;
       const creditCost = feature.creditOperation ? getCreditCost(feature.creditOperation) : 0;
       return [
         featureId,
@@ -315,30 +304,25 @@ function getPlanCapabilities(planId) {
   return {
     planId: normalizedPlanId,
     planName: plan.name,
-    analytics: {
-      ...base.analytics,
-      label: plan.features.analytics,
-    },
+    recoveryLab: true,
+    processing: plan.processing || SUBSCRIPTION_PLANS.plus.processing,
     support: {
       ...base.support,
+      ticketAccess: true,
       label: plan.features.support,
-    },
-    missions: {
-      label: `${plan.features.wolfHuntTasks} mission opportunities per month`,
-      monthlyBoosts: Number.isFinite(missionQuota) ? missionQuota : 0,
     },
     credits: {
       monthlyAllocation: plan.features.monthlyCredits || 0,
       label: `${plan.features.monthlyCredits || 0} editing credits per month`,
     },
-    multicam: !!plan.features.multicam,
+    multicam: true,
     teamSeats: plan.features.teamSeats || 1,
     editing: {
-      allPaidFeaturesUnlocked: isPaidPlan,
-      topUpsEnabled: isPaidPlan,
+      allPaidFeaturesUnlocked: true, // Compatibility field: tools are shared by every plan.
+      topUpsEnabled: true,
       monthlyCreditsIncluded: plan.features.monthlyCredits || 0,
       policy:
-        "Paid plans include the creative toolset. Credit-based generations draw from your monthly allowance first, and you can top up anytime.",
+        "Same creativity. Same tools. More usage when you upgrade. Local editing uses no cloud processing tokens.",
       features: editing,
     },
   };
@@ -353,6 +337,8 @@ function getCreditCost(operation) {
 }
 
 module.exports = {
+  LEGACY_SUBSCRIPTION_PLANS,
+  ALL_SUBSCRIPTION_PLANS,
   SUBSCRIPTION_PLANS,
   PLAN_CAPABILITIES,
   CREDIT_COSTS,

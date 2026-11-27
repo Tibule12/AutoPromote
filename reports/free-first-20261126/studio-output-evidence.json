@@ -1,0 +1,22 @@
+{
+  "nativeJobId": "viral_c05d6d05d802b6b771d1b9cef0e5d855bdd30092078b79105a0d482176f8152e",
+  "sha256": "51708b0c4c83983c3e104b740a78d16f1f43d8b28aceb0cdf596e50eefecb3e4",
+  "bytes": 267143,
+  "duration": "1.000000",
+  "streams": [
+    {
+      "type": "video",
+      "width": 1080,
+      "height": 1920,
+      "codec": "h264"
+    },
+    {
+      "type": "audio",
+      "codec": "aac"
+    }
+  ],
+  "jobStatus": "completed",
+  "fullDecode": true,
+  "outputStoragePath": "studio/exports/demo-pilot-alice/viral_c05d6d05d802b6b771d1b9cef0e5d855bdd30092078b79105a0d482176f8152e/render.mp4",
+  "scope": "Actual App upload, title/Undo/Redo, native save/cold reopen and native CPU export; technical synthetic test source, no creative or production approval."
+}

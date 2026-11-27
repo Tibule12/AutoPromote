@@ -616,7 +616,7 @@ export default function StudioWelcomePage({ onGetStarted, onSignIn }) {
               <a className="wf-text-link" href="#workspace">
                 See the real workflow <span>↓</span>
               </a>
-              <small>Free account to start. Paid tools and exports use credits.</small>
+              <small>Create for free. Cloud processing uses your renewable allowance.</small>
             </div>
           </div>
           <StudioReel reduced={reduced} watch={setPreview} />

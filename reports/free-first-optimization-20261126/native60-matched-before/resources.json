@@ -1,0 +1,59 @@
+{
+  "sampledTreePeakRssBytes": 739028992,
+  "status": "completed",
+  "wallSecondsIncludingImport": 134.50082145800116,
+  "cpuSeconds": 422.131944,
+  "largestProcessPeakRssKiB": 571268,
+  "cpuAffinity": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "threads": 4,
+  "providerChargesStarted": false,
+  "actualCloudExpenditureUsd": 0,
+  "invoiceAttributedHistoricalCostUsd": null,
+  "sourceBytes": 38935983,
+  "sourceSha256": "d563280d6d3f60c275be7900bafb71d4c67bcdc6531b811dcb19b904aeb3c526",
+  "stages": [
+    {
+      "program": "ffmpeg",
+      "output": "846732b0-bba4-4eaa-a19c-bdf619d8024a_segment_v_0.mp4",
+      "wallSeconds": 9.8902
+    },
+    {
+      "program": "ffmpeg",
+      "output": "846732b0-bba4-4eaa-a19c-bdf619d8024a_segment_a_0.m4a",
+      "wallSeconds": 2.5998
+    },
+    {
+      "program": "ffmpeg",
+      "output": "846732b0-bba4-4eaa-a19c-bdf619d8024a_trimmed.mp4",
+      "wallSeconds": 2.8105
+    },
+    {
+      "program": "ffmpeg",
+      "output": "846732b0-bba4-4eaa-a19c-bdf619d8024a_cropped.mp4",
+      "wallSeconds": 40.6297
+    },
+    {
+      "program": "ffmpeg",
+      "output": "846732b0-bba4-4eaa-a19c-bdf619d8024a_finish.mp4",
+      "wallSeconds": 22.2078
+    },
+    {
+      "program": "ffmpeg",
+      "output": "-",
+      "wallSeconds": 0.5451
+    },
+    {
+      "program": "ffmpeg",
+      "output": "846732b0-bba4-4eaa-a19c-bdf619d8024a_viral.mp4",
+      "wallSeconds": 41.4068
+    }
+  ],
+  "mode": "render",
+  "baseline": true,
+  "workerSourceSha256": "99661a8c3e9c12b22b10f62a708156888d70f2f7142716b384b67d12424584d0"
+}

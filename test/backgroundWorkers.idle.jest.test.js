@@ -27,9 +27,19 @@ const {
 } = require("../src/services/promotionTaskQueue");
 const promotion = require("../src/promotionService");
 beforeEach(() => {
+  delete process.env.FREE_FIRST_USAGE_ENABLED;
   jest.clearAllMocks();
   mockTasks.mockResolvedValue(false);
   mockSchedules.mockResolvedValue(false);
+});
+afterEach(() => { delete process.env.FREE_FIRST_USAGE_ENABLED; });
+
+test("renewable publishing cannot dequeue or upload without a reserved dispatcher context", async () => {
+  process.env.FREE_FIRST_USAGE_ENABLED = "true";
+  mockTasks.mockResolvedValue(true);
+  await expect(processNextPlatformTask()).rejects.toMatchObject({code:"BOUNDED_PROCESSING_ADAPTER_REQUIRED"});
+  await expect(processNextYouTubeTask()).rejects.toMatchObject({code:"BOUNDED_PROCESSING_ADAPTER_REQUIRED"});
+  expect(mockCollection).not.toHaveBeenCalled();
 });
 
 test("idle publishing workers stop before queue/content scans", async () => {

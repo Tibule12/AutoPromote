@@ -2,6 +2,7 @@
 const functions = require("firebase-functions/v1");
 // The Firebase Admin SDK to access Cloud Firestore, Realtime Database and Cloud Storage.
 const admin = require("firebase-admin");
+require('./_server/src/services/infrastructureTelemetry').install();
 const { v4: uuidv4 } = require("./lib/uuid-compat");
 // path module not required in current implementation
 const cors = require("cors");
@@ -230,8 +231,6 @@ exports.createPromotionOnApproval = functions
       const before = change.before.data();
       const after = change.after.data();
       const contentId = context.params.contentId;
-      console.log(`createPromotionOnApproval triggered for contentId: ${contentId}`);
-      console.log("Before status:", before.status, "After status:", after.status);
       // Only trigger if status changed to 'approved'
       if (before.status !== "approved" && after.status === "approved") {
         const promotionData = {
@@ -243,10 +242,10 @@ exports.createPromotionOnApproval = functions
           ),
           createdAt: admin.firestore.Timestamp.now(),
         };
-        await admin.firestore().collection("promotion_schedules").add(promotionData);
+        await require('./_server/src/services/contentUpdateRouter').createApprovalSchedule({
+          db:admin.firestore(),contentId,eventId:context.eventId,data:promotionData,
+        });
         console.log(`Promotion schedule created for content (onUpdate): ${contentId}`);
-      } else {
-        console.log("Status did not change to approved, no promotion created.");
       }
       return null;
     } catch (error) {
@@ -277,7 +276,9 @@ exports.createPromotionOnContentCreate = functions
           ),
           createdAt: admin.firestore.Timestamp.now(),
         };
-        await admin.firestore().collection("promotion_schedules").add(promotionData);
+        await require('./_server/src/services/contentUpdateRouter').createApprovalSchedule({
+          db:admin.firestore(),contentId,eventId:context.eventId,data:promotionData,
+        });
         console.log(`Promotion schedule created for content (onCreate): ${contentId}`);
       } else {
         console.log("Document status is not approved, no promotion created.");
@@ -312,13 +313,7 @@ exports.handleLandingPageIntent = functions
       const intentNewlySet =
         (!beforeIntent && !!afterIntent) ||
         (beforeIntent === undefined && afterIntent !== undefined);
-      console.log("LandingPageIntent -", {
-        beforeIntent,
-        afterIntent,
-        intentNewlySet,
-      });
       if (!intentNewlySet) {
-        console.log("LandingPageIntent: intent not newly set, skipping.");
         return null;
       }
       if (after.landingPageUrl) {
@@ -411,13 +406,7 @@ exports.handleSmartLinkIntent = functions
       const intentNewlySet =
         (!beforeIntent && !!afterIntent) ||
         (beforeIntent === undefined && afterIntent !== undefined);
-      console.log("SmartLinkIntent -", {
-        beforeIntent,
-        afterIntent,
-        intentNewlySet,
-      });
       if (!intentNewlySet) {
-        console.log("SmartLinkIntent: intent not newly set, skipping.");
         return null;
       }
       if (after.smartLink) {
@@ -500,6 +489,21 @@ exports.autoRewardCreators = functions
     }
   });
 
+
+// Never introduce a differently named content trigger during cutover. Retain
+// the existing trigger identity; a coordinated writer freeze/drain precedes
+// retirement of the other three triggers and this in-place update.
+if(process.env.CONTENT_UPDATE_ROUTER_ENABLED==='true') {
+  throw new Error('Use the reviewed in-place CONTENT_UPDATE_ROUTER_MODE=survivor migration; additive contentUpdated deployment is prohibited');
+}
+if(process.env.CONTENT_UPDATE_ROUTER_MODE==='survivor') {
+  const names=['createPromotionOnApproval','handleLandingPageIntent','handleSmartLinkIntent','autoRewardCreators'];
+  const exportsLegacy=Object.fromEntries(names.map(name=>[name,exports[name]]));
+  const handlers=Object.fromEntries(names.map(name=>[name,(change,context)=>exportsLegacy[name].run(change,context)]));
+  exports.createPromotionOnApproval=functions.region(region).firestore.document('content/{contentId}').onUpdate(
+    require('./_server/src/services/contentUpdateRouter').createContentUpdateRouter(handlers));
+  for(const name of names)if(name!=='createPromotionOnApproval')delete exports[name];
+}
 
 // Scheduled cleanup for temp clip uploads
 if (!process.env.CI) { // Only load in production/emulator to avoid errors in simplified environments

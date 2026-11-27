@@ -2,6 +2,8 @@
 const { db, admin } = require("../firebaseAdmin");
 const { safeFetch } = require("../utils/ssrfGuard");
 const { cleanupSourceFile } = require("../utils/cleanupSource");
+const { streamLinkedInVideo } = require("../utils/streamLinkedInVideo");
+const crypto = require("node:crypto");
 
 let fetchFn = global.fetch;
 if (!fetchFn) {
@@ -16,6 +18,88 @@ if (!fetchFn) {
  * Get user's LinkedIn connection tokens
  */
 const { tokensFromDoc } = require("./connectionTokenUtils");
+const { accessTokenExpiresAt } = require("./connectionTokenExpiry");
+const { publishingError } = require("./publishingTaskErrors");
+const { encryptToken, hasEncryption } = require("./secretVault");
+
+async function requireReconnect(uid) {
+  await db
+    .collection("users")
+    .doc(uid)
+    .collection("connections")
+    .doc("linkedin")
+    .set(
+      { connected: false, reauthRequired: true, lastConnectionError: "expired_access_token" },
+      { merge: true }
+    );
+  throw publishingError(
+    "LinkedIn access token expired or was revoked. Reconnect LinkedIn in Connections, then retry this post.",
+    "auth",
+    401
+  );
+}
+
+async function refreshAccessToken(uid, connection) {
+  const tokens = connection.tokens;
+  if (!tokens.refresh_token) return requireReconnect(uid);
+  const clientId = process.env.LINKEDIN_CLIENT_ID;
+  const clientSecret = process.env.LINKEDIN_CLIENT_SECRET;
+  if (!clientId || !clientSecret) {
+    throw publishingError("LinkedIn token refresh requires configured client credentials.", "auth");
+  }
+  const response = await safeFetch("https://www.linkedin.com/oauth/v2/accessToken", fetchFn, {
+    fetchOptions: {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "refresh_token",
+        refresh_token: tokens.refresh_token,
+        client_id: clientId,
+        client_secret: clientSecret,
+      }),
+      signal: AbortSignal.timeout(15000),
+    },
+    requireHttps: true,
+    allowHosts: ["www.linkedin.com"],
+  });
+  if (!response.ok) {
+    if ([400, 401, 403].includes(response.status)) return requireReconnect(uid);
+    throw publishingError(
+      "LinkedIn token refresh temporarily failed.",
+      response.status === 429 ? "rate_limit" : "transient",
+      response.status
+    );
+  }
+  const refreshed = await response.json();
+  if (!refreshed.access_token) return requireReconnect(uid);
+  const now = new Date().toISOString();
+  const updated = { ...tokens, ...refreshed };
+  // Relative expires_in from the refresh response replaces any old absolute expiry.
+  delete updated.expires_at;
+  delete updated.expiresAt;
+  const encrypted = hasEncryption();
+  await db
+    .collection("users")
+    .doc(uid)
+    .collection("connections")
+    .doc("linkedin")
+    .set(
+      {
+        tokens: encrypted ? encryptToken(JSON.stringify(updated)) : updated,
+        hasEncryption: encrypted,
+        connected: true,
+        reauthRequired: false,
+        lastConnectionError: null,
+        tokensUpdatedAt: now,
+        updatedAt: now,
+        expiresAt: refreshed.expires_in
+          ? new Date(Date.now() + Number(refreshed.expires_in) * 1000).toISOString()
+          : null,
+      },
+      { merge: true }
+    );
+  return refreshed.access_token;
+}
 
 async function getUserLinkedInConnection(uid) {
   const snap = await db
@@ -34,7 +118,7 @@ async function getUserLinkedInConnection(uid) {
 /**
  * Get valid access token (with refresh if needed)
  */
-async function getValidAccessToken(uid) {
+async function getValidAccessToken(uid, { forceRefresh = false } = {}) {
   const connection = await getUserLinkedInConnection(uid);
   if (!connection || !connection.tokens) {
     console.warn(`[LinkedIn] No connection/tokens for ${uid}`);
@@ -48,30 +132,52 @@ async function getValidAccessToken(uid) {
     return tokens; // Return the raw string as the access token
   }
 
-  const now = Date.now();
-
-  // Check if token is still valid (LinkedIn tokens typically last 60 days)
-  if (tokens.expires_in && tokens.access_token) {
-    const expiresAt = (connection.updatedAt?._seconds || 0) * 1000 + tokens.expires_in * 1000;
-    if (now < expiresAt - 300000) {
-      // 5 min buffer
-      return tokens.access_token;
-    }
+  const expiresAt = accessTokenExpiresAt(connection, tokens);
+  if (forceRefresh || (Number.isFinite(expiresAt) && Date.now() >= expiresAt - 300000)) {
+    return refreshAccessToken(uid, connection);
   }
-
-  // LinkedIn doesn't support refresh tokens in the same way as Twitter
-  // Tokens last 60 days, so if expired, user needs to re-authenticate
   return tokens.access_token;
+}
+
+// Retry a rejected credential once when LinkedIn supplied a refresh token.
+// Other provider failures retain their HTTP status for the queue retry policy.
+async function linkedInFetch(uid, url, options) {
+  const response = await safeFetch(url, fetchFn, options);
+  if (response.status !== 401) return response;
+  const token = await getValidAccessToken(uid, { forceRefresh: true });
+  const retried = await safeFetch(url, fetchFn, {
+    ...options,
+    fetchOptions: {
+      ...options.fetchOptions,
+      headers: { ...options.fetchOptions.headers, Authorization: `Bearer ${token}` },
+    },
+  });
+  if (retried.status === 401) return requireReconnect(uid);
+  return retried;
+}
+
+function providerError(message, response) {
+  return publishingError(
+    message,
+    [401, 403].includes(response.status)
+      ? "auth"
+      : response.status === 429
+        ? "rate_limit"
+        : response.status >= 500
+          ? "transient"
+          : "validation",
+    response.status
+  );
 }
 
 /**
  * Get LinkedIn user profile (person URN)
  */
-async function getUserProfile(accessToken) {
+async function getUserProfile(accessToken, uid) {
   if (!fetchFn) throw new Error("Fetch not available");
 
   // Try v2/me (Classic / r_liteprofile)
-  const response = await safeFetch("https://api.linkedin.com/v2/me", fetchFn, {
+  const response = await linkedInFetch(uid, "https://api.linkedin.com/v2/me", {
     fetchOptions: {
       method: "GET",
       headers: {
@@ -92,7 +198,7 @@ async function getUserProfile(accessToken) {
   // New tokens often only have 'profile' scope which doesn't allow /v2/me
   if (response.status === 403) {
     try {
-      const oidcConn = await safeFetch("https://api.linkedin.com/v2/userinfo", fetchFn, {
+      const oidcConn = await linkedInFetch(uid, "https://api.linkedin.com/v2/userinfo", {
         fetchOptions: {
           method: "GET",
           headers: {
@@ -110,14 +216,16 @@ async function getUserProfile(accessToken) {
           return oidcProfile.sub; // OIDC subject ID matches person URN ID
         }
       }
+      if (!oidcConn.ok) throw providerError("LinkedIn profile lookup failed.", oidcConn);
     } catch (e) {
+      if (e.errorClass) throw e;
       console.warn("LinkedIn OIDC fallback failed:", e.message);
     }
   }
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`Failed to get LinkedIn profile: ${error}`);
+    throw providerError(`Failed to get LinkedIn profile: ${error}`, response);
   }
 
   const profile = await response.json();
@@ -131,12 +239,12 @@ async function uploadImage({ uid, imageUrl }) {
   const accessToken = await getValidAccessToken(uid);
   if (!accessToken) throw new Error("No valid LinkedIn access token");
 
-  const personId = await getUserProfile(accessToken);
+  const personId = await getUserProfile(accessToken, uid);
 
   // Step 1: Register upload
-  const registerResponse = await safeFetch(
+  const registerResponse = await linkedInFetch(
+    uid,
     "https://api.linkedin.com/v2/assets?action=registerUpload",
-    fetchFn,
     {
       fetchOptions: {
         method: "POST",
@@ -164,7 +272,7 @@ async function uploadImage({ uid, imageUrl }) {
   );
 
   if (!registerResponse.ok) {
-    throw new Error("Failed to register LinkedIn image upload");
+    throw providerError("Failed to register LinkedIn image upload", registerResponse);
   }
 
   const registerData = await registerResponse.json();
@@ -173,26 +281,13 @@ async function uploadImage({ uid, imageUrl }) {
       .uploadUrl;
   const asset = registerData.value.asset;
 
-  // Step 2: Download image
-  const imageResponse = await safeFetch(imageUrl, fetchFn, { requireHttps: true });
-  if (!imageResponse.ok) throw new Error("Failed to download image");
-  const imageBuffer =
-    typeof imageResponse.buffer === "function"
-      ? await imageResponse.buffer()
-      : Buffer.from(await imageResponse.arrayBuffer());
-
-  // Step 3: Upload image
-  const uploadResponse = await fetch(uploadUrl, {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: imageBuffer,
+  await streamLinkedInVideo({
+    videoUrl: imageUrl,
+    uploadUrl,
+    accessToken,
+    fetchImpl: fetchFn,
+    maxBytes: 20 * 1024 * 1024,
   });
-
-  if (!uploadResponse.ok) {
-    throw new Error("Failed to upload image to LinkedIn");
-  }
 
   return asset; // Return asset URN
 }
@@ -204,12 +299,12 @@ async function uploadVideo({ uid, videoUrl }) {
   const accessToken = await getValidAccessToken(uid);
   if (!accessToken) throw new Error("No valid LinkedIn access token");
 
-  const personId = await getUserProfile(accessToken);
+  const personId = await getUserProfile(accessToken, uid);
 
   // Step 1: Register upload
-  const registerResponse = await safeFetch(
+  const registerResponse = await linkedInFetch(
+    uid,
     "https://api.linkedin.com/v2/assets?action=registerUpload",
-    fetchFn,
     {
       fetchOptions: {
         method: "POST",
@@ -238,7 +333,7 @@ async function uploadVideo({ uid, videoUrl }) {
 
   if (!registerResponse.ok) {
     const err = await registerResponse.text();
-    throw new Error(`Failed to register LinkedIn video upload: ${err}`);
+    throw providerError(`Failed to register LinkedIn video upload: ${err}`, registerResponse);
   }
 
   const registerData = await registerResponse.json();
@@ -247,29 +342,11 @@ async function uploadVideo({ uid, videoUrl }) {
       .uploadUrl;
   const asset = registerData.value.asset;
 
-  // Step 2: Download video stream
-  const videoResponse = await safeFetch(videoUrl, fetchFn, { requireHttps: true });
-  if (!videoResponse.ok) throw new Error("Failed to download video for upload");
+  // Steps 2–3: stream with backpressure instead of buffering the entire video.
+  await streamLinkedInVideo({ videoUrl, uploadUrl, accessToken, fetchImpl: fetchFn });
 
-  // Use buffer for compatibility
-  const videoBuffer =
-    typeof videoResponse.buffer === "function"
-      ? await videoResponse.buffer()
-      : Buffer.from(await videoResponse.arrayBuffer());
-
-  // Step 3: Upload video
-  const uploadResponse = await fetch(uploadUrl, {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/octet-stream",
-    },
-    body: videoBuffer,
-  });
-
-  if (!uploadResponse.ok) {
-    throw new Error("Failed to upload video bytes to LinkedIn");
-  }
+  // The read endpoint takes the opaque ID, not the digitalmediaAsset URN.
+  const assetId = String(asset).split(":").pop();
 
   // Step 4: Poll for completion
   return new Promise((resolve, reject) => {
@@ -280,24 +357,27 @@ async function uploadVideo({ uid, videoUrl }) {
     const poll = async () => {
       attempts++;
       try {
-        const statusRes = await safeFetch(`https://api.linkedin.com/v2/assets/${asset}`, fetchFn, {
-          fetchOptions: {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "X-Restli-Protocol-Version": "2.0.0",
+        const statusRes = await safeFetch(
+          `https://api.linkedin.com/v2/assets/${encodeURIComponent(assetId)}`,
+          fetchFn,
+          {
+            fetchOptions: {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "X-Restli-Protocol-Version": "2.0.0",
+              },
             },
-          },
-          requireHttps: true,
-          allowHosts: ["api.linkedin.com"],
-        });
+            requireHttps: true,
+            allowHosts: ["api.linkedin.com"],
+          }
+        );
 
         if (statusRes.ok) {
           const statusData = await statusRes.json();
           const state = statusData.recipes[0].status;
           if (state === "AVAILABLE") {
-            // Video is ready on LinkedIn, delete source file
-            cleanupSourceFile(videoUrl).catch(() => {});
+            // Keep the source until the public post has a confirmed identity.
             resolve(asset);
             return;
           } else if (state === "CLIENT_ERROR" || state === "PROCESSING_FAILED") {
@@ -346,6 +426,8 @@ async function postToLinkedIn({
   hashtagString = "",
   companyId = null,
   personId: personIdParam = null,
+  submissionReceipt = null,
+  onSubmissionAccepted,
 }) {
   if (!uid) throw new Error("uid required");
 
@@ -388,7 +470,8 @@ async function postToLinkedIn({
   // we might want to ignore the link as an attachment and just put it in text.
   // But if we have NO media, we should definitely use the link as an attachment (Article).
 
-  if (!resolvedText && !useArticleUrl && !useImage && !useVideo) throw new Error("content required");
+  if (!resolvedText && !useArticleUrl && !useImage && !useVideo)
+    throw new Error("content required");
   if (!fetchFn) throw new Error("Fetch not available");
 
   const accessToken = await getValidAccessToken(uid);
@@ -396,11 +479,45 @@ async function postToLinkedIn({
 
   // Resolve posting identity from connected account by default.
   // companyId is optional and only used when explicitly provided and valid.
-  const resolvedPersonId = personIdParam || (await getUserProfile(accessToken));
+  const resolvedPersonId = personIdParam || (await getUserProfile(accessToken, uid));
   const hasExplicitOrgTarget = typeof companyId === "string" && /^\d+$/.test(companyId.trim());
   const authorUrn = hasExplicitOrgTarget
     ? `urn:li:organization:${companyId.trim()}`
     : `urn:li:person:${resolvedPersonId}`;
+  const binding = crypto
+    .createHash("sha256")
+    .update(
+      JSON.stringify({
+        authorUrn,
+        text: resolvedText,
+        hashtagString,
+        title: resolvedTitle,
+        video: useVideo || null,
+        image: useImage || null,
+        article: useArticleUrl || null,
+      })
+    )
+    .digest("hex");
+  if (submissionReceipt) {
+    if (submissionReceipt.platform !== "linkedin" || submissionReceipt.binding !== binding)
+      throw publishingError(
+        "The saved LinkedIn submission does not match this release.",
+        "validation"
+      );
+    if (submissionReceipt.shareId)
+      return {
+        success: true,
+        shareId: submissionReceipt.shareId,
+        url: `https://www.linkedin.com/feed/update/${submissionReceipt.shareId}`,
+        recovered: true,
+      };
+    // LinkedIn write-only access cannot resolve an ambiguous post after a
+    // process dies. Hold for review rather than blindly sending it twice.
+    throw publishingError(
+      "LinkedIn submission was interrupted. Check your profile before retrying.",
+      "publication_unconfirmed"
+    );
+  }
 
   // Build share payload
   const sharePayload = {
@@ -432,6 +549,7 @@ async function postToLinkedIn({
         },
       ];
     } catch (e) {
+      if (e.errorClass) throw e;
       throw new Error(`LinkedIn video upload failed: ${e.message}`);
     }
   }
@@ -448,6 +566,7 @@ async function postToLinkedIn({
         },
       ];
     } catch (e) {
+      if (e.errorClass) throw e;
       console.warn("[LinkedIn] Image upload failed, posting without image:", e.message);
     }
   }
@@ -470,8 +589,17 @@ async function postToLinkedIn({
     ];
   }
 
+  // Persist before crossing the public-post boundary. Uploads may be retried;
+  // an interrupted post submission must not silently create a second post.
+  const receipt = {
+    platform: "linkedin",
+    binding,
+    phase: "submitting",
+    submittedAt: new Date().toISOString(),
+  };
+  if (onSubmissionAccepted) await onSubmissionAccepted(receipt);
   // Post to LinkedIn
-  const response = await safeFetch("https://api.linkedin.com/v2/ugcPosts", fetchFn, {
+  const response = await linkedInFetch(uid, "https://api.linkedin.com/v2/ugcPosts", {
     fetchOptions: {
       method: "POST",
       headers: {
@@ -494,6 +622,10 @@ async function postToLinkedIn({
   }
 
   if (!response.ok) {
+    // An explicit provider rejection permits normal auth/backoff retry. A
+    // missing response leaves the durable submission marker for safe review.
+    if (onSubmissionAccepted && [400, 401, 403, 404, 422, 429].includes(response.status))
+      await onSubmissionAccepted(null);
     const errorMsg = responseData.message || responseData.error || "LinkedIn posting failed";
     const orgHint =
       hasExplicitOrgTarget && response.status === 403
@@ -508,13 +640,20 @@ async function postToLinkedIn({
       response: responseData,
     };
     console.error("[LinkedIn] Publish failed diagnostic:", JSON.stringify(diagnostic));
-    throw new Error(
-      `LinkedIn posting failed: ${errorMsg}.${orgHint} [status=${response.status} endpoint=/v2/ugcPosts]`
+    throw providerError(
+      `LinkedIn posting failed: ${errorMsg}.${orgHint} [status=${response.status} endpoint=/v2/ugcPosts]`,
+      response
     );
   }
 
-  const shareId = responseData.id;
+  const shareId = responseData.id || response.headers?.get?.("x-restli-id");
+  if (!shareId)
+    throw publishingError(
+      "LinkedIn accepted the request without a post ID. Check the profile before retrying to avoid a duplicate.",
+      "publication_unconfirmed"
+    );
   const shareUrl = `https://www.linkedin.com/feed/update/${shareId}`;
+  if (onSubmissionAccepted) await onSubmissionAccepted({ ...receipt, phase: "confirmed", shareId });
 
   // Store post info in Firestore if contentId provided
   if (contentId && shareId) {
@@ -562,7 +701,7 @@ async function getPostStats({ uid, shareId }) {
   if (!accessToken) throw new Error("No valid LinkedIn access token");
 
   // LinkedIn uses a different endpoint for analytics
-  const url = `https://api.linkedin.com/v2/socialActions/${encodeURIComponent(shareId)}/(likes,comments)`;
+  const url = `https://api.linkedin.com/rest/socialMetadata/${encodeURIComponent(shareId)}`;
 
   const response = await safeFetch(url, fetchFn, {
     fetchOptions: {
@@ -570,6 +709,7 @@ async function getPostStats({ uid, shareId }) {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "X-Restli-Protocol-Version": "2.0.0",
+        "LinkedIn-Version": process.env.LINKEDIN_ANALYTICS_VERSION || "202610",
       },
     },
     requireHttps: true,
@@ -577,15 +717,24 @@ async function getPostStats({ uid, shareId }) {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch LinkedIn post stats");
+    const error = await response.json().catch(() => ({}));
+    throw Object.assign(new Error(error.message || "Failed to fetch LinkedIn post statistics"), {
+      code: response.status === 403 ? "PERMISSION_DENIED" : "PROVIDER_REQUEST_FAILED",
+      status: response.status,
+    });
   }
 
   const data = await response.json();
 
   return {
     shareId,
-    likes: data.likes?.paging?.total || 0,
-    comments: data.comments?.paging?.total || 0,
+    likes: Object.values(data.reactionSummaries || {}).length
+      ? Object.values(data.reactionSummaries).reduce(
+          (sum, reaction) => sum + (reaction.count || 0),
+          0
+        )
+      : null,
+    comments: typeof data.commentSummary?.count === "number" ? data.commentSummary.count : null,
     fetchedAt: new Date().toISOString(),
   };
 }

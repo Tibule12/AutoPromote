@@ -1,0 +1,8 @@
+{
+  "candidateSource": "def multicam_card_canvas_filter(input_label, width, height, output_label, blur=24):\n    \"\"\"Build a solid true-black surface behind premium rounded video cards.\"\"\"\n    return (\n        # The surface is deliberately solid black. Preserve the source's frame\n        # format/colour metadata, but build it once rather than scaling an\n        # entire moving stream only to paint every pixel black on every frame.\n        f\"[{input_label}]trim=end_frame=1,scale=2:2:flags=neighbor,\"\n        \"drawbox=x=0:y=0:w=iw:h=ih:color=black:t=fill,\"\n        f\"scale={width}:{height}:flags=neighbor,\"\n        \"loop=loop=-1:size=1:start=0,setpts=N/(30*TB),\"\n        f\"setsar=1[{output_label}]\"\n    )\n",
+  "retainedProductionSource": "def multicam_card_canvas_filter(input_label, width, height, output_label, blur=24):\n    \"\"\"Build a solid true-black surface behind premium rounded video cards.\"\"\"\n    return (\n        f\"[{input_label}]scale={width}:{height}:force_original_aspect_ratio=increase,\"\n        f\"crop={width}:{height},\"\n        \"drawbox=x=0:y=0:w=iw:h=ih:color=black:t=fill,\"\n        f\"setsar=1[{output_label}]\"\n    )\n",
+  "pixelTestsPassed": true,
+  "promotion": "rejected: matched full-source workload did not show a runtime saving; retain the simpler existing compositor",
+  "candidateFullWorkflowSeconds": 230.135,
+  "retainedFullWorkflowSeconds": 215.905
+}

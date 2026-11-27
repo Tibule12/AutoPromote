@@ -1,0 +1,213 @@
+{
+  "currency": "USD",
+  "basis": "Mixed 30-day consumption and latest retained-footprint sensitivity; NOT an invoice, a fixed-cost total, or a production maximum.",
+  "rows": [
+    {
+      "service": "Render backend + diagnostic cron",
+      "quantity": 1,
+      "unit": "reference month",
+      "rateUsd": 8,
+      "estimatedGrossUsd": 8,
+      "basis": "Historical $7 server line plus $1 cron minimum; current plan/replicas unverified",
+      "scope": "fixed-reference",
+      "actualInvoiceAttributedUsd": null
+    },
+    {
+      "service": "Firestore reads",
+      "quantity": 32255320,
+      "unit": "document",
+      "rateUsd": 3e-7,
+      "estimatedGrossUsd": 9.676596,
+      "basis": "Observed 30d total at us-central1 Standard price; before daily grants. Includes LOOKUP/QUERY/NOT_FOUND; no per-operation attribution",
+      "scope": "unallocated",
+      "actualInvoiceAttributedUsd": null
+    },
+    {
+      "service": "Firestore writes",
+      "quantity": 831804,
+      "unit": "document",
+      "rateUsd": 9e-7,
+      "estimatedGrossUsd": 0.748624,
+      "basis": "Observed 30d total, before daily grants; owner/operation split unavailable",
+      "scope": "unallocated",
+      "actualInvoiceAttributedUsd": null
+    },
+    {
+      "service": "Firestore deletes",
+      "quantity": 30881,
+      "unit": "document",
+      "rateUsd": 1e-7,
+      "estimatedGrossUsd": 0.003088,
+      "basis": "Observed 30d total, before daily grants",
+      "scope": "unallocated",
+      "actualInvoiceAttributedUsd": null
+    },
+    {
+      "service": "Firestore document + index storage",
+      "quantity": 3.375802065245807,
+      "unit": "GiB-month",
+      "rateUsd": 0.15,
+      "estimatedGrossUsd": 0.50637,
+      "basis": "Latest observed footprint held for 30 days; before 1 GiB grant. Not historical mean",
+      "scope": "retained-footprint",
+      "actualInvoiceAttributedUsd": null
+    },
+    {
+      "service": "Cloud Run autopromote-model-v1-segmentation",
+      "quantity": 679.1838458477632,
+      "unit": "observed billable instance-second",
+      "rateUsd": 0.00088522,
+      "estimatedGrossUsd": 0.601227,
+      "basis": "Observed 30d instance-time × CURRENT shape/reference rate; historical revisions/startup boost/minimum rounding and credits not attributed. Shared thulani services remain unallocated.",
+      "scope": "processing-or-service",
+      "actualInvoiceAttributedUsd": null
+    },
+    {
+      "service": "Cloud Run cam-combiner-render-fast-job",
+      "quantity": 60.17428230449948,
+      "unit": "observed billable instance-second",
+      "rateUsd": 0.000168,
+      "estimatedGrossUsd": 0.010109,
+      "basis": "Observed 30d instance-time × CURRENT shape/reference rate; historical revisions/startup boost/minimum rounding and credits not attributed. Shared thulani services remain unallocated.",
+      "scope": "processing-or-service",
+      "actualInvoiceAttributedUsd": null
+    },
+    {
+      "service": "Cloud Run cam-combiner-render-gpu-job",
+      "quantity": 232.45970929609217,
+      "unit": "observed billable instance-second",
+      "rateUsd": 0.00088522,
+      "estimatedGrossUsd": 0.205778,
+      "basis": "Observed 30d instance-time × CURRENT shape/reference rate; historical revisions/startup boost/minimum rounding and credits not attributed. Shared thulani services remain unallocated.",
+      "scope": "processing-or-service",
+      "actualInvoiceAttributedUsd": null
+    },
+    {
+      "service": "Cloud Run cam-combiner-worker",
+      "quantity": 160.56071830860952,
+      "unit": "observed billable instance-second",
+      "rateUsd": 0.000116,
+      "estimatedGrossUsd": 0.018625,
+      "basis": "Observed 30d instance-time × CURRENT shape/reference rate; historical revisions/startup boost/minimum rounding and credits not attributed. Shared thulani services remain unallocated.",
+      "scope": "processing-or-service",
+      "actualInvoiceAttributedUsd": null
+    },
+    {
+      "service": "Cloud Run media-worker-gpu",
+      "quantity": 19245.057065119865,
+      "unit": "observed billable instance-second",
+      "rateUsd": 0.00088522,
+      "estimatedGrossUsd": 17.036109,
+      "basis": "Observed 30d instance-time × CURRENT shape/reference rate; historical revisions/startup boost/minimum rounding and credits not attributed. Shared thulani services remain unallocated.",
+      "scope": "processing-or-service",
+      "actualInvoiceAttributedUsd": null
+    },
+    {
+      "service": "Cloud Run media-worker-v1",
+      "quantity": 3074.7969371332642,
+      "unit": "observed billable instance-second",
+      "rateUsd": 0.000116,
+      "estimatedGrossUsd": 0.356676,
+      "basis": "Observed 30d instance-time × CURRENT shape/reference rate; historical revisions/startup boost/minimum rounding and credits not attributed. Shared thulani services remain unallocated.",
+      "scope": "processing-or-service",
+      "actualInvoiceAttributedUsd": null
+    },
+    {
+      "service": "Cloud Run thulani-api",
+      "quantity": 0,
+      "unit": "observed billable instance-second",
+      "rateUsd": 0.00002525,
+      "estimatedGrossUsd": 0,
+      "basis": "Observed 30d instance-time × CURRENT shape/reference rate; historical revisions/startup boost/minimum rounding and credits not attributed. Shared thulani services remain unallocated.",
+      "scope": "shared-unallocated",
+      "actualInvoiceAttributedUsd": null
+    },
+    {
+      "service": "Cloud Run thulani-frontend",
+      "quantity": 58.46597854362605,
+      "unit": "observed billable instance-second",
+      "rateUsd": 0.00002525,
+      "estimatedGrossUsd": 0.001476,
+      "basis": "Observed 30d instance-time × CURRENT shape/reference rate; historical revisions/startup boost/minimum rounding and credits not attributed. Shared thulani services remain unallocated.",
+      "scope": "shared-unallocated",
+      "actualInvoiceAttributedUsd": null
+    },
+    {
+      "service": "Cloud Run thulani-worker",
+      "quantity": 8.8,
+      "unit": "observed billable instance-second",
+      "rateUsd": 0.00002525,
+      "estimatedGrossUsd": 0.000222,
+      "basis": "Observed 30d instance-time × CURRENT shape/reference rate; historical revisions/startup boost/minimum rounding and credits not attributed. Shared thulani services remain unallocated.",
+      "scope": "shared-unallocated",
+      "actualInvoiceAttributedUsd": null
+    },
+    {
+      "service": "Artifact Registry current repositories",
+      "quantity": 160.08113153465092,
+      "unit": "GiB-month",
+      "rateUsd": 0.1,
+      "estimatedGrossUsd": 16.008113,
+      "basis": "Current API repository size held 30 days, before account 0.5 GiB grant. Older Monitoring disagrees; not historical bill. Includes shared thulani-repo.",
+      "scope": "retained-footprint",
+      "actualInvoiceAttributedUsd": null
+    },
+    {
+      "service": "GCS retained current footprint",
+      "quantity": 53.72846002038568,
+      "unit": "GiB-month",
+      "rateUsd": 0.02,
+      "estimatedGrossUsd": 1.074569,
+      "basis": "Latest gauges held 30 days at regional Standard reference; bucket classes/soft-deleted bytes/credits require reconciliation",
+      "scope": "retained-footprint",
+      "actualInvoiceAttributedUsd": null
+    },
+    {
+      "service": "Functions invocations",
+      "quantity": 1984647,
+      "unit": "invocation",
+      "rateUsd": 4.0000000000000003e-7,
+      "estimatedGrossUsd": 0.793859,
+      "basis": "Gross reference only; first 2M may be covered by shared grants. Execution compute/network not inferred from invocation count.",
+      "scope": "unallocated",
+      "actualInvoiceAttributedUsd": null
+    },
+    {
+      "service": "Cloud Build known execution intervals",
+      "quantity": 12.754699999999998,
+      "unit": "build-minute",
+      "rateUsd": 0.0156,
+      "estimatedGrossUsd": 0.198973,
+      "basis": "E2_HIGHCPU_8 sensitivity for observed started builds; one default machine and cancelled/no-start interval cannot be priced exactly. No queued time included.",
+      "scope": "development-overhead",
+      "actualInvoiceAttributedUsd": null
+    },
+    {
+      "service": "Firebase Hosting transfer",
+      "quantity": 0.496379897,
+      "unit": "GB",
+      "rateUsd": 0.15,
+      "estimatedGrossUsd": 0.074457,
+      "basis": "November MTD domain transfer before daily quota; not extrapolated to full month. Static Hosting, not App Hosting.",
+      "scope": "control-plane",
+      "actualInvoiceAttributedUsd": null
+    }
+  ],
+  "estimatedGrossSubtotalUsd": 55.314871,
+  "gcsTransferSensitivityUsd": {
+    "minimum": 0,
+    "allObservedBytesInternetReference": 3.857613
+  },
+  "firestorePossibleDailyGrantUsd": 1.05,
+  "unpriced": [
+    "current Render replicas/workspace/disks/bandwidth/build overage",
+    "Functions billed compute/100ms rounding and outbound transfer",
+    "GCS class A/B operations and location/destination-specific egress",
+    "email, external AI consumed credits, PayPal fees/FX/chargebacks",
+    "domain renewal, paid Sentry/custom Monitoring, Data Connect/Secret Manager/App Check/Persona/X API",
+    "historical registry footprint discrepancy and credits/taxes"
+  ],
+  "actualInvoiceAttributedTotalUsd": null,
+  "noProcessingTokenCostsAddedAgain": true,
+  "use": "Historical diagnostic reference separate from the population forecast. Never add this subtotal to the processing-token scenario: Cloud Run/media/GCS/job DB are already represented there."
+}

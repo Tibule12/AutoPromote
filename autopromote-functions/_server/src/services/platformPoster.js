@@ -369,13 +369,32 @@ const handlers = {
   telegram: postToTelegram,
 };
 
-async function dispatchPlatformPost({ platform, contentId, payload, reason, uid }) {
+async function dispatchPlatformPost({
+  platform,
+  contentId,
+  payload = {},
+  reason,
+  uid,
+  submissionReceipt,
+  onSubmissionAccepted,
+}) {
+  require("./processingTokens/runtime").assertDispatch();
   console.log(
     `[PlatformPoster] 🚀 Dispatching post to ${platform} for content ${contentId}. Reason: ${reason}`
   );
+  // Approved Team releases keep the reviewed copy/settings. Automatic hashtag
+  // generation or client task payloads cannot rewrite an approved release.
+  const teamContent = contentId?.startsWith("team_")
+    ? await require("./teamWorkspaceRuntime").prepareTeamDispatch(
+        contentId,
+        platform,
+        payload.scheduleId
+      )
+    : null;
+  if (teamContent) payload = teamContent;
   // If no hashtagString provided and we have a contentId, generate platform
   // specific hashtags automatically so posting flows can include them.
-  if (!payload.hashtagString && !payload.hashtags && contentId) {
+  if (!teamContent && !payload.hashtagString && !payload.hashtags && contentId) {
     try {
       const contentSnap = await db.collection("content").doc(contentId).get();
       const content = contentSnap.exists ? contentSnap.data() : {};
@@ -492,12 +511,22 @@ async function dispatchPlatformPost({ platform, contentId, payload, reason, uid 
   }
 
   // Execute handler with logging wrapper
+  if (["telegram", "discord"].includes(platform)) {
+    baseArgs.uid = uid;
+    baseArgs.contentId = contentId;
+  }
+  if (["reddit", "telegram", "discord", "linkedin"].includes(platform)) {
+    baseArgs.submissionReceipt = submissionReceipt;
+    baseArgs.onSubmissionAccepted = onSubmissionAccepted;
+  }
   try {
     const start = Date.now();
     const result = await handler(baseArgs);
     const took = Date.now() - start;
 
-    if (result && result.success) {
+    if (result?.pending) {
+      console.log(`[PlatformPoster] Submission accepted for ${platform}; verifying publication.`);
+    } else if (result && result.success) {
       console.log(
         `[PlatformPoster] ✅ Upload SUCCESS for ${platform} (took ${took}ms). PostID: ${
           result.postId || result.id || "N/A"

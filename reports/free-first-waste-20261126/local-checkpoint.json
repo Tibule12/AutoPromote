@@ -1,0 +1,12 @@
+{
+  "scope": "Owned isolated local demo only; no production resource changes",
+  "privateLocation": "/home/tibule12/.cache/autopromote-free-first-20261126/waste-final-checkpoint",
+  "authUsers": 2,
+  "documentCount": 4,
+  "authSnapshot": true,
+  "firestoreNativeSnapshot": true,
+  "storageSnapshot": true,
+  "signedWorkerIdle": true,
+  "completeOriginalReplayQualified": false,
+  "creativeJobsStartedThisBrowserReview": 0
+}

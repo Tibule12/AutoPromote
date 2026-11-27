@@ -1,0 +1,244 @@
+{
+  "capturedAtUtc": "2026-11-26T18:41:53.047406+00:00",
+  "methods": [
+    "GET"
+  ],
+  "productionWrites": 0,
+  "requests": {
+    "repositoriesUs": {
+      "status": 200,
+      "truncated": false
+    },
+    "repositoriesCentral": {
+      "status": 200,
+      "truncated": false
+    },
+    "runJobsCentral": {
+      "status": 200,
+      "truncated": false
+    },
+    "firestoreStorageDescriptors": {
+      "status": 200,
+      "truncated": false
+    },
+    "sqlInstances": {
+      "status": 200,
+      "truncated": false
+    },
+    "dataConnectServices": {
+      "status": 200,
+      "truncated": false
+    },
+    "secretsMetadata": {
+      "status": 200,
+      "truncated": false
+    }
+  },
+  "repositories": [
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io",
+      "format": "DOCKER",
+      "sizeBytes": "158206817863"
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/repositories/cloud-run-source-deploy",
+      "format": "DOCKER"
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/repositories/gcf-artifacts",
+      "format": "DOCKER"
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo",
+      "format": "DOCKER",
+      "sizeBytes": "13678988299",
+      "cleanupPolicyDryRun": true
+    }
+  ],
+  "runJobs": [
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/cam-combiner-render-gpu-job",
+      "taskTemplate": {
+        "maxRetries": 0,
+        "timeout": "14400s",
+        "nodeSelector": {
+          "accelerator": "nvidia-rtx-pro-6000"
+        }
+      },
+      "resources": [
+        {
+          "limits": {
+            "cpu": "20",
+            "nvidia.com/gpu": "1",
+            "memory": "80Gi"
+          }
+        }
+      ]
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/autopromote-model-v1-tracking-cpu",
+      "taskTemplate": {
+        "maxRetries": 0,
+        "timeout": "120s"
+      },
+      "resources": [
+        {
+          "limits": {
+            "cpu": "2",
+            "memory": "2Gi"
+          }
+        }
+      ]
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/autopromote-model-v1-video",
+      "taskTemplate": {
+        "maxRetries": 0,
+        "timeout": "3300s",
+        "nodeSelector": {
+          "accelerator": "nvidia-rtx-pro-6000"
+        }
+      },
+      "resources": [
+        {
+          "limits": {
+            "cpu": "20",
+            "nvidia.com/gpu": "1",
+            "memory": "80Gi"
+          }
+        }
+      ]
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/autopromote-model-v1-segmentation",
+      "taskTemplate": {
+        "maxRetries": 0,
+        "timeout": "600s",
+        "nodeSelector": {
+          "accelerator": "nvidia-rtx-pro-6000"
+        }
+      },
+      "resources": [
+        {
+          "limits": {
+            "cpu": "20",
+            "nvidia.com/gpu": "1",
+            "memory": "80Gi"
+          }
+        }
+      ]
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/autopromote-model-v1-vision",
+      "taskTemplate": {
+        "maxRetries": 0,
+        "timeout": "600s",
+        "nodeSelector": {
+          "accelerator": "nvidia-rtx-pro-6000"
+        }
+      },
+      "resources": [
+        {
+          "limits": {
+            "cpu": "20",
+            "nvidia.com/gpu": "1",
+            "memory": "80Gi"
+          }
+        }
+      ]
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/viral-studio-rtx-qualification",
+      "taskTemplate": {
+        "maxRetries": 0,
+        "timeout": "300s",
+        "nodeSelector": {
+          "accelerator": "nvidia-rtx-pro-6000"
+        }
+      },
+      "resources": [
+        {
+          "limits": {
+            "cpu": "20",
+            "nvidia.com/gpu": "1",
+            "memory": "80Gi"
+          }
+        }
+      ]
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/cam-combiner-render-fast-job",
+      "taskTemplate": {
+        "maxRetries": 0,
+        "timeout": "14400s"
+      },
+      "resources": [
+        {
+          "limits": {
+            "cpu": "8",
+            "memory": "12Gi"
+          }
+        }
+      ]
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/cam-combiner-render-job",
+      "taskTemplate": {
+        "maxRetries": 0,
+        "timeout": "14400s"
+      },
+      "resources": [
+        {
+          "limits": {
+            "cpu": "8",
+            "memory": "12Gi"
+          }
+        }
+      ]
+    }
+  ],
+  "sqlInstances": [],
+  "dataConnectServices": [
+    "projects/autopromote-cc6d3/locations/us-central1/services/autopromote"
+  ],
+  "secretResourceCount": 3,
+  "renderCredentialMetadataPresent": false,
+  "firestoreStorageMetrics": [
+    {
+      "type": "firestore.googleapis.com/storage/backups_storage_bytes",
+      "unit": "By",
+      "metricKind": "GAUGE",
+      "description": "Per database total backup storage size(in bytes)."
+    },
+    {
+      "type": "firestore.googleapis.com/storage/data_and_index_storage_bytes",
+      "unit": "By",
+      "metricKind": "GAUGE",
+      "description": "Per database data and index storage size(in bytes)."
+    },
+    {
+      "type": "firestore.googleapis.com/storage/pitr_storage_bytes",
+      "unit": "By",
+      "metricKind": "GAUGE",
+      "description": "Per database point in time recovery storage size(in bytes)."
+    }
+  ],
+  "gpuServiceShape": [
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/services/media-worker-gpu",
+      "nodeSelector": {
+        "accelerator": "nvidia-rtx-pro-6000"
+      },
+      "resources": [
+        {
+          "limits": {
+            "cpu": "20",
+            "memory": "80Gi",
+            "nvidia.com/gpu": "1"
+          },
+          "startupCpuBoost": true
+        }
+      ]
+    }
+  ]
+}

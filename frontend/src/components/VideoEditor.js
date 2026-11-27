@@ -2323,7 +2323,7 @@ function VideoEditor({
               <h3>Open Clip Studio</h3>
               <p>
                 Edit timing, overlays, captions, and export from one workspace. Studio access stays
-                included on paid plans, while heavier generations use credits only when you actually
+                available on Free and Plus, while heavier generations use credits only when you actually
                 run them.
               </p>
               <div className="studio-launch-badge-row">
@@ -2342,7 +2342,7 @@ function VideoEditor({
                 <strong>{totalCreditsAvailable ?? "..."}</strong> editing credits available
                 {billingDetailParts.length ? ` (${billingDetailParts.join(" + ")})` : ""}.
                 Credit-based runs draw from included monthly credits first, then top-up credits.
-                Included editing tools stay available on paid plans.
+                Included editing tools stay available on Free and Plus.
               </div>
               {!desktopToolsAvailable ? (
                 <div className="studio-launch-desktop-note">
@@ -2402,7 +2402,7 @@ function VideoEditor({
           <div className="video-actions">
             {!hideCreationWorkflows && (
               <div className="video-actions-note">
-                Cam Combiner and Flow Edit stay included on paid plans. Save your
+                Cam Combiner and Flow Edit stay available on Free and Plus. Save your
                 credits for analysis, promo generation, and final rendering.
               </div>
             )}

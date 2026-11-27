@@ -1,0 +1,1972 @@
+{
+  "samples": {
+    "firestore": {
+      "entries": [
+        {
+          "timestamp": "2026-11-26T19:30:03.919423Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:30:03.609557Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:29:54.303102Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:29:41.240314Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:29:39.104311Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:29:35.880291Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Commit",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:29:35.802028Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.BatchGetDocuments",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:29:35.543253Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:29:20.460125Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:28:53.743863Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:28:50.871081Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Commit",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:28:50.799605Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.BatchGetDocuments",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:28:47.877487Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:28:28.143752Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:28:18.997341Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:28:05.868167Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Commit",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:28:05.793175Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.BatchGetDocuments",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:27:53.154136Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:27:52.213736Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:27:20.886116Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Commit",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:27:20.792175Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.BatchGetDocuments",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:27:17.774233Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:27:17.624349Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:27:11.375222Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:27:10.417956Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:27:07.992029Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:26:42.653415Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:26:40.055950Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:26:35.863920Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Commit",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:26:35.784080Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.BatchGetDocuments",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:26:34.973677Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:26:34.716711Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:26:19.928227Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:26:19.716864Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:50.882710Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Commit",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:50.810134Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.BatchGetDocuments",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:36.206336Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:32.887119Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.Listen",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe),gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.937425Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.634688Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.566117Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.565450Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.565121Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.510801Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.446599Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.445551Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.443969Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.394543Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.329239Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.329128Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.328843Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.277586Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.215064Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.213282Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.213197Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.163938Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.099148Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.098042Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.097573Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:18.049649Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.982670Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.982223Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.979363Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.933059Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.867743Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.866510Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.865243Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.818346Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.749904Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.748820Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.747717Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.700618Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.633116Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.631592Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.631312Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.583139Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.517139Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.516366Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.512460Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.466679Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.403858Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.401380Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.400789Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.354951Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.289817Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.289432Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.288661Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.241073Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.171124Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.170640Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.170052Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.121758Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.054385Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.054180Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.053012Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:17.003319Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:16.938557Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:16.937904Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:16.937287Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:25:16.889349Z",
+          "resource": "audited_resource",
+          "function": null,
+          "method": "google.firestore.v1.Firestore.RunQuery",
+          "principalHash": "703daf01810e42ab",
+          "agent": "grpc-node-js/1.14.5,gzip(gfe)",
+          "category": "other"
+        }
+      ],
+      "truncated": true
+    },
+    "contentTriggers": {
+      "entries": [
+        {
+          "timestamp": "2026-11-26T19:24:54.101265995Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.100674Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "intent not newly set"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.100662Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.100661Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.100659Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.100656Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.100649Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "LandingPageIntent"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.097814057Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.077967039Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.076329Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "intent not newly set"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.076314Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.076311Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.076309Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.076306Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.076297Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "SmartLinkIntent"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.075018975Z",
+          "resource": "cloud_function",
+          "function": "createPromotionOnApproval",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.074595653Z",
+          "resource": "cloud_function",
+          "function": "autoRewardCreators",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.074471Z",
+          "resource": "cloud_function",
+          "function": "createPromotionOnApproval",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "Status did not change to approved"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.074461Z",
+          "resource": "cloud_function",
+          "function": "createPromotionOnApproval",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.074452Z",
+          "resource": "cloud_function",
+          "function": "createPromotionOnApproval",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "triggered for contentId"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.072260531Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.071898906Z",
+          "resource": "cloud_function",
+          "function": "createPromotionOnApproval",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:54.071059498Z",
+          "resource": "cloud_function",
+          "function": "autoRewardCreators",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.861660169Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.861020Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "intent not newly set"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.861007Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.861005Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.861002Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.861Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.860991Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "LandingPageIntent"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.859733891Z",
+          "resource": "cloud_function",
+          "function": "autoRewardCreators",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.858377760Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.857308652Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.856194Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "intent not newly set"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.856178Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.856175Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.856173Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.856170Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.856160Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "SmartLinkIntent"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.855485741Z",
+          "resource": "cloud_function",
+          "function": "autoRewardCreators",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.855395441Z",
+          "resource": "cloud_function",
+          "function": "createPromotionOnApproval",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.854895Z",
+          "resource": "cloud_function",
+          "function": "createPromotionOnApproval",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "Status did not change to approved"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.854862Z",
+          "resource": "cloud_function",
+          "function": "createPromotionOnApproval",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.854852Z",
+          "resource": "cloud_function",
+          "function": "createPromotionOnApproval",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "triggered for contentId"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.852968466Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.852810861Z",
+          "resource": "cloud_function",
+          "function": "createPromotionOnApproval",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.697816465Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.696033Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "intent not newly set"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.695907Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.695905Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.695901Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.695898Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.695888Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "SmartLinkIntent"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.691677902Z",
+          "resource": "cloud_function",
+          "function": "createPromotionOnApproval",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.691143Z",
+          "resource": "cloud_function",
+          "function": "createPromotionOnApproval",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "Status did not change to approved"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.691129Z",
+          "resource": "cloud_function",
+          "function": "createPromotionOnApproval",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.691116Z",
+          "resource": "cloud_function",
+          "function": "createPromotionOnApproval",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "triggered for contentId"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.690313037Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.688647162Z",
+          "resource": "cloud_function",
+          "function": "createPromotionOnApproval",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.683522264Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.682815Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "intent not newly set"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.682804Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.682802Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.682801Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.682798Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.682789Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "LandingPageIntent"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.679601296Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.677047735Z",
+          "resource": "cloud_function",
+          "function": "autoRewardCreators",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.673137311Z",
+          "resource": "cloud_function",
+          "function": "autoRewardCreators",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.459956640Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.458887Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "intent not newly set"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.458871Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.458869Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.458867Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.458864Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.458854Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "SmartLinkIntent"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.455315288Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.454626660Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.454407Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "intent not newly set"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.454394Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.454392Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.454391Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.454389Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.454379Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "LandingPageIntent"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.453164166Z",
+          "resource": "cloud_function",
+          "function": "autoRewardCreators",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.451670056Z",
+          "resource": "cloud_function",
+          "function": "handleLandingPageIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.449299783Z",
+          "resource": "cloud_function",
+          "function": "autoRewardCreators",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.448002779Z",
+          "resource": "cloud_function",
+          "function": "createPromotionOnApproval",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.447385Z",
+          "resource": "cloud_function",
+          "function": "createPromotionOnApproval",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "Status did not change to approved"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.447363Z",
+          "resource": "cloud_function",
+          "function": "createPromotionOnApproval",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.447352Z",
+          "resource": "cloud_function",
+          "function": "createPromotionOnApproval",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "triggered for contentId"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.444749679Z",
+          "resource": "cloud_function",
+          "function": "createPromotionOnApproval",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.256182353Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.255372Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "intent not newly set"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.255345Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.255343Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.255341Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.255338Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.255329Z",
+          "resource": "cloud_function",
+          "function": "handleSmartLinkIntent",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "SmartLinkIntent"
+        },
+        {
+          "timestamp": "2026-11-26T19:24:53.254661408Z",
+          "resource": "cloud_function",
+          "function": "autoRewardCreators",
+          "method": null,
+          "principalHash": null,
+          "agent": "",
+          "category": "other"
+        }
+      ],
+      "truncated": true
+    }
+  },
+  "requests": [
+    {
+      "label": "services",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "jobs",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "functions",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "revisions-media-worker-gpu",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "revisions-cam-combiner-worker",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "revisions-thulani-worker",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "revisions-thulani-frontend",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "revisions-thulani-api",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "revisions-media-worker-v1",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": true
+    },
+    {
+      "label": "executions-cam-combiner-render-gpu-job",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "executions-autopromote-model-v1-tracking-cpu",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "executions-autopromote-model-v1-video",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "executions-autopromote-model-v1-segmentation",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "executions-autopromote-model-v1-vision",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "executions-viral-studio-rtx-qualification",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "executions-cam-combiner-render-fast-job",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "executions-cam-combiner-render-job",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "repositories-us",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "repositories-us-central1",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "images-0-0",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "images-1-0",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "images-2-0",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "images-3-0",
+      "httpStatus": 200,
+      "method": "GET",
+      "truncated": false
+    },
+    {
+      "label": "logs-firestore",
+      "httpStatus": 200,
+      "method": "POST (read entries:list)",
+      "truncated": true
+    },
+    {
+      "label": "logs-contentTriggers",
+      "httpStatus": 200,
+      "method": "POST (read entries:list)",
+      "truncated": true
+    }
+  ],
+  "productionWrites": 0,
+  "limitations": [
+    "Bounded log samples are not complete read/endpoint attribution.",
+    "Missing Data Access entries may reflect disabled logging/permissions; do not enable paid logging here.",
+    "Client/browser listeners and Render requests are not necessarily identifiable in Admin SDK audit logs."
+  ]
+}

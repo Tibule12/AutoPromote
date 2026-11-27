@@ -1,0 +1,94 @@
+{
+  "periodStartUtc": "2026-11-01T00:00:00+00:00",
+  "periodEndUtc": "2026-11-26T18:49:41.090057+00:00",
+  "methods": [
+    "GET"
+  ],
+  "productionWrites": 0,
+  "metrics": {
+    "hostingTransferBytes": {
+      "httpStatus": 200,
+      "truncated": false,
+      "rows": [
+        {
+          "resource": {
+            "type": "firebase_domain",
+            "labels": {
+              "project_id": "autopromote-cc6d3",
+              "domain_name": "autopromote-cc6d3.firebaseapp.com",
+              "site_name": "autopromote-cc6d3"
+            }
+          },
+          "metricLabels": {},
+          "points": 24,
+          "observedSum": 306463676.0,
+          "latestValue": 83370344.0,
+          "latestSampleAtUtc": "2026-11-26T18:49:41.090057Z"
+        },
+        {
+          "resource": {
+            "type": "firebase_domain",
+            "labels": {
+              "domain_name": "autopromote-cc6d3.web.app",
+              "site_name": "autopromote-cc6d3",
+              "project_id": "autopromote-cc6d3"
+            }
+          },
+          "metricLabels": {},
+          "points": 25,
+          "observedSum": 189916221.0,
+          "latestValue": 44257299.0,
+          "latestSampleAtUtc": "2026-11-26T18:49:41.090057Z"
+        }
+      ]
+    },
+    "hostingStoredBytes": {
+      "httpStatus": 200,
+      "truncated": false,
+      "rows": [
+        {
+          "resource": {
+            "type": "firebase_domain",
+            "labels": {
+              "domain_name": "autopromote-cc6d3",
+              "site_name": "autopromote-cc6d3",
+              "project_id": "autopromote-cc6d3"
+            }
+          },
+          "metricLabels": {},
+          "points": 26,
+          "observedSum": null,
+          "latestValue": 148017532.0,
+          "latestSampleAtUtc": "2026-11-26T18:49:41.090057Z"
+        }
+      ]
+    },
+    "authNewMau": {
+      "httpStatus": 200,
+      "truncated": false,
+      "rows": [
+        {
+          "resource": {
+            "type": "identitytoolkit_project",
+            "labels": {
+              "project_id": "autopromote-cc6d3"
+            }
+          },
+          "metricLabels": {
+            "pricing_tier": "1",
+            "is_anon": "false"
+          },
+          "points": 4,
+          "observedSum": 7.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-24T18:49:41.090057Z"
+        }
+      ]
+    },
+    "authSmsSent": {
+      "httpStatus": 200,
+      "truncated": false,
+      "rows": []
+    }
+  }
+}

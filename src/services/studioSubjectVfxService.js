@@ -92,6 +92,7 @@ async function createSubjectVfxPreview({ ownerUid, scene: input, clientRequestId
   const requestRef = db()
     .collection("studio_subject_vfx_requests")
     .doc(hash(`${ownerUid}:${clientRequestId}`));
+  const workRef = db().collection("studio_subject_vfx_work").doc(hash(`${ownerUid}:${requestHash}`));
   if (executionKind === 'model_artifact_cpu') {
     // A closed browser may stop polling after the CPU job finishes. Reconcile
     // only this owner's lease through the normal receipt/ownership checks;
@@ -106,16 +107,30 @@ async function createSubjectVfxPreview({ ownerUid, scene: input, clientRequestId
   }
   const jobId = crypto.randomUUID();
   const result = await db().runTransaction(async tx => {
-    const [existing, capacity] = await Promise.all([tx.get(requestRef), tx.get(lease(executionKind))]);
+    const [existing, capacity, retained] = await Promise.all([
+      tx.get(requestRef), tx.get(lease(executionKind)), tx.get(workRef),
+    ]);
     if (existing.exists) {
       if (existing.data().requestHash !== requestHash)
         throw error(409, "This render request ID belongs to another edit.");
       return { jobId: existing.data().jobId, reused: true };
     }
+    if (retained.data()?.expiresAtMs > Date.now()) {
+      const previous = await tx.get(jobs().doc(retained.data().jobId));
+      const data = previous.data();
+      if (data?.ownerUid === ownerUid && data.requestHash === requestHash &&
+          data.expiresAtMs > Date.now() &&
+          ["queued", "processing", "dispatch_uncertain", "completed", "cancel_requested"].includes(data.status)) {
+        tx.create(requestRef, { ownerUid, requestHash, jobId: retained.data().jobId });
+        return { jobId: retained.data().jobId, reused: true };
+      }
+    }
+    require("./processingTokens/runtime").assertDispatch();
     const now = Date.now();
     if (capacity.data()?.expiresAtMs > now)
       throw error(429, executionKind==='model_artifact_cpu'?"Subject preview is processing another edit. Retry when it finishes.":"The NVIDIA renderer is working on another edit. Retry when it finishes.");
     tx.create(requestRef, { ownerUid, requestHash, jobId });
+    tx.set(workRef, { ownerUid, requestHash, jobId, expiresAtMs: now + 86400000 });
     tx.create(jobs().doc(jobId), {
       ownerUid,
       // Firestore does not support arrays inside arrays (prompt points are
@@ -132,10 +147,9 @@ async function createSubjectVfxPreview({ ownerUid, scene: input, clientRequestId
     tx.set(lease(executionKind), { jobId, ownerUid, expiresAtMs: now + 20 * 60000 });
     return { jobId, reused: false };
   });
-  if (result.reused) {
-    const previous = (await jobs().doc(result.jobId).get()).data();
-    if (["completed", "failed", "cancelled"].includes(previous?.status)) return result;
-  }
+  // An existing queued/running/uncertain request already owns a dispatch.
+  // Poll its original job; repeating its identity must never render again.
+  if (result.reused) return result;
   const dispatchedJobId = result.jobId;
   try {
     const [sourceUrl] = await sourceBucket

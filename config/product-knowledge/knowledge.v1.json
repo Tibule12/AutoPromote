@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.71",
+  "knowledge_version": "1.0.72",
   "product_version": "1.2.0",
   "release_channel": "development",
-  "updated_at": "2026-11-25",
+  "updated_at": "2026-11-26",
   "features": [
     {
       "feature_id": "studio.timeline",
@@ -45,7 +45,8 @@
       "render_behavior": "The shared composition plan carries group timing into the CPU compositor. The existing inverse programme clock gates the group\u2019s assembled output at the same In/Out range. Source clips, child animation and audio use their existing compilation paths.",
       "limitations": [
         "This dated development snapshot does not establish professional or production readiness.",
-        "One real 20-second footage/title/music/SFX project exercises group pointer move, trim, opacity keys, locks, group deletion/undo, source split/history and exact cold reopen. Broader source-occurrence attachment/reordering, group split/duplicate, nested audio/video/owned 3D timing and continuous/full picture/sound remain unqualified. Group trim preserves hidden keys and source phase; it does not retime/stretch child content."
+        "One real 20-second footage/title/music/SFX project exercises group pointer move, trim, opacity keys, locks, group deletion/undo, source split/history and exact cold reopen. Broader source-occurrence attachment/reordering, group split/duplicate, nested audio/video/owned 3D timing and continuous/full picture/sound remain unqualified. Group trim preserves hidden keys and source phase; it does not retime/stretch child content.",
+        "Free-first development migration: Free and Plus share creative tools and all six destinations. Supported local editing uses no cloud processing tokens. Cloud admission, reset and rolling capacity are enforced only through configured bounded adapters; production rollout and final pricing remain pending. Existing subscriptions and purchased credits are retained."
       ],
       "common_errors": [
         {
@@ -71,7 +72,7 @@
       },
       "review_state": "SOURCE_AUDITED",
       "status": "PARTIAL",
-      "updated_at": "2026-11-05",
+      "updated_at": "2026-11-26",
       "product_version": "1.2.0",
       "visibility": "PUBLIC",
       "source_evidence": [
@@ -3381,7 +3382,9 @@
       "limitations": [
         "The timing result is one production project, not a capacity or completion-time guarantee. Actual concurrent-user throughput, forced GPU-to-CPU failover, cold starts and host loss remain separate.",
         "This dated development snapshot does not establish professional or production readiness.",
-        "The 15 October programme-clock repair removes an erroneous black fade over dim footage. A20s CPU export completes in244.079s with all480 decoded picture frames unchanged; full colour/raster/live sound remains unqualified."
+        "The 15 October programme-clock repair removes an erroneous black fade over dim footage. A20s CPU export completes in244.079s with all480 decoded picture frames unchanged; full colour/raster/live sound remains unqualified.",
+        "Free-first development migration: Free and Plus share creative tools and all six destinations. Supported local editing uses no cloud processing tokens. Cloud admission, reset and rolling capacity are enforced only through configured bounded adapters; production rollout and final pricing remain pending. Existing subscriptions and purchased credits are retained.",
+        "26 November local qualification includes a real signed-in 60-second title/edit/save/reopen/export and complete finished playback. Local measurements and whole-environment reference estimates do not approve final allowances, price, production dispatch, independent multicam, all effects/background/3D combinations or external publication."
       ],
       "common_errors": [
         {
@@ -3476,7 +3479,7 @@
       },
       "review_state": "SOURCE_AUDITED",
       "status": "FUNCTIONAL",
-      "updated_at": "2026-11-22",
+      "updated_at": "2026-11-26",
       "product_version": "1.2.0",
       "visibility": "PUBLIC",
       "source_evidence": [
@@ -3513,6 +3516,11 @@
         {
           "path": "reports/studio-render-throughput-20261122/release-verification.json",
           "anchor": "\"byteIdenticalToPreviousProduction\"",
+          "kind": "NATIVE_REPORT"
+        },
+        {
+          "path": "reports/free-first-optimization-20261126/README.md",
+          "anchor": "Completed outputs and measured resources",
           "kind": "NATIVE_REPORT"
         }
       ]
@@ -3551,7 +3559,8 @@
         "Working local HEVC/PCM32 SDR-to-HDR10 delivery fully decodes externally. The tested browser cannot decode its pictures; the download remains available. This is 100-nit SDR mapping, not a complete HDR grading pipeline.",
         "Main separately implements ProRes/MOV with PCM and explicit video bitrate. Implementation and retained evidence must be checked for the requested delivery combination.",
         "Match first source uses a constant output rate. Preservation of variable-rate timestamps remains a separate qualification.",
-        "All devices, delivery combinations, long-job recovery and whole predictive picture/audio parity are not qualified."
+        "All devices, delivery combinations, long-job recovery and whole predictive picture/audio parity are not qualified.",
+        "Free-first development migration: Free and Plus share creative tools and all six destinations. Supported local editing uses no cloud processing tokens. Cloud admission, reset and rolling capacity are enforced only through configured bounded adapters; production rollout and final pricing remain pending. Existing subscriptions and purchased credits are retained."
       ],
       "common_errors": [
         {
@@ -3584,7 +3593,7 @@
       },
       "review_state": "SOURCE_AUDITED",
       "status": "PARTIAL",
-      "updated_at": "2026-11-22",
+      "updated_at": "2026-11-26",
       "product_version": "1.2.0",
       "visibility": "PUBLIC",
       "source_evidence": [
@@ -7185,7 +7194,8 @@
       "limitations": [
         "Provider permissions, token health, account allowance and destination access apply.",
         "The current provider must verify the posting identity; a stored connection alone is insufficient.",
-        "Six-platform external delivery has not been qualified by the connection checks."
+        "Six-platform external delivery has not been qualified by the connection checks.",
+        "Free-first development migration: Free and Plus share creative tools and all six destinations. Supported local editing uses no cloud processing tokens. Cloud admission, reset and rolling capacity are enforced only through configured bounded adapters; production rollout and final pricing remain pending. Existing subscriptions and purchased credits are retained."
       ],
       "common_errors": [
         {
@@ -7201,7 +7211,7 @@
       "readiness_authority": null,
       "review_state": "SOURCE_AUDITED",
       "status": "PARTIAL",
-      "updated_at": "2026-10-17",
+      "updated_at": "2026-11-26",
       "product_version": "1.2.0",
       "visibility": "PUBLIC",
       "source_evidence": [
@@ -7273,7 +7283,8 @@
         "An upload acknowledgement does not prove every schedule was created.",
         "A pending schedule needs an operating scheduler and posting worker. Requested posts continue when the browser closes; empty queues avoid repeated scans. Only a successful provider result confirms publication.",
         "Fresh uploads and edited replacement files still require upload allowance. Reusing stored media for a schedule does not increase new-content upload capacity.",
-        "If this account has opted into 24-hour published-video retention, its owned publishing copies expire 24 hours after every intended destination confirms publication. Pending, paused, failed, recurring, shared or transforming work keeps its file. Expired copies are not selectable for a new schedule; upload the file again. Publication history remains."
+        "If this account has opted into 24-hour published-video retention, its owned publishing copies expire 24 hours after every intended destination confirms publication. Pending, paused, failed, recurring, shared or transforming work keeps its file. Expired copies are not selectable for a new schedule; upload the file again. Publication history remains.",
+        "Free-first development migration: Free and Plus share creative tools and all six destinations. Supported local editing uses no cloud processing tokens. Cloud admission, reset and rolling capacity are enforced only through configured bounded adapters; production rollout and final pricing remain pending. Existing subscriptions and purchased credits are retained."
       ],
       "common_errors": [
         {
@@ -7289,7 +7300,7 @@
       "readiness_authority": null,
       "review_state": "SOURCE_AUDITED",
       "status": "PARTIAL",
-      "updated_at": "2026-11-17",
+      "updated_at": "2026-11-26",
       "product_version": "1.2.0",
       "visibility": "PUBLIC",
       "source_evidence": [
@@ -7444,7 +7455,8 @@
         "Own-business promotion and paid partnerships use different disclosures. Describe the actual relationship before selecting the platform fields.",
         "TikTok disclosure switches start off for a new post. Cuts, captions, colour correction and minor retouching alone do not require an AI label. Realistic AI-generated or significantly AI-altered media still needs the applicable disclosure.",
         "TikTok can apply additional labels automatically. AutoPromote cannot remove TikTok-applied AI labels or change an existing post's commercial label; provider rules still apply.",
-        "A created Reddit post can lack playable video. Publication requires a completed attachment and accessible media; a link or upload acknowledgement is insufficient."
+        "A created Reddit post can lack playable video. Publication requires a completed attachment and accessible media; a link or upload acknowledgement is insufficient.",
+        "Free-first development migration: Free and Plus share creative tools and all six destinations. Supported local editing uses no cloud processing tokens. Cloud admission, reset and rolling capacity are enforced only through configured bounded adapters; production rollout and final pricing remain pending. Existing subscriptions and purchased credits are retained."
       ],
       "common_errors": [
         {
@@ -7476,7 +7488,7 @@
       "readiness_authority": null,
       "review_state": "SOURCE_AUDITED",
       "status": "PARTIAL",
-      "updated_at": "2026-11-22",
+      "updated_at": "2026-11-26",
       "product_version": "1.2.0",
       "visibility": "PUBLIC",
       "source_evidence": [

@@ -1,0 +1,12 @@
+{
+  "headless": true,
+  "muted": true,
+  "mockedResponses": false,
+  "productionRequests": 0,
+  "checks": [
+    "ordinary emulator sign-in and Free allowance page",
+    "actual candidate Studio workspace opens retained 60s movie",
+    "real contextual-help response selects studio.captions"
+  ],
+  "errors": []
+}

@@ -33,7 +33,7 @@ async function fulfillPayment(paymentId, ipnData = {}) {
       const purchaseType = (meta && meta.type) || null;
 
       // Perform user credit updates inside transaction when possible
-      // UNIFICATION: Convert purchased $ amounts to "growth_credits" for Wolf Hunt
+      // UNIFICATION: Convert purchased $ amounts to legacy "growth_credits"
       if ((purchaseType === "ad_credits" || purchaseType === "strategy_credits") && meta.userId) {
         const userRef = db.collection("users").doc(String(meta.userId));
         const dollarAmount =
@@ -58,7 +58,7 @@ async function fulfillPayment(paymentId, ipnData = {}) {
                 {
                   adCredits: admin.firestore.FieldValue.increment(dollarAmount), // Legacy tracker ($)
                   strategyCredits: admin.firestore.FieldValue.increment(dollarAmount), // New tracker ($)
-                  growth_credits: admin.firestore.FieldValue.increment(creditAmount), // Wolf Hunt Currency
+                  growth_credits: admin.firestore.FieldValue.increment(creditAmount), // Legacy balance
                 },
                 { merge: true }
               );

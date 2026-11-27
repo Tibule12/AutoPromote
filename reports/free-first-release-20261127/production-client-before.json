@@ -1,0 +1,35 @@
+[
+  {
+    "origin": "https://autopromote.org",
+    "status": 200,
+    "server": "cloudflare",
+    "mainJs": [
+      "/static/js/main.3db16437.js"
+    ],
+    "title": [
+      "AutoPromote \u2014 AI Video Editing for Podcasts & Social Clips"
+    ]
+  },
+  {
+    "origin": "https://api.autopromote.org",
+    "status": 200,
+    "server": "cloudflare",
+    "mainJs": [
+      "/static/js/main.67f9bc12.js"
+    ],
+    "title": [
+      "AutoPromote \u2014 AI Video Editing for Podcasts & Social Clips"
+    ]
+  },
+  {
+    "origin": "https://autopromote.onrender.com",
+    "status": 200,
+    "server": "cloudflare",
+    "mainJs": [
+      "/static/js/main.67f9bc12.js"
+    ],
+    "title": [
+      "AutoPromote \u2014 AI Video Editing for Podcasts & Social Clips"
+    ]
+  }
+]

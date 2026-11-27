@@ -1,0 +1,19 @@
+{
+  "scope": "Real Firestore emulator; repeated complete retention scans. No production writes, object deletion or cloud processing.",
+  "measurements": {
+    "sixCycles": {
+      "before": {
+        "reads": 558,
+        "writes": 0,
+        "calls": 42
+      },
+      "after": {
+        "reads": 143,
+        "writes": 0,
+        "calls": 22
+      },
+      "avoidedReadPercent": 74.37275985663084,
+      "retainedContent": 8
+    }
+  }
+}

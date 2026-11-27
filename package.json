@@ -71,7 +71,9 @@
     "knowledge:test": "node --test test/product-knowledge/*.test.js",
     "knowledge:review": "node scripts/product-knowledge.js review",
     "assistance:test": "node --test test/product-assistance/*.test.js",
-    "test:security": "node --test test/security/*.test.js test/e2e/studio-worker-read-recovery.test.js"
+    "test:security": "node --test test/security/*.test.js test/e2e/studio-worker-read-recovery.test.js",
+    "test:free-first": "node scripts/test-free-first.cjs",
+    "free-first:economics": "node scripts/free-first-economics.cjs"
   },
   "engines": {
     "node": ">=20.18.1"

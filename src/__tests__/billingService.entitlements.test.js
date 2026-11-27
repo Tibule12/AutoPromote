@@ -90,7 +90,7 @@ describe("billingService entitlement enforcement", () => {
     expect(snapshot.tierId).toBe("free");
   });
 
-  it("grants Studio entitlements while Founding Tester access is active", async () => {
+  it("shares six destinations while retaining active Founding Tester resource grants", async () => {
     const snapshot = await getEffectiveTierSnapshot(
       "tester-1",
       { tier: "free", status: "inactive" },
@@ -110,7 +110,7 @@ describe("billingService entitlement enforcement", () => {
     expect(snapshot.accessSource).toBe("tester_program");
     expect(snapshot.status).toBe("promotional");
     expect(snapshot.tier.monthly_upload_cap).toBe(10);
-    expect(snapshot.tier.platform_limit).toBe(3);
+    expect(snapshot.tier.platform_limit).toBe(6);
   });
 
   it("removes Founding Tester entitlements after expiry", async () => {

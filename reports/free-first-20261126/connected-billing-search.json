@@ -1,0 +1,12 @@
+{
+  "provider": "connected Google Drive",
+  "queries": [
+    "AutoPromote billing",
+    "autopromote-cc6d3",
+    "AutoPromote invoice",
+    "Cloud billing export"
+  ],
+  "matchingResults": 0,
+  "filesModified": 0,
+  "conclusion": "No matching billing export found by these bounded searches; this is not proof no invoice exists elsewhere."
+}

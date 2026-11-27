@@ -1,0 +1,41 @@
+[
+  {
+    "name": "projects/autopromote-cc6d3/sites/autopromote-cc6d3",
+    "defaultUrl": "https://autopromote-cc6d3.web.app",
+    "domains": [],
+    "latestRelease": [
+      {
+        "name": "sites/autopromote-cc6d3/releases/1783857288901000",
+        "version": {
+          "name": "sites/autopromote-cc6d3/versions/784c84e5ed8b0fdc",
+          "status": "FINALIZED",
+          "config": {
+            "headers": [
+              {
+                "headers": {
+                  "Cross-Origin-Embedder-Policy": "require-corp",
+                  "Cross-Origin-Opener-Policy": "same-origin"
+                },
+                "glob": "**"
+              }
+            ],
+            "rewrites": [
+              {
+                "glob": "**",
+                "path": "/index.html"
+              }
+            ]
+          },
+          "labels": {
+            "deployment-tool": "cli-firebase"
+          },
+          "createTime": "2026-07-12T11:54:27.376717Z",
+          "finalizeTime": "2026-07-12T11:54:48.281305Z",
+          "fileCount": "113",
+          "versionBytes": "21563053"
+        },
+        "releaseTime": "2026-07-12T11:54:48.901Z"
+      }
+    ]
+  }
+]

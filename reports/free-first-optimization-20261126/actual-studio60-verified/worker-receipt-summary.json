@@ -1,0 +1,24 @@
+{
+  "sourceGeneration": "1795715095594",
+  "sourceHash": "d563280d6d3f60c275be7900bafb71d4c67bcdc6531b811dcb19b904aeb3c526",
+  "state": "succeeded",
+  "exitCode": 0,
+  "signal": null,
+  "processTerminated": true,
+  "startedAt": "2026-11-26T18:03:18.063Z",
+  "finishedAt": "2026-11-26T18:06:28.095Z",
+  "resource": {
+    "wallSeconds": 189.61585149701568,
+    "cpuSeconds": 417.03707299999996,
+    "peakRssKiB": 757536,
+    "cpuCeilingSeconds": 600,
+    "localFileCeilingBytes": 134217728,
+    "providerChargesStarted": false,
+    "invoiceCostMicros": null
+  },
+  "output": {
+    "path": "/tmp/free-first-optimization-worker240/4a83c1fd9f04d2ddc8bfa0bafcfafa5c672cb3a08c56a89d2d93dc1febfa867b/artifact.mp4",
+    "bytes": 26797595,
+    "sha256": "632606ea5293c2e14e8dda2ef52b504585213c50d05cb41fe0e5f1fe4c441931"
+  }
+}

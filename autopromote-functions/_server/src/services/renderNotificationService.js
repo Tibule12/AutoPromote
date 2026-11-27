@@ -70,10 +70,10 @@ async function notifyCompletedMulticamRenders() {
     }
 
     const expiresAt = toIsoString(data.expiresAt || data.result?.expiresAt || data.result?.expires_at);
-    const dashboardUrl = process.env.DASHBOARD_URL || process.env.FRONTEND_URL || "https://autopromote.app";
+    const dashboardUrl = process.env.DASHBOARD_URL || process.env.FRONTEND_URL || "https://autopromote.org";
     const expiryLine = expiresAt
-      ? `This download is kept for 4 days and expires around ${new Date(expiresAt).toLocaleString("en-US", { timeZone: "UTC" })} UTC.`
-      : "This download is kept for 4 days.";
+      ? `This download expires around ${new Date(expiresAt).toLocaleString("en-US", { timeZone: "UTC" })} UTC.`
+      : "You can check this download’s expiry under Saved Cam Combiner masters.";
 
     try {
       await sendEmail({

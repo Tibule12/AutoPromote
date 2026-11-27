@@ -1,0 +1,41 @@
+[
+  {
+    "origin": "https://autopromote.org",
+    "mainJs": [
+      "/static/js/main.1bf65d4b.js"
+    ],
+    "headers": {
+      "etag": "W/\"ae3d998265a14fe120ba581ec7eb480d\"",
+      "last-modified": "Fri, 27 Nov 2026 04:01:22 UTC",
+      "age": "23",
+      "cf-cache-status": "HIT",
+      "x-render-origin-server": null
+    }
+  },
+  {
+    "origin": "https://tibule12.github.io/AutoPromote",
+    "mainJs": [
+      "/static/js/main.63928a3c.js"
+    ],
+    "headers": {
+      "etag": "\"6b0900a8-80c\"",
+      "last-modified": "Fri, 27 Nov 2026 04:01:44 GMT",
+      "age": "0",
+      "cf-cache-status": null,
+      "x-render-origin-server": null
+    }
+  },
+  {
+    "origin": "https://api.autopromote.org",
+    "mainJs": [
+      "/static/js/main.67f9bc12.js"
+    ],
+    "headers": {
+      "etag": "W/\"80c-1a21af785d8\"",
+      "last-modified": "Fri, 27 Nov 2026 03:05:59 GMT",
+      "age": null,
+      "cf-cache-status": "DYNAMIC",
+      "x-render-origin-server": "Render"
+    }
+  }
+]

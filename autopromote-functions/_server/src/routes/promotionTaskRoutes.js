@@ -184,6 +184,7 @@ router.post("/requeue/:id", authMiddleware, adminOnly, promotionWriteLimiter, as
 router.post(
   "/platform/enqueue",
   authMiddleware,
+  require("../services/unifiedCredits/application").applicationCreditRoute("queue.dispatch", db),
   promotionWriteLimiter,
   rateLimit({ field: "platformEnqueue", perMinute: 60, weight: 2 }),
   validateBody({

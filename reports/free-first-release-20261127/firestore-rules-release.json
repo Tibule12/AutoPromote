@@ -1,0 +1,16 @@
+{
+  "startedAtUtc": "2026-11-27T04:05:47.303706+00:00",
+  "execute": true,
+  "project": "autopromote-cc6d3",
+  "sourceSha256": "176ad0acd047e6b4f748787e2fe845d767531c9c70c598e601b5a5910a2cf07d",
+  "scope": "Financial evidence/admin catchall and profile delete only; preserve the current deployed workspace/content rules. No Storage/IAM/data/balance changes.",
+  "authorization": "Owner requested push and deployment of tested updates on 27 November 2026",
+  "expectedRuntimeCommit": "2c92c8c978acac837dfa97f7082c9a08dd964539",
+  "beforeRuleset": "projects/autopromote-cc6d3/rulesets/54a118f4-dba4-474c-80b6-60fc53393b04",
+  "beforeSha256": "a6f2ddfe1a3d4f48d15b91d7e112736cb45e235bdd68dc01259d451682823deb",
+  "createdRuleset": "projects/autopromote-cc6d3/rulesets/c371aaf1-5824-4b76-8759-23f6533e54e7",
+  "status": "PUBLISHED_AND_VERIFIED",
+  "afterRuleset": "projects/autopromote-cc6d3/rulesets/c371aaf1-5824-4b76-8759-23f6533e54e7",
+  "updateTime": "2026-11-27T04:05:54.569319Z",
+  "finishedAtUtc": "2026-11-27T04:05:56.959555+00:00"
+}

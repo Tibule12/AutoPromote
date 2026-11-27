@@ -523,6 +523,7 @@ const finishJob = async ({ job, patch, firestore = db, clock = Date.now }) =>
   });
 
 const callFaceWorker = async (job, signedUrl) => {
+  require("./processingTokens/runtime").assertDispatch();
   const base =
     process.env.MEDIA_WORKER_URL || "https://media-worker-v1-341498038874.us-central1.run.app";
   const url = `${base}/track-studio-faces`;

@@ -7,7 +7,10 @@
 //  {"id":"enterprise","price":99,"monthlyTaskQuota":500,"aiQuota":2000}
 // ]
 
-const { SUBSCRIPTION_PLANS, normalizePlanId } = require("../config/subscriptionPlans");
+const {
+  ALL_SUBSCRIPTION_PLANS: SUBSCRIPTION_PLANS,
+  normalizePlanId,
+} = require("../config/subscriptionPlans");
 
 const DEFAULT_AI_QUOTAS = {
   free: 80,

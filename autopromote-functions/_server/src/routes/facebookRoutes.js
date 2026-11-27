@@ -3,6 +3,7 @@ const fetch = require("node-fetch");
 const crypto = require("crypto");
 const { admin, db } = require("../../firebaseAdmin");
 const authMiddleware = require("../../authMiddleware");
+const workspaceScope = require("../middlewares/workspaceScope");
 const logger = require("../utils/logger");
 const { cleanupSourceFile } = require("../../src/utils/cleanupSource");
 
@@ -34,6 +35,8 @@ const REQUESTED_SCOPES = [
   "pages_manage_metadata",
   "instagram_basic",
   "instagram_content_publish",
+  "read_insights",
+  "instagram_manage_insights",
 ];
 
 router.get("/health", (req, res) => {
@@ -380,11 +383,12 @@ router.get("/callback", async (req, res) => {
 router.get(
   "/status",
   authMiddleware,
+  workspaceScope,
   require("../statusInstrument")("facebookStatus", async (req, res) => {
     const { getCache, setCache } = require("../utils/simpleCache");
     const { dedupe } = require("../utils/inFlight");
     const { instrument } = require("../utils/queryMetrics");
-    const uid = req.userId || req.user?.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     const cacheKey = `facebook_status_${uid}`;
     const cached = getCache(cacheKey);
     if (cached) return res.json({ ...cached, _cached: true });
@@ -536,12 +540,12 @@ router.get(
 );
 
 // Upload to a Facebook Page feed/photos/videos
-router.post("/upload", authMiddleware, async (req, res) => {
+router.post("/upload", authMiddleware, workspaceScope, async (req, res) => {
   try {
     const { pageId, content } = req.body || {};
     if (!pageId || !content)
       return res.status(400).json({ error: "pageId and content are required" });
-    const uid = req.userId || req.user?.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     const snap = await db
       .collection("users")
       .doc(uid)

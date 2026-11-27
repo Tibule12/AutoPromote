@@ -1,0 +1,149 @@
+{
+  "source": "Connected Gmail, read-only",
+  "invoices": [
+    {
+      "messageId": "19cc2697a9b50b5c",
+      "date": "2026-03-06",
+      "provider": "Render",
+      "classification": "historical shared-workspace receipt; service-level attribution unavailable",
+      "items": [
+        {
+          "category": "Static sites",
+          "instances": 2,
+          "consumption": "1071h 55m 41s",
+          "amountDisplayed": 0
+        },
+        {
+          "category": "Servers",
+          "instances": 4,
+          "consumption": "1748h 59m 10s",
+          "amountDisplayed": 7
+        },
+        {
+          "category": "Builds",
+          "consumption": "3h 47m 31s",
+          "amountDisplayed": 5
+        },
+        {
+          "category": "Workspace plan",
+          "users": 1,
+          "amountDisplayed": 29
+        }
+      ],
+      "sourceUrl": "https://mail.google.com/mail/u/0/#all/19cc2697a9b50b5c",
+      "totalPaidDisplayed": 41,
+      "reportedCurrencySymbol": "$",
+      "isoCurrencyVerified": false
+    },
+    {
+      "messageId": "19d5b346e5eca4f3",
+      "date": "2026-04-05",
+      "provider": "Render",
+      "classification": "historical shared-workspace receipt; service-level attribution unavailable",
+      "items": [
+        {
+          "category": "Static sites",
+          "instances": 2,
+          "consumption": "1487h 59m 58s",
+          "amountDisplayed": 0
+        },
+        {
+          "category": "Servers",
+          "instances": 5,
+          "consumption": "2254h 42m 7s",
+          "amountDisplayed": 7
+        },
+        {
+          "category": "Cron jobs",
+          "consumption": "20h 12m 29s",
+          "amountDisplayed": 0.49
+        },
+        {
+          "category": "Builds",
+          "consumption": "5m 50s",
+          "amountDisplayed": 5
+        }
+      ],
+      "sourceUrl": "https://mail.google.com/mail/u/0/#all/19d5b346e5eca4f3",
+      "totalPaidDisplayed": 12.49,
+      "reportedCurrencySymbol": "$",
+      "isoCurrencyVerified": false
+    },
+    {
+      "messageId": "19df7c88f191b631",
+      "date": "2026-05-05",
+      "provider": "Render",
+      "classification": "historical shared-workspace receipt; not a current-month invoice",
+      "items": [
+        {
+          "category": "Static sites",
+          "instances": 2,
+          "consumption": "1439h 59m 58s",
+          "amountDisplayed": 0
+        },
+        {
+          "category": "Servers",
+          "instances": 3,
+          "consumption": "2159h 59m 57s",
+          "amountDisplayed": 7
+        },
+        {
+          "category": "Cron jobs",
+          "consumption": "14h 50m 27s",
+          "amountDisplayed": 1
+        }
+      ],
+      "sourceUrl": "https://mail.google.com/mail/u/0/#all/19df7c88f191b631",
+      "totalPaidDisplayed": 8,
+      "reportedCurrencySymbol": "$",
+      "isoCurrencyVerified": false
+    },
+    {
+      "messageId": "19cc851b36b76bd2",
+      "date": "2026-03-07",
+      "provider": "Replicate",
+      "classification": "one-time prepaid credit purchase; consumed API expenditure and AutoPromote attribution unknown",
+      "items": [
+        {
+          "category": "Prepaid credit purchase",
+          "amountDisplayed": 10
+        }
+      ],
+      "sourceUrl": "https://mail.google.com/mail/u/0/#all/19cc851b36b76bd2",
+      "totalPaidDisplayed": 10,
+      "reportedCurrencySymbol": "$",
+      "isoCurrencyVerified": false,
+      "amountRemainingDisplayed": 0
+    }
+  ],
+  "otherEvidence": [
+    {
+      "provider": "Render",
+      "messageId": "1a1fc7b8a071e17b",
+      "date": "2026-11-21",
+      "fact": "More than 70% of a 500-minute build allowance used; email states $5 per additional 1000 minutes. No exact spend."
+    },
+    {
+      "provider": "Render",
+      "messageId": "19f2edd941ea4b15",
+      "date": "2026-07-04",
+      "fact": "Historical billing notice lists AutoPromote web/static, one diagnostic cron and three tempauth services; workspace includes other applications. This does not establish current payment status."
+    },
+    {
+      "provider": "PayPal",
+      "messageId": "1a1d097c30dfe920",
+      "date": "2026-11-12",
+      "fact": "October statement availability notification only; no merchant fee ledger attached."
+    }
+  ],
+  "limitations": [
+    "No current Render plan, bandwidth, disk or scaling inventory authenticated through a provider API; no Render API credential found in configured environment or secret metadata.",
+    "No attributable current Google Cloud invoice or billing export; aggregate budget alert is separate.",
+    "Payer receipts for legacy AutoPromote subscriptions do not establish merchant processing fees.",
+    "No email-delivery purchase/invoice or attributable OpenAI usage invoice found in bounded searches.",
+    "Historical amounts are not added to modeled monthly infrastructure as if current or incremental.",
+    "Receipt text displays dollar symbols but no ISO currency; amounts are not treated as verified USD invoices."
+  ],
+  "mailChanges": 0,
+  "messagesSent": 0
+}

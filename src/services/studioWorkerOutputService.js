@@ -6,7 +6,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const crypto = require("crypto");
-const { Transform } = require("stream");
+const { Transform, Writable } = require("stream");
 const { pipeline } = require("stream/promises");
 const { buildWorkerRequestConfig } = require("../utils/cloudRunAuth");
 
@@ -176,30 +176,31 @@ async function persistWorkerBucketOutput({ url, userId, jobId, expectedSha256, l
   const sourceBytes = Number(sourceMetadata.size);
   if (!Number.isSafeInteger(sourceBytes) || sourceBytes <= 0 || sourceBytes > maximum || !sourceMetadata.generation)
     throw new Error('Worker bucket output has invalid size or generation');
-  const directory = await fs.promises.mkdtemp(path.join(os.tmpdir(),'studio-bucket-output-'));
-  const local = path.join(directory, 'render' + extension);
-  try {
+  {
     let bytes = 0; const digest = crypto.createHash('sha256');
-    const bounded = new Transform({transform(chunk,encoding,callback) {
+    const bounded = new Writable({write(chunk,encoding,callback) {
       bytes += chunk.length;
       if (bytes > maximum) return callback(new Error('Studio output exceeds transfer limit'));
-      digest.update(chunk); callback(null,chunk);
+      digest.update(chunk); callback();
     }});
-    await pipeline(bucket.file(sourcePath,{generation:sourceMetadata.generation}).createReadStream(),
-      bounded,fs.createWriteStream(local,{flags:'wx'}));
+    const sourceFile = bucket.file(sourcePath,{generation:sourceMetadata.generation});
+    await pipeline(sourceFile.createReadStream(), bounded);
     if (bytes !== sourceBytes || digest.digest('hex') !== expectedSha256)
       throw new Error('Worker bucket output differs from the completed render hash');
     try {
-      await bucket.upload(local,{destination:storagePath,resumable:false,preconditionOpts:{ifGenerationMatch:0},
-        metadata:{contentType,cacheControl:'private, max-age=3600',
-          metadata:{ownerUid:userId,jobId,purpose:'studio_export',sha256:expectedSha256,
-            sourceGeneration:String(sourceMetadata.generation)}}});
+      // GCS copies the exact verified generation internally. Preserve SHA256
+      // validation while avoiding a complete Render outbound re-upload and
+      // temporary disk copy. No customer URL is fetched or trusted as a path.
+      await sourceFile.copy(target,{preconditionOpts:{ifGenerationMatch:0},
+        contentType,cacheControl:'private, max-age=3600',
+        metadata:{ownerUid:userId,jobId,purpose:'studio_export',sha256:expectedSha256,
+          sourceGeneration:String(sourceMetadata.generation)}});
     } catch (error) { if (Number(error.code) !== 412) throw error; }
     // A simultaneous adopter may win creation; validate its exact identity.
     const result = await existing();
     if (!result) throw new Error('Studio export was not persisted');
     return result;
-  } finally { await fs.promises.rm(directory,{recursive:true,force:true}); }
+  }
 }
 module.exports.workerBucketOutputPath = workerBucketOutputPath;
 module.exports.persistWorkerBucketOutput = persistWorkerBucketOutput;

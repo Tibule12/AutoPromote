@@ -543,7 +543,7 @@ const ViralScanner = ({
         requiredCredits: Number(payload.requiredCredits || CLIP_SCAN_CREDIT_COST),
         balance: Number(payload.balance || 0),
         tier: payload.tier || "free",
-        planName: payload.planName || "Starter",
+        planName: payload.planName || "AutoPromote Free",
         topUpsAllowed: Boolean(payload.topUpsAllowed),
       };
       setCreditBalance(access.balance);

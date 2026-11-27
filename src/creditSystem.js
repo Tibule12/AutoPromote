@@ -1,6 +1,6 @@
 const { db } = require("./firebaseAdmin");
 const crypto = require("crypto");
-const { normalizePlanId, resolvePlan } = require("./config/subscriptionPlans");
+const { normalizePlanId, resolvePlan, LEGACY_SUBSCRIPTION_PLANS } = require("./config/subscriptionPlans");
 const { getEffectiveTierSnapshot } = require("./services/billingService");
 const { getActiveTesterAccess, getTesterCreditState } = require("./config/testerProgram");
 
@@ -30,10 +30,10 @@ const isProductionRuntime = () =>
   Boolean(process.env.FUNCTION_TARGET);
 
 const isLocalEditingCreditBypassEnabled = () => {
-  if (process.env.DISABLE_VIDEO_EDITOR_CREDITS === "true") return true;
+  if (process.env.DISABLE_VIDEO_EDITOR_CREDITS === "true") return !isProductionRuntime();
   if (process.env.LOCAL_EDITING_CREDIT_BYPASS === "false") return false;
   if (process.env.LOCAL_EDITING_CREDIT_BYPASS === "true") return !isProductionRuntime();
-  return !isProductionRuntime();
+  return false;
 };
 
 const shouldBypassEditingCredits = operation =>
@@ -44,11 +44,33 @@ const shouldBypassEditingCredits = operation =>
  * Returns { monthlyRemaining, topUpBalance, totalAvailable, monthlyAllocation, monthKey }
  */
 const getCreditBreakdown = async userId => {
+  const renewable = require("./services/processingTokens/runtime").current(userId);
+  if (renewable || require("./services/processingTokens/runtime").enabled()) {
+    const status = await (
+      renewable?.service || require("./services/processingTokens/runtime").service()
+    ).status(userId);
+    return {
+      monthlyRemaining: status.remaining,
+      totalAvailable: status.remaining,
+      monthlyAllocation: status.allowance,
+      monthlyUsed: status.allowance - status.remaining,
+      topUpBalance: 0,
+      tier: status.planId,
+      processingTokens: true,
+    };
+  }
   const local = require("./services/unifiedCredits/application").getApplicationContext(userId);
   if (local) {
     const a = await local.balance();
-    return { monthlyRemaining: a.balance, topUpBalance: 0, totalAvailable: a.balance,
-      monthlyAllocation: a.monthlyAllowance, monthKey: a.cycle, tier: a.tier, sharedWallet: true };
+    return {
+      monthlyRemaining: a.balance,
+      topUpBalance: 0,
+      totalAvailable: a.balance,
+      monthlyAllocation: a.monthlyAllowance,
+      monthKey: a.cycle,
+      tier: a.tier,
+      sharedWallet: true,
+    };
   }
   const monthKey = new Date().toISOString().slice(0, 7);
   const [userSnap, creditLedgerSnap] = await Promise.all([
@@ -65,7 +87,7 @@ const getCreditBreakdown = async userId => {
     tierId: userData.subscriptionTier || "free",
   }));
   const tier = normalizePlanId(effectiveTier.tierId || userData.subscriptionTier || "free");
-  const plan = resolvePlan(tier);
+  const plan = LEGACY_SUBSCRIPTION_PLANS[tier] || resolvePlan(tier);
   const testerAccess = effectiveTier.testerAccess || null;
   const testerCredits = getTesterCreditState(testerAccess, plan.features.monthlyCredits || 0);
   const monthlyAllocation = testerCredits?.allowance ?? plan.features.monthlyCredits ?? 0;
@@ -99,11 +121,27 @@ const getCreditBreakdown = async userId => {
  * Records a ledger entry for monthly tracking.
  */
 const deductCredits = async (userId, amount, operation = "unknown", metadata = {}) => {
+  const renewable = require("./services/processingTokens/runtime").current(userId);
+  if (renewable)
+    return {
+      success: true,
+      deferredSettlement: true,
+      processingTokens: true,
+      requestId: renewable.reservation.requestId,
+      amount: renewable.reservation.tokens,
+    };
+
+  require("./services/processingTokens/runtime").assertDispatch();
   const local = require("./services/unifiedCredits/application").getApplicationContext(userId);
   if (local) {
     if (/multicam|cam-combiner/i.test(operation)) throw new Error("Cam Combiner is excluded");
-    return { success: true, remaining: (await local.balance()).balance, amount: local.op.credits,
-      unifiedOperationId: local.op.operationId, deferredSettlement: true };
+    return {
+      success: true,
+      remaining: (await local.balance()).balance,
+      amount: local.op.credits,
+      unifiedOperationId: local.op.operationId,
+      deferredSettlement: true,
+    };
   }
   if (Number(amount || 0) > 0 && shouldBypassEditingCredits(operation)) {
     console.log(
@@ -163,11 +201,8 @@ const deductCredits = async (userId, amount, operation = "unknown", metadata = {
         testerAccess && planRank[testerTier] > planRank[subscribedTier]
           ? testerTier
           : subscribedTier;
-      const plan = resolvePlan(tier);
-      const testerCredits = getTesterCreditState(
-        testerAccess,
-        plan.features.monthlyCredits || 0
-      );
+      const plan = LEGACY_SUBSCRIPTION_PLANS[tier] || resolvePlan(tier);
+      const testerCredits = getTesterCreditState(testerAccess, plan.features.monthlyCredits || 0);
       const monthlyAllocation = testerCredits?.allowance ?? plan.features.monthlyCredits ?? 0;
 
       // Count monthly usage from ledger (use transaction-safe query)
@@ -271,6 +306,14 @@ const deductCredits = async (userId, amount, operation = "unknown", metadata = {
 };
 
 const refundCredits = async (userId, refund, operation = "refund", metadata = {}) => {
+  // Durable jobs reconcile after the admitting HTTP context has ended. Their
+  // receipts must never fall through into a legacy purchased-credit refund.
+  if (refund?.processingTokens === true && refund?.deferredSettlement === true)
+    return { success: false, deferredSettlement: true, processingTokens: true,
+      requestId: refund.requestId, message: "Awaiting a trusted terminal job outcome" };
+  if (require("./services/processingTokens/runtime").current(userId))
+    return { success: true, deferredSettlement: true, processingTokens: true };
+
   // Status/recovery reads run outside the original request's async context.
   // A shared-wallet receipt must never enter a legacy balance writer.
   if (refund?.deferredSettlement === true && refund?.unifiedOperationId)

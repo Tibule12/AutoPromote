@@ -72,6 +72,19 @@ const normalizeApprovalRecord = data => {
 };
 
 const deriveApprovalStatus = data => {
+  if (isMulticamRenderJob(data)) {
+    const status = String(data?.status || "").toLowerCase();
+    const hasWorkerOutput = Boolean(extractWorkerOutputUrl(data));
+    if (
+      hasWorkerOutput &&
+      ["completed", "needs_review", "approved", "rejected"].includes(status)
+    ) {
+      // A paid Cam Combiner render is the delivered master. Users should not
+      // be pushed through an approve/reject loop that encourages rerenders.
+      return APPROVAL_STATUSES.APPROVED;
+    }
+  }
+
   const explicit = String(data?.approvalStatus || "").toLowerCase();
   if (Object.values(APPROVAL_STATUSES).includes(explicit)) return explicit;
 
@@ -92,7 +105,7 @@ const normalizeRenderApproval = (jobId, data = {}) => {
   const approvalStatus = deriveApprovalStatus(data);
   const approvedOutputUrl = extractApprovedOutputUrl(data);
   const heldOutputUrl = extractWorkerOutputUrl(data);
-  const reviewRequired = isMulticamRenderJob(data);
+  const reviewRequired = false;
   const isApproved = approvalStatus === APPROVAL_STATUSES.APPROVED;
   const outputUrl = isApproved ? approvedOutputUrl || heldOutputUrl : null;
   const previewUrl = approvalStatus ? heldOutputUrl || approvedOutputUrl : null;

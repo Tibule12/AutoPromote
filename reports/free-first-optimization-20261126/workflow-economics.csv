@@ -1,0 +1,7 @@
+name,status,currentEstimatedUsd,currentCpuServiceReferenceEstimatedUsd,gpuJobSensitivityEstimatedUsd,optimizedEstimatedUsd,recommendedTokens,freeCapacityPerSixDays,plusCapacityPerRenewal,plusCapacityPerRolling30Days,estimatedCostReductionPercent
+"60s basic native worker export","completed_local",0.063939,0.023002,0.063939,0.015445,20,4,24,99,75.84
+"60s multilingual word-timed captions","completed_local",0.059013,0.018409,0.059013,0.007291,10,8,48,198,87.64
+"184s Find Viral Clips + 45s export","completed_local",0.10808,0.04646,0.10808,0.029827,38,1,12,51,72.4
+"60s two-stream Cam edit + external audio","completed_local",0.095794,0.047661,0.095794,0.039529,50,1,9,39,58.74
+"60s visual effect + keyed title motion","completed_local",0.098936,0.0424,0.098936,0.031394,40,1,11,49,68.27
+"Actual signed-in 60s title/edit/save/reopen/export","completed_local",0.075979,0.030615,0.075979,0.025026,32,3,15,62,67.06

@@ -73,6 +73,7 @@ function studio3DBucket() {
 }
 
 async function dispatchStudio3DJob(jobId) {
+  require("./processingTokens/runtime").assertDispatch();
   const localConfig = local.configuration();
   if (localConfig?.durable) {
     const ref = admin.firestore().collection("studio_3d_jobs").doc(jobId), doc = await ref.get(), data = doc.data();

@@ -1,0 +1,57 @@
+{
+  "output": "reports/free-first-20261126/native-output.mp4",
+  "outputSha256": "1e72a1a03a20b324541cc94b95fe1a9c29ed2388ab3f415fe52ca0ea8b237363",
+  "streams": [
+    {
+      "type": "video",
+      "width": 320,
+      "height": 180
+    },
+    {
+      "type": "audio"
+    }
+  ],
+  "measuredResources": {
+    "wallSeconds": 2.3598588000168093,
+    "cpuSeconds": 2.499499,
+    "peakRssKiB": 115600,
+    "cpuCeilingSeconds": 600,
+    "localFileCeilingBytes": 134217728,
+    "providerChargesStarted": false,
+    "invoiceCostMicros": null
+  },
+  "processing": {
+    "requestId": "native-output",
+    "consumedTokens": 2,
+    "measuredWallSeconds": 2.614,
+    "costBasis": "local-wall-time-reference-estimate",
+    "actualCloudSpendMicros": 0
+  },
+  "allowance": {
+    "planId": "free",
+    "allowance": 100,
+    "remaining": 98,
+    "remainingPercent": 98,
+    "cycleRemainingTokens": 98,
+    "rollingRemainingTokens": 498,
+    "exhaustionReason": null,
+    "nextResetAt": "2026-12-03T04:27:24.163Z",
+    "rolling30DayLimit": 500,
+    "rollingSpentTokens": 2,
+    "reservedTokens": 0,
+    "storage": {
+      "usedBytes": 0,
+      "reservedBytes": 0,
+      "limitBytes": 1073741824,
+      "measured": false
+    },
+    "activeJobs": 0,
+    "localEditingAvailable": true,
+    "provisional": true,
+    "rollingAvailableAt": "2026-12-27T04:27:26.889Z",
+    "asOf": "2026-11-27T04:27:27.059Z"
+  },
+  "signedTerminationVerified": true,
+  "duplicateDispatchBlocked": true,
+  "scope": "canonical worker + HTTP admission + emulator ledger; not full signed-in Studio UI or provider publication"
+}

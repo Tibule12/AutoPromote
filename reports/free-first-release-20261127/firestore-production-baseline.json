@@ -1,0 +1,10 @@
+{
+  "project": "autopromote-cc6d3",
+  "release": "projects/autopromote-cc6d3/releases/cloud.firestore",
+  "ruleset": "projects/autopromote-cc6d3/rulesets/54a118f4-dba4-474c-80b6-60fc53393b04",
+  "updateTime": "2026-11-04T08:38:32.267911Z",
+  "sha256": "a6f2ddfe1a3d4f48d15b91d7e112736cb45e235bdd68dc01259d451682823deb",
+  "matchesCurrentMain": false,
+  "files": 1,
+  "noChanges": true
+}

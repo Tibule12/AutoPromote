@@ -13,11 +13,12 @@ SOURCE = Path(__file__).with_name("main_media_server.py")
 
 class CaptionModelLanguageTests(unittest.TestCase):
     def setUp(self):
-        names = {"transcription_model_has_unmapped_languages", "transcribe_with_hints"}
+        names = {"transcription_model_has_unmapped_languages", "_transcribe_with_hints_uncached"}
         tree = ast.parse(SOURCE.read_text())
         module = ast.Module(body=[n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in names], type_ignores=[])
         self.runtime = {"os": os}
         exec(compile(module, str(SOURCE), "exec"), self.runtime)
+        self.runtime["transcribe_with_hints"] = self.runtime["_transcribe_with_hints_uncached"]
 
     def test_local_pinned_model_card_has_no_reliable_decoder_language(self):
         with tempfile.TemporaryDirectory() as directory:

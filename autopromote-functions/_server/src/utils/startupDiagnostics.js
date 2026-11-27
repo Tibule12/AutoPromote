@@ -66,10 +66,6 @@ class StartupDiagnostics {
       "PAYPAL_CLIENT_SECRET",
       "OPENAI_API_KEY",
       "FRONTEND_URL",
-      "ZEPTOMAIL_API_KEY",
-      "ZEPTOMAIL_API_URL",
-      "ZEPTOMAIL_FROM_EMAIL",
-      "ZEPTOMAIL_FROM_NAME",
     ];
 
     const optional = [
@@ -457,15 +453,14 @@ class StartupDiagnostics {
     console.log("\n🔍 Checking Email Service...");
 
     const hasZeptoMail =
-      !!process.env.ZEPTOMAIL_API_KEY &&
-      !!process.env.ZEPTOMAIL_API_URL &&
-      !!process.env.ZEPTOMAIL_FROM_EMAIL &&
-      !!process.env.ZEPTOMAIL_FROM_NAME;
+      !!(process.env.ZEPTOMAIL_SEND_MAIL_TOKEN || process.env.ZEPTOMAIL_API_KEY) &&
+      !!(process.env.ZEPTOMAIL_FROM_EMAIL || process.env.EMAIL_FROM) &&
+      process.env.EMAIL_SENDER_MODE !== "disabled";
 
     if (!hasZeptoMail) {
       this.log("error", "email", "No email service configured", {
         action_required:
-          "Add ZEPTOMAIL_API_KEY, ZEPTOMAIL_API_URL, ZEPTOMAIL_FROM_EMAIL, and ZEPTOMAIL_FROM_NAME",
+          "Add ZEPTOMAIL_SEND_MAIL_TOKEN and ZEPTOMAIL_FROM_EMAIL, then set EMAIL_PROVIDER=zeptomail",
         impact: "Transactional emails will not be sent",
       });
     } else {

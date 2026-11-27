@@ -10,7 +10,7 @@ const TESTER_PROGRAM = Object.freeze({
   usageLimits: Object.freeze({
     uploads: 10,
     queuedPlatformPosts: 30,
-    connectedPlatforms: 3,
+    connectedPlatforms: 6,
   }),
   allowedWorkflows: Object.freeze([
     "camCombiner",
@@ -61,7 +61,7 @@ function applyTesterCapabilityAllowlist(capabilities, testerAccess) {
       featureId,
       {
         ...feature,
-        enabled: Boolean(feature?.enabled && allowed.has(featureId)),
+        enabled: Boolean(feature?.enabled),
         topUpEligible: false,
       },
     ])
@@ -70,7 +70,7 @@ function applyTesterCapabilityAllowlist(capabilities, testerAccess) {
   return {
     ...capabilities,
     teamSeats: 1,
-    recoveryLab: false,
+    recoveryLab: true,
     support: {
       ...(capabilities?.support || {}),
       ticketAccess: true,
@@ -84,10 +84,10 @@ function applyTesterCapabilityAllowlist(capabilities, testerAccess) {
     },
     editing: {
       ...(capabilities?.editing || {}),
-      allPaidFeaturesUnlocked: false,
+      allPaidFeaturesUnlocked: true,
       topUpsEnabled: false,
       policy:
-        "Founding Tester access is limited to the approved test workflows and its trial credit allowance.",
+        "All creative tools are available. Existing Founding Tester credits remain separate from renewable processing tokens.",
       features: editingFeatures,
     },
     testerProgram: {

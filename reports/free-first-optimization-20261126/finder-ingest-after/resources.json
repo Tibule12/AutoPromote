@@ -1,0 +1,26 @@
+{
+  "sampledTreePeakRssBytes": 272044032,
+  "status": "completed",
+  "wallSecondsIncludingImport": 53.521956082986435,
+  "cpuSeconds": 87.60370999999999,
+  "largestProcessPeakRssKiB": 148604,
+  "cpuAffinity": [
+    0,
+    1
+  ],
+  "threads": 2,
+  "providerChargesStarted": false,
+  "actualCloudExpenditureUsd": 0,
+  "invoiceAttributedHistoricalCostUsd": null,
+  "sourceBytes": 217765078,
+  "sourceSha256": "5a3a0cbf4b4372507d3bfddeb4f47170442e213eabd4f80432ca82a29421ce05",
+  "stages": [
+    {
+      "program": "ffmpeg",
+      "output": "analysis.mp4",
+      "wallSeconds": 52.4753
+    }
+  ],
+  "mode": "ingest",
+  "baseline": false
+}

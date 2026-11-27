@@ -1,0 +1,30 @@
+{
+  "basis": "Reference estimate only. No external publication or new schedule performed.",
+  "assetBytes": 26797595,
+  "destinations": 6,
+  "existingNativeOutputReused": true,
+  "sourceReRendered": false,
+  "currentEstimatedUsd": 0.045087,
+  "candidateNearStoragePublisherEstimatedUsd": 0.022109,
+  "candidateRecommendedTokens": 28,
+  "currentReferenceRecommendedTokens": 57,
+  "proposedReservationTokens": 72,
+  "candidateImplemented": false,
+  "actualCloudSpendUsd": 0,
+  "historicalInvoiceAttributedUsd": null,
+  "measuredPublisherResourceUse": null,
+  "freeCompletedCreatePublishCapacityVerified": null,
+  "plusCompletedCreatePublishCapacityVerified": null,
+  "estimatedReductionPercent": 50.96330131856387,
+  "costOwnership": [
+    "Publisher variable transfer and destination DB/events only.",
+    "Existing Render API base CPU is already fixed hosting; do not add its rent a second time.",
+    "Native creation/export is a separate operation; no six repeated renders.",
+    "Moving uploads into a bounded same-region CPU worker is a proposal; native H264/AAC bytes and provider upload semantics must stay identical."
+  ],
+  "remaining": [
+    "Owner approval of exact film/thumbnail before external publication under AGENTS.md.",
+    "Live provider upload/status receipts and actual egress paths are unqualified.",
+    "Publisher/Scheduler production financial adapter remains fail-closed."
+  ]
+}

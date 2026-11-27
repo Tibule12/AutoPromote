@@ -6,10 +6,17 @@ const DEFAULT_OPENAI_BASE =
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || process.env.OPENAI_KEY || null;
 
 async function request(path, payload = {}, opts = {}) {
+  require("./processingTokens/runtime").assertDispatch();
   if (!OPENAI_API_KEY) throw new Error("OpenAI API key not configured.");
   const url = `${DEFAULT_OPENAI_BASE}${path}`;
   const headers = Object.assign({ Authorization: `Bearer ${OPENAI_API_KEY}` }, opts.headers || {});
-  const res = await axios.post(url, payload, { headers, maxBodyLength: Infinity });
+  const res = await axios.post(url, payload, {
+    headers,
+    maxBodyLength: Infinity,
+    ...(opts.timeout ? { timeout: opts.timeout } : {}),
+    ...(opts.signal ? { signal: opts.signal } : {}),
+    ...(opts.maxContentLength ? { maxContentLength: opts.maxContentLength } : {}),
+  });
   return res.data;
 }
 
@@ -25,6 +32,7 @@ async function chatCompletions(params = {}, meta = {}) {
 }
 
 async function audioTranscriptions(formData, meta = {}) {
+  require("./processingTokens/runtime").assertDispatch();
   if (!OPENAI_API_KEY) throw new Error("OpenAI API key not configured.");
   const url = `${DEFAULT_OPENAI_BASE}/v1/audio/transcriptions`;
   const headers = Object.assign(

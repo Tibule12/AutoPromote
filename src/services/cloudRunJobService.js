@@ -82,10 +82,19 @@ function buildRunJobOverrides(jobId, dispatchToken) {
 }
 
 async function cloudRunRequest(config) {
+  if (String(config.method).toUpperCase() === "POST" && /:run$/.test(config.url)) {
+    require("./processingTokens/runtime").assertDispatch();
+    const runtime=require('./processingTokens/runtime'),ctx=runtime.current();
+    if(runtime.enabled()&&(!ctx?.cloudRunRequestDigest||
+        ctx.cloudRunRequestDigest!==require('./unifiedCredits/workerVerification').digest(config.data)||
+        config.url!=='https://run.googleapis.com/v2/'+ctx.cloudRunProfile?.job+':run'))
+      throw Object.assign(new Error('BOUNDED_CLOUD_RUN_ADAPTER_REQUIRED'),{code:'BOUNDED_CLOUD_RUN_ADAPTER_REQUIRED',status:503});
+  }
   assertApplicationTransport("https://run.googleapis.com");
   if (!authClientPromise) authClientPromise = auth.getClient();
   const client = await authClientPromise;
-  return client.request({ timeout: 30000, ...config });
+  return client.request({ timeout: 30000, ...config,
+    ...(String(config.method).toUpperCase()==='POST'&&/:run$/.test(config.url)?{retry:false}:{}) });
 }
 
 function safeGpuDispatchFallback(error) {
@@ -109,10 +118,13 @@ async function executeMulticamRenderJob({
 }) {
   if (!jobId || !dispatchToken)
     throw new Error("A job ID and dispatch token are required for durable rendering");
-  const device = preferredDevice === "cpu" || !getMulticamGpuJobName() ? "cpu" : "gpu";
+  const { costRoutingEnabled, boundedManualMulticam } = require("./processingTokens/costRouting");
+  const economicalCpu = costRoutingEnabled(process.env) && boundedManualMulticam(multicamRequest);
+  const renewable=require('./processingTokens/runtime').current();
+  const device = renewable?.cloudRunProfile?.device || (preferredDevice === "cpu" || economicalCpu || !getMulticamGpuJobName() ? "cpu" : "gpu");
   const run = async targetDevice => {
-    const resourceName = await resolveJobResourceName(multicamRequest, targetDevice);
-    const data = buildRunJobOverrides(jobId, dispatchToken);
+    const resourceName = renewable?.cloudRunProfile?.job || await resolveJobResourceName(multicamRequest, targetDevice);
+    let data = buildRunJobOverrides(jobId, dispatchToken);
     data.overrides.containerOverrides[0].env.push(
       { name: "MULTICAM_EXECUTION_DEVICE", value: targetDevice },
       {
@@ -120,6 +132,7 @@ async function executeMulticamRenderJob({
         value: multicamRequestNeedsCaptions(multicamRequest) === false ? "1" : "0",
       }
     );
+    if(renewable?.prepareCloudRunJob)data=await renewable.prepareCloudRunJob(resourceName,data);
     let response;
     try {
       response = await cloudRunRequest({
@@ -140,7 +153,7 @@ async function executeMulticamRenderJob({
       routeReason:
         targetDevice === "gpu"
           ? "gpu_primary"
-          : device === "gpu"
+          : economicalCpu ? "qualified_short_cpu" : device === "gpu"
             ? "gpu_unavailable"
             : "cpu_fallback",
       dispatchMode: "cloud_run_job",
@@ -149,6 +162,7 @@ async function executeMulticamRenderJob({
   try {
     return await run(device);
   } catch (error) {
+    if (require("./processingTokens/runtime").enabled()) throw error;
     if (device !== "gpu" || !safeGpuDispatchFallback(error)) throw error;
     return run("cpu");
   }

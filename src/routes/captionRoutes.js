@@ -20,7 +20,10 @@ const captionLimiter = rateLimit({
 const freeTierLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 5, // 5 requests per hour (Free users)
-  message: { error: "Free tier limit reached. Upgrade to Premium for unlimited captions." },
+  message: {
+    error:
+      "Caption processing capacity reached. Try again after the reset; local caption editing remains available.",
+  },
   keyGenerator: req => req.user?.uid || req.ip,
 });
 

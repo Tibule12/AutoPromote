@@ -1,5 +1,5 @@
 // discordService.js - Discord webhook and bot posting
-const { db, admin } = require("../firebaseAdmin");
+const { db } = require("../firebaseAdmin");
 const { safeFetch } = require("../utils/ssrfGuard");
 
 let fetchFn = global.fetch;
@@ -23,41 +23,6 @@ async function getUserDiscordConnection(uid) {
   const tokens = tokensFromDoc(d);
   if (tokens) d.tokens = tokens;
   return d;
-}
-
-/**
- * Post to Discord via webhook
- * Webhooks are the simplest way to post to Discord channels
- */
-async function postViaWebhook({ webhookUrl, content, embeds, username, avatarUrl }) {
-  if (!fetchFn) throw new Error("Fetch not available");
-  if (!webhookUrl) throw new Error("webhookUrl required");
-
-  const payload = {};
-
-  if (content) payload.content = content;
-  if (username) payload.username = username;
-  if (avatarUrl) payload.avatar_url = avatarUrl;
-  if (embeds && embeds.length > 0) payload.embeds = embeds;
-
-  const response = await fetch(webhookUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Discord webhook failed: ${error}`);
-  }
-
-  // Discord webhooks return 204 No Content on success
-  return {
-    success: true,
-    status: response.status,
-  };
 }
 
 /**
@@ -134,144 +99,8 @@ function createEmbed({ title, description, url, color, imageUrl, thumbnailUrl, f
 /**
  * Main posting function for Discord
  */
-async function postToDiscord({
-  uid,
-  content,
-  title,
-  description,
-  url,
-  imageUrl,
-  contentId,
-  webhookUrl,
-  channelId,
-  hashtags = [],
-  hashtagString = "",
-}) {
-  if (!uid && !webhookUrl) throw new Error("uid or webhookUrl required");
-  if (!content && !title) throw new Error("content or title required");
-  if (!fetchFn) throw new Error("Fetch not available");
-
-  let connection = null;
-  let userWebhookUrl = webhookUrl;
-  let userChannelId = channelId;
-
-  // Get user's Discord connection if uid provided
-  if (uid) {
-    connection = await getUserDiscordConnection(uid);
-    if (connection) {
-      // Check for stored webhook URL or channel ID
-      userWebhookUrl = userWebhookUrl || connection.webhookUrl || connection.meta?.webhookUrl;
-      userChannelId = userChannelId || connection.channelId || connection.meta?.channelId;
-    }
-  }
-
-  // Create embed for rich content
-  const embeds = [];
-  if (title || description || imageUrl) {
-    embeds.push(
-      createEmbed({
-        title,
-        description,
-        url,
-        imageUrl,
-        color: 0x5865f2, // Discord blurple color
-      })
-    );
-  }
-
-  let result;
-  let messageId = null;
-  let postedVia = null;
-
-  // Try webhook first (simpler, no auth needed)
-  if (userWebhookUrl) {
-    try {
-      result = await postViaWebhook({
-        webhookUrl: userWebhookUrl,
-        content:
-          (content || "") +
-          (hashtagString
-            ? ` ${hashtagString}`
-            : hashtags && hashtags.length
-              ? ` ${hashtags.join(" ")}`
-              : ""),
-        embeds: embeds.length > 0 ? embeds : null,
-        username: "AutoPromote",
-        avatarUrl: null,
-      });
-      postedVia = "webhook";
-    } catch (e) {
-      console.warn("[Discord] Webhook posting failed:", e.message);
-      // Fall through to bot method
-    }
-  }
-
-  // Try bot method if webhook failed or not available
-  if (!result && userChannelId) {
-    const botToken = process.env.DISCORD_BOT_TOKEN;
-    if (botToken) {
-      try {
-        result = await postViaBot({
-          botToken,
-          channelId: userChannelId,
-          content:
-            (content || "") +
-            (hashtagString
-              ? ` ${hashtagString}`
-              : hashtags && hashtags.length
-                ? ` ${hashtags.join(" ")}`
-                : ""),
-          embeds: embeds.length > 0 ? embeds : null,
-        });
-        messageId = result.messageId;
-        postedVia = "bot";
-      } catch (e) {
-        throw new Error(`Discord bot posting failed: ${e.message}`);
-      }
-    } else {
-      throw new Error("No Discord bot token configured");
-    }
-  }
-
-  if (!result) {
-    throw new Error("No Discord webhook URL or channel ID available");
-  }
-
-  // Store post info in Firestore if contentId provided
-  if (contentId && uid) {
-    try {
-      const contentRef = db.collection("content").doc(contentId);
-      const existing = await contentRef.get();
-      const existingData = existing.exists ? existing.data().discord || {} : {};
-
-      await contentRef.set(
-        {
-          discord: {
-            ...existingData,
-            messageId: messageId || "webhook-post",
-            channelId: userChannelId || "unknown",
-            content: content || title || "",
-            postedAt: new Date().toISOString(),
-            postedVia,
-            createdAt: existingData.createdAt || admin.firestore.FieldValue.serverTimestamp(),
-            lastUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          },
-        },
-        { merge: true }
-      );
-    } catch (e) {
-      console.warn("[Discord] Failed to store post info in Firestore:", e.message);
-    }
-  }
-
-  return {
-    success: true,
-    platform: "discord",
-    messageId: messageId || "webhook-post",
-    channelId: userChannelId,
-    postedVia,
-    raw: result,
-  };
+async function postToDiscord(args) {
+  return require("./communityDelivery").deliver({ ...args, payload: args.payload || args, platform: "discord" });
 }
 
 /**
@@ -318,7 +147,6 @@ async function getMessage({ channelId, messageId }) {
 module.exports = {
   getUserDiscordConnection,
   postToDiscord,
-  postViaWebhook,
   postViaBot,
   createEmbed,
   getMessage,

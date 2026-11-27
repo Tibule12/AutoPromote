@@ -61,7 +61,7 @@ class WhisperCudaSelectionTests(unittest.TestCase):
         with patch.dict(os.environ, {"FASTER_WHISPER_DEVICE": "cuda", "FASTER_WHISPER_COMPUTE_TYPE": "float16"}):
             self.assertIs(self.runtime["get_faster_whisper_model"]("small"), cpu_model)
             self.assertIs(self.runtime["get_faster_whisper_model"]("small"), cpu_model)
-        self.assertEqual(self.runtime["FasterWhisperModel"].call_args_list[1].kwargs, {"device": "cpu", "compute_type": "int8"})
+        self.assertEqual(self.runtime["FasterWhisperModel"].call_args_list[1].kwargs, {"device": "cpu", "compute_type": "int8", "cpu_threads": 4})
 
     def test_successful_cuda_model_is_reused_without_reloading(self):
         gpu_model = self.runtime["FasterWhisperModel"].return_value

@@ -1,0 +1,92 @@
+{
+  "source": "free-first-release-20261127/production-first-release-complete-cycle.json",
+  "initialReleaseCommit": "2c92c8c978acac837dfa97f7082c9a08dd964539",
+  "windows": {
+    "before": {
+      "startUtcMinute": "2026-11-27T03:59",
+      "endUtcMinute": "2026-11-27T04:01",
+      "metrics": {
+        "reads": {
+          "observedCount": 3896.0,
+          "minuteBuckets": {
+            "2026-11-27T03:59": 1549.0,
+            "2026-11-27T04:00": 2254.0,
+            "2026-11-27T04:01": 93.0
+          },
+          "missingMinutesAreNotZero": true
+        },
+        "writes": {
+          "observedCount": 156.0,
+          "minuteBuckets": {
+            "2026-11-27T03:59": 105.0,
+            "2026-11-27T04:00": 49.0,
+            "2026-11-27T04:01": 2.0
+          },
+          "missingMinutesAreNotZero": true
+        },
+        "functionExecutions": {
+          "observedCount": 616.0,
+          "minuteBuckets": {
+            "2026-11-27T03:59": 497.0,
+            "2026-11-27T04:00": 119.0,
+            "2026-11-27T04:01": 0.0
+          },
+          "missingMinutesAreNotZero": true
+        }
+      },
+      "dependencyQueries": 776,
+      "queryOperators": {
+        "EQUAL": 776
+      }
+    },
+    "afterInitialRelease": {
+      "startUtcMinute": "2026-11-27T04:19",
+      "endUtcMinute": "2026-11-27T04:21",
+      "metrics": {
+        "reads": {
+          "observedCount": 4913.0,
+          "minuteBuckets": {
+            "2026-11-27T04:19": 261.0,
+            "2026-11-27T04:20": 3558.0,
+            "2026-11-27T04:21": 1094.0
+          },
+          "missingMinutesAreNotZero": true
+        },
+        "writes": {
+          "observedCount": 3.0,
+          "minuteBuckets": {
+            "2026-11-27T04:19": 0.0,
+            "2026-11-27T04:20": 2.0,
+            "2026-11-27T04:21": 1.0
+          },
+          "missingMinutesAreNotZero": true
+        },
+        "functionExecutions": {
+          "observedCount": 0.0,
+          "minuteBuckets": {
+            "2026-11-27T04:19": 0.0,
+            "2026-11-27T04:20": 0.0
+          },
+          "missingMinutesAreNotZero": true
+        }
+      },
+      "dependencyQueries": 126,
+      "queryOperators": {
+        "IN": 76,
+        "EQUAL": 50
+      }
+    }
+  },
+  "findings": [
+    "Dependency-query requests fell776 to126; complete-window project document reads3896 to4913 did not improve. Shared-result truncation fallback also rereads historical documents.",
+    "Project writes fell156 to3; old four content update executions616 versus zero observed after the release. Recent missing delivery metrics are not proof of zero delayed delivery.",
+    "PR561 negative-only caching addresses repeated document reads; its production warm-cycle result is separate and pending."
+  ],
+  "limitations": [
+    "Project totals can include other applications and different work; these are adjacent observed cycles, not a controlled load benchmark.",
+    "Monitoring is delayed and bucket alignment differs from audit timestamps.",
+    "Bounded content Commit samples are truncated at the oldest200 matching writes; latest returned content write is03:59:01Z.",
+    "These are consumed units, not an attributed invoice."
+  ],
+  "paidCreativeWorkloadsStarted": 0
+}

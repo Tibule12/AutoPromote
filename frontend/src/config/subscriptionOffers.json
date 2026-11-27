@@ -1,0 +1,48 @@
+[
+  {
+    "id": "free",
+    "name": "AutoPromote Free",
+    "price": 0,
+    "currency": "USD",
+    "provisional": true,
+    "features": {
+      "monthlyCredits": 0,
+      "uploads": 20,
+      "platformLimit": 6,
+      "monthlyPromotions": 30,
+      "support": "Email support",
+      "multicam": true,
+      "teamSeats": 1
+    },
+    "processing": {
+      "tokens": 100,
+      "resetHours": 144,
+      "rolling30DayTokens": 500,
+      "storageBytes": 1073741824
+    },
+    "purchaseEnabled": false
+  },
+  {
+    "id": "plus",
+    "name": "AutoPromote Plus",
+    "price": 4.99,
+    "currency": "USD",
+    "provisional": true,
+    "features": {
+      "monthlyCredits": 0,
+      "uploads": 80,
+      "platformLimit": 6,
+      "monthlyPromotions": 150,
+      "support": "Email support",
+      "multicam": true,
+      "teamSeats": 1
+    },
+    "processing": {
+      "tokens": 500,
+      "resetHours": 24,
+      "rolling30DayTokens": 2000,
+      "storageBytes": 5368709120
+    },
+    "purchaseEnabled": false
+  }
+]

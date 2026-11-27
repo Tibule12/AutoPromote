@@ -1,6 +1,7 @@
 // Lightweight test bypass: when CI_ROUTE_IMPORTS=1 (route import tests) or FIREBASE_ADMIN_BYPASS=1
 // we avoid real Firebase initialization and return in-memory stubs.
 // When running under jest/CI or with bypass envs, avoid initializing actual Firebase Admin
+require("./services/infrastructureTelemetry").install();
 const bypass =
   process.env.CI_ROUTE_IMPORTS === "1" ||
   process.env.FIREBASE_ADMIN_BYPASS === "1" ||

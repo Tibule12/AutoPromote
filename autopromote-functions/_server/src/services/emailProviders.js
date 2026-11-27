@@ -3,13 +3,20 @@
 
 const { maskEmail } = require("../utils/logSanitizer");
 
+const ZEPTOMAIL_DEFAULT_API_URL = "https://api.zeptomail.com/v1.1/email";
+
+function getZeptoMailConfig() {
+  return {
+    apiUrl: process.env.ZEPTOMAIL_API_URL || ZEPTOMAIL_DEFAULT_API_URL,
+    apiKey: process.env.ZEPTOMAIL_SEND_MAIL_TOKEN || process.env.ZEPTOMAIL_API_KEY,
+    fromEmail: process.env.ZEPTOMAIL_FROM_EMAIL || process.env.EMAIL_FROM,
+    fromName: process.env.ZEPTOMAIL_FROM_NAME || "AutoPromote",
+  };
+}
+
 function hasZeptoMailConfig() {
-  return Boolean(
-    process.env.ZEPTOMAIL_API_KEY &&
-      process.env.ZEPTOMAIL_API_URL &&
-      process.env.ZEPTOMAIL_FROM_EMAIL &&
-      process.env.ZEPTOMAIL_FROM_NAME
-  );
+  const { apiKey, fromEmail } = getZeptoMailConfig();
+  return Boolean(apiKey && fromEmail);
 }
 
 function hasSmtpConfig() {
@@ -32,14 +39,11 @@ const providers = {
   }),
 
   zeptomail: () => {
-    const apiUrl = process.env.ZEPTOMAIL_API_URL;
-    const apiKey = process.env.ZEPTOMAIL_API_KEY;
-    const fromEmail = process.env.ZEPTOMAIL_FROM_EMAIL;
-    const fromName = process.env.ZEPTOMAIL_FROM_NAME;
+    const { apiUrl, apiKey, fromEmail, fromName } = getZeptoMailConfig();
 
-    if (!apiUrl || !apiKey || !fromEmail || !fromName) {
+    if (!apiKey || !fromEmail) {
       throw new Error(
-        "missing ZEPTOMAIL_API_URL/ZEPTOMAIL_API_KEY/ZEPTOMAIL_FROM_EMAIL/ZEPTOMAIL_FROM_NAME"
+        "missing ZEPTOMAIL_SEND_MAIL_TOKEN (or ZEPTOMAIL_API_KEY) and ZEPTOMAIL_FROM_EMAIL"
       );
     }
 
@@ -152,7 +156,7 @@ const providers = {
     };
   },
 
-  // Zoho alias for smtp (backward compatibility if enviroment uses 'zoho')
+  // Keep the historical `zoho` name pointed at the ZeptoMail transactional API.
   zoho: () => {
     return providers.zeptomail();
   },
@@ -160,11 +164,14 @@ const providers = {
 
 function getEmailProvider() {
   const providerName = (
-    process.env.EMAIL_PROVIDER ||
-    (process.env.ZEPTOMAIL_API_KEY && process.env.ZEPTOMAIL_API_URL ? "zeptomail" : "console")
+    process.env.EMAIL_PROVIDER || (hasZeptoMailConfig() ? "zeptomail" : "console")
   ).toLowerCase();
 
-  if ((providerName === "smtp" || providerName === "zoho") && !hasSmtpConfig() && hasZeptoMailConfig()) {
+  if (
+    (providerName === "smtp" || providerName === "zoho") &&
+    !hasSmtpConfig() &&
+    hasZeptoMailConfig()
+  ) {
     console.warn("[email] SMTP requested but not fully configured, falling back to ZeptoMail");
     return providers.zeptomail();
   }
@@ -180,7 +187,9 @@ function getEmailProvider() {
   } catch (e) {
     if (providerName !== "zeptomail" && hasZeptoMailConfig()) {
       try {
-        console.warn(`[email] provider '${providerName}' failed to init, falling back to ZeptoMail`);
+        console.warn(
+          `[email] provider '${providerName}' failed to init, falling back to ZeptoMail`
+        );
         return providers.zeptomail();
       } catch (_) {}
     }

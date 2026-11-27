@@ -1,4 +1,4 @@
-const SUBSCRIPTION_PLANS = {
+const LEGACY_SUBSCRIPTION_PLANS = {
   free: {
     id: "free",
     name: "Starter",
@@ -60,6 +60,40 @@ const SUBSCRIPTION_PLANS = {
   },
 };
 
+// Legacy IDs remain resolvable for existing agreements and purchased-credit accounting.
+// They are never returned as new purchase options.
+const SHARED_FEATURES = {
+  monthlyCredits: 0,
+  uploads: 20,
+  platformLimit: 6,
+  monthlyPromotions: 30,
+  support: "Email support",
+  multicam: true,
+  teamSeats: 1,
+};
+const SUBSCRIPTION_PLANS = {
+  free: {
+    id: "free",
+    name: "AutoPromote Free",
+    price: 0,
+    currency: "USD",
+    provisional: true,
+    features: { ...SHARED_FEATURES },
+    processing: { tokens: 100, resetHours: 144, rolling30DayTokens: 500, storageBytes: 1073741824 },
+  },
+  plus: {
+    id: "plus",
+    name: "AutoPromote Plus",
+    price: 4.99,
+    currency: "USD",
+    provisional: true,
+    paypalPlanIdEnv: "PAYPAL_PLUS_PLAN_ID",
+    features: { ...SHARED_FEATURES, uploads: 80, monthlyPromotions: 150 },
+    processing: { tokens: 500, resetHours: 24, rolling30DayTokens: 2000, storageBytes: 5368709120 },
+  },
+};
+const ALL_SUBSCRIPTION_PLANS = { ...LEGACY_SUBSCRIPTION_PLANS, ...SUBSCRIPTION_PLANS };
+
 /**
  * Credit costs per media operation.
  * These are deducted from the user's monthly credit allocation (or purchased top-ups).
@@ -93,7 +127,7 @@ const EDITING_FEATURE_CATALOG = {
     pythonWorker: true,
     usesStorage: true,
     creditOperation: "process",
-    limitModel: "monthly_credits_then_topups",
+    limitModel: "server_resource_allowance",
   },
   audioExtract: {
     label: "Audio Extraction",
@@ -102,7 +136,7 @@ const EDITING_FEATURE_CATALOG = {
     pythonWorker: true,
     usesStorage: true,
     creditOperation: "transcribe",
-    limitModel: "monthly_credits_then_topups",
+    limitModel: "server_resource_allowance",
   },
   multicam: {
     label: "Cam Combiner",
@@ -111,7 +145,7 @@ const EDITING_FEATURE_CATALOG = {
     pythonWorker: false,
     usesStorage: false,
     creditOperation: null,
-    limitModel: "included_on_paid_plans",
+    limitModel: "shared_tools",
   },
   autoDirector: {
     label: "Auto Director",
@@ -120,7 +154,7 @@ const EDITING_FEATURE_CATALOG = {
     pythonWorker: false,
     usesStorage: false,
     creditOperation: null,
-    limitModel: "included_on_paid_plans",
+    limitModel: "shared_tools",
   },
   flowEdit: {
     label: "Flow Edit / Sync to Sound",
@@ -129,7 +163,7 @@ const EDITING_FEATURE_CATALOG = {
     pythonWorker: false,
     usesStorage: false,
     creditOperation: null,
-    limitModel: "included_on_paid_plans",
+    limitModel: "shared_tools",
   },
   thumbnailLab: {
     label: "Thumbnail Lab",
@@ -138,7 +172,7 @@ const EDITING_FEATURE_CATALOG = {
     pythonWorker: false,
     usesStorage: false,
     creditOperation: null,
-    limitModel: "included_on_paid_plans",
+    limitModel: "shared_tools",
   },
   findViralClips: {
     label: "Find Viral Clips",
@@ -147,7 +181,7 @@ const EDITING_FEATURE_CATALOG = {
     pythonWorker: false,
     usesStorage: true,
     creditOperation: "analyze",
-    limitModel: "monthly_credits_then_topups",
+    limitModel: "server_resource_allowance",
   },
   viralClipStudio: {
     label: "Viral Clip Studio",
@@ -156,7 +190,7 @@ const EDITING_FEATURE_CATALOG = {
     pythonWorker: false,
     usesStorage: false,
     creditOperation: null,
-    limitModel: "included_on_paid_plans",
+    limitModel: "shared_tools",
   },
   clipRender: {
     label: "Render Final Clip",
@@ -165,7 +199,7 @@ const EDITING_FEATURE_CATALOG = {
     pythonWorker: true,
     usesStorage: true,
     creditOperation: "render-clip",
-    limitModel: "monthly_credits_then_topups",
+    limitModel: "server_resource_allowance",
   },
   videoProcessing: {
     label: "AI Video Processing",
@@ -174,7 +208,7 @@ const EDITING_FEATURE_CATALOG = {
     pythonWorker: true,
     usesStorage: true,
     creditOperation: "process",
-    limitModel: "monthly_credits_then_topups",
+    limitModel: "server_resource_allowance",
   },
   multicamRender: {
     label: "Server Multicam Render",
@@ -183,7 +217,7 @@ const EDITING_FEATURE_CATALOG = {
     pythonWorker: true,
     usesStorage: true,
     creditOperation: "render-multicam",
-    limitModel: "monthly_credits_then_topups",
+    limitModel: "server_resource_allowance",
   },
 };
 
@@ -229,11 +263,11 @@ const PLAN_CAPABILITIES = {
 function normalizePlanId(value) {
   const raw = (value || "free").toString().trim().toLowerCase();
   if (raw === "basic") return "premium";
-  return SUBSCRIPTION_PLANS[raw] ? raw : "free";
+  return ALL_SUBSCRIPTION_PLANS[raw] ? raw : "free";
 }
 
 function resolvePlan(planId) {
-  return SUBSCRIPTION_PLANS[normalizePlanId(planId)] || SUBSCRIPTION_PLANS.free;
+  return ALL_SUBSCRIPTION_PLANS[normalizePlanId(planId)] || SUBSCRIPTION_PLANS.free;
 }
 
 function getUploadLimitForPlan(planId) {
@@ -242,18 +276,17 @@ function getUploadLimitForPlan(planId) {
 }
 
 function getPlatformLimitForPlan(planId) {
-  const limit = resolvePlan(planId).features.platformLimit;
-  return limit === "Unlimited" || limit === "unlimited" ? Infinity : Number(limit) || 1;
+  return 6;
 }
 
 function getPlanCapabilities(planId) {
   const normalizedPlanId = normalizePlanId(planId);
   const plan = resolvePlan(normalizedPlanId);
   const base = PLAN_CAPABILITIES[normalizedPlanId] || PLAN_CAPABILITIES.free;
-  const isPaidPlan = normalizedPlanId !== "free";
+
   const editing = Object.fromEntries(
     Object.entries(EDITING_FEATURE_CATALOG).map(([featureId, feature]) => {
-      const enabled = isPaidPlan;
+      const enabled = true;
       const creditCost = feature.creditOperation ? getCreditCost(feature.creditOperation) : 0;
       return [
         featureId,
@@ -271,23 +304,25 @@ function getPlanCapabilities(planId) {
   return {
     planId: normalizedPlanId,
     planName: plan.name,
-    recoveryLab: base.recoveryLab,
+    recoveryLab: true,
+    processing: plan.processing || SUBSCRIPTION_PLANS.plus.processing,
     support: {
       ...base.support,
+      ticketAccess: true,
       label: plan.features.support,
     },
     credits: {
       monthlyAllocation: plan.features.monthlyCredits || 0,
       label: `${plan.features.monthlyCredits || 0} editing credits per month`,
     },
-    multicam: !!plan.features.multicam,
+    multicam: true,
     teamSeats: plan.features.teamSeats || 1,
     editing: {
-      allPaidFeaturesUnlocked: isPaidPlan,
-      topUpsEnabled: isPaidPlan,
+      allPaidFeaturesUnlocked: true, // Compatibility field: tools are shared by every plan.
+      topUpsEnabled: true,
       monthlyCreditsIncluded: plan.features.monthlyCredits || 0,
       policy:
-        "Paid plans include the creative toolset. Credit-based generations draw from your monthly allowance first, and you can top up anytime.",
+        "Same creativity. Same tools. More usage when you upgrade. Local editing uses no cloud processing tokens.",
       features: editing,
     },
   };
@@ -302,6 +337,8 @@ function getCreditCost(operation) {
 }
 
 module.exports = {
+  LEGACY_SUBSCRIPTION_PLANS,
+  ALL_SUBSCRIPTION_PLANS,
   SUBSCRIPTION_PLANS,
   PLAN_CAPABILITIES,
   CREDIT_COSTS,

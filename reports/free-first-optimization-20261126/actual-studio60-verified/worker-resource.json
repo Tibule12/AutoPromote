@@ -1,0 +1,13 @@
+{
+  "wallSeconds": 189.61585149701568,
+  "cpuSeconds": 417.03707299999996,
+  "peakRssKiB": 757536,
+  "cpuCeilingSeconds": 600,
+  "localFileCeilingBytes": 134217728,
+  "providerChargesStarted": false,
+  "invoiceCostMicros": null,
+  "status": "completed",
+  "wallSecondsIncludingImport": 189.61585149701568,
+  "sourceBytes": 38935983,
+  "resourceScope": "local native process + children; peak RSS is largest process, not aggregate tree"
+}

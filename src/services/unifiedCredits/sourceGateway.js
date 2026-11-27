@@ -131,6 +131,7 @@ function createSourceGateway({
     return ownedUrl(uid, url);
   }
   const api = {
+    describeForRequest: sourceFor,
     async signedUrl(uid, name, { attachment = false } = {}) {
       const source = await describe(uid, name);
       return capability(attachment ? { ...source, attachment: true } : source);

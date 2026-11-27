@@ -18,9 +18,18 @@ beforeEach(() => {
   process.env.MEDIA_WORKER_GPU_URL = "https://gpu.example";
   delete process.env.MEDIA_WORKER_GPU_FALLBACK;
   delete process.env.MEDIA_WORKER_CPU_BUDGET_SECONDS;
+  delete process.env.FREE_FIRST_USAGE_ENABLED;
+  delete process.env.MEDIA_WORKER_ROUTING_POLICY;
   application.getApplicationContext.mockReturnValue(null);
 });
 afterAll(() => { process.env = prior; });
+
+test("renewable accounting never fails over an uncertain analysis into another paid attempt", async () => {
+  process.env.FREE_FIRST_USAGE_ENABLED = "true";
+  axios.post.mockRejectedValueOnce(Object.assign(new Error("timeout after acceptance"), {code:"ETIMEDOUT"}));
+  await expect(postMediaWorker("/analyze-clips",{source_duration_seconds:180})).rejects.toMatchObject({code:"ETIMEDOUT"});
+  expect(axios.post).toHaveBeenCalledTimes(1);
+});
 
 test('original Studio sounds refuse older workers before admission or dispatch',async()=>{
  const payload={end_time:4,sound_effects:[{builtIn:true,tone:'prism_sweep',enabled:true}]};
@@ -42,6 +51,17 @@ test("all speech sources use the GPU first, including short recordings", () => {
   expect(selectMediaWorker("/analyze-clips", { source_duration_seconds: 375 })).toMatchObject({device:"gpu",reason:"gpu_primary"});
   expect(selectMediaWorker("/analyze-clips", { source_duration_seconds: 20 })).toMatchObject({device:"gpu"});
   expect(selectMediaWorker("/analyze-clips")).toMatchObject({device:"gpu"});
+});
+test("opt-in cost routing uses the same CPU renderer for a qualified short full-quality edit across all plans", () => {
+  process.env.MEDIA_WORKER_ROUTING_POLICY = "cost-aware-v1";
+  const payload = {start_time:0,end_time:60,output_settings:{resolution:"1080p",fps:30}};
+  for (const tier of ["free","plus","pro"]) {
+    expect(selectMediaWorker("/render-viral-clip",{...payload,tier})).toMatchObject({device:"cpu",reason:"qualified_short_cpu"});
+  }
+  for (const extra of [{end_time:61},{auto_captions:true},{output_settings:{resolution:"2160p",fps:30}},
+    {output_settings:{resolution:"1080p",fps:60}},{composition_plan:{layers:[{},{}]}},{subjectVfx:[{}]}])
+    expect(selectMediaWorker("/render-viral-clip",{...payload,...extra})).toMatchObject({device:"gpu"});
+  expect(selectMediaWorker("/analyze-clips",{source_duration_seconds:60})).toMatchObject({device:"gpu"});
 });
 test("render budget follows output timeline duration, not a long source's original duration", () => {
   expect(selectMediaWorker("/render-viral-clip", { timeline_segments:[{start_time:300,end_time:332.8,duration:32.8}], motion_graphics:{} })).toMatchObject({device:"gpu",sourceSeconds:32.8});

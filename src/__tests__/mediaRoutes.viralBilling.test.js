@@ -3,6 +3,7 @@ const request = require("supertest");
 
 const mockAnalyzeVideo = jest.fn();
 const mockRenderClip = jest.fn();
+const mockStartAudioExtractionJob = jest.fn();
 const mockResolveOwnedTemporaryVideoSource = jest.fn();
 const mockDeleteOwnedTemporaryVideoSource = jest.fn();
 
@@ -22,6 +23,7 @@ jest.mock("../services/videoEditingService", () =>
   jest.fn().mockImplementation(() => ({
     analyzeVideo: mockAnalyzeVideo,
     renderClip: mockRenderClip,
+    startAudioExtractionJob: mockStartAudioExtractionJob,
   }))
 );
 
@@ -79,7 +81,7 @@ describe("viral scan and render billing recovery", () => {
     mockDeleteOwnedTemporaryVideoSource.mockResolvedValue({ status: "deleted" });
   });
 
-  it("blocks Starter plans during preflight before any upload or credit charge", async () => {
+  it("allows Free tools during preflight without charging until dispatch", async () => {
     getCreditBreakdown.mockResolvedValue({
       totalAvailable: 15,
       tier: "free",
@@ -95,8 +97,8 @@ describe("viral scan and render billing recovery", () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.body).toMatchObject({
-      allowed: false,
-      code: "VIRAL_SCAN_PLAN_REQUIRED",
+      allowed: true,
+      code: null,
       balance: 15,
       requiredCredits: 8,
     });
@@ -124,7 +126,7 @@ describe("viral scan and render billing recovery", () => {
     expect(deductCredits).not.toHaveBeenCalled();
   });
 
-  it("blocks tools outside the controlled Founding Tester allowlist", async () => {
+  it("shares creative tools with Founding Testers while retaining job controls", async () => {
     getEffectiveTierSnapshot.mockResolvedValue({
       tierId: "pro",
       testerAccess: {
@@ -135,12 +137,18 @@ describe("viral scan and render billing recovery", () => {
       accessSource: "tester_program",
     });
 
+    mockStartAudioExtractionJob.mockResolvedValue({ jobId: "audio-job" });
     const response = await request(buildApp())
       .post("/api/media/extract-audio")
       .send({ fileUrl: "https://example.com/source.mp4" });
 
-    expect(response.statusCode).toBe(403);
-    expect(response.body.code).toBe("TESTER_FEATURE_NOT_INCLUDED");
+    expect(response.statusCode).toBe(200);
+    expect(response.body.jobId).toBe("audio-job");
+    expect(mockStartAudioExtractionJob).toHaveBeenCalledWith(
+      "https://example.com/source.mp4",
+      "viral-user",
+      { sourceLabel: "" }
+    );
     expect(deductCredits).not.toHaveBeenCalled();
   });
 
@@ -178,17 +186,41 @@ describe("viral scan and render billing recovery", () => {
     expect(refundCredits).not.toHaveBeenCalled();
   });
 
-  it('rejects invalid clip preferences before charging or contacting the worker',async()=>{
-    const response=await request(buildApp()).post('/api/media/analyze').send({fileUrl:'https://example.com/source.mp4',selectionSettings:{minDuration:60,maxDuration:15,destinations:['tiktok'],focus:''}});
-    expect(response.statusCode).toBe(400);expect(response.body.code).toBe('VIRAL_SCAN_SETTINGS_INVALID');
-    expect(deductCredits).not.toHaveBeenCalled();expect(mockAnalyzeVideo).not.toHaveBeenCalled();
+  it("rejects invalid clip preferences before charging or contacting the worker", async () => {
+    const response = await request(buildApp())
+      .post("/api/media/analyze")
+      .send({
+        fileUrl: "https://example.com/source.mp4",
+        selectionSettings: {
+          minDuration: 60,
+          maxDuration: 15,
+          destinations: ["tiktok"],
+          focus: "",
+        },
+      });
+    expect(response.statusCode).toBe(400);
+    expect(response.body.code).toBe("VIRAL_SCAN_SETTINGS_INVALID");
+    expect(deductCredits).not.toHaveBeenCalled();
+    expect(mockAnalyzeVideo).not.toHaveBeenCalled();
   });
 
-  it('carries validated length, destinations and brief to actual analysis admission',async()=>{
+  it("carries validated length, destinations and brief to actual analysis admission", async () => {
     mockAnalyzeVideo.mockResolvedValue([]);
-    const settings={minDuration:60,maxDuration:90,destinations:['youtube_shorts'],focus:'customer retention'};
-    const response=await request(buildApp()).post('/api/media/analyze').send({fileUrl:'https://example.com/source.mp4',selectionSettings:settings});
-    expect(response.statusCode).toBe(200);expect(mockAnalyzeVideo).toHaveBeenCalledWith('https://example.com/source.mp4','viral-user',expect.objectContaining({selectionSettings:{...settings,version:'moments-v2'}}));
+    const settings = {
+      minDuration: 60,
+      maxDuration: 90,
+      destinations: ["youtube_shorts"],
+      focus: "customer retention",
+    };
+    const response = await request(buildApp())
+      .post("/api/media/analyze")
+      .send({ fileUrl: "https://example.com/source.mp4", selectionSettings: settings });
+    expect(response.statusCode).toBe(200);
+    expect(mockAnalyzeVideo).toHaveBeenCalledWith(
+      "https://example.com/source.mp4",
+      "viral-user",
+      expect.objectContaining({ selectionSettings: { ...settings, version: "moments-v2" } })
+    );
   });
 
   it("verifies an owned temporary upload and deletes it after analysis", async () => {

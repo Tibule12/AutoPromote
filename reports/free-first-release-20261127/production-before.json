@@ -1,0 +1,86 @@
+[
+  {
+    "origin": "https://api.autopromote.org",
+    "path": "/api/version",
+    "status": 200,
+    "data": {
+      "ok": true,
+      "version": "1.2.0",
+      "commit": "3f11ebf67793d49610bc449357a21bfb1d7a5b14",
+      "securityPolicy": "security-owner-bootstrap-20261027",
+      "generatedAt": "2026-11-27T03:40:14.557Z"
+    }
+  },
+  {
+    "origin": "https://api.autopromote.org",
+    "path": "/health",
+    "error": "JSONDecodeError"
+  },
+  {
+    "origin": "https://api.autopromote.org",
+    "path": "/api/paypal-subscriptions/plans",
+    "status": 200,
+    "data": {
+      "plans": [
+        {
+          "id": "free",
+          "price": 0
+        },
+        {
+          "id": "premium",
+          "price": 14.99
+        },
+        {
+          "id": "pro",
+          "price": 34.99
+        },
+        {
+          "id": "enterprise",
+          "price": 99.99
+        }
+      ]
+    }
+  },
+  {
+    "origin": "https://autopromote.onrender.com",
+    "path": "/api/version",
+    "status": 200,
+    "data": {
+      "ok": true,
+      "version": "1.2.0",
+      "commit": "3f11ebf67793d49610bc449357a21bfb1d7a5b14",
+      "securityPolicy": "security-owner-bootstrap-20261027",
+      "generatedAt": "2026-11-27T03:40:15.833Z"
+    }
+  },
+  {
+    "origin": "https://autopromote.onrender.com",
+    "path": "/health",
+    "error": "JSONDecodeError"
+  },
+  {
+    "origin": "https://autopromote.onrender.com",
+    "path": "/api/paypal-subscriptions/plans",
+    "status": 200,
+    "data": {
+      "plans": [
+        {
+          "id": "free",
+          "price": 0
+        },
+        {
+          "id": "premium",
+          "price": 14.99
+        },
+        {
+          "id": "pro",
+          "price": 34.99
+        },
+        {
+          "id": "enterprise",
+          "price": 99.99
+        }
+      ]
+    }
+  }
+]

@@ -1,8 +1,11 @@
 // TikTok OAuth and API integration (server-side only) with sandbox/production mode support
 const express = require("express");
 const fetch = require("node-fetch");
+const fs = require("node:fs");
+const { withStagedMedia } = require("../utils/stagedMedia");
 const router = express.Router();
 const authMiddleware = require("../authMiddleware");
+const workspaceScope = require("../middlewares/workspaceScope");
 const { cleanupSourceFile } = require("../utils/cleanupSource");
 const { admin, db } = require("../firebaseAdmin");
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
@@ -19,6 +22,7 @@ const { safeFetch } = require("../utils/ssrfGuard");
 const { tokenInfo, objSummary } = require("../utils/logSanitizer");
 // Helper to extract/decrypt stored token blobs from connection documents
 const { tokensFromDoc } = require("../services/connectionTokenUtils");
+const { resolveTikTokDisclosures, tikTokDisclosurePostInfo } = require("../utils/tiktokDisclosures");
 
 // Rate limiters for TikTok routes (router-level).
 // `rateLimiter` is a facade that uses a distributed limiter when available,
@@ -381,7 +385,7 @@ router.get(
     const cfg = activeConfig();
     if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
     try {
-      const uid = req.userId || req.user?.uid;
+      const uid = require("../middlewares/workspaceScope").resourceUserId(req);
       if (!uid) return res.status(401).json({ error: "Unauthorized" });
       const crypto = require("crypto");
       const nonce = crypto.randomBytes(16).toString("hex"); // Use cryptographically secure random
@@ -861,13 +865,14 @@ router.get(
 router.get(
   "/status",
   authMiddleware,
+  workspaceScope,
   ttPublicLimiter,
   require("../statusInstrument")("tiktokStatus", async (req, res) => {
     const started = Date.now();
     try {
       const cfg = activeConfig();
       if (ensureTikTokEnv(res, cfg, { requireSecret: false })) return;
-      const uid = req.userId || req.user?.uid;
+      const uid = require("../middlewares/workspaceScope").resourceUserId(req);
       if (!uid) return res.status(401).json({ connected: false, error: "Unauthorized" });
       const { getCache, setCache } = require("../utils/simpleCache");
       const { dedupe } = require("../utils/inFlight");
@@ -948,7 +953,7 @@ router.get(
 router.get("/debug/state", authMiddleware, ttPublicLimiter, async (req, res) => {
   if (!DEBUG_TIKTOK_OAUTH) return res.status(404).json({ error: "debug_disabled" });
   try {
-    const uid = req.userId || req.user?.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     if (!uid) return res.status(401).json({ error: "Unauthorized" });
     const doc = await db.collection("users").doc(uid).collection("oauth_state").doc("tiktok").get();
     if (!doc.exists) return res.json({ exists: false });
@@ -972,6 +977,7 @@ router.get("/debug/state", authMiddleware, ttPublicLimiter, async (req, res) => 
 router.post(
   "/upload",
   authMiddleware,
+  workspaceScope,
   rateLimit({ max: 5, windowMs: 3600000, key: r => r.ip }),
   async (req, res) => {
     // DEMO MODE: Return success response to demonstrate UX flow for TikTok approval
@@ -979,12 +985,19 @@ router.post(
     const DEMO_MODE = process.env.TIKTOK_DEMO_MODE === "true";
 
     try {
-      const uid = req.userId || req.user?.uid;
+      const uid = require("../middlewares/workspaceScope").resourceUserId(req);
       if (!uid) return res.status(401).json({ error: "Unauthorized" });
 
       // Accept payload fields used by frontend: url (storage URL), title, meta, platform_options
       const { meta = {}, platform_options = {} } = req.body || {};
       const tiktokOpts = platform_options && platform_options.tiktok;
+      let conn = null;
+      let disclosures;
+      try {
+        disclosures = resolveTikTokDisclosures({ platform_options: { tiktok: tiktokOpts || {} } });
+      } catch (error) {
+        return res.status(400).json({ error: error.code, message: error.message });
+      }
 
       // If TikTok options present, validate required UX fields (privacy + consent)
       if (tiktokOpts) {
@@ -1021,7 +1034,7 @@ router.post(
           .collection("connections")
           .doc("tiktok")
           .get();
-        const conn = connSnap.exists ? connSnap.data() : null;
+        conn = connSnap.exists ? connSnap.data() : null;
 
         // Conservative default info
         const defaultInfo = {
@@ -1163,9 +1176,9 @@ router.post(
         // If commercial content is enabled, require at least one of yourBrand or brandedContent
         if (
           tiktokOpts &&
-          tiktokOpts.commercial &&
-          tiktokOpts.commercial.yourBrand === false &&
-          tiktokOpts.commercial.brandedContent === false
+          disclosures.isCommercial &&
+          !disclosures.brandOrganic &&
+          !disclosures.brandedContent
         ) {
           try {
             await db.collection("admin_audit").add({
@@ -1193,8 +1206,7 @@ router.post(
         // Branded content cannot be private: enforce invariant server-side as well
         if (
           tiktokOpts &&
-          tiktokOpts.commercial &&
-          tiktokOpts.commercial.brandedContent &&
+          disclosures.brandedContent &&
           tiktokOpts.privacy === "SELF_ONLY"
         ) {
           try {
@@ -1246,7 +1258,7 @@ router.post(
           }
 
           // Require disclosure when content is marked as AI-generated
-          if (tiktokOpts.is_aigc) {
+          if (disclosures.aiGenerated) {
             if (!tiktokOpts.disclosure) {
               try {
                 await db.collection("admin_audit").add({
@@ -1274,8 +1286,7 @@ router.post(
 
           // Require disclosure when any commercial/branded flag is selected
           if (
-            tiktokOpts.commercial &&
-            (tiktokOpts.commercial.yourBrand || tiktokOpts.commercial.brandedContent)
+            disclosures.brandOrganic || disclosures.brandedContent
           ) {
             if (!tiktokOpts.disclosure) {
               try {
@@ -1305,8 +1316,7 @@ router.post(
         // Branded content cannot be private: enforce invariant server-side as well
         if (
           tiktokOpts &&
-          tiktokOpts.commercial &&
-          tiktokOpts.commercial.brandedContent &&
+          disclosures.brandedContent &&
           tiktokOpts.privacy === "SELF_ONLY"
         ) {
           try {
@@ -1487,7 +1497,6 @@ router.post(
 
       // 3. Initiate Upload
       const { safeFetch } = require("../utils/ssrfGuard");
-      const { validateUrl } = require("../utils/urlValidator"); // Assuming this exists or we use safeFetch
 
       console.log("[TikTok Upload] Initializing upload for open_id:", openId);
 
@@ -1514,104 +1523,106 @@ router.post(
         return res.status(400).json({ error: "invalid_video_url", message: "Invalid video URL." });
       }
 
-      // Step A: Init Upload
-      const initRes = await safeFetch(
-        "https://open.tiktokapis.com/v2/post/publish/video/init/",
-        fetch,
-        {
-          fetchOptions: {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json; charset=UTF-8",
+      return await withStagedMedia({ url: videoUrl, fetchImpl: fetch }, async ({ filePath, bytes, signal }) => {
+        // Step A: Init Upload
+        const initRes = await safeFetch(
+          "https://open.tiktokapis.com/v2/post/publish/video/init/",
+          fetch,
+          {
+            fetchOptions: {
+              method: "POST",
+              signal,
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json; charset=UTF-8",
+              },
+              body: JSON.stringify({
+                post_info: {
+                  title: req.body.title || "AutoPromote Video",
+                  privacy_level: tiktokOpts?.privacy || "PUBLIC_TO_EVERYONE", // Map to API constants
+                  disable_duet:
+                    tiktokOpts?.interactions?.duet === false ||
+                    tiktokOpts?.interactions?.duet === false,
+                  disable_comment: tiktokOpts?.interactions?.comments === false,
+                  disable_stitch: tiktokOpts?.interactions?.stitch === false,
+                  video_cover_timestamp_ms: 1000, // Optional: default cover
+                  ...tikTokDisclosurePostInfo(disclosures),
+                },
+                source_info: {
+                  source: "FILE_UPLOAD",
+                  video_size: bytes,
+                  chunk_size: bytes,
+                  total_chunk_count: 1,
+                },
+              }),
             },
-            body: JSON.stringify({
-              post_info: {
-                title: req.body.title || "AutoPromote Video",
-                privacy_level: tiktokOpts?.privacy || "PUBLIC_TO_EVERYONE", // Map to API constants
-                disable_duet:
-                  tiktokOpts?.interactions?.duet === false ||
-                  tiktokOpts?.interactions?.duet === false,
-                disable_comment: tiktokOpts?.interactions?.comments === false,
-                disable_stitch: tiktokOpts?.interactions?.stitch === false,
-                video_cover_timestamp_ms: 1000, // Optional: default cover
-              },
-              source_info: {
-                source: "FILE_UPLOAD",
-                video_size: req.body.meta?.size || 0, // Ideally we have size
-                chunk_size: req.body.meta?.size || 0,
-                total_chunk_count: 1,
-              },
-            }),
+            requireHttps: true,
+            allowHosts: ["open.tiktokapis.com"],
+          }
+        );
+
+        // Analyze Init Response
+        const initData = await initRes.json();
+        if (!initRes.ok || !initData.data || !initData.data.upload_url) {
+          console.error("[TikTok Upload] Init failed:", JSON.stringify(initData));
+          // Fallback to legacy endpoint if v2 post init fails (in case app uses older scope)
+          // ... But for now, report error
+          return res.status(400).json({
+            error: "tiktok_init_failed",
+            message: "Failed to initialize upload with TikTok.",
+            details: initData,
+          });
+        }
+
+        const uploadUrl = initData.data.upload_url;
+        const publishId = initData.data.publish_id;
+
+        // Step B: Upload File
+        console.log("[TikTok Upload] Uploading file to:", uploadUrl);
+
+        // Upload to TikTok
+        const uploadRes = await safeFetch(uploadUrl, fetch, {
+          fetchOptions: {
+            method: "PUT",
+            headers: {
+              "Content-Type": "video/mp4",
+              "Content-Range": `bytes 0-${bytes - 1}/${bytes}`,
+              "Content-Length": String(bytes),
+            },
+            body: fs.createReadStream(filePath, { signal }),
+            signal,
           },
           requireHttps: true,
-          allowHosts: ["open.tiktokapis.com"],
-        }
-      );
-
-      // Analyze Init Response
-      const initData = await initRes.json();
-      if (!initRes.ok || !initData.data || !initData.data.upload_url) {
-        console.error("[TikTok Upload] Init failed:", JSON.stringify(initData));
-        // Fallback to legacy endpoint if v2 post init fails (in case app uses older scope)
-        // ... But for now, report error
-        return res.status(400).json({
-          error: "tiktok_init_failed",
-          message: "Failed to initialize upload with TikTok.",
-          details: initData,
+          allowHosts: ["open.tiktokapis.com", "tiktokapis.com"], // Add exact host if different for upload
         });
-      }
 
-      const uploadUrl = initData.data.upload_url;
-      const publishId = initData.data.publish_id;
+        if (!uploadRes.ok) {
+          const upErr = await uploadRes.text();
+          console.error("[TikTok Upload] File upload failed:", upErr);
+          return res
+            .status(400)
+            .json({ error: "tiktok_upload_error", message: "Failed to send video file to TikTok." });
+        }
 
-      // Step B: Upload File
-      console.log("[TikTok Upload] Uploading file to:", uploadUrl);
+        // Matches typical "Direct Post" flow: Init -> Upload.
+        // Often checking status is next, but successful upload usually implies queuing for publish.
 
-      // fetch the file content from storage URL
-      const fileRes = await safeFetch(videoUrl, fetch, {
-        fetchOptions: { timeout: 60000 },
-        requireHttps: true,
-      });
-      if (!fileRes.ok) throw new Error(`Failed to download video from storage: ${fileRes.status}`);
-      const fileBuffer = await fileRes.buffer();
+        // Aggressive Cleanup to save storage costs
+        await cleanupSourceFile(videoUrl);
 
-      // Upload to TikTok
-      const uploadRes = await safeFetch(uploadUrl, fetch, {
-        fetchOptions: {
-          method: "PUT",
-          headers: {
-            "Content-Type": "video/mp4",
-            "Content-Range": `bytes 0-${fileBuffer.length - 1}/${fileBuffer.length}`,
-            "Content-Length": fileBuffer.length,
-          },
-          body: fileBuffer,
-        },
-        requireHttps: true,
-        allowHosts: ["open.tiktokapis.com", "tiktokapis.com"], // Add exact host if different for upload
-      });
-
-      if (!uploadRes.ok) {
-        const upErr = await uploadRes.text();
-        console.error("[TikTok Upload] File upload failed:", upErr);
-        return res
-          .status(400)
-          .json({ error: "tiktok_upload_error", message: "Failed to send video file to TikTok." });
-      }
-
-      // Matches typical "Direct Post" flow: Init -> Upload.
-      // Often checking status is next, but successful upload usually implies queuing for publish.
-
-      // Aggressive Cleanup to save storage costs
-      await cleanupSourceFile(videoUrl);
-
-      res.json({
-        success: true,
-        publish_id: publishId,
-        message: "Video uploaded to TikTok successfully.",
+        res.json({
+          success: true,
+          publish_id: publishId,
+          message: "Video uploaded to TikTok successfully.",
+        });
       });
     } catch (err) {
       console.error("TikTok upload error:", err);
+      if (err.code === "MEDIA_TRANSFER_BUSY") {
+        res.set("Retry-After", String(err.retryAfter));
+        return res.status(503).json({ error: err.code, message: err.message });
+      }
+      if (err.status === 413) return res.status(413).json({ error: "media_too_large" });
       // Determine if it was a permissions issue
       const msg = err.message || "";
       if (msg.includes("scope") || msg.includes("permission")) {
@@ -1629,7 +1640,7 @@ router.post(
 // Get user's TikTok video list (approved scope: video.list)
 router.get("/videos", authMiddleware, ttPublicLimiter, async (req, res) => {
   try {
-    const uid = req.userId || req.user?.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     if (!uid) return res.status(401).json({ error: "Unauthorized" });
 
     const userRef = db.collection("users").doc(uid);
@@ -1771,9 +1782,9 @@ module.exports = router;
 // Returns minimal creator settings needed by the frontend: display name, privacy options,
 // max video duration, and allowed interactions (comment/duet/stitch). This is used by
 // the frontend to render the required UX before publishing to TikTok.
-router.get("/creator_info", authMiddleware, ttPublicLimiter, async (req, res) => {
+router.get("/creator_info", authMiddleware, workspaceScope, ttPublicLimiter, async (req, res) => {
   try {
-    const uid = req.userId || req.user?.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     if (!uid) return res.status(401).json({ error: "Unauthorized" });
 
     const DEMO_MODE =

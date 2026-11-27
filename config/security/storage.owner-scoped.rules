@@ -13,6 +13,20 @@ service firebase.storage {
         (!firestore.exists(/databases/(default)/documents/users/$(userId)) ||
          firestore.get(/databases/(default)/documents/users/$(userId)).data.get('uploadBlocked', false) != true);
     }
+    // Controlled storage migration: enabling this server-owned switch requires a
+    // measured inventory and API reservation before a direct SDK upload.
+    function hasStorageReservation(userId) {
+      let control = /databases/(default)/documents/processing_control/storage;
+      let enabled = firestore.exists(control) && firestore.get(control).data.get('enforceReservations', false);
+      let id = request.resource.metadata.get('processingReservationId', 'missing');
+      let reservation = /databases/(default)/documents/processing_storage_reservations/$(id);
+      return !enabled || (firestore.exists(reservation) &&
+        firestore.get(reservation).data.userId == userId &&
+        firestore.get(reservation).data.state == 'reserved' &&
+        firestore.get(reservation).data.bytes == request.resource.size &&
+        firestore.get(reservation).data.expiresAt > request.time.toMillis() &&
+        firestore.get(reservation).data.storagePath == request.resource.name);
+    }
     function isTrustedAdmin() {
       return isVerified() && request.auth.uid in ['bf04dPKELvVMivWoUyLsAVyw2sg2'];
     }
@@ -22,31 +36,31 @@ service firebase.storage {
     match /uploads/{mediaType}/{userId}/{allPaths=**} {
       allow read: if isOwner(userId);
       allow create, update: if mediaType in ['videos', 'images', 'audios'] &&
-        canUpload(userId) && request.resource.size < 500 * 1024 * 1024 &&
+        canUpload(userId) && hasStorageReservation(userId) && request.resource.size < 500 * 1024 * 1024 &&
         request.resource.metadata.ownerUid == userId;
       allow delete: if isOwner(userId);
     }
     match /temp_scans/{userId}/{allPaths=**} {
       allow read, delete: if isOwner(userId);
-      allow create, update: if canUpload(userId) &&
+      allow create, update: if canUpload(userId) && hasStorageReservation(userId) &&
         request.resource.size < 500 * 1024 * 1024 &&
         request.resource.metadata.ownerUid == userId &&
         request.resource.metadata.sourcePurpose == 'viral_scan';
     }
     match /temp_sources/{userId}/{allPaths=**} {
       allow read, delete: if isOwner(userId);
-      allow create, update: if canUpload(userId) && request.resource.size < 500 * 1024 * 1024;
+      allow create, update: if canUpload(userId) && hasStorageReservation(userId) && request.resource.size < 500 * 1024 * 1024;
     }
     // Existing editor/thumbnail/memetic SDK paths previously used the 50 MiB fallback.
     match /{prefix}/{userId}/{allPaths=**} {
       allow read, delete: if prefix in ['temp_uploads', 'temp_analysis', 'thumbnails', 'memetic_seeds'] && isOwner(userId);
       allow create, update: if prefix in ['temp_uploads', 'temp_analysis', 'thumbnails', 'memetic_seeds'] &&
-        canUpload(userId) && request.resource.size < 50 * 1024 * 1024;
+        canUpload(userId) && hasStorageReservation(userId) && request.resource.size < 50 * 1024 * 1024;
     }
     // Preserve the existing owner-scoped Cam Combiner layouts and size behaviour.
     match /temp/{purpose}/{userId}/{allPaths=**} {
       allow read, delete: if purpose in ['multicam', 'multicam-clean-sync', 'multicam-clean-sync-audio', 'multicam-ingest'] && isOwner(userId);
-      allow create, update: if purpose in ['multicam', 'multicam-clean-sync', 'multicam-clean-sync-audio', 'multicam-ingest'] && canUpload(userId);
+      allow create, update: if purpose in ['multicam', 'multicam-clean-sync', 'multicam-clean-sync-audio', 'multicam-ingest'] && canUpload(userId) && hasStorageReservation(userId);
     }
 
     // Public assets remain readable; public shared writes require reviewed authority.
@@ -56,7 +70,7 @@ service firebase.storage {
     }
     match /content/{userId}/published/{allPaths=**} {
       allow read: if true;
-      allow create, update: if canUpload(userId) && request.resource.size < 50 * 1024 * 1024;
+      allow create, update: if canUpload(userId) && hasStorageReservation(userId) && request.resource.size < 50 * 1024 * 1024;
       allow delete: if isOwner(userId);
     }
     match /landing-pages/{allPaths=**} {

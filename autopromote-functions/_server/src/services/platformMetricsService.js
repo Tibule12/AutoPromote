@@ -2,6 +2,7 @@
 // Phase 3: Fetch metrics for platform posts (skeleton implementations, best-effort)
 
 const fetch = require("node-fetch");
+const { numericMetric } = require("./platformMetricValues");
 
 const { getPostStats: getFacebookPostStats } = require("./facebookService");
 
@@ -26,10 +27,13 @@ async function fetchFacebookPostMetrics(uid, externalId, pageId) {
     if (!stats) return null;
     return {
       post_impressions: stats.impressions,
+      views: stats.views,
+      shares: stats.shares,
       post_engaged_users: stats.engagedUsers,
       // map other fields if needed for computing score
       likes: stats.likes,
       comments: stats.comments,
+      issues: stats.issues || [],
     };
   } catch (e) {
     console.warn("[PlatformMetrics] Facebook fetch failed:", e.message);
@@ -53,23 +57,41 @@ async function fetchTwitterTweetMetrics(tweetId) {
   }
 }
 
-async function fetchInstagramMediaMetrics(mediaId) {
-  const IG_TOKEN = process.env.FACEBOOK_PAGE_ACCESS_TOKEN; // Assuming same token scope if IG connected
-  if (!IG_TOKEN || !mediaId) return null;
+async function fetchInstagramMediaMetrics(uid, mediaId) {
+  if (!uid || !mediaId) return null;
   try {
-    // Basic metrics: impressions, reach, engagement (varies by media type)
-    const url = `https://graph.facebook.com/${mediaId}/insights?metric=impressions,reach,engagement&access_token=${encodeURIComponent(IG_TOKEN)}`;
-    const res = await fetch(url);
-    const json = await safeJson(res);
+    const conn = await require("./facebookService").getUserFacebookConnection(uid);
+    if (!conn) return null;
+    const igId = conn.ig_business_account_id || conn.instagramBusinessAccountId || conn.instagramId;
+    const pages = conn.pages || conn.meta?.pages || [];
+    const page = pages.find(p => p.instagram_business_account?.id === igId) || (pages.length === 1 ? pages[0] : null);
+    const token = page?.access_token || (page?.encrypted_access_token ? require("./secretVault").decryptToken(page.encrypted_access_token) : null) || conn.tokens?.access_token;
+    if (!token) return null;
+    // Basic media counters use the account's own connection, never a global token.
+    const res = await fetch(`https://graph.facebook.com/v22.0/${encodeURIComponent(mediaId)}?fields=like_count,comments_count`,
+      { headers: { Authorization: `Bearer ${token}` }, timeout: 12000 });
     if (!res.ok) return null;
-    const metrics = {};
-    (json.data || []).forEach(m => {
-      metrics[m.name] = parseInt(m.values?.[0]?.value || 0, 10);
-    });
-    return metrics;
-  } catch (_) {
-    return null;
-  }
+    const data = await safeJson(res);
+    const result = { like_count: numericMetric(data.like_count), comment_count: numericMetric(data.comments_count) };
+    try {
+    const insights = await fetch(`https://graph.facebook.com/v24.0/${encodeURIComponent(mediaId)}/insights?metric=views,reach`,
+      { headers: { Authorization: `Bearer ${token}` }, timeout: 12000 });
+    const insightData = await safeJson(insights);
+    if (insights.ok) {
+      const values = Object.fromEntries((insightData.data || []).map(row => [row.name,
+        row.total_value?.value ?? row.values?.at(-1)?.value]));
+      result.view_count = numericMetric(values.views);
+      result.reach = numericMetric(values.reach);
+    } else {
+      result.issues = [{ metric: "views", code: [10, 200].includes(insightData.error?.code)
+        ? "PERMISSION_DENIED" : "PROVIDER_REQUEST_FAILED",
+      message: insightData.error?.message || "Instagram insights request failed." }];
+    }
+    } catch {
+      result.issues = [{ metric: "views", code: "PROVIDER_REQUEST_FAILED", message: "Instagram insights could not be retrieved." }];
+    }
+    return result;
+  } catch (_) { return null; }
 }
 
 const { getVideoMetrics } = require("./tiktokService");
@@ -78,24 +100,35 @@ const { getPostStats: getLinkedInPostStats } = require("./linkedinService");
 const { getPostInfo: getRedditPostInfo } = require("./redditService");
 const { getTracksBatch } = require("./spotifyService");
 
-async function fetchTikTokMetrics(uid, externalId) {
-  if (!uid || !externalId) return null;
+async function fetchTikTokMetrics(uid, externalId, { publishId } = {}) {
+  if (!uid) return null;
   try {
-    const videos = await getVideoMetrics(uid, [externalId]);
+    const publicId = /^[0-9]{10,30}$/.test(String(externalId || "")) ? String(externalId) : null;
+    const reference = publishId || (String(externalId || "").startsWith("v_pub") ? externalId : null);
+    const videos = await getVideoMetrics(uid, publicId ? [publicId] : [], { publishId: reference });
     if (!videos || videos.length === 0) return null;
 
     const v = videos[0];
     // Normalize strict typing
     return {
-      view_count: v.view_count || 0,
-      like_count: v.like_count || 0,
-      comment_count: v.comment_count || 0,
-      share_count: v.share_count || 0,
+      view_count: numericMetric(v.view_count),
+      like_count: numericMetric(v.like_count),
+      comment_count: numericMetric(v.comment_count),
+      share_count: numericMetric(v.share_count),
+      publicVideoId: typeof v.id === "string" ? v.id : publicId,
     };
   } catch (e) {
     console.warn("[PlatformMetrics] TikTok fetch failed for %s: %s", externalId, e.message);
-    return null;
+    return {
+      publicVideoId: errorPublicVideoId(e),
+      collectionError: { code: e.code || "PROVIDER_REQUEST_FAILED", message: e.message.slice(0, 400) },
+    };
   }
+}
+
+function errorPublicVideoId(error) {
+  return typeof error?.publicVideoId === "string" && /^[0-9]{10,30}$/.test(error.publicVideoId)
+    ? error.publicVideoId : null;
 }
 
 async function fetchYouTubeMetrics(uid, externalId) {
@@ -105,9 +138,9 @@ async function fetchYouTubeMetrics(uid, externalId) {
     if (!data || !data.statistics) return null;
 
     return {
-      view_count: parseInt(data.statistics.viewCount || "0", 10),
-      like_count: parseInt(data.statistics.likeCount || "0", 10),
-      comment_count: parseInt(data.statistics.commentCount || "0", 10),
+      view_count: numericMetric(data.statistics.viewCount),
+      like_count: numericMetric(data.statistics.likeCount),
+      comment_count: numericMetric(data.statistics.commentCount),
       // YouTube doesn't always show shares publicly via API
     };
   } catch (e) {
@@ -121,13 +154,13 @@ async function fetchLinkedInMetrics(uid, externalId) {
   try {
     const stats = await getLinkedInPostStats({ uid, shareId: externalId });
     return {
-      like_count: stats.likes || 0,
-      comment_count: stats.comments || 0,
+      like_count: numericMetric(stats.likes),
+      comment_count: numericMetric(stats.comments),
       // LinkedIn API (basic) doesn't give views/impressions easily
     };
   } catch (e) {
     console.warn("[PlatformMetrics] LinkedIn fetch failed:", e.message);
-    return null;
+    return { collectionError: { code: e.code || "PROVIDER_REQUEST_FAILED", message: e.message.slice(0, 400) } };
   }
 }
 
@@ -167,13 +200,15 @@ async function fetchBatchMetrics(platform, items) {
     const results = {};
     for (const [uid, ids] of Object.entries(byUid)) {
       try {
-        const videos = await getVideoMetrics(uid, ids);
+        const videos = [];
+        for (let offset = 0; offset < ids.length; offset += 20)
+          videos.push(...await getVideoMetrics(uid, ids.slice(offset, offset + 20)));
         videos.forEach(v => {
           results[v.id] = {
-            view_count: v.view_count || 0,
-            like_count: v.like_count || 0,
-            comment_count: v.comment_count || 0,
-            share_count: v.share_count || 0,
+            view_count: numericMetric(v.view_count),
+            like_count: numericMetric(v.like_count),
+            comment_count: numericMetric(v.comment_count),
+            share_count: numericMetric(v.share_count),
           };
         });
       } catch (e) {
@@ -217,7 +252,7 @@ async function fetchBatchMetrics(platform, items) {
       let metrics = null;
       if (platform === "facebook")
         metrics = await fetchFacebookPostMetrics(item.uid, item.id, item.pageId);
-      else if (platform === "instagram") metrics = await fetchInstagramMediaMetrics(item.id);
+      else if (platform === "instagram") metrics = await fetchInstagramMediaMetrics(item.uid, item.id);
       else if (platform === "twitter") metrics = await fetchTwitterTweetMetrics(item.id);
       else if (platform === "linkedin") metrics = await fetchLinkedInMetrics(item.uid, item.id);
       else if (platform === "youtube") metrics = await fetchYouTubeMetrics(item.uid, item.id);

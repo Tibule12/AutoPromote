@@ -194,6 +194,7 @@ def _release_capacity(job_id, reason):
         if not snapshot.exists:
             return False
         data = snapshot.to_dict() or {}
+
         active_jobs = data.get("activeJobs") or {}
         if not isinstance(active_jobs, dict):
             active_jobs = {}
@@ -226,7 +227,8 @@ def _release_capacity(job_id, reason):
 
 
 def _claim_job(doc_ref, dispatch_token, execution_id):
-    transaction = worker.firestore.client().transaction()
+    db = worker.firestore.client()
+    transaction = db.transaction()
 
     @worker.firestore.transactional
     def claim(transaction):
@@ -249,6 +251,11 @@ def _claim_job(doc_ref, dispatch_token, execution_id):
         ):
             return "completed", data
 
+        from renewable_job_admission import renewable_claim
+        renewable = renewable_claim(
+            lambda collection, identity: db.collection(collection).document(identity).get(transaction=transaction).to_dict(),
+            os.environ, doc_ref.id, data, execution_id,
+        )
         lease = data.get("renderLease") or {}
         lease_execution = str(lease.get("execution") or "")
         lease_expires_at = str(lease.get("expiresAt") or "")
@@ -264,6 +271,11 @@ def _claim_job(doc_ref, dispatch_token, execution_id):
             return "duplicate", data
 
         now = datetime.datetime.now(datetime.timezone.utc)
+        if renewable:
+            transaction.set(
+                db.collection("processing_worker_bindings").document(renewable["bindingId"]),
+                {"workerClaim": renewable}, merge=True,
+            )
         transaction.set(
             doc_ref,
             {

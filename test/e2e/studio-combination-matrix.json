@@ -27676,5 +27676,103 @@
       "Overall recognition defects and broad preview/device/combination limits remain explicit",
       "Newer local Node/VFX edits need matching-revision evidence reconciliation"
     ]
+  },
+  "freeFirstSubscriptions20261126": {
+    "scope": "Shared creative access and opt-in processing budgets; renderer and formal readiness classifications unchanged.",
+    "evidenceRefs": [
+      "reports/free-first-20261126/README.md",
+      "reports/free-first-20261126/native-render-evidence.json",
+      "reports/free-first-20261126/tests-final.log",
+      "reports/free-first-20261126/browser-evidence.json",
+      "reports/free-first-20261126/studio-output-evidence.json",
+      "reports/free-first-20261126/finished-playback.json"
+    ],
+    "verified": [
+      "emulator allowance reset and financial controls",
+      "native CPU render and signed terminal accounting",
+      "unchanged purchased/promotional wallet documents",
+      "real signed-in Free App upload/title/Undo/Redo/save/cold reopen/native export; 100 to 97 reference tokens and unchanged legacy wallet"
+    ],
+    "remaining": [
+      "all six actual provider publications",
+      "production adapter/host-loss/GPU/storage validation",
+      "existing S02/S04/S03 and broader preview/export parity"
+    ]
+  },
+  "freeFirstProcessingOptimization20261126": {
+    "scope": "Offline production-algorithm cost reduction and real signed-in 60s native edit; complete operating-environment reference estimates. No readiness or creative promotion.",
+    "evidenceRefs": [
+      "reports/free-first-optimization-20261126/README.md",
+      "reports/free-first-optimization-20261126/actual-studio60-verified/browser-evidence.json",
+      "reports/free-first-optimization-20261126/actual-studio60-verified/finished-playback.json",
+      "reports/free-first-optimization-20261126/neutral-finish-comparison.json",
+      "reports/free-first-optimization-20261126/OPERATING-ENVIRONMENT.md"
+    ],
+    "verified": [
+      "normal Free upload/title/history/save/cold-reopen/60s native export, complete finished playback, 100 to 76 local reference tokens, legacy wallet unchanged",
+      "Finder ingest CPU reduction, exact transcription reuse, neutral finish pass fusion; native worker movies fully decode",
+      "manual two-stream external-audio Cam and effects/keyed-title CPU movies; independent-camera/ordinary effects App scope not inferred",
+      "unreserved dispatcher/provider/fallback protection and idle account-poll demand exclusion",
+      "46 financial/native/economics, 133 dispatcher/idle, 178 worker, 14 unified-wallet cases"
+    ],
+    "remaining": [
+      "funded bounded production adapters and per-operation all-in attribution",
+      "independent cameras/drift/auto-switch/reaction and first-use background/3D workflow qualification",
+      "six-provider publication and exact owner creative/listening approval",
+      "current Render service plan/scaling/bandwidth; merchant fee statement and incomplete billing attribution",
+      "S02/S04/S03, full predictive picture/audio/material/lighting/latency parity and historical typography failures unchanged"
+    ]
+  },
+  "freeFirstInfrastructureWaste20261127": {
+    "date": "2026-11-27",
+    "scope": "Measured local infrastructure waste removal and identical retained 60s native-output adoption; no new creative render, deployment or readiness promotion.",
+    "evidenceRefs": [
+      "reports/free-first-waste-20261126/README.md",
+      "reports/free-first-waste-20261126/local-before-after.json",
+      "reports/free-first-waste-20261126/media-transfer-before-after.json",
+      "reports/free-first-waste-20261126/free-first-regression-final.log",
+      "reports/free-first-waste-20261126/client/verification.json",
+      "reports/free-first-waste-20261126/welcome/verification.json"
+    ],
+    "verified": [
+      "Real Firestore emulator: repeated held-source retention writes 100 to 0; sparse preflight queries 80 to 8 with fresh deletion guards preserved",
+      "Concurrent diagnostic views 800 to 21 estimated document reads; nonfinancial counter commits 100 to 2 with totals preserved",
+      "Actual retained 60s native MP4 SHA256 unchanged; local real-SDK server rewrite removes complete backend re-upload",
+      "Actual Functions SDK consolidated export invokes retained approval handler; duplicate event creates one emulator schedule"
+    ],
+    "remaining": [
+      "Production source/app/route attribution for complete 30-day usage and hosted Render CPU/RSS/latency/concurrency",
+      "Approved coordinated Function migration, production GCS generation/IAM/rewrite qualification and complete safe registry ownership/reachability review",
+      "Funded bounded production adapters, independent cameras/drift/automatic speaker/reaction, complete first-use background/3D and six-provider publication",
+      "S02/S04/S03, whole predictive parity, historical typography 13/16 failures and owner creative/listening approval remain unchanged"
+    ],
+    "readinessPromotion": false,
+    "nextTaskId": "S02"
+  },
+  "freeFirstProductionQualification20261127": {
+    "date": "2026-11-27",
+    "scope": "Owner-authorized independent cost/payment release; remaining Free/Plus/worker gates disabled.",
+    "evidenceRefs": [
+      "reports/free-first-release-20261127/README.md",
+      "reports/free-first-release-20261127/STAGED-RELEASE.md",
+      "reports/free-first-release-20261127/production-after.json",
+      "reports/free-first-release-20261127/firestore-rules-release.json",
+      "reports/free-first-release-20261127/retention-cache-local.json",
+      "reports/free-first-release-20261127/allowance-qualification.json"
+    ],
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "verified": [
+      "PR560 deployed on both production API origins; financial-only Rules delta published and read back.",
+      "Negative-only retention cache passes real repeated-cycle and safety tests; PR561 release qualification.",
+      "Renewable Cloud Run adapter/native admission and authenticated billing UI tested locally with provider fixtures; activation off."
+    ],
+    "remaining": [
+      "Live warm-cycle document-read measurement and longer billing comparison.",
+      "Production worker/IAM/host-loss/all-in scope and independent-camera/first-use background/3D/six-provider qualification.",
+      "Lossless writer barrier/journal and all-handler receipts before trigger cutover.",
+      "Render/external ownership before any registry deletion; merchant payment lifecycle before plan activation.",
+      "S02/S04/S03, typography13/16 and owner creative/listening approval unchanged."
+    ]
   }
 }

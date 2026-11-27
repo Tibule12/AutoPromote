@@ -8,11 +8,12 @@ const { getUserUsageStats } = require("./middlewares/usageLimitMiddleware");
 const { getCreditBreakdown } = require("./creditSystem");
 const { getEffectiveTierSnapshot } = require("./services/billingService");
 const {
-  SUBSCRIPTION_PLANS,
+  ALL_SUBSCRIPTION_PLANS: SUBSCRIPTION_PLANS,
   getPlanCapabilities,
   normalizePlanId,
   CREDIT_TOP_UP_PACKS,
 } = require("./config/subscriptionPlans");
+const { applyTesterCapabilityAllowlist } = require("./config/testerProgram");
 
 const router = express.Router();
 
@@ -59,7 +60,7 @@ const kycLimiter = rateLimiter({
 const userDefaultsCache = new Map();
 const USER_DEFAULTS_TTL_MS = parseInt(process.env.USER_DEFAULTS_TTL_MS || "15000", 10);
 
-function buildUserDefaultsPayload(snap) {
+function buildUserDefaultsPayload(snap, authority = {}) {
   const data = snap.data() || {};
   return {
     user: {
@@ -82,8 +83,8 @@ function buildUserDefaultsPayload(snap) {
           : typeof data.automation?.autoRepostEnabled === "boolean"
             ? data.automation.autoRepostEnabled
             : true,
-      role: data.role || "user",
-      isAdmin: data.isAdmin || false,
+      role: authority.role || "user",
+      isAdmin: authority.isAdmin === true,
     },
   };
 }
@@ -95,16 +96,19 @@ async function buildSubscriptionProfilePayload(userId, user) {
   ]);
   const normalizedPlanId = normalizePlanId(tierSnapshot.tierId);
   const plan = SUBSCRIPTION_PLANS[normalizedPlanId] || SUBSCRIPTION_PLANS.free;
-  const capabilities = getPlanCapabilities(normalizedPlanId);
+  const capabilities = applyTesterCapabilityAllowlist(
+    getPlanCapabilities(normalizedPlanId),
+    tierSnapshot.testerAccess
+  );
 
   return {
     success: true,
     user,
     userId,
     planId: normalizedPlanId,
-    planName: plan.name,
-    tierName: capabilities.planName || plan.name,
-    price: plan.price,
+    planName: tierSnapshot.testerAccess ? "Founding Tester" : plan.name,
+    tierName: tierSnapshot.testerAccess ? "Founding Tester" : capabilities.planName || plan.name,
+    price: tierSnapshot.testerAccess ? 0 : plan.price,
     monthlyCredits: {
       allocation: credits.monthlyAllocation,
       used: credits.monthlyUsed,
@@ -121,6 +125,21 @@ async function buildSubscriptionProfilePayload(userId, user) {
     entitlements: capabilities,
     topUpPacks: CREDIT_TOP_UP_PACKS,
     subscriptionStatus: tierSnapshot.status || "inactive",
+    testerAccess: tierSnapshot.testerAccess
+      ? {
+          programId: tierSnapshot.testerAccess.programId,
+          programName: tierSnapshot.testerAccess.programName,
+          status: tierSnapshot.testerAccess.status,
+          planId: tierSnapshot.testerAccess.planId,
+          grantedAt: tierSnapshot.testerAccess.grantedAt,
+          expiresAt: tierSnapshot.testerAccess.expiresAt,
+          bonusCredits: tierSnapshot.testerAccess.bonusCredits,
+          creditAllowance: tierSnapshot.testerAccess.creditAllowance,
+          creditsUsed: tierSnapshot.testerAccess.creditsUsed || 0,
+          allowedWorkflows: tierSnapshot.testerAccess.allowedWorkflows || [],
+          autoRenews: false,
+        }
+      : null,
     email: user?.email || "",
     tier: normalizedPlanId,
     balance: credits.totalAvailable,
@@ -138,7 +157,7 @@ router.get("/me", authMiddleware, writeLimiter, async (req, res) => {
     const ref = db.collection("users").doc(req.userId);
     const snap = await ref.get();
     if (!snap.exists) return res.status(404).json({ error: "User not found" });
-    const payload = buildUserDefaultsPayload(snap);
+    const payload = buildUserDefaultsPayload(snap, req.user);
     userDefaultsCache.set(req.userId, { ts: Date.now(), payload });
     res.json(payload);
   } catch (err) {
@@ -185,14 +204,9 @@ router.put("/me", authMiddleware, writeLimiter, async (req, res) => {
         autoRepostEnabled,
       };
     }
-    // Prevent downgrading admin role or isAdmin
-    if (currentData.role === "admin" || currentData.isAdmin === true) {
-      updates.role = "admin";
-      updates.isAdmin = true;
-    }
     await ref.set(updates, { merge: true });
     const snap = await ref.get();
-    const payload = buildUserDefaultsPayload(snap);
+    const payload = buildUserDefaultsPayload(snap, req.user);
     userDefaultsCache.set(req.userId, { ts: Date.now(), payload });
     res.json(payload);
   } catch (err) {
@@ -211,8 +225,8 @@ router.get("/profile", authMiddleware, publicLimiter, async (req, res) => {
       user = {
         id: userDoc.id,
         ...userDoc.data(),
-        role: userDoc.data().role || "user",
-        isAdmin: userDoc.data().isAdmin || false,
+        role: req.user.role || "user",
+        isAdmin: req.user.isAdmin === true,
       };
 
       // AUTO-UNBLOCK LOGIC: Check if quota reset (new month) is needed
@@ -234,7 +248,7 @@ router.get("/profile", authMiddleware, publicLimiter, async (req, res) => {
     } else {
       // If not found, try admins collection
       const adminDoc = await db.collection("admins").doc(req.userId).get();
-      if (adminDoc.exists) {
+      if (adminDoc.exists && req.user.isAdmin === true) {
         user = {
           id: adminDoc.id,
           ...adminDoc.data(),
@@ -696,28 +710,11 @@ router.get("/me/plan", authMiddleware, async (req, res) => {
   }
 });
 
-// Assign / change my plan (temporary pseudo billing)
+// Plan changes require the existing verified billing flow; no self-assignment.
 router.post("/me/plan", authMiddleware, async (req, res) => {
-  try {
-    const { tier } = req.body || {};
-    if (!tier) return res.status(400).json({ ok: false, error: "tier required" });
-    const { getPlans } = require("./services/planService");
-    const plans = getPlans();
-    const found = plans.find(p => p.tier === tier);
-    if (!found) return res.status(400).json({ ok: false, error: "unknown tier" });
-    const ref = db.collection("users").doc(req.userId);
-    await ref.set(
-      {
-        plan: {
-          tier,
-          assignedAt: new Date().toISOString(),
-          pricing: { monthly: found.monthly || null },
-        },
-      },
-      { merge: true }
-    );
-    return res.json({ ok: true, plan: { tier, assignedAt: new Date().toISOString() } });
-  } catch (e) {
-    return res.status(500).json({ ok: false, error: e.message });
-  }
+  return res.status(410).json({
+    ok: false,
+    error: "self_service_plan_assignment_disabled",
+    recommendedEndpoint: "/api/paypal-subscriptions/create-subscription",
+  });
 });

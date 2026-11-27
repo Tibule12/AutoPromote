@@ -1,0 +1,16 @@
+{
+  "validatedOffline": true,
+  "status": "CREATED",
+  "priceUsd": 4.99,
+  "billingPeriod": "MONTH",
+  "trial": false,
+  "setupFeeUsd": 0,
+  "productIdResolved": false,
+  "providerPlanCreated": false,
+  "providerPlanActivated": false,
+  "blockers": [
+    "Approved merchant product ID and actual country/fees/tax handling",
+    "Authorized PayPal sandbox return/webhook/refund/renewal testing",
+    "Production worker and complete Free-workflow qualification before purchase enablement"
+  ]
+}

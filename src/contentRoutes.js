@@ -55,7 +55,7 @@ async function ensureRecoveryLabAccess(userId) {
   );
 
   if (!entitlements.recoveryLab) {
-    const error = new Error("Recovery Lab is available on Studio and Agency plans.");
+    const error = new Error("Recovery Lab is available on Free and Plus, subject to processing capacity.");
     error.statusCode = 403;
     error.entitlements = entitlements;
     throw error;

@@ -1,10 +1,12 @@
 const fs = require('node:fs');
 const crypto = require('node:crypto');
 const {Readable} = require('node:stream');
-const mockObjects = new Map(), mockReads = [], mockUploads = jest.fn();
+const mockObjects = new Map(), mockReads = [], mockUploads = jest.fn(), mockCopies = jest.fn();
 let mockNonce = 0;
 const mockBucket = { name:'private-test-bucket', upload:mockUploads,
   file:(name,options) => ({
+    name,
+    copy:(destination,copyOptions)=>mockCopies({name,options},destination.name,copyOptions),
     getMetadata:async()=>{if(!mockObjects.has(name))throw Object.assign(new Error('absent'),{code:404});return [mockObjects.get(name).metadata];},
     createReadStream:()=>{mockReads.push({name,options});return Readable.from([mockObjects.get(name).bytes]);},
     getSignedUrl:async()=>[`https://storage.googleapis.com/private-test-bucket/${name}?test=${++mockNonce}`],
@@ -35,6 +37,13 @@ test('retained local recovery hashes only the exact private canonical job file',
 beforeEach(()=>{
   mockObjects.clear();mockReads.length=0;mockUploads.mockReset();mockNonce=0;
   mockObjects.set(source,{bytes,metadata:{size:String(bytes.length),generation:'123'}});
+  mockCopies.mockReset();
+  mockCopies.mockImplementation(async(sourceFile,destination,options)=>{
+    expect(sourceFile.options).toEqual({generation:'123'});
+    expect(options.preconditionOpts).toEqual({ifGenerationMatch:0});
+    if(mockObjects.has(destination))throw Object.assign(new Error('already exists'),{code:412});
+    mockObjects.set(destination,{bytes:Buffer.from(mockObjects.get(sourceFile.name).bytes),metadata:{size:String(bytes.length),generation:'456',contentType:options.contentType,metadata:options.metadata}});
+  });
   mockUploads.mockImplementation(async(file,options)=>{
     expect(options.preconditionOpts).toEqual({ifGenerationMatch:0});
     if(mockObjects.has(options.destination))throw Object.assign(new Error('already exists'),{code:412});
@@ -70,14 +79,14 @@ test('preserves the QuickTime extension and MIME when adopting a ProRes master',
   const url = input.url.replace(/\.mp4\?/, '.mov?');
   const result = await persistWorkerBucketOutput({ ...input, url });
   expect(result).toMatchObject({ storagePath: ownedPath, sha256: digest, bytes: bytes.length });
-  expect(mockUploads).toHaveBeenCalledWith(expect.stringMatching(/\.mov$/), expect.objectContaining({
-    destination: ownedPath, metadata: expect.objectContaining({ contentType: 'video/quicktime' }),
+  expect(mockCopies).toHaveBeenCalledWith(expect.anything(), ownedPath, expect.objectContaining({
+    contentType: 'video/quicktime',
   }));
   expect(mockObjects.get(ownedPath).bytes).toEqual(bytes);
 });
 test('repeated adoption renews access without rereading or replacing immutable bytes',async()=>{
   const first=await persistWorkerBucketOutput(input),second=await persistWorkerBucketOutput(input);
-  expect(first.url).not.toBe(second.url);expect(mockReads).toHaveLength(1);expect(mockUploads).toHaveBeenCalledTimes(1);
+  expect(first.url).not.toBe(second.url);expect(mockReads).toHaveLength(1);expect(mockCopies).toHaveBeenCalledTimes(1);expect(mockUploads).not.toHaveBeenCalled();
 });
 test('changed source bytes never become a finished owned export',async()=>{
   mockObjects.get(source).bytes=Buffer.from('different payload same length');
@@ -95,8 +104,8 @@ test.each([{ownerUid:'other-owner'},{sha256:'a'.repeat(64)}])('an existing confl
   expect(mockReads).toHaveLength(0);expect(mockUploads).not.toHaveBeenCalled();
 });
 test('a simultaneous matching creator can win while keeping one immutable result',async()=>{
-  mockUploads.mockImplementationOnce(async(file,options)=>{
-    mockObjects.set(target,{bytes:fs.readFileSync(file),metadata:{size:String(bytes.length),generation:'789',metadata:options.metadata.metadata}});
+  mockCopies.mockImplementationOnce(async(_source,_destination,options)=>{
+    mockObjects.set(target,{bytes,metadata:{size:String(bytes.length),generation:'789',metadata:options.metadata}});
     throw Object.assign(new Error('already exists'),{code:412});
   });
   expect(await persistWorkerBucketOutput(input)).toMatchObject({sha256:digest,generation:'789'});

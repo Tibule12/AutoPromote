@@ -1992,8 +1992,8 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalVideoRe
               </p>
               <div className="tg-billing-note">
                 {canUseFeature("thumbnailLab")
-                  ? "Included on paid plans. Concepting, remixing, and creative direction stay available without spending generation credits."
-                  : "Upgrade to a paid plan to unlock Thumbnail Lab."}
+                  ? "Available on Free and Plus. Concepting, remixing, and creative direction stay available without spending generation credits."
+                  : "Thumbnail Lab is available on Free and Plus."}
               </div>
               <div className="tg-header-actions">
                 {stage === "idle" && (

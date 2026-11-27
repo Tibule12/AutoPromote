@@ -771,7 +771,8 @@ class VideoEditingService {
   async postCamCombinerWorker(endpoint, payload, timeout) {
     const primaryUrl = `${CAM_COMBINER_WORKER_URL}${endpoint}`;
     try {
-      const requestConfig = await buildWorkerRequestConfig(primaryUrl, { timeout });
+      const identityConfig = await buildWorkerRequestConfig(primaryUrl, { timeout });
+      const requestConfig = await require("./unifiedCredits/workerTransport").applicationWorkerConfig(primaryUrl, payload, identityConfig);
       return await axios.post(primaryUrl, payload, requestConfig);
     } catch (error) {
       const workerDetail = getWorkerErrorDetail(error);
@@ -1421,6 +1422,7 @@ class VideoEditingService {
   }
 
   async planStoryVisuals(beats, userId, options = {}) {
+    require("./processingTokens/runtime").assertDispatch();
     const payload = {
       beats: Array.isArray(beats) ? beats : [],
       max_candidates: Math.max(1, Math.min(4, Number(options.maxCandidates || 3))),

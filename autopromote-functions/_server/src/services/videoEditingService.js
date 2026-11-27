@@ -3,20 +3,38 @@
 // Bridges Node.js backend with Python Media Worker
 
 const axios = require("axios");
-const admin = require("firebase-admin");
+const { captionTranscriptionOptions } = require("./captionTranscriptionOptions");
+const { admin, db } = require("../firebaseAdmin");
 const crypto = require("crypto");
-const db = admin.firestore();
 const fs = require("fs");
+const { mediaOperationSummary, errorSummary, safeLogText } = require("../utils/logSanitizer");
+const { encodeStudioJobOptions, decodeStudioJobOptions } = require('./studioJobOptions');
+const { isTransientWorkerOutput, persistWorkerOutput, persistWorkerBucketOutput } = require("./studioWorkerOutputService");
 const { queueAudioExtractionTask } = require("./mediaWorkerTaskQueue");
 const { deductCredits, refundCredits } = require("../creditSystem");
+const { buildWorkerRequestConfig } = require("../utils/cloudRunAuth");
+const { postMediaWorker, assertMediaWorkerReady } = require("./mediaWorkerRouting");
+const {
+  executeMulticamRenderJob,
+  isDurableMulticamRenderEnabled,
+} = require("./cloudRunJobService");
+const { ensureMulticamGpuAdmission, recordDispatch } = require("./multicamGpuAdmission");
+const {
+  releaseMulticamRenderCapacity,
+  reserveMulticamRenderCapacity,
+} = require("./multicamCapacityService");
 
 // Point to the Python service (default to Cloud Run in production, localhost in dev)
 // Use the deployed URL for stability if env var is missing
 const MEDIA_WORKER_URL =
   process.env.MEDIA_WORKER_URL || "https://media-worker-v1-341498038874.us-central1.run.app";
+const DEFAULT_CAM_COMBINER_WORKER_URL =
+  "https://cam-combiner-worker-341498038874.us-central1.run.app";
 const LOCAL_MEDIA_WORKER_URL = process.env.LOCAL_MEDIA_WORKER_URL || "http://127.0.0.1:8000";
 const CAM_COMBINER_WORKER_URL =
-  process.env.CAM_COMBINER_WORKER_URL || process.env.MULTICAM_WORKER_URL || MEDIA_WORKER_URL;
+  process.env.CAM_COMBINER_WORKER_URL ||
+  process.env.MULTICAM_WORKER_URL ||
+  DEFAULT_CAM_COMBINER_WORKER_URL;
 const LOCAL_CAM_COMBINER_WORKER_URL =
   process.env.LOCAL_CAM_COMBINER_WORKER_URL || LOCAL_MEDIA_WORKER_URL;
 const IS_PRODUCTION_RUNTIME =
@@ -26,8 +44,44 @@ const ALLOW_LOCAL_WORKER_FALLBACK =
   (!IS_PRODUCTION_RUNTIME && process.env.ALLOW_LOCAL_WORKER_FALLBACK !== "false");
 const MULTICAM_MASTER_RETENTION_DAYS = Math.max(
   1,
-  parseInt(process.env.MULTICAM_MASTER_RETENTION_DAYS || "4", 10) || 4
+  parseInt(process.env.MULTICAM_MASTER_RETENTION_DAYS || "7", 10) || 7
 );
+const DEFAULT_MULTICAM_CHECKPOINT_SECONDS =
+  parseInt(process.env.MULTICAM_CHECKPOINT_SECONDS || String(5 * 60), 10) || 5 * 60;
+const VIRAL_RENDER_WORKER_TIMEOUT_MS = Math.max(
+  60 * 1000,
+  parseInt(process.env.VIRAL_RENDER_WORKER_TIMEOUT_MS || String(62 * 60 * 1000), 10) ||
+    62 * 60 * 1000
+);
+
+function normalizeMulticamCheckpointContract(multicamRequest = {}) {
+  const totalDurationSeconds = Math.max(
+    0,
+    Number(
+      multicamRequest.totalDurationSeconds ??
+        multicamRequest.total_duration_seconds ??
+        multicamRequest.overlapDuration ??
+        multicamRequest.overlap_duration ??
+        0
+    ) || 0
+  );
+  const checkpointSeconds = Math.max(
+    1,
+    Number(
+      multicamRequest.checkpointSeconds ??
+        multicamRequest.checkpoint_seconds ??
+        DEFAULT_MULTICAM_CHECKPOINT_SECONDS
+    ) || DEFAULT_MULTICAM_CHECKPOINT_SECONDS
+  );
+  const expectedCheckpointCount = Math.max(1, Math.ceil(totalDurationSeconds / checkpointSeconds));
+  return {
+    renderSpecVersion: 2,
+    totalDurationSeconds,
+    checkpointSeconds,
+    checkpointedRender: expectedCheckpointCount > 1,
+    expectedCheckpointCount,
+  };
+}
 
 function getWorkerErrorDetail(error) {
   const status = error.response?.status;
@@ -83,6 +137,11 @@ function getMulticamExpiryIso(fromMs = Date.now()) {
 const { v4: uuidv4 } = require("uuid");
 
 class VideoEditingService {
+  static readProcessingOptions(record) { return decodeStudioJobOptions(record); }
+  async assertRenderWorkerReady(options = {}) {
+    return assertMediaWorkerReady(options.viralData || {});
+  }
+
   async startAudioExtractionJob(videoUrl, userId, options = {}) {
     const jobId = uuidv4();
     console.log(`[VideoEditing] Starting audio extraction job ${jobId} for User ${userId}`);
@@ -134,7 +193,7 @@ class VideoEditingService {
 
       return { jobId };
     } catch (error) {
-      console.error(`[VideoEditing] Failed to start audio extraction job ${jobId}:`, error.message);
+      console.error(`[VideoEditing] Failed to start audio extraction job ${jobId}:`, errorSummary(error));
 
       await db.collection("video_edits").doc(jobId).set(
         {
@@ -154,68 +213,92 @@ class VideoEditingService {
    * Start an async video processing job
    * Returns a jobId immediately for polling.
    */
-  async startProcessingJob(videoUrl, options, userId, requestOptions = {}) {
-    const renderRequestId = String(requestOptions.renderRequestId || "").trim();
-    const jobId = renderRequestId
-      ? `viral_${crypto
-          .createHash("sha256")
-          .update(`${userId}:${renderRequestId}`)
-          .digest("hex")
-          .slice(0, 40)}`
-      : uuidv4();
+  async startProcessingJob(videoUrl, options, userId, attempt = {}) {
+    require("./unifiedCredits/application").assertApplicationDatabase(db);
+    require("./unifiedCredits/application").assertApplicationTransport(MEDIA_WORKER_URL);
+    const jobId = attempt.jobId || uuidv4();
     console.log(`[VideoEditing] Starting Async Job ${jobId} for User ${userId}`);
 
+    let dispatched = false;
     try {
       const jobRef = db.collection("video_edits").doc(jobId);
       const jobData = {
         jobId,
         userId,
         videoUrl,
-        options,
-        ...(renderRequestId ? { renderRequestId } : {}),
+        ...encodeStudioJobOptions(options),
+        ...(attempt.renderRequestId ? { type: "viral_render", renderRequestId: attempt.renderRequestId } : {}),
+        ...(attempt.sourceRenderJobId ? { sourceRenderJobId: attempt.sourceRenderJobId } : {}),
+        ...(attempt.creditReceipt ? { creditReceipt: attempt.creditReceipt } : {}),
         status: "queued",
         progress: 0,
         createdAt: new Date().toISOString(),
       };
-      let created = true;
-
-      if (renderRequestId) {
-        created = await db.runTransaction(async transaction => {
-          const existing = await transaction.get(jobRef);
-          if (existing.exists) {
-            const existingData = existing.data() || {};
-            if (existingData.userId !== userId) {
-              throw new Error("Render request belongs to a different user");
-            }
-            return false;
-          }
-          transaction.set(jobRef, jobData);
-          return true;
-        });
-      } else {
-        await jobRef.set(jobData);
+      try {
+        // create() is atomic across server instances. A repeated request must
+        // never replace an existing job or dispatch the same render twice.
+        if (attempt.jobId) await jobRef.create(jobData);
+        else await jobRef.set(jobData);
+      } catch (createError) {
+        if (!attempt.jobId) throw createError;
+        const existing = await jobRef.get();
+        if (
+          existing.exists &&
+          existing.data()?.userId === userId &&
+          existing.data()?.renderRequestId === attempt.renderRequestId &&
+          existing.data()?.options?.renderViral === true
+        ) {
+          return { jobId, reused: true, status: existing.data().status };
+        }
+        throw createError;
       }
 
-      if (created) {
-        // Start background processing without awaiting. A retry with the same
-        // renderRequestId returns this durable job instead of dispatching twice.
-        this.processJobBackground(jobId, videoUrl, options, userId).catch(err => {
-          console.error(`[VideoEditing] Background Job ${jobId} Failed (uncaught):`, err);
-        });
-      }
+      // Start background processing without awaiting
+      const localCreditContext = require("./unifiedCredits/application").getApplicationContext(userId);
+      if (localCreditContext) await localCreditContext.bindJob("video_edits", jobId);
+      dispatched = true;
+      this.processJobBackground(jobId, videoUrl, options, userId).catch(err => {
+        console.error(`[VideoEditing] Background Job ${jobId} Failed (uncaught):`, errorSummary(err));
+      });
 
-      return { jobId, deduplicated: !created };
+      return { jobId, reused: false };
     } catch (error) {
-      console.error("Failed to start job:", error);
+      if (!dispatched) {
+        const localContext = require('./unifiedCredits/application').getApplicationContext(userId);
+        if (localContext) await localContext.confirmNoDispatch();
+      }
+      console.error("Failed to start job:", errorSummary(error));
       throw new Error("Failed to queue video processing job");
     }
   }
 
-  async startMulticamRenderJob(multicamRequest, userId) {
-    const jobId = uuidv4();
+  async startMulticamRenderJob(multicamRequest, userId, options = {}) {
+    const jobId = options.jobId || uuidv4();
+    const durableRender = isDurableMulticamRenderEnabled();
+    const checkpointContract = normalizeMulticamCheckpointContract(multicamRequest);
+    const normalizedMulticamRequest = { ...multicamRequest, ...checkpointContract };
+    let capacityReserved = options.capacityReserved === true;
+    const dispatchToken = durableRender ? uuidv4() : null;
+    const dispatchTokenHash = dispatchToken
+      ? crypto.createHash("sha256").update(dispatchToken).digest("hex")
+      : null;
+    const persistedRequest = durableRender
+      ? this.buildMulticamWorkerPayload(normalizedMulticamRequest, jobId)
+      : normalizedMulticamRequest;
+    if (durableRender) {
+      persistedRequest.async_mode = true;
+      persistedRequest.job_id = jobId;
+      persistedRequest.plan_only = false;
+      persistedRequest.planOnly = false;
+    }
     console.log(`[VideoEditing] Starting multicam render job ${jobId} for User ${userId}`);
 
     try {
+      if (durableRender && !capacityReserved) {
+        await reserveMulticamRenderCapacity({ jobId, userId });
+        capacityReserved = true;
+      }
+
       await db
         .collection("video_edits")
         .doc(jobId)
@@ -223,23 +306,110 @@ class VideoEditingService {
           jobId,
           userId,
           type: "multicam_render",
-          multicamRequest,
+          multicamRequest: persistedRequest,
+          ...checkpointContract,
+          renderCheckpoint: {
+            stage: "queued",
+            currentIndex: null,
+            completedCount: 0,
+            expectedCount: checkpointContract.expectedCheckpointCount,
+            completedDurationSeconds: 0,
+            totalDurationSeconds: checkpointContract.totalDurationSeconds,
+          },
           creditReceipt: multicamRequest?.creditReceipt || null,
+          pendingCreditCost: Number(multicamRequest?.pendingCreditCost || 0),
+          requireServerProof: multicamRequest?.requireServerProof === true,
           retentionDays: MULTICAM_MASTER_RETENTION_DAYS,
           status: "queued",
+          stage: durableRender ? "queued_for_cloud_run_job" : "queued",
+          dispatchMode: durableRender ? "cloud_run_job" : "process_background",
+          dispatchTokenHash,
           progress: 0,
           createdAt: new Date().toISOString(),
         });
 
-      this.processMulticamJobBackground(jobId, multicamRequest, userId).catch(err => {
-        console.error(`[VideoEditing] Multicam Job ${jobId} Failed (uncaught):`, err);
-      });
+      if (durableRender) {
+        const jobRef = db.collection("video_edits").doc(jobId);
+        try {
+          const dispatch = await executeMulticamRenderJob({ jobId, dispatchToken, multicamRequest: persistedRequest });
+          await recordDispatch(db, jobRef, dispatch);
+          if (dispatch.device === "gpu" || dispatch.routeReason === "gpu_unavailable") this.ensureMulticamGpuAdmission(jobId);
+        } catch (error) {
+          // A lost provider reply may already have started the task. Preserve
+          // the job/charge, then fence only if no worker has claimed it.
+          if (!error.multicamDispatchDevice || (error.response && Number(error.response.status) < 500)) throw error;
+          await db.runTransaction(async transaction => {
+            const data = (await transaction.get(jobRef)).data();
+            if (data?.status !== "queued" || data.renderLease?.claimedAt) return;
+            transaction.set(jobRef, { executionDevice: error.multicamDispatchDevice,
+              ...(error.multicamDispatchDevice === "cpu" ? { gpuFallbackCount: 1 } : {}),
+              dispatchedAt: new Date().toISOString(), stage: "awaiting_worker_admission",
+              detail: "Checking worker startup before continuing the same render" }, { merge: true });
+          });
+          this.ensureMulticamGpuAdmission(jobId);
+        }
+      } else {
+        this.processMulticamJobBackground(jobId, normalizedMulticamRequest, userId).catch(err => {
+          console.error(`[VideoEditing] Multicam Job ${jobId} Failed (uncaught):`, errorSummary(err));
+        });
+      }
 
-      return { jobId };
+      return {
+        jobId,
+        dispatchMode: durableRender ? "cloud_run_job" : "process_background",
+        ...checkpointContract,
+      };
     } catch (error) {
-      console.error("Failed to start multicam render job:", error);
+      console.error("Failed to start multicam render job:", errorSummary(error));
+      const creditReceipt = multicamRequest?.creditReceipt;
+      let creditRefund = null;
+      if (creditReceipt && !creditReceipt.skipped) {
+        creditRefund = await refundCredits(userId, creditReceipt, "render-multicam-refund", {
+          jobId,
+          reason: `dispatch_failed:${error.message}`,
+          idempotencyKey: `render-multicam-refund:${jobId}`,
+        }).catch(refundError => ({ success: false, message: refundError.message }));
+      }
+      await db
+        .collection("video_edits")
+        .doc(jobId)
+        .set(
+          {
+            status: "dispatch_failed",
+            stage: "dispatch_failed",
+            error: error.message,
+            refundRequired: Boolean(
+              creditReceipt && !creditReceipt.skipped && !creditRefund?.success
+            ),
+            creditRefund,
+            failedAt: new Date().toISOString(),
+          },
+          { merge: true }
+        )
+        .catch(() => null);
+      if (capacityReserved) {
+        await releaseMulticamRenderCapacity(jobId, "dispatch_failed").catch(releaseError => {
+          console.error(
+            `[VideoEditing] Could not release multicam capacity for ${jobId}:`,
+            errorSummary(releaseError)
+          );
+        });
+      }
       throw new Error("Failed to queue multi-camera render job");
     }
+  }
+
+  ensureMulticamGpuAdmission(jobId) {
+    ensureMulticamGpuAdmission({ db, jobId, onFailure: async (data, error) => {
+      const receipt = data.creditReceipt;
+      let refund = null;
+      if (receipt && !receipt.skipped) refund = await refundCredits(data.userId, receipt, "render-multicam-refund", {
+        jobId, reason: `dispatch_failed:${error.message}`, idempotencyKey: `render-multicam-refund:${jobId}`,
+      }).catch(refundError => ({ success: false, message: refundError.message }));
+      await db.collection("video_edits").doc(jobId).set({ creditRefund: refund,
+        refundRequired: Boolean(receipt && !receipt.skipped && !refund?.success) }, { merge: true });
+      await releaseMulticamRenderCapacity(jobId, "dispatch_failed");
+    } });
   }
 
   /**
@@ -277,16 +447,36 @@ class VideoEditingService {
         progress: 100,
         result: result, // { success: true, url: ..., remainingCredits: ... }
         outputUrl: result.url,
+        ...(result.outputStoragePath ? { outputStoragePath: result.outputStoragePath,
+          storagePath: result.outputStoragePath } : {}),
         completedAt: new Date().toISOString(),
       });
 
       console.log(`[VideoEditing] Job ${jobId} Completed Successfully.`);
     } catch (error) {
-      console.error(`[VideoEditing] Job ${jobId} Failed:`, error.message);
+      console.error(`[VideoEditing] Job ${jobId} Failed:`, errorSummary(error));
+      let creditRefund = null;
+      if (options?.renderViral === true) {
+        try {
+          const existing = await docRef.get();
+          const receipt = existing.exists ? existing.data()?.creditReceipt : null;
+          if (receipt && !receipt.skipped) {
+            creditRefund = await refundCredits(userId, receipt, "viral-render-process-refund", {
+              jobId,
+              idempotencyKey: `viral-render-refund:${jobId}`,
+              reason: "worker_failed",
+            });
+          }
+        } catch (refundError) {
+          creditRefund = { success: false, message: refundError.message };
+          console.error(`[VideoEditing] Job ${jobId} refund failed:`, errorSummary(refundError));
+        }
+      }
       await docRef.update({
         status: "failed",
         error: error.message,
         progress: 0,
+        ...(creditRefund ? { creditRefund, creditsRefunded: creditRefund.success === true } : {}),
         failedAt: new Date().toISOString(),
       });
     }
@@ -311,6 +501,14 @@ class VideoEditingService {
           updatedAt: new Date().toISOString(),
         });
         const proofResult = await this.proveMulticamRender(multicamRequest, userId, jobId);
+        Object.assign(multicamRequest, {
+          qaProofStatus: proofResult.qaProofStatus,
+          qa_proof_status: proofResult.qaProofStatus,
+          qaProofReceiptId: proofResult.qaProofReceiptId,
+          qa_proof_receipt_id: proofResult.qaProofReceiptId,
+          qaProofReceipt: proofResult.qaProofReceipt,
+          qa_proof_receipt: proofResult.qaProofReceipt,
+        });
         await docRef.update({
           status: "proof_passed",
           stage: "server_proof_passed",
@@ -367,7 +565,7 @@ class VideoEditingService {
     } catch (error) {
       const workerDetail = getWorkerErrorDetail(error);
       const errorMessage = workerDetail || error.message;
-      console.error(`[VideoEditing] Multicam Job ${jobId} Failed:`, errorMessage);
+      console.error(`[VideoEditing] Multicam Job ${jobId} Failed:`, errorSummary(error));
       let creditRefund = null;
       let refundableReceipt = multicamRequest?.creditReceipt || null;
       if (!refundableReceipt) {
@@ -377,7 +575,7 @@ class VideoEditingService {
         } catch (receiptError) {
           console.error(
             `[VideoEditing] Multicam Job ${jobId} could not reload credit receipt for refund:`,
-            receiptError.message
+            errorSummary(receiptError)
           );
         }
       }
@@ -390,7 +588,7 @@ class VideoEditingService {
           });
         } catch (refundError) {
           creditRefund = { success: false, message: refundError.message };
-          console.error(`[VideoEditing] Multicam Job ${jobId} refund failed:`, refundError.message);
+          console.error(`[VideoEditing] Multicam Job ${jobId} refund failed:`, errorSummary(refundError));
         }
       }
       await docRef.update({
@@ -408,12 +606,25 @@ class VideoEditingService {
   }
 
   buildMulticamWorkerPayload(multicamRequest, jobId = null) {
+    const checkpointContract = normalizeMulticamCheckpointContract(multicamRequest);
     return {
+      render_spec_version: checkpointContract.renderSpecVersion,
+      renderSpecVersion: checkpointContract.renderSpecVersion,
+      total_duration_seconds: checkpointContract.totalDurationSeconds,
+      totalDurationSeconds: checkpointContract.totalDurationSeconds,
+      checkpoint_seconds: checkpointContract.checkpointSeconds,
+      checkpointSeconds: checkpointContract.checkpointSeconds,
+      checkpointed_render: checkpointContract.checkpointedRender,
+      checkpointedRender: checkpointContract.checkpointedRender,
+      expected_checkpoint_count: checkpointContract.expectedCheckpointCount,
+      expectedCheckpointCount: checkpointContract.expectedCheckpointCount,
       sources: Array.isArray(multicamRequest?.sources)
         ? multicamRequest.sources.map(source => ({
             id: source.id,
             label: source.label || "",
             url: source.url,
+            storage_path: source.storagePath || source.storage_path || null,
+            storagePath: source.storagePath || source.storage_path || null,
             offset_seconds: Number(source.offsetSeconds ?? source.offset_seconds ?? 0),
             sync_rate: Number(source.syncRate ?? source.sync_rate ?? 1),
             syncRate: Number(source.syncRate ?? source.sync_rate ?? 1),
@@ -441,13 +652,21 @@ class VideoEditingService {
             layout_mode: item.layoutMode || item.layout_mode || "cut",
           }))
         : [],
-      auto_switch: !!multicamRequest?.autoSwitch,
-      audio_based_auto_switch: multicamRequest?.audioBasedAutoSwitch !== false,
-      auto_switch_interval: Number(multicamRequest?.autoSwitchInterval ?? 2),
-      auto_switch_aggressiveness: multicamRequest?.autoSwitchAggressiveness || "balanced",
+      auto_switch: multicamRequest?.autoSwitch === true || multicamRequest?.auto_switch === true,
+      audio_based_auto_switch:
+        multicamRequest?.audioBasedAutoSwitch !== false &&
+        multicamRequest?.audio_based_auto_switch !== false,
+      auto_switch_interval: Number(
+        multicamRequest?.autoSwitchInterval ?? multicamRequest?.auto_switch_interval ?? 2
+      ),
+      auto_switch_aggressiveness:
+        multicamRequest?.autoSwitchAggressiveness ||
+        multicamRequest?.auto_switch_aggressiveness ||
+        "balanced",
       render_tier: multicamRequest?.renderTier || multicamRequest?.render_tier || "premium",
       renderTier: multicamRequest?.renderTier || multicamRequest?.render_tier || "premium",
-      primary_audio_camera_id: multicamRequest?.primaryAudioCameraId || null,
+      primary_audio_camera_id:
+        multicamRequest?.primaryAudioCameraId || multicamRequest?.primary_audio_camera_id || null,
       director_channel_camera_ids: Array.isArray(multicamRequest?.directorChannelCameraIds)
         ? multicamRequest.directorChannelCameraIds
         : Array.isArray(multicamRequest?.director_channel_camera_ids)
@@ -458,13 +677,59 @@ class VideoEditingService {
         : Array.isArray(multicamRequest?.director_channel_camera_ids)
           ? multicamRequest.director_channel_camera_ids
           : null,
-      overlap_start: Number(multicamRequest?.overlapStart ?? 0),
-      overlapStart: Number(multicamRequest?.overlapStart ?? 0),
-      overlap_duration: Number(multicamRequest?.overlapDuration ?? 0),
-      overlapDuration: Number(multicamRequest?.overlapDuration ?? 0),
-      output_aspect_ratio: multicamRequest?.outputAspectRatio || "9:16",
-      outputAspectRatio: multicamRequest?.outputAspectRatio || "9:16",
+      trusted_sync_contract:
+        multicamRequest?.trustedSyncContract || multicamRequest?.trusted_sync_contract || null,
+      trustedSyncContract:
+        multicamRequest?.trustedSyncContract || multicamRequest?.trusted_sync_contract || null,
+      trusted_director_channel_map:
+        multicamRequest?.trustedDirectorChannelMap ||
+        multicamRequest?.trusted_director_channel_map ||
+        null,
+      trustedDirectorChannelMap:
+        multicamRequest?.trustedDirectorChannelMap ||
+        multicamRequest?.trusted_director_channel_map ||
+        null,
+      overlap_start: Number(multicamRequest?.overlapStart ?? multicamRequest?.overlap_start ?? 0),
+      overlapStart: Number(multicamRequest?.overlapStart ?? multicamRequest?.overlap_start ?? 0),
+      overlap_duration: Number(
+        multicamRequest?.overlapDuration ?? multicamRequest?.overlap_duration ?? 0
+      ),
+      overlapDuration: Number(
+        multicamRequest?.overlapDuration ?? multicamRequest?.overlap_duration ?? 0
+      ),
+      timeline_start: Number(
+        multicamRequest?.timelineStart ??
+          multicamRequest?.timeline_start ??
+          multicamRequest?.overlapStart ??
+          multicamRequest?.overlap_start ??
+          0
+      ),
+      timelineStart: Number(
+        multicamRequest?.timelineStart ??
+          multicamRequest?.timeline_start ??
+          multicamRequest?.overlapStart ??
+          multicamRequest?.overlap_start ??
+          0
+      ),
+      output_aspect_ratio:
+        multicamRequest?.outputAspectRatio || multicamRequest?.output_aspect_ratio || "16:9",
+      outputAspectRatio:
+        multicamRequest?.outputAspectRatio || multicamRequest?.output_aspect_ratio || "16:9",
+      reaction_overlays:
+        multicamRequest?.reactionOverlays === true || multicamRequest?.reaction_overlays === true,
+      reactionOverlays:
+        multicamRequest?.reactionOverlays === true || multicamRequest?.reaction_overlays === true,
+      pre_sync_clap_alignment:
+        multicamRequest?.preSyncClapAlignment === true ||
+        multicamRequest?.pre_sync_clap_alignment === true,
+      preSyncClapAlignment:
+        multicamRequest?.preSyncClapAlignment === true ||
+        multicamRequest?.pre_sync_clap_alignment === true,
       external_audio_url: multicamRequest?.externalAudio?.url || null,
+      external_audio_storage_path:
+        multicamRequest?.externalAudio?.storagePath ||
+        multicamRequest?.externalAudio?.storage_path ||
+        null,
       external_audio_offset_seconds: Number(multicamRequest?.externalAudio?.offset_seconds ?? 0),
       external_audio_mix_mode: multicamRequest?.externalAudio?.mix_mode || "external_only",
       external_audio_cache_key: multicamRequest?.externalAudio?.cache_key || null,
@@ -489,14 +754,26 @@ class VideoEditingService {
         multicamRequest?.generateThumbnail === true || multicamRequest?.generate_thumbnail === true,
       plan_only: multicamRequest?.planOnly === true || multicamRequest?.plan_only === true,
       planOnly: multicamRequest?.planOnly === true || multicamRequest?.plan_only === true,
+      qa_proof_status: multicamRequest?.qaProofStatus || multicamRequest?.qa_proof_status || null,
+      qaProofStatus: multicamRequest?.qaProofStatus || multicamRequest?.qa_proof_status || null,
+      qa_proof_receipt_id:
+        multicamRequest?.qaProofReceiptId || multicamRequest?.qa_proof_receipt_id || null,
+      qaProofReceiptId:
+        multicamRequest?.qaProofReceiptId || multicamRequest?.qa_proof_receipt_id || null,
+      qa_proof_receipt:
+        multicamRequest?.qaProofReceipt || multicamRequest?.qa_proof_receipt || null,
+      qaProofReceipt: multicamRequest?.qaProofReceipt || multicamRequest?.qa_proof_receipt || null,
       job_id: jobId,
       async_mode: !!jobId,
     };
   }
 
   async postCamCombinerWorker(endpoint, payload, timeout) {
+    const primaryUrl = `${CAM_COMBINER_WORKER_URL}${endpoint}`;
     try {
-      return await axios.post(`${CAM_COMBINER_WORKER_URL}${endpoint}`, payload, { timeout });
+      const identityConfig = await buildWorkerRequestConfig(primaryUrl, { timeout });
+      const requestConfig = await require("./unifiedCredits/workerTransport").applicationWorkerConfig(primaryUrl, payload, identityConfig);
+      return await axios.post(primaryUrl, payload, requestConfig);
     } catch (error) {
       const workerDetail = getWorkerErrorDetail(error);
       if (!shouldTryLocalCamCombinerWorker(error)) {
@@ -550,6 +827,13 @@ class VideoEditingService {
     requirePassed("director_truth_audit", proof?.director_truth_audit);
     requirePassed("director_latency_audit", proof?.director_latency_audit);
 
+    const qaProofReceipt = proof?.qa_proof_receipt || proof?.qaProofReceipt || null;
+    const qaProofReceiptId =
+      proof?.qa_proof_receipt_id || proof?.qaProofReceiptId || qaProofReceipt?.qa_proof_receipt_id;
+    if (!qaProofReceipt || !qaProofReceiptId) {
+      failures.push({ gate: "signed_server_plan_receipt", status: "missing" });
+    }
+
     const receipt = {
       status: failures.length ? "failed" : "passed",
       checkedAt: new Date().toISOString(),
@@ -565,6 +849,9 @@ class VideoEditingService {
       directorLatencyAudit: proof?.director_latency_audit || null,
       directorAudio: proof?.director_audio || null,
       renderSegmentMerge: proof?.render_segment_merge || null,
+      qaProofStatus: proof?.qa_proof_status || proof?.qaProofStatus || null,
+      qaProofReceiptId,
+      qaProofReceipt,
     };
 
     if (failures.length) {
@@ -605,7 +892,7 @@ class VideoEditingService {
       renderTier: payload.renderTier || payload.render_tier,
     });
 
-    const response = await this.postCamCombinerWorker("/render-multicam", payload, 900000);
+    const response = await this.postCamCombinerWorker("/render-multicam", payload, 3550000);
     return this.validateMulticamServerProof(response.data, multicamRequest);
   }
 
@@ -618,9 +905,7 @@ class VideoEditingService {
    * @returns {Promise<Object>} { success: true, url: string, ... }
    */
   async processVideo(videoUrl, options, userId, jobId = null) {
-    // Safe logging - pass user input as data arg, not template string
-    console.log("[VideoEditing] Processing video request", { userId, options, jobId });
-    console.log("[VideoEditing] Options detail:", JSON.stringify(options, null, 2));
+    console.log("[VideoEditing] Processing video request", mediaOperationSummary(options, jobId));
 
     // Track the resulting file path from Python
     let resultPath = null;
@@ -745,6 +1030,14 @@ class VideoEditingService {
         endpoint = "/render-viral-clip";
         payload = {
           ...payload,
+          // ViralClipStudio already produces the canonical worker contract.
+          // Preserve every reviewed/editorial field here instead of silently
+          // rebuilding a smaller legacy subset. The server-controlled source
+          // and job identity below still win over browser-supplied values.
+          ...viralData,
+          video_url: videoUrl,
+          job_id: jobId,
+          async_mode: !!jobId,
           start_time: startTime,
           end_time: endTime,
           auto_captions:
@@ -754,20 +1047,30 @@ class VideoEditingService {
             viralData.captionStyle ||
             viralData.renderDefaults?.caption_style ||
             payload.caption_style,
-          caption_position: viralData.caption_position || viralData.captionPosition || "lower",
-          caption_scale: Number(viralData.caption_scale ?? viralData.captionScale ?? 1),
+          caption_position:
+            viralData.caption_position || viralData.captionPosition || "lower",
+          caption_scale: Number(
+            viralData.caption_scale ?? viralData.captionScale ?? 1
+          ),
           caption_text_override:
             viralData.caption_text_override ?? viralData.captionTextOverride ?? null,
-          preview_speed: Number(viralData.preview_speed ?? viralData.previewSpeed ?? 1),
-          speed_segments: Array.isArray(viralData.speed_segments || viralData.speedSegments)
+          caption_review_copy: viralData.caption_review_copy === true,
+          caption_coverage_mode: viralData.caption_coverage_mode || "full",
+          preview_speed: Number(
+            viralData.preview_speed ?? viralData.previewSpeed ?? 1
+          ),
+          speed_segments: Array.isArray(
+            viralData.speed_segments || viralData.speedSegments
+          )
             ? viralData.speed_segments || viralData.speedSegments
             : [],
-          pacing_level: viralData.pacing_level || viralData.pacingLevel || null,
+          pacing_level:
+            viralData.pacing_level || viralData.pacingLevel || null,
           motion_graphics: viralData.motion_graphics || viralData.motionGraphics || null,
           sound_effects: viralData.sound_effects || viralData.soundEffects || [],
           audio_remix: viralData.audio_remix || viralData.audioRemix || null,
-          creative_intent: viralData.creative_intent || viralData.creativeIntent || null,
-          creative_plan: viralData.creative_plan || viralData.creativePlan || null,
+          creative_intent:
+            viralData.creative_intent || viralData.creativeIntent || null,
           smart_crop:
             viralData.smart_crop !== undefined
               ? !!viralData.smart_crop
@@ -852,10 +1155,25 @@ class VideoEditingService {
           cover_frame: viralData.cover_frame || null,
           thumbnail_frame: viralData.thumbnail_frame || viralData.cover_frame || null,
           brand_watermark:
-            viralData.brand_watermark !== false && viralData.brandWatermark !== false,
-          brandWatermark: viralData.brand_watermark !== false && viralData.brandWatermark !== false,
-          watermark_text: viralData.watermark_text || viralData.watermarkText || "AUTOPROMOTE",
-          watermarkText: viralData.watermark_text || viralData.watermarkText || "AUTOPROMOTE",
+            viralData.brand_watermark !== undefined
+              ? !!viralData.brand_watermark
+              : viralData.brandWatermark !== undefined
+                ? !!viralData.brandWatermark
+                : true,
+          brandWatermark:
+            viralData.brandWatermark !== undefined
+              ? !!viralData.brandWatermark
+              : viralData.brand_watermark !== undefined
+                ? !!viralData.brand_watermark
+                : true,
+          watermark_text:
+            viralData.watermark_text ||
+            viralData.watermarkText ||
+            "AutoPromote · Viral Clip Studio",
+          watermarkText:
+            viralData.watermark_text ||
+            viralData.watermarkText ||
+            "AutoPromote · Viral Clip Studio",
           overlays: (viralData.overlays || []).map(o => ({
             ...o,
             start_time:
@@ -868,12 +1186,23 @@ class VideoEditingService {
         };
       }
 
-      console.log("[VideoEditing] Payload to worker:", JSON.stringify(payload));
-
-      // Increase timeout significantly for AI model downloading (30 mins)
-      const response = await axios.post(`${MEDIA_WORKER_URL}${endpoint}`, payload, {
-        timeout: 1800000, // 30 minutes (increased from 10m for model downloads)
+      console.log("[VideoEditing] Submitting worker request", {
+        timelineSegments: payload.timeline_segments?.length || 0,
+        overlays: payload.overlays?.length || 0,
       });
+
+      // A reviewed long-form Studio render may use the full 60-minute Cloud Run
+      // window. Keep the Node request alive slightly longer so it cannot mark a
+      // healthy worker job failed while that worker is still rendering.
+      const execution = await postMediaWorker(endpoint, payload, {
+        timeoutMs: endpoint === "/render-viral-clip" ? VIRAL_RENDER_WORKER_TIMEOUT_MS : 1800000,
+        preferredDevice: endpoint === "/render-viral-clip" ? options.renderWorkerDevice : undefined,
+        onRoute: jobId ? route => db.collection("video_edits").doc(jobId).update({
+          executionDevice: route.device, workerRouteReason: route.reason,
+          estimatedCpuSeconds: route.estimatedCpuSeconds,
+        }) : undefined,
+      });
+      const { response, workerUrl } = execution;
 
       const result = response.data;
 
@@ -893,14 +1222,51 @@ class VideoEditingService {
 
       // Check if the worker already uploaded the file (Distributed Worker Support)
       if (result.output_url && result.output_url.startsWith("http")) {
-        console.log(`[VideoEditing] Worker returned remote URL: ${result.output_url}`);
+        let outputUrl = result.output_url;
+        let outputStoragePath = result.output_storage_path || null;
+        let thumbnailUrl = result.thumbnail_url || result.thumbnailUrl || null;
+        let durableOutput = null;
+        if (isTransientWorkerOutput(outputUrl, workerUrl)) {
+          durableOutput = await persistWorkerOutput({ url: outputUrl, workerUrl, userId, jobId });
+          outputUrl = durableOutput.url;
+          outputStoragePath = durableOutput.storagePath;
+          if (thumbnailUrl && isTransientWorkerOutput(thumbnailUrl, workerUrl)) {
+            try {
+              thumbnailUrl = (await persistWorkerOutput({ url: thumbnailUrl, workerUrl,
+                userId, jobId, thumbnail: true })).url;
+            } catch (error) {
+              console.warn("[VideoEditing] Optional export thumbnail transfer failed:", errorSummary(error));
+              thumbnailUrl = null;
+            }
+          }
+        }
+        if (!durableOutput && options.renderViral) {
+          durableOutput = await persistWorkerBucketOutput({url:outputUrl,userId,jobId,
+            expectedSha256:result.output_sha256 || result.outputSha256});
+          if (durableOutput) { outputUrl=durableOutput.url; outputStoragePath=durableOutput.storagePath; }
+        }
+        console.log("[VideoEditing] Worker output ready", { durable: Boolean(durableOutput) });
+        const workerOutputHash = result.output_sha256 || result.outputSha256;
+        const outputIntegrity = durableOutput
+          ? { outputSha256: durableOutput.sha256, outputBytes: durableOutput.bytes }
+          : typeof workerOutputHash === "string" && /^[a-f0-9]{64}$/.test(workerOutputHash)
+            ? { outputSha256: workerOutputHash,
+                ...(Number.isSafeInteger(result.output_bytes) && result.output_bytes > 0
+                  ? { outputBytes: result.output_bytes } : {}) }
+            : {};
         return {
           success: true,
-          url: result.output_url,
-          thumbnailUrl: result.thumbnail_url || result.thumbnailUrl || null,
+          url: outputUrl,
+          outputStoragePath,
+          ...outputIntegrity,
+          ...(durableOutput?.generation ? { outputGeneration: durableOutput.generation } : {}),
+          thumbnailUrl,
           coverFrame: result.cover_frame || result.coverFrame || null,
           thumbnailFrame: result.thumbnail_frame || result.thumbnailFrame || null,
           duration: result.duration || 0,
+          audioProof: result.audio_proof || result.audioProof || null,
+          captionReviewCopy: result.caption_review_copy === true,
+          creativeTemplateInstance: result.creative_template_instance || null,
           message: "Processing completed (Remote Worker)",
         };
       }
@@ -940,14 +1306,19 @@ class VideoEditingService {
 
       // 4. Get Public URL
       const fileRef = bucket.file(destination);
-      await fileRef.makePublic();
-      const publicUrl = `https://storage.googleapis.com/${bucket.name}/${destination}`;
+      const localCreditContext = require("./unifiedCredits/application").getApplicationContext(
+        userId
+      );
+      if (!localCreditContext) await fileRef.makePublic();
+      const publicUrl = localCreditContext
+        ? (await fileRef.getSignedUrl({ action: "read", expires: Date.now() + 300000 }))[0]
+        : `https://storage.googleapis.com/${bucket.name}/${destination}`;
 
       // 5. Cleanup Local File
       try {
         fs.unlinkSync(resultPath);
       } catch (e) {
-        console.warn("[VideoEditing] Failed to delete temp file:", e.message);
+        console.warn("[VideoEditing] Failed to delete temp file:", errorSummary(e));
       }
 
       // 6. Cleanup Source File (If it was a temporary upload)
@@ -959,9 +1330,9 @@ class VideoEditingService {
           // But we will Log it for a Lifecycle Policy to handle.
           // BETTER APPROACH: Return the 'temp' flag to the controller/frontend to trigger deletion?
           // OR: Just rely on Lifecycle Rules (Safest).
-          console.log("[VideoEditing] Note: Source file may need cleanup:", videoUrl);
+          console.log("[VideoEditing] Source cleanup delegated to retention policy", { jobId });
         } catch (e) {
-          console.warn("Cleanup source failed", e);
+          console.warn("Cleanup source failed", errorSummary(e));
         }
       }
 
@@ -978,12 +1349,13 @@ class VideoEditingService {
         success: true,
         url: publicUrl,
         message: "Video processed successfully",
+        creativeTemplateInstance: result.creative_template_instance || null,
       };
     } catch (error) {
-      console.error("[VideoEditing] Error:", error.message);
+      console.error("[VideoEditing] Error:", errorSummary(error));
       let errorDetail = error.message;
       if (error.response && error.response.data) {
-        console.error("Worker Error:", error.response.data);
+        console.error("Worker Error:", errorSummary(error));
         // If the worker returned a 'detail' field (FastAPI default), include it.
         if (error.response.data.detail) {
           errorDetail += ` - Worker says: ${error.response.data.detail}`;
@@ -1011,29 +1383,66 @@ class VideoEditingService {
       force_fresh: Boolean(options.forceFresh),
       scan_nonce: typeof options.scanNonce === "string" ? options.scanNonce : "",
       local_path: options.localPath || null,
+      learning_profile: options.learningProfile || null,
+      selection_settings: require('./clipSelectionSettings').normalizeClipSelectionSettings(options.selectionSettings),
+      ...(Number(options.sourceDurationSeconds) > 0 ? { source_duration_seconds: Number(options.sourceDurationSeconds) } : {}),
     };
     try {
       let response;
       try {
-        response = await axios.post(`${MEDIA_WORKER_URL}/analyze-clips`, payload, {
-          timeout: 600000,
-        });
+        ({ response } = await postMediaWorker("/analyze-clips", payload,
+          { timeoutMs: 600000, onRoute: options.onRoute }));
       } catch (error) {
-        if (!shouldTryLocalWorker(error)) throw error;
+        if (
+          require("./unifiedCredits/application").getApplicationContext(userId)?.workerVerifier ||
+          !shouldTryLocalWorker(error)
+        )
+          throw error;
         console.warn(
-          `[VideoAnalysis] Primary worker failed (${getWorkerErrorDetail(error)}). Retrying local worker.`
+          `[VideoAnalysis] Primary worker failed (${safeLogText(getWorkerErrorDetail(error))}). Retrying local worker.`
         );
-        response = await axios.post(`${LOCAL_MEDIA_WORKER_URL}/analyze-clips`, payload, {
-          timeout: 600000,
-        });
+        response = await axios.post(
+          `${LOCAL_MEDIA_WORKER_URL}/analyze-clips`,
+          payload,
+          await require("./unifiedCredits/workerTransport").applicationWorkerConfig(
+            `${LOCAL_MEDIA_WORKER_URL}/analyze-clips`,
+            payload,
+            { timeout: 600000 }
+          )
+        );
       }
 
       // Returns { status, job_id, scenes: [...] }
       return response.data.scenes || [];
     } catch (error) {
       const detail = getWorkerErrorDetail(error);
-      console.error("[VideoAnalysis] Error:", detail);
+      console.error("[VideoAnalysis] Error:", errorSummary(error));
       throw new Error(`Video analysis failed: ${detail}`);
+    }
+  }
+
+  async planStoryVisuals(beats, userId, options = {}) {
+    require("./processingTokens/runtime").assertDispatch();
+    const payload = {
+      beats: Array.isArray(beats) ? beats : [],
+      max_candidates: Math.max(1, Math.min(4, Number(options.maxCandidates || 3))),
+      request_id: String(options.requestId || ""),
+    };
+    try {
+      let response;
+      try {
+        response = await axios.post(`${MEDIA_WORKER_URL}/plan-story-visuals`, payload, {
+          timeout: 90000,
+        });
+      } catch (error) {
+        if (!shouldTryLocalWorker(error)) throw error;
+        response = await axios.post(`${LOCAL_MEDIA_WORKER_URL}/plan-story-visuals`, payload, {
+          timeout: 90000,
+        });
+      }
+      return response.data;
+    } catch (error) {
+      throw new Error(`Story visual planning failed: ${getWorkerErrorDetail(error)}`);
     }
   }
 
@@ -1043,18 +1452,26 @@ class VideoEditingService {
   async renderClip(videoUrl, startTime, endTime, userId) {
     console.log(`[VideoRender] Rendering clip for User: ${userId} (${startTime}-${endTime}s)`);
     try {
-      const response = await axios.post(
-        `${MEDIA_WORKER_URL}/render-clip`,
-        {
-          video_url: videoUrl,
-          start_time: startTime,
-          end_time: endTime,
-          target_aspect_ratio: "9:16",
-        },
-        { timeout: 300000 }
-      );
+      const clipPayload = {
+        video_url: videoUrl,
+        start_time: startTime,
+        end_time: endTime,
+        target_aspect_ratio: "9:16",
+      };
+      const { response } = await postMediaWorker("/render-clip", clipPayload, { timeoutMs: 600000 });
 
       const resultPath = response.data.output_path;
+
+      if (response.data.audio_proof?.verified !== true) {
+        throw new Error("Worker did not verify audio on the rendered clip");
+      }
+
+      if (response.data.output_url && response.data.output_url.startsWith("http")) {
+        return {
+          url: response.data.output_url,
+          audioProof: response.data.audio_proof,
+        };
+      }
 
       // Upload to Firebase
       const bucket = admin.storage().bucket();
@@ -1075,9 +1492,9 @@ class VideoEditingService {
         fs.unlinkSync(resultPath);
       } catch (e) {}
 
-      return { url: publicUrl };
+      return { url: publicUrl, audioProof: response.data.audio_proof };
     } catch (error) {
-      console.error("[VideoRender] Error:", error.message);
+      console.error("[VideoRender] Error:", errorSummary(error));
       throw new Error("Clip rendering failed");
     }
   }
@@ -1090,7 +1507,8 @@ class VideoEditingService {
   /**
    * Start an async transcription job
    */
-  async startTranscriptionJob(videoUrl, userId) {
+  async startTranscriptionJob(videoUrl, userId, { translateToEnglish = false, sourceLanguage = "auto" } = {}) {
+    ({ translateToEnglish, sourceLanguage } = captionTranscriptionOptions({translateToEnglish, sourceLanguage}));
     const jobId = uuidv4();
     try {
       // Store initial job state
@@ -1101,12 +1519,14 @@ class VideoEditingService {
         videoUrl,
         status: "queued",
         progress: 0,
+        translateToEnglish: !!translateToEnglish,
+        sourceLanguage,
         createdAt: new Date().toISOString(),
       });
 
       // Start background task
-      this.processTranscriptionBackground(jobId, videoUrl).catch(err => {
-        console.error(`[VideoTranscribe] Background Job ${jobId} Failed:`, err);
+      this.processTranscriptionBackground(jobId, videoUrl, { translateToEnglish, sourceLanguage }).catch(err => {
+        console.error(`[VideoTranscribe] Background Job ${jobId} Failed:`, errorSummary(err));
       });
 
       return { jobId };
@@ -1118,7 +1538,7 @@ class VideoEditingService {
   /**
    * Background processor for transcription
    */
-  async processTranscriptionBackground(jobId, videoUrl) {
+  async processTranscriptionBackground(jobId, videoUrl, { translateToEnglish = false, sourceLanguage = "auto" } = {}) {
     const docRef = db.collection("video_edits").doc(jobId);
     try {
       await docRef.update({ status: "processing", progress: 10 });
@@ -1126,34 +1546,72 @@ class VideoEditingService {
       console.log(`[VideoTranscribe] Calling worker for job ${jobId}`);
 
       // Call Python Worker
-      const response = await axios.post(
-        `${MEDIA_WORKER_URL}/transcribe`,
+      const { response } = await postMediaWorker(
+        "/transcribe",
         {
           video_url: videoUrl,
-          language: "auto",
-          hint: "South African English accent possible. Preserve local names, slang, and code-switching.",
+          // The worker intentionally validates this endpoint as Dict[str, str].
+          // Sending a JSON boolean makes FastAPI reject the whole request with
+          // 422 before transcription starts.
+          translate_to_english: translateToEnglish ? "true" : "false",
+          source_language: sourceLanguage,
         },
         {
-          timeout: 600000, // 10 minutes
+          // Full podcast transcription can legitimately exceed ten minutes on
+          // CPU workers. The browser polls the durable job and must not receive
+          // a false failure while the worker is still producing captions.
+          timeoutMs: 3600000,
+          onRoute: route => docRef.update({ executionDevice: route.device,
+            workerRouteReason: route.reason }),
         }
       );
 
       // Worker returns { segments: [...] }
       const result = response.data;
+      const segments = Array.isArray(result?.segments) ? result.segments : [];
+      const transcriptionQuality = result?.transcription_quality || null;
+
+      if (!segments.length) {
+        // A successful HTTP response can still contain zero usable captions:
+        // the speech model sometimes invents repeated syllables over music or
+        // a choir. Never label that as a completed caption job.
+        await docRef.update({
+          status: "failed",
+          error:
+            "No reliable spoken words were found in this video. Music or singing can confuse automatic captions. Try a clearer speech section, or add and time your own captions in Studio.",
+          transcriptionQuality,
+          progress: 0,
+          failedAt: new Date().toISOString(),
+        });
+        return;
+      }
 
       await docRef.update({
         status: "completed",
-        result: { segments: result.segments },
+        result: {
+          segments,
+          transcriptionQuality,
+          detectedLanguages: result.detected_languages || [],
+          languageMode:
+            result.language_mode ||
+            (translateToEnglish ? null : "preserve_spoken_languages"),
+        },
         progress: 100,
         completedAt: new Date().toISOString(),
       });
 
       console.log(`[VideoTranscribe] Job ${jobId} Completed.`);
     } catch (error) {
-      console.error(`[VideoTranscribe] Job ${jobId} Failed:`, error.message);
+      const workerDetail =
+        error.response?.data?.detail || error.response?.data?.message || error.message;
+      const safeWorkerDetail =
+        typeof workerDetail === "string"
+          ? workerDetail.slice(0, 1000)
+          : JSON.stringify(workerDetail || "Transcription failed").slice(0, 1000);
+      console.error(`[VideoTranscribe] Job ${jobId} Failed:`, errorSummary(error));
       await docRef.update({
         status: "failed",
-        error: error.message,
+        error: safeWorkerDetail,
         progress: 0,
         failedAt: new Date().toISOString(),
       });
@@ -1166,20 +1624,20 @@ class VideoEditingService {
    * @returns {Promise<Array>} segments
    */
   async transcribeVideo(videoUrl) {
-    console.log(`[VideoTranscription] Requesting transcription for: ${videoUrl}`);
+    console.log("[VideoTranscription] Requesting transcription", { hasSource: Boolean(videoUrl) });
     try {
-      const response = await axios.post(
-        `${MEDIA_WORKER_URL}/transcribe`,
+      const { response } = await postMediaWorker(
+        "/transcribe",
         {
           video_url: videoUrl,
         },
-        { timeout: 600000 }
+        { timeoutMs: 600000 }
       ); // 10 mins
 
       // Returns { status, segments: [...] }
       return response.data.segments || [];
     } catch (error) {
-      console.error("[VideoTranscription] Error:", error.message);
+      console.error("[VideoTranscription] Error:", errorSummary(error));
       // Fallback or rethrow
       throw new Error("Transcription failed");
     }
@@ -1199,21 +1657,12 @@ class VideoEditingService {
       hasExternalAudio: !!external_audio_url,
     });
 
-    let workerUrl = CAM_COMBINER_WORKER_URL;
-    if (ALLOW_LOCAL_WORKER_FALLBACK && LOCAL_CAM_COMBINER_WORKER_URL) {
-      try {
-        await axios.get(`${LOCAL_CAM_COMBINER_WORKER_URL}/health`, { timeout: 2000 });
-        workerUrl = LOCAL_CAM_COMBINER_WORKER_URL;
-      } catch {
-        // fall through to cloud worker
-      }
-    }
-
     const payload = {
       sources: sources.map((s, index) => ({
         id: s.id || `camera_${index + 1}`,
         label: s.label || "",
         url: s.url,
+        cache_key: s.cache_key || null,
         offset_seconds: Number(s.offset_seconds || 0),
         sync_rate: Number(s.sync_rate ?? s.syncRate ?? 1),
         syncRate: Number(s.syncRate ?? s.sync_rate ?? 1),
@@ -1251,9 +1700,15 @@ class VideoEditingService {
 
     let response;
     try {
-      response = await axios.post(`${workerUrl}/multicam/preflight-sync`, payload, {
-        timeout: 120000,
-      });
+      response = await this.postCamCombinerWorker(
+        "/multicam/preflight-sync",
+        payload,
+        // Full-length originals can take more than two minutes to materialize
+        // and sample at start/middle/end. Keep this above the worker's normal
+        // processing time so a successful sync result is not discarded by the
+        // API gateway moments before it arrives.
+        300000
+      );
     } catch (error) {
       const workerDetail =
         error.response?.data?.detail || error.response?.data?.message || error.message;
@@ -1278,7 +1733,7 @@ class VideoEditingService {
     const payload = this.buildMulticamWorkerPayload(multicamRequest, jobId);
 
     let response;
-    response = await this.postCamCombinerWorker("/render-multicam", payload, 1800000);
+    response = await this.postCamCombinerWorker("/render-multicam", payload, 3550000);
 
     const result = response.data;
     if (result.status === "processing" && result.mode === "async") {

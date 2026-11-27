@@ -1,0 +1,17 @@
+{
+  "privateCheckpoint": "/home/tibule12/.cache/autopromote-free-first-20261126/safe-release-final-checkpoint-20261127",
+  "localOnly": true,
+  "exportedFirestore": true,
+  "exportedAuth": true,
+  "mediaObjectsAndMetadataExported": 2,
+  "exportedDocuments": 9,
+  "nativeStorageEmulatorExportCompleted": false,
+  "nativeStorageExportFailure": "Owned emulator process exited before replying; independently exported exact media bytes/metadata and original persistence directory retained.",
+  "productionWrites": 0,
+  "paidOperations": 0,
+  "newCreativeRenders": 0,
+  "freshFullReplayQualified": false,
+  "ownedApiStopped": true,
+  "ownedFirestoreAndBaselineStopped": true,
+  "unrelatedEducationEmulatorPreserved": true
+}

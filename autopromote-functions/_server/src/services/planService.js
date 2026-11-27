@@ -7,7 +7,10 @@
 //  {"id":"enterprise","price":99,"monthlyTaskQuota":500,"aiQuota":2000}
 // ]
 
-const { SUBSCRIPTION_PLANS, normalizePlanId } = require("../config/subscriptionPlans");
+const {
+  ALL_SUBSCRIPTION_PLANS: SUBSCRIPTION_PLANS,
+  normalizePlanId,
+} = require("../config/subscriptionPlans");
 
 const DEFAULT_AI_QUOTAS = {
   free: 80,
@@ -20,7 +23,7 @@ function buildDefaultPlans() {
   return Object.values(SUBSCRIPTION_PLANS).map(plan => ({
     id: plan.id,
     price: Number(plan.price) || 0,
-    monthlyTaskQuota: Number(plan.features && plan.features.wolfHuntTasks) || 0,
+    monthlyTaskQuota: Number(plan.features && plan.features.monthlyPromotions) || 0,
     aiQuota: DEFAULT_AI_QUOTAS[plan.id] || 0,
   }));
 }

@@ -1,0 +1,25 @@
+{
+  "scope": "only newly generated benchmark intermediates; original media and completed exports preserved",
+  "removed": [
+    {
+      "file": "reports/free-first-optimization-20261126/finder-ingest-before/analysis.mp4",
+      "bytes": 44000933,
+      "sha256": "6d403782ead8274cb2a008001856d9cdf616837a5afe18df7f64788f4373a765"
+    },
+    {
+      "file": "reports/free-first-optimization-20261126/finder-ingest-before/ingest.mp4",
+      "bytes": 200299651,
+      "sha256": "46fe9a263f36d3e238d4459fed43f5d979403632ba39649e2a6f5811621871ac"
+    },
+    {
+      "file": "reports/free-first-optimization-20261126/finder-ingest-after/analysis.mp4",
+      "bytes": 47484351,
+      "sha256": "89a48634af9e7407e7ee2173ebf1511d912c87983bc6abf59131da028402eeab"
+    },
+    {
+      "file": "reports/free-first-optimization-20261126/finder-ingest-after/ingest.mp4",
+      "bytes": 217765078,
+      "sha256": "5a3a0cbf4b4372507d3bfddeb4f47170442e213eabd4f80432ca82a29421ce05"
+    }
+  ]
+}

@@ -134,6 +134,7 @@ beforeEach(() => {
   process.env.STUDIO_NVIDIA_VFX_SECRET = "s".repeat(32);
 });
 afterEach(() => {
+  delete process.env.FREE_FIRST_USAGE_ENABLED;
   delete process.env.STUDIO_NVIDIA_VFX_URL;
   delete process.env.STUDIO_NVIDIA_VFX_SECRET;
   delete process.env.STUDIO_MODEL_VFX_URL;
@@ -224,7 +225,8 @@ test.each(['completed','processing'])('CPU capacity after browser closure is rec
     requestHash:job(first.jobId).requestHash,status,receipt:{...receipt(first.jobId),encoder:'libx264',
       modelArtifactHash:modelArtifactRef.artifactHash,gpuCount:0,elapsed_seconds:1,
       mask_manifest_sha256:manifestSha256,implementation_sha256:'a'.repeat(64)}}});
-  const next=createSubjectVfxPreview({...input,clientRequestId:'closed-browser-next'});
+  const nextScene=scene();nextScene.effects[0].text='A different edit';
+  const next=createSubjectVfxPreview({...input,scene:nextScene,clientRequestId:'closed-browser-next'});
   if(status==='completed'){
     expect((await next).jobId).not.toBe(first.jobId);expect(job(first.jobId).status).toBe('completed');
     expect(axios.post).toHaveBeenCalledTimes(2); // Exactly one new explicitly requested CPU job.
@@ -245,7 +247,8 @@ test.each(['completed','processing'])('CPU capacity after browser closure is rec
     requestHash:job(first.jobId).requestHash,status,receipt:{...receipt(first.jobId),encoder:'libx264',
       modelArtifactHash:modelArtifactRef.artifactHash,gpuCount:0,elapsed_seconds:1,
       mask_manifest_sha256:manifestSha256,implementation_sha256:'a'.repeat(64)}}});
-  const next=createSubjectVfxPreview({...input,clientRequestId:'closed-browser-next'});
+  const nextScene=scene();nextScene.effects[0].text='A different edit';
+  const next=createSubjectVfxPreview({...input,scene:nextScene,clientRequestId:'closed-browser-next'});
   if(status==='completed'){
     expect((await next).jobId).not.toBe(first.jobId);expect(job(first.jobId).status).toBe('completed');
     expect(axios.post).toHaveBeenCalledTimes(2); // Exactly one new explicitly requested CPU job.
@@ -282,19 +285,50 @@ test("point tuples survive durable storage without Firestore nested arrays", asy
   await finish(jobId);
   expect(await resolveSubjectVfxExport(exportItems(jobId))).toHaveLength(1);
 });
-test("a lost dispatch acknowledgment retries the same job and binds request identity to its scene", async () => {
+test("a lost dispatch acknowledgment recovers the same job without redispatch and binds its scene", async () => {
   axios.post.mockRejectedValueOnce(new Error("connection lost"));
   const request = { ownerUid, scene: scene(), clientRequestId: "uncertain-request-123" };
   const first = await createSubjectVfxPreview(request);
   expect(job(first.jobId).status).toBe("dispatch_uncertain");
   axios.post.mockImplementation(async (_url, spec) => ({ data: { jobId: spec.jobId } }));
   expect(await createSubjectVfxPreview(request)).toEqual({ jobId: first.jobId, reused: true });
-  expect(axios.post.mock.calls.map(([, body]) => body.jobId)).toEqual([first.jobId, first.jobId]);
+  expect(axios.post.mock.calls.map(([, body]) => body.jobId)).toEqual([first.jobId]);
   const changed = scene();
   changed.effects[0].text = "CHANGED";
   await expect(createSubjectVfxPreview({ ...request, scene: changed })).rejects.toMatchObject({
     statusCode: 409,
   });
+});
+test("renewable usage refuses new VFX execution before creating a job or acquiring capacity", async () => {
+  process.env.FREE_FIRST_USAGE_ENABLED = "true";
+  try {
+    await expect(create()).rejects.toMatchObject({ code: "BOUNDED_PROCESSING_ADAPTER_REQUIRED" });
+    expect(axios.post).not.toHaveBeenCalled();
+    expect(documents.size).toBe(0);
+  } finally { delete process.env.FREE_FIRST_USAGE_ENABLED; }
+});
+test("a queued VFX request is reused without another provider dispatch even after processing is suspended", async () => {
+  const first = await create();
+  process.env.FREE_FIRST_USAGE_ENABLED = "true";
+  try {
+    expect(await create()).toEqual({ jobId: first.jobId, reused: true });
+    expect(axios.post).toHaveBeenCalledTimes(1);
+  } finally { delete process.env.FREE_FIRST_USAGE_ENABLED; }
+});
+test("a new client request ID reuses the identical generation/model/scene instead of rendering or storing it twice", async () => {
+  const first = await create('first-content-request');
+  const duplicate = await create('new-content-request');
+  expect(duplicate).toEqual({jobId:first.jobId,reused:true});
+  expect(axios.post).toHaveBeenCalledTimes(1);
+  expect([...documents.keys()].filter(key=>key.startsWith('studio_subject_vfx_jobs/'))).toHaveLength(1);
+});
+test("completed identical VFX reuses its verified asset while a changed source generation requires new work", async () => {
+  const first=await create('first-completed-edit');await finish(first.jobId);
+  expect(await create('same-completed-edit')).toEqual({jobId:first.jobId,reused:true});
+  expect(axios.post).toHaveBeenCalledTimes(1);expect(saves).toHaveLength(1);
+  objects.get(scene().sourceStoragePath).generation='124';
+  const changed=await create('new-generation-edit');
+  expect(changed.jobId).not.toBe(first.jobId);expect(axios.post).toHaveBeenCalledTimes(2);
 });
 test("a definite oversized dispatch fails and releases capacity instead of polling an absent job", async () => {
   axios.post.mockRejectedValueOnce({ response: { status: 413 } });
@@ -329,7 +363,8 @@ test("offline and busy workers fail before another render is dispatched", async 
   expect(axios.post).not.toHaveBeenCalled();
   process.env.STUDIO_NVIDIA_VFX_URL = "https://nvidia.test.invalid";
   await create();
-  await expect(create("second-request-123")).rejects.toMatchObject({ statusCode: 429 });
+  const changed=scene();changed.effects[0].text="A different edit";
+  await expect(createSubjectVfxPreview({ownerUid,scene:changed,clientRequestId:"second-request-123"})).rejects.toMatchObject({ statusCode: 429 });
   expect(axios.post).toHaveBeenCalledTimes(1);
   expect(await resolveSubjectVfxExport({ ownerUid, items: [], timeline: [] })).toEqual([]);
 });

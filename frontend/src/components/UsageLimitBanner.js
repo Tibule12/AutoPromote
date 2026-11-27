@@ -89,7 +89,8 @@ const UsageLimitBanner = ({ backLabel }) => {
       </div>
       {isAtLimit && (
         <div className="limit-message">
-          Upgrade to Premium or Pro to continue uploading and get a higher monthly upload limit.
+          Wait for your upload allowance to reset or review Plus capacity. Local editing remains
+          available.
         </div>
       )}
     </div>

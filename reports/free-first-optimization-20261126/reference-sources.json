@@ -1,0 +1,32 @@
+{
+  "checkedDateLocal": "2026-11-26",
+  "sources": [
+    {
+      "title": "Cloud Run GPU jobs resource requirements",
+      "url": "https://docs.cloud.google.com/run/docs/configuring/jobs/gpu?hl=en",
+      "facts": [
+        "Full RTX PRO 6000 minimum 20 vCPU / 80 GiB; these are provider minima, not profiled Cam stage needs.",
+        "L4 minimum 4 vCPU / 16 GiB; requires separate CUDA/NVENC/model qualification.",
+        "Fractional RTX preview minimum 10 vCPU / 40 GiB; not a qualified default."
+      ]
+    },
+    {
+      "title": "Cloud Run pricing",
+      "url": "https://cloud.google.com/run/pricing",
+      "facts": [
+        "USD on-demand reference; CPU, memory and GPU all count.",
+        "Jobs and instance-based services have a one-minute minimum including startup/lifetime.",
+        "Same-region Google Cloud traffic is not charged as internet egress."
+      ]
+    },
+    {
+      "title": "Cloud Storage pricing",
+      "url": "https://cloud.google.com/storage/pricing",
+      "facts": [
+        "Storage and network are separate costs.",
+        "Use explicit download/retention assumptions; region/route/volume matter."
+      ]
+    }
+  ],
+  "actualPerOperationInvoiceCostsAvailable": false
+}

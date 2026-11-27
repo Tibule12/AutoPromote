@@ -1,0 +1,46 @@
+{
+  "checks": [
+    {
+      "origin": "http://127.0.0.1:37663",
+      "width": 1440,
+      "noOverflow": true
+    },
+    {
+      "origin": "http://127.0.0.1:47865",
+      "width": 1440,
+      "noOverflow": true
+    },
+    {
+      "origin": "http://127.0.0.1:37663",
+      "width": 1200,
+      "noOverflow": true
+    },
+    {
+      "origin": "http://127.0.0.1:47865",
+      "width": 1200,
+      "noOverflow": true
+    },
+    {
+      "origin": "http://127.0.0.1:37663",
+      "width": 390,
+      "noOverflow": true
+    },
+    {
+      "origin": "http://127.0.0.1:47865",
+      "width": 390,
+      "noOverflow": true
+    },
+    {
+      "origin": "http://127.0.0.1:37663",
+      "width": 360,
+      "noOverflow": true
+    },
+    {
+      "origin": "http://127.0.0.1:47865",
+      "width": 360,
+      "noOverflow": true
+    }
+  ],
+  "exactApprovedCopyReplacementOnly": true,
+  "mediaLinksAndHeadingUnchanged": true
+}

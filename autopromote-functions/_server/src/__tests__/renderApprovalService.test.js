@@ -17,18 +17,19 @@ describe("renderApprovalService", () => {
     },
   };
 
-  it("holds completed multicam output for review and blocks download URLs", () => {
+  it("delivers a completed paid multicam render without a review gate", () => {
     const approval = normalizeRenderApproval("job-1", completedRender);
 
-    expect(approval.approvalStatus).toBe("needs_review");
-    expect(approval.deliveryStatus).toBe("held_for_review");
-    expect(approval.canDownload).toBe(false);
-    expect(approval.outputUrl).toBeNull();
+    expect(approval.approvalStatus).toBe("approved");
+    expect(approval.deliveryStatus).toBe("available");
+    expect(approval.reviewRequired).toBe(false);
+    expect(approval.canDownload).toBe(true);
+    expect(approval.outputUrl).toBe("https://cdn.example.com/held.mp4");
     expect(approval.previewUrl).toBe("https://cdn.example.com/held.mp4");
 
-    expect(sanitizeResultForApproval(completedRender.result, approval)).toEqual({
-      duration: 120,
-    });
+    expect(sanitizeResultForApproval(completedRender.result, approval)).toEqual(
+      expect.objectContaining({ url: "https://cdn.example.com/held.mp4", duration: 120 })
+    );
   });
 
   it("exposes only the approved output after approval", () => {
@@ -48,7 +49,7 @@ describe("renderApprovalService", () => {
     expect(approved.outputUrl).toBe("https://cdn.example.com/held.mp4");
   });
 
-  it("keeps rejected renders blocked", () => {
+  it("does not reintroduce a rejection gate for a completed paid render", () => {
     const timestamp = "SERVER_TIMESTAMP";
     const update = buildRejectionUpdate({
       data: completedRender,
@@ -58,9 +59,9 @@ describe("renderApprovalService", () => {
     });
     const rejected = normalizeRenderApproval("job-1", { ...completedRender, ...update });
 
-    expect(rejected.approvalStatus).toBe("rejected");
-    expect(rejected.deliveryStatus).toBe("blocked");
-    expect(rejected.canDownload).toBe(false);
-    expect(rejected.outputUrl).toBeNull();
+    expect(rejected.approvalStatus).toBe("approved");
+    expect(rejected.deliveryStatus).toBe("available");
+    expect(rejected.canDownload).toBe(true);
+    expect(rejected.outputUrl).toBe("https://cdn.example.com/held.mp4");
   });
 });

@@ -14,9 +14,23 @@ jest.mock("../../utils/ssrfGuard", () => ({
       global.__last_linkedin_post = last;
       return Promise.resolve({ ok: true, text: async () => JSON.stringify({ id: "share_1" }) });
     }
+    if (url.includes("assets?action=registerUpload")) {
+      return Promise.resolve({ ok: true, json: async () => ({ value: {
+        asset: "urn:li:digitalmediaAsset:video_1",
+        uploadMechanism: { "com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest": {
+          uploadUrl: "https://www.linkedin.com/upload/video_1",
+        } },
+      } }) });
+    }
+    if (url.endsWith("/v2/assets/video_1")) {
+      return Promise.resolve({ ok: true, json: async () => ({ recipes: [{ status: "AVAILABLE" }] }) });
+    }
     return Promise.resolve({ ok: true, json: async () => ({}), text: async () => "{}" });
   }),
 }));
+
+jest.mock("../../utils/streamLinkedInVideo", () => ({ streamLinkedInVideo: jest.fn(async () => ({ bytes: 100 })) }));
+jest.mock("../../utils/cleanupSource", () => ({ cleanupSourceFile: jest.fn(async () => {}) }));
 
 jest.mock("../../firebaseAdmin", () => ({
   db: {
@@ -25,10 +39,14 @@ jest.mock("../../firebaseAdmin", () => ({
         return {
           get: async () => ({
             exists: true,
-            data: () => ({
-              tokens: { access_token: "li_token", expires_in: 999999 },
-              updatedAt: { _seconds: Math.floor(Date.now() / 1000) },
-            }),
+            data: () =>
+              global.__linkedin_connection || {
+                tokens: { access_token: "li_token", expires_in: 999999 },
+                updatedAt: { _seconds: Math.floor(Date.now() / 1000) },
+              },
+          }),
+          set: jest.fn(async data => {
+            global.__linkedin_connection_update = data;
           }),
         };
       }
@@ -49,9 +67,119 @@ jest.mock("../../firebaseAdmin", () => ({
   admin: { firestore: { FieldValue: { serverTimestamp: () => ({}) } } },
 }));
 
-const { postToLinkedIn } = require("../linkedinService");
+const { postToLinkedIn, getValidAccessToken } = require("../linkedinService");
+const { safeFetch } = require("../../utils/ssrfGuard");
+
+afterEach(() => {
+  delete global.__linkedin_connection;
+  delete global.__linkedin_connection_update;
+});
+
+test("a provider 500 retains the submission marker and prevents a blind resend", async () => {
+  let receipt;
+  safeFetch.mockResolvedValueOnce({ ok: false, status: 500, text: async () => '{"message":"server error"}' });
+  const input = { uid: "user1", personId: "fixture-person", text: "One release",
+    onSubmissionAccepted: async value => { receipt = value; } };
+  await expect(postToLinkedIn(input)).rejects.toThrow("server error");
+  expect(receipt.phase).toBe("submitting");
+  const calls = safeFetch.mock.calls.length;
+  await expect(postToLinkedIn({ ...input, submissionReceipt: receipt }))
+    .rejects.toMatchObject({ errorClass: "publication_unconfirmed" });
+  expect(safeFetch.mock.calls).toHaveLength(calls);
+});
+
+describe("LinkedIn expired credentials", () => {
+  test("stops an expired ISO timestamp credential and asks for reconnect", async () => {
+    global.__linkedin_connection = {
+      tokens: { access_token: "expired", expires_in: 3600 },
+      updatedAt: "2026-01-01T00:00:00Z",
+    };
+    const calls = safeFetch.mock.calls.length;
+    await expect(getValidAccessToken("user1")).rejects.toMatchObject({
+      errorClass: "auth",
+      status: 401,
+    });
+    expect(safeFetch.mock.calls).toHaveLength(calls);
+    expect(global.__linkedin_connection_update).toMatchObject({
+      connected: false,
+      reauthRequired: true,
+    });
+  });
+  test("recognizes a provider-revoked legacy token without retrying publication", async () => {
+    safeFetch.mockResolvedValueOnce({ ok: false, status: 401 });
+    await expect(postToLinkedIn({ uid: "user1", text: "Hello" })).rejects.toMatchObject({
+      errorClass: "auth",
+    });
+  });
+  test("uses a supplied refresh token and persists the replacement", async () => {
+    const previousId = process.env.LINKEDIN_CLIENT_ID,
+      previousSecret = process.env.LINKEDIN_CLIENT_SECRET;
+    process.env.LINKEDIN_CLIENT_ID = "test-client";
+    process.env.LINKEDIN_CLIENT_SECRET = "test-secret";
+    global.__linkedin_connection = {
+      tokens: { access_token: "expired", refresh_token: "refresh", expires_in: 3600 },
+      updatedAt: "2026-01-01T00:00:00Z",
+    };
+    safeFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ access_token: "replacement", expires_in: 3600 }),
+    });
+    try {
+      await expect(getValidAccessToken("user1")).resolves.toBe("replacement");
+      expect(global.__linkedin_connection_update).toMatchObject({
+        connected: true,
+        reauthRequired: false,
+      });
+      const [url, , opts] = safeFetch.mock.calls.at(-1);
+      expect(url).toBe("https://www.linkedin.com/oauth/v2/accessToken");
+      expect(opts.fetchOptions.body.get("grant_type")).toBe("refresh_token");
+    } finally {
+      if (previousId === undefined) delete process.env.LINKEDIN_CLIENT_ID;
+      else process.env.LINKEDIN_CLIENT_ID = previousId;
+      if (previousSecret === undefined) delete process.env.LINKEDIN_CLIENT_SECRET;
+      else process.env.LINKEDIN_CLIENT_SECRET = previousSecret;
+    }
+  });
+});
 
 describe("LinkedIn posting with hashtags", () => {
+  test("confirms a receipt before return and resumes it without sending a second post", async () => {
+    const persist = jest.fn(async () => {});
+    const args = { uid: "user1", text: "Original release", onSubmissionAccepted: persist };
+    await postToLinkedIn(args);
+    expect(persist.mock.calls[0][0]).toMatchObject({ platform: "linkedin", phase: "submitting" });
+    const receipt = persist.mock.calls.at(-1)[0];
+    expect(receipt).toMatchObject({ phase: "confirmed", shareId: "share_1" });
+    const posts = () => safeFetch.mock.calls.filter(([url]) => url.includes("/v2/ugcPosts")).length;
+    const before = posts();
+    await expect(postToLinkedIn({ ...args, submissionReceipt: receipt }))
+      .resolves.toMatchObject({ success: true, shareId: "share_1", recovered: true });
+    expect(posts()).toBe(before);
+  });
+
+  test("a process loss at the public-post boundary holds the release instead of resending", async () => {
+    const persist = jest.fn(async receipt => {
+      if (receipt?.phase === "submitting") throw new Error("Process stopped before request");
+    });
+    const args = { uid: "user1", text: "Interrupted release", onSubmissionAccepted: persist };
+    const before = safeFetch.mock.calls.filter(([url]) => url.includes("/v2/ugcPosts")).length;
+    await expect(postToLinkedIn(args)).rejects.toThrow("Process stopped");
+    await expect(postToLinkedIn({ ...args, submissionReceipt: persist.mock.calls[0][0] }))
+      .rejects.toMatchObject({ errorClass: "publication_unconfirmed" });
+    expect(safeFetch.mock.calls.filter(([url]) => url.includes("/v2/ugcPosts"))).toHaveLength(before);
+  });
+  test("streams the video and polls its opaque asset ID before posting", async () => {
+    const { streamLinkedInVideo } = require("../../utils/streamLinkedInVideo");
+    await expect(postToLinkedIn({ uid: "user1", text: "Festival", videoUrl: "https://storage.googleapis.com/b/video.mp4" }))
+      .resolves.toMatchObject({ success: true });
+    expect(streamLinkedInVideo).toHaveBeenCalledWith(expect.objectContaining({
+      videoUrl: "https://storage.googleapis.com/b/video.mp4", uploadUrl: "https://www.linkedin.com/upload/video_1",
+    }));
+    expect(safeFetch.mock.calls.some(([url]) => url.endsWith("/v2/assets/video_1"))).toBe(true);
+    const body = JSON.parse(global.__last_linkedin_post.opts.fetchOptions.body);
+    expect(body.specificContent["com.linkedin.ugc.ShareContent"].media[0].media)
+      .toBe("urn:li:digitalmediaAsset:video_1");
+  });
   test("appends hashtagString to shareCommentary.text", async () => {
     global.__last_linkedin_post = null;
 

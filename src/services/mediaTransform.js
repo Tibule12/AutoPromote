@@ -464,6 +464,7 @@ function processMedia(inputFile, outputFile, options = {}) {
 }
 
 async function processMediaTransformTaskDoc(doc) {
+  require("./processingTokens/runtime").assertDispatch();
   const data = doc.data();
 
   await doc.ref.update({ status: "processing", updatedAt: new Date().toISOString() });

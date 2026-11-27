@@ -4,6 +4,24 @@ const authMiddleware = require("./authMiddleware");
 const router = express.Router();
 const { rateLimiter } = require("./middlewares/globalRateLimiter");
 const { normalizePlanId, resolvePlan } = require("./config/subscriptionPlans");
+const { TESTER_PROGRAM } = require("./config/testerProgram");
+const { grantTesterAccess } = require("./services/testerProgramService");
+const { sendTesterAccessGranted } = require("./services/emailService");
+
+const getTesterDashboardUrl = () =>
+  `${String(process.env.PUBLIC_APP_URL || "https://autopromote.org").replace(/\/$/, "")}/#/`;
+
+async function deliverTesterAccessEmail(tester) {
+  if (!tester?.email) {
+    return { ok: false, provider: "none", error: "tester_email_missing" };
+  }
+  return sendTesterAccessGranted({
+    email: tester.email,
+    name: tester.name,
+    expiresAt: tester.expiresAt,
+    dashboardUrl: getTesterDashboardUrl(),
+  });
+}
 
 const adminPublicLimiter = rateLimiter({
   capacity: parseInt(process.env.RATE_LIMIT_ADMIN_PUBLIC || "60", 10),
@@ -22,19 +40,8 @@ const adminOnly = async (req, res, next) => {
       return next();
     }
 
-    // Double-check with Firebase Auth custom claims as fallback
-    try {
-      const userRecord = await auth.getUser(req.userId);
-      const customClaims = userRecord.customClaims || {};
-
-      if (customClaims.admin === true) {
-        // Don't log entire user or claims to avoid leaking sensitive details to logs
-        console.log("User has admin claim in Firebase Auth for uid:", req.userId || "unknown");
-        return next();
-      }
-    } catch (authError) {
-      console.error("Error checking Firebase Auth claims:", authError);
-    }
+    // Effective authority was verified against the trusted identity policy.
+    // Raw historical Auth claims must not bypass that policy.
 
     // If we get here, the user is not an admin
     // Log only the userId (avoid printing full user object which may contain sensitive fields)
@@ -342,6 +349,155 @@ router.post("/users/:id/unsuspend", authMiddleware, adminOnly, async (req, res) 
   } catch (error) {
     console.error("Error unsuspending user:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Grant one of the ten time-limited Founding Tester places. This is a
+// promotional entitlement, not a PayPal subscription, and is idempotent per user.
+router.post("/users/:id/tester-access", authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const adminId = req.userId || req.user?.uid;
+    const result = await grantTesterAccess({ userId, adminId });
+    let emailSent = false;
+
+    if (!result.alreadyGranted && result.tester?.email) {
+      try {
+        const delivery = await deliverTesterAccessEmail(result.tester);
+        emailSent = delivery?.ok === true && delivery?.provider !== "console";
+      } catch (emailError) {
+        console.error("[tester-program] access email failed:", emailError.message);
+      }
+
+      await db.collection("audit_logs").add({
+        action: "grant_founding_tester_access",
+        adminId,
+        targetId: userId,
+        details: {
+          programId: TESTER_PROGRAM.id,
+          planId: TESTER_PROGRAM.planId,
+          bonusCredits: TESTER_PROGRAM.bonusCredits,
+          expiresAt: result.tester.expiresAt,
+          emailSent,
+        },
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+
+    return res.json({
+      success: true,
+      alreadyGranted: result.alreadyGranted,
+      emailSent,
+      claimedSeats: result.claimedSeats,
+      maxSeats: TESTER_PROGRAM.maxSeats,
+      tester: result.tester,
+      bundle: result.bundle || null,
+    });
+  } catch (error) {
+    const knownCodes = new Set([
+      "user_required",
+      "admin_required",
+      "user_not_found",
+      "tester_program_full",
+    ]);
+    if (knownCodes.has(error.code)) {
+      return res.status(error.statusCode || 400).json({
+        success: false,
+        error: error.code,
+        message: error.message,
+      });
+    }
+    console.error("[tester-program] grant failed:", error);
+    return res.status(500).json({ success: false, error: "internal_error" });
+  }
+});
+
+// Retry the branded access email without granting another seat or changing the
+// tester's allowance. This is safe to use after a temporary provider failure.
+router.post(
+  "/users/:id/tester-access/resend-email",
+  authMiddleware,
+  adminOnly,
+  async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const adminId = req.userId || req.user?.uid;
+      const userDoc = await db.collection("users").doc(userId).get();
+      if (!userDoc.exists) {
+        return res.status(404).json({ success: false, error: "user_not_found" });
+      }
+
+      const user = userDoc.data() || {};
+      const testerAccess = user.testerAccess || null;
+      if (!testerAccess?.programId) {
+        return res.status(409).json({ success: false, error: "tester_access_not_granted" });
+      }
+      if (
+        testerAccess.status !== "active" ||
+        !Number.isFinite(Date.parse(testerAccess.expiresAt || "")) ||
+        Date.parse(testerAccess.expiresAt) <= Date.now()
+      ) {
+        return res.status(409).json({ success: false, error: "tester_access_expired" });
+      }
+
+      const delivery = await deliverTesterAccessEmail({
+        email: user.email,
+        name: user.name || user.displayName,
+        expiresAt: testerAccess.expiresAt,
+      });
+      const emailSent = delivery?.ok === true && delivery?.provider !== "console";
+
+      await db.collection("audit_logs").add({
+        action: "resend_founding_tester_email",
+        adminId,
+        targetId: userId,
+        details: {
+          programId: testerAccess.programId,
+          emailSent,
+          provider: delivery?.provider || "unknown",
+        },
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      if (!emailSent) {
+        console.error(
+          "[tester-program] resend email failed provider=%s error=%s",
+          delivery?.provider || "unknown",
+          delivery?.error || "not_delivered"
+        );
+        return res.status(503).json({
+          success: false,
+          error: "email_not_delivered",
+          message:
+            delivery?.provider === "console"
+              ? "ZeptoMail is not configured in production."
+              : "ZeptoMail did not accept the message. Check the Render email configuration and logs.",
+        });
+      }
+
+      return res.json({
+        success: true,
+        emailSent: true,
+        provider: delivery.provider,
+      });
+    } catch (error) {
+      console.error("[tester-program] resend email failed:", error.message);
+      return res.status(500).json({ success: false, error: "internal_error" });
+    }
+  }
+);
+
+// An audited upload allowance changes capacity without rewriting a subscription.
+router.put("/users/:id/upload-allowance", authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const { setUploadAllowance } = require("./services/uploadAllowance");
+    const allowance = await setUploadAllowance(db, {
+      userId: req.params.id, adminId: req.userId || req.user.uid,
+      monthlyLimit: req.body.monthlyLimit, reason: req.body.reason,
+    });
+    res.json({ success: true, allowance });
+  } catch (error) {
+    res.status(error.status || 500).json({ error: error.status ? error.message : "Could not save upload allowance" });
   }
 });
 

@@ -1,109 +1,26 @@
-# Billing & Subscription Architecture
+# Billing and processing architecture
 
-This document serves as the **Single Source of Truth** for all billing, subscription, and credit logic within AutoPromote. Use this reference when updating pricing, adding providers, or debugging payment flows.
+The isolated Free-first implementation exposes **AutoPromote Free** and **AutoPromote Plus** only. Both share existing creative tools and all six publishing destinations, subject to platform/readiness requirements. Subscription prices are USD. Plus at $4.99/month and all numerical allowances are provisional; checkout is disabled unless `PLUS_PURCHASES_ENABLED=true` and an approved `PAYPAL_PLUS_PLAN_ID` is configured. This document describes branch implementation, not a completed production rollout.
 
-## 1. Billing Providers & Strategy
+`src/config/subscriptionPlans.js` is the public catalog. `LEGACY_SUBSCRIPTION_PLANS` and `ALL_SUBSCRIPTION_PLANS` retain historical IDs, prices and monthly credit allocations for existing contracts. They must not be returned as new offers. Do not alter provider agreements to match a catalog edit.
 
-We operate on a **Hybrid Model**:
+## Separate accounts
 
-1.  **Subscriptions (Recurring):** Monthly/Yearly plans for platform feature access.
-2.  **Credits (Pay-As-You-Go):** "Growth Credits" coin system for specific actions (AI processing, boosts).
+- Existing purchased credits, tester credits, grants and their original terms remain in the legacy systems. No migration, deletion or token conversion is performed.
+- Renewable `processing_*` accounting uses **1 token = $0.001 budgeted infrastructure expenditure**. It is an internal resource unit, not money or a purchased-credit exchange rate.
+- Proposed Free: 100 every 144 hours, at most 500 tokens of modeled expenditure per exact rolling 30 days. Proposed Plus: 500 every 24 hours, at most 2,000 rolling tokens. Service plan policy is configurable; shared features do not depend on tier.
+- Resource reservations and actual incurred expense are separate. Failed jobs may restore user allowance but retain incurred expense. Old-cycle refunds never increase a new allowance. Uncertain worker completion retains reservation/concurrency until signed evidence.
 
-| Provider    | Purpose                                   | Regions      | Status    |
-| :---------- | :---------------------------------------- | :----------- | :-------- |
-| **PayPal**  | Subscriptions & One-time Credit Purchases | Global       | ✅ Active |
-| **PayFast** | One-time Credit Purchases (ZAR)           | South Africa | ✅ Active |
+## Authority and dispatch
 
----
+The server owns plans, balances, quotes and reservations. Firestore transactions serialize concurrent spends and duplicate requests. Native routes reuse a single asynchronous processing context; legacy credit calls within it defer settlement and never debit the purchased wallet. `processingBudgetMiddleware` and guarded worker/Cloud Run/model/3D/publisher/OpenAI boundaries are opt-in with `FREE_FIRST_USAGE_ENABLED=true`. Production adapters are not yet qualified; unbounded operations refuse admission. Supported browser-local edits require no cloud tokens.
 
-## 2. Subscription Tiers (Recurring)
+The signed local-process adapter reuses `unifiedCredits/workerVerification`, its source-gateway and the existing canonical renderer. The old pilot retains its sandbox guard; it is not made production-safe by deleting that guard. Production requires private worker IAM, enforced upper bounds and durable receipt recovery.
 
-Defined in: `src/routes/paypalSubscriptionRoutes.js`
-UI Component: `frontend/src/components/PayPalSubscriptionPanel.js`
+Global daily/monthly/free/API budgets, outstanding liability, user rolling costs and concurrency are application-level controls. They are not a hard cap on the company's entire cloud bill: legacy jobs, downloads, ongoing storage and inaccurate estimates remain outside proven coverage. Storage reservation/reconciliation exists behind a separate rule switch pending trusted inventory and full upload-adapter integration.
 
-| Tier Name   | ID        | Price (USD) | PayPal Plan ID (Env Var) | Key Features                                                        |
-| :---------- | :-------- | :---------- | :----------------------- | :------------------------------------------------------------------ |
-| **Free**    | `free`    | $0.00       | N/A                      | 5 Uploads, Basic Analytics, Watermark                               |
-| **Pro**     | `pro`     | $29.99      | `PAYPAL_PRO_PLAN_ID`     | Unlimited Uploads, No Watermark, Priority Support                   |
-| **Premium** | `premium` | $9.99       | `PAYPAL_PREMIUM_PLAN_ID` | **Best Value**: AI Clips, Cross-Platform Auto, Viral Boosts (3x/mo) |
+## Payments
 
-**Note regarding Premium vs Pro**: Historically, "Pro" might appear more expensive in legacy config, but "Premium" is the current focused tier with AI features. Check `paypalSubscriptionRoutes.js` for the active source of truth on feature flags.
+`/api/usage/upgrade` returns 410 and never grants entitlements. PayPal activation derives plan from configured remote plan IDs, requires authenticated ownership, ACTIVE state, verified USD payment and a future paid period. Atomic claim/payment events reject cross-account replay. Webhooks use PayPal's verification API, then re-read the current agreement. Cancellation retains paid-through access; suspension/expiry remove paid capacity. Administrative grants must be explicitly server-authorized.
 
----
-
-## 3. Credit Packages (Pay-As-You-Go)
-
-Defined in: `frontend/src/EngagementMarketplace.js` and `src/routes/paymentsExtendedRoutes.js`
-Used for: AI Video Processing, "Wolf Pack" Community Boosts, Marketplace Bounties.
-
-| Package Name    | ID            | Credits | Price (USD) | Cost/Credit |
-| :-------------- | :------------ | :------ | :---------- | :---------- |
-| **Cub Snack**   | `pack_small`  | 50      | $4.99       | ~$0.10      |
-| **Wolf Meal**   | `pack_medium` | 150     | $12.99      | ~$0.08      |
-| **Alpha Feast** | `pack_large`  | 500     | $39.99      | ~$0.07      |
-
-**Conversion Logic**:
-
-- Credits are stored in Firestore `users/{uid}.credits` (or `user_credits` collection).
-- 1 Credit ≈ $0.10 value roughly, but abstracted for gamification.
-
----
-
-## 4. Feature Billing Map (Where Money Meets Code)
-
-| Feature              | Billing Type | Implementation File                                  | Logic                                                                                               |
-| :------------------- | :----------- | :--------------------------------------------------- | :-------------------------------------------------------------------------------------------------- |
-| **Video Processing** | Credits      | `frontend/src/components/VideoEditor.js`             | Checks credit balance before calling AI processing. Costs calculated dynamically based on duration. |
-| **AI Clips (Viral)** | Credits      | `frontend/src/UserDashboardTabs/ClipStudioPanel.js`  | `402 Payment Required` triggers if insufficient credits.                                            |
-| **Upload Quota**     | Subscription | `frontend/src/ContentUploadForm.js`                  | Checks `user.tier` vs limits. Blocks upload if limit reached.                                       |
-| **Viral Boost**      | Credits      | `frontend/src/EngagementMarketplace.js`              | Deducts credits to create a "Bounty" in the community feed.                                         |
-| **Subscription UI**  | Subscription | `frontend/src/components/PayPalSubscriptionPanel.js` | Handles upgrade/downgrade UI, PayPal Buttons.                                                       |
-| **Public Pricing**   | Display      | `frontend/src/Pricing.js`                            | Wraps the SubscriptionPanel for public view.                                                        |
-
----
-
-## 5. Database Schema Reference
-
-**`users` Collection**:
-
-```json
-{
-  "uid": "user_123",
-  "email": "user@example.com",
-  "subscription": {
-    "planId": "premium", // free, pro, premium
-    "status": "active", // active, cancelled, past_due
-    "provider": "paypal",
-    "subscriptionId": "I-123456789"
-  },
-  "credits": 150, // Available wallet balance
-  "usage": {
-    "uploads_this_month": 5,
-    "ai_clips_generated": 10
-  }
-}
-```
-
-**`transactions` Collection**:
-
-```json
-{
-  "userId": "user_123",
-  "type": "CREDIT_PURCHASE", // or SUBSCRIPTION_PAYMENT
-  "amount": 12.99,
-  "currency": "USD",
-  "provider": "PAYPAL", // or PAYFAST
-  "creditsAdded": 150,
-  "timestamp": "ISO_DATE"
-}
-```
-
-## 6. Update Protocols
-
-When changing a price or plan:
-
-1.  **PayPal Dashboard**: Update the Plan ID in PayPal first.
-2.  **Environment Variables**: Update `.env` (e.g., `PAYPAL_PREMIUM_PLAN_ID`) in Backend.
-3.  **Backend Config**: Update `src/routes/paypalSubscriptionRoutes.js`.
-4.  **Frontend Config**: Update usage limits or display text in `PayPalSubscriptionPanel.js`.
-5.  **Documentation**: Update this file (`BILLING_ARCHITECTURE.md`).
+No subscription change, customer balance write or provider plan activation has occurred during implementation. The [audit and evidence](reports/free-first-20261126/README.md) and [migration/rollback proposal](reports/free-first-20261126/MIGRATION.md) define the remaining launch gates.

@@ -125,6 +125,24 @@ const TIERS = {
   },
 };
 
+// Creative access is shared. Existing customer resource entitlements remain at least as large.
+for (const tier of Object.values(TIERS)) {
+  tier.platform_limit = 6;
+  tier.allowed_features = {
+    ...tier.allowed_features,
+    organic_upload: true,
+    global_distribution: true,
+    multicam: true,
+  };
+}
+TIERS.PLUS = {
+  ...TIERS.FREE,
+  id: "plus",
+  name: "AutoPromote Plus",
+  monthly_upload_cap: getUploadLimitForPlan("plus"),
+  monthly_price: Number(resolvePlan("plus").price),
+};
+
 const FEATURE_PRICES = {
   // All prices 0 during "Addiction Phase"
   engagement_blocks: 0.0,
@@ -142,7 +160,7 @@ function buildTesterTier(baseTier) {
     monthly_upload_cap: TESTER_PROGRAM.usageLimits.uploads,
     monthly_ai_cap: 30,
     monthly_bot_cap: 0,
-    platform_limit: TESTER_PROGRAM.usageLimits.connectedPlatforms,
+    platform_limit: 6,
     allowed_features: {
       organic_upload: true,
       bot_boost: false,
@@ -159,20 +177,20 @@ function getPlatformPostMonthlyQuota(planId, plan = null, testerAccess = null, b
   if (testerAccess) return TESTER_PROGRAM.usageLimits.queuedPlatformPosts;
   const normalized = normalizePlanId(planId || "free");
   const defaultPlatformPostQuotas = {
-    free: 10,
+    free: 30,
+    plus: 150,
     premium: 150,
     basic: 150,
     pro: 500,
     enterprise: 2000,
   };
   const envKey = `PLATFORM_POST_MONTHLY_QUOTA_${String(normalized).toUpperCase()}`;
-  const base = (
+  const base =
     parseInt(process.env[envKey] || "", 10) ||
     parseInt(process.env.PLATFORM_POST_MONTHLY_QUOTA || "", 10) ||
     defaultPlatformPostQuotas[normalized] ||
     (plan && plan.features ? Number(plan.features.monthlyPromotions) : 0) ||
-    0
-  );
+    0;
   // Only server-owned billing data can raise one account's publishing capacity.
   const allowance = billingData?.publishingAllowance?.monthlyLimit;
   return Number.isInteger(allowance) && allowance >= 1 && allowance <= 10000
@@ -198,7 +216,7 @@ async function resolveEffectiveTierId(userId, billingData, userData) {
   const testerAccess = getActiveTesterAccess(safeUser, now);
   if (testerAccess) {
     const testerTier = normalizePlanId(testerAccess.planId || "pro");
-    const planRank = { free: 0, premium: 1, pro: 2, enterprise: 3 };
+    const planRank = { free: 0, plus: 1, premium: 2, pro: 3, enterprise: 4 };
     return planRank[billingTier] > planRank[testerTier] ? billingTier : testerTier;
   }
 
@@ -224,19 +242,27 @@ async function resolveEffectiveTierId(userId, billingData, userData) {
     "external_missing",
   ].includes(normalizedStatus);
 
-  if (isCancelledState) {
-    return "free";
+  if (billingTier === "plus" || userTier === "plus") {
+    const grant = safeBilling.administrativeGrant;
+    const adminGrant = grant?.authorized === true && grant.grantedBy &&
+      (!grant.expiresAt || Date.parse(grant.expiresAt) > now);
+    if (!adminGrant && (safeBilling.paymentVerified !== true || !hasFutureExpiry ||
+        !["active", "cancelled", "canceled"].includes(normalizedStatus))) return "free";
   }
+  if (["cancelled", "canceled"].includes(normalizedStatus) && hasFutureExpiry) {
+    return billingTier !== "free" ? billingTier : userTier;
+  }
+  if (isCancelledState) return "free";
 
   if (normalizedStatus === "active") {
-    if (isExpired) return billingTier !== "free" ? billingTier : "free";
+    if (isExpired) return "free";
     if (billingTier !== "free") return billingTier;
     if (hasFutureExpiry && userTier !== "free") return userTier;
     return "free";
   }
 
   if (isExpired) {
-    return billingTier !== "free" ? billingTier : "free";
+    return "free";
   }
 
   if (!normalizedStatus) {
@@ -280,8 +306,10 @@ async function getEffectiveTierSnapshot(userId, providedBillingData, providedUse
   const baseTier = TIERS[tierId.toUpperCase()] || TIERS.FREE;
   const testerAccess = getActiveTesterAccess(userData);
   const selectedTier = testerAccess ? buildTesterTier(baseTier) : baseTier;
-  const tier = { ...selectedTier,
-    monthly_upload_cap: effectiveUploadLimit(selectedTier.monthly_upload_cap, billingData) };
+  const tier = {
+    ...selectedTier,
+    monthly_upload_cap: effectiveUploadLimit(selectedTier.monthly_upload_cap, billingData),
+  };
 
   return {
     tierId,
@@ -315,8 +343,10 @@ async function calculateCreatorCharge(userId, intent, _featuresSelected = []) {
   const baseTier = TIERS[userTierId.toUpperCase()] || TIERS.FREE;
   const testerAccess = getActiveTesterAccess(userData);
   const selectedTier = testerAccess ? buildTesterTier(baseTier) : baseTier;
-  const userTier = { ...selectedTier,
-    monthly_upload_cap: effectiveUploadLimit(selectedTier.monthly_upload_cap, billingData) };
+  const userTier = {
+    ...selectedTier,
+    monthly_upload_cap: effectiveUploadLimit(selectedTier.monthly_upload_cap, billingData),
+  };
 
   // 2. Check Upload Caps (for Organic/Commercial)
   const used = billingData.uploads_this_month || 0;
@@ -558,6 +588,7 @@ async function trackBotUsage(userId, amount = 1) {
 // We export the main calculator.
 
 module.exports = {
+  resolveEffectiveTierId,
   calculateCreatorCharge,
   getEffectiveTierSnapshot,
   checkAILimit,

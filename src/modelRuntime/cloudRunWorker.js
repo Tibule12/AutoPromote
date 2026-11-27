@@ -7,6 +7,7 @@ class CloudRunCapabilityWorker {
   }
   prefix(job) { return `${this.resultPrefix}/${job.ownerUid}/${job.id}/${job.attemptToken}`; }
   async dispatch(job) {
+    require("../services/processingTokens/runtime").assertDispatch();
     let spec,etag;
     try {
       if(job.workerImage!==this.image)throw fail('MODEL_QUEUED_WORKER_IMAGE_CHANGED',503);

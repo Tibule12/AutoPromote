@@ -1,0 +1,921 @@
+{
+  "scope": "Real loopback Firestore and HTTP; controlled fixture authentication. No cloud invocations/publication/deletions. Local CPU/RSS is not hosted Render capacity.",
+  "measurements": {
+    "retentionSparse": {
+      "before": {
+        "reads": 80,
+        "writes": 0,
+        "calls": 80,
+        "wallMs": 214.37628100000006,
+        "cpuMs": 206.599,
+        "rssBytes": 120111104
+      },
+      "after": {
+        "reads": 26,
+        "writes": 0,
+        "calls": 8,
+        "wallMs": 34.72838300000001,
+        "cpuMs": 27.128,
+        "rssBytes": 120242176
+      }
+    },
+    "retentionIneligible": {
+      "calls": 3,
+      "dependencyCalls": 0,
+      "storageOperations": 0
+    },
+    "retentionRepeatedHold": {
+      "before": {
+        "reads": 0,
+        "writes": 100,
+        "calls": 100,
+        "wallMs": 390.702949,
+        "cpuMs": 189.73,
+        "rssBytes": 123830272
+      },
+      "after": {
+        "reads": 0,
+        "writes": 0,
+        "calls": 0,
+        "wallMs": 0.8830609999999979,
+        "cpuMs": 0.957,
+        "rssBytes": 123830272
+      },
+      "changedStatusWrites": 1,
+      "filesDeleted": 0
+    },
+    "counterBurst": {
+      "before": {
+        "reads": 0,
+        "writes": 100,
+        "calls": 100,
+        "wallMs": 243.18631600000003,
+        "cpuMs": 141.319,
+        "rssBytes": 130715648
+      },
+      "after": {
+        "reads": 0,
+        "writes": 2,
+        "calls": 2,
+        "wallMs": 11.179980999999998,
+        "cpuMs": 5.415,
+        "rssBytes": 130715648
+      },
+      "eventsRetained": 100
+    },
+    "triggerDispatch": {
+      "fixtureUpdates": 1004,
+      "legacyDeliveries": 4016,
+      "consolidatedDeliveries": 1004,
+      "relevantHandlers": 4,
+      "cloudFunctionsStarted": 0
+    },
+    "approvalReplay": {
+      "deliveries": 20,
+      "schedulesCreated": 1,
+      "successfulWrites": 1
+    },
+    "actualFunctionsSdk": {
+      "consolidatedExport": true,
+      "survivingTrigger": "createPromotionOnApproval",
+      "additionalTriggerCreated": false,
+      "threeRedundantUpdateExportsAbsent": true,
+      "deliveries": 2,
+      "schedules": 1
+    },
+    "adminActivity20Concurrent": {
+      "before": {
+        "reads": 800,
+        "writes": 0,
+        "calls": 420,
+        "wallMs": 721.1801450000003,
+        "cpuMs": 1088.313,
+        "rssBytes": 195473408,
+        "p95Ms": 693.8396130000001
+      },
+      "after": {
+        "reads": 21,
+        "writes": 0,
+        "calls": 2,
+        "wallMs": 29.383069000000432,
+        "cpuMs": 28.626,
+        "rssBytes": 195473408,
+        "p95Ms": 26.157626000000164
+      },
+      "identicalResponse": true,
+      "authCheckedBeforeCache": true,
+      "distinctOwnersHaveSeparateCache": true
+    }
+  },
+  "profile": {
+    "enabled": true,
+    "processId": 1476459,
+    "uptimeMs": 6567,
+    "activeRequests": 0,
+    "peakConcurrentRequests": 20,
+    "rssBytes": 195473408,
+    "heapUsedBytes": 68096592,
+    "peakProcessRssKiB": 200700,
+    "cpuUserMicros": 2424177,
+    "cpuSystemMicros": 166253,
+    "cgroup": {
+      "memoryMax": null,
+      "cpuMax": null
+    },
+    "firestore": [
+      {
+        "id": "b9c4278d70049fef0c82",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "fixture:SDK",
+        "source": "sdk/unattributed",
+        "method": "commit",
+        "query": {
+          "parent": "",
+          "collections": [],
+          "filters": [],
+          "order": [],
+          "limit": null
+        },
+        "calls": 1,
+        "errors": 0,
+        "documentsReturned": 0,
+        "minimumReadEstimate": 0,
+        "writesCommitted": 1,
+        "listenerChanges": 0
+      },
+      {
+        "id": "e27d81c8b1c184685b8f",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "fixture:SDK",
+        "source": "sdk/unattributed",
+        "method": "batchGetDocuments",
+        "query": {
+          "parent": "",
+          "collections": [],
+          "filters": [],
+          "order": [],
+          "limit": null
+        },
+        "calls": 1,
+        "errors": 0,
+        "documentsReturned": 1,
+        "minimumReadEstimate": 1,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "94d1159adbaa6869e1e1",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "fixture:SDK",
+        "source": "sdk/unattributed",
+        "method": "runQuery",
+        "query": {
+          "parent": "",
+          "collections": [
+            [
+              "waste_observation",
+              false
+            ]
+          ],
+          "filters": [
+            [
+              "secret",
+              "EQUAL"
+            ]
+          ],
+          "order": [],
+          "limit": null
+        },
+        "calls": 1,
+        "errors": 0,
+        "documentsReturned": 1,
+        "minimumReadEstimate": 1,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "72e7bec00854970a5297",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "background/unattributed",
+        "source": "sdk/unattributed",
+        "method": "commit",
+        "query": {
+          "parent": "",
+          "collections": [],
+          "filters": [],
+          "order": [],
+          "limit": null
+        },
+        "calls": 234,
+        "errors": 20,
+        "documentsReturned": 0,
+        "minimumReadEstimate": 0,
+        "writesCommitted": 256,
+        "listenerChanges": 0
+      },
+      {
+        "id": "483626597c766d357c1b",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "background/unattributed",
+        "source": "sdk/unattributed",
+        "method": "runQuery",
+        "query": {
+          "parent": "",
+          "collections": [
+            [
+              "platform_posts",
+              false
+            ]
+          ],
+          "filters": [
+            [
+              "contentId",
+              "EQUAL"
+            ]
+          ],
+          "order": [],
+          "limit": 200
+        },
+        "calls": 20,
+        "errors": 0,
+        "documentsReturned": 20,
+        "minimumReadEstimate": 20,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "5670d67ddacc4b4e8461",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "background/unattributed",
+        "source": "sdk/unattributed",
+        "method": "runQuery",
+        "query": {
+          "parent": "",
+          "collections": [
+            [
+              "promotion_tasks",
+              false
+            ]
+          ],
+          "filters": [
+            [
+              "contentId",
+              "EQUAL"
+            ]
+          ],
+          "order": [],
+          "limit": 200
+        },
+        "calls": 20,
+        "errors": 0,
+        "documentsReturned": 0,
+        "minimumReadEstimate": 20,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "82cc4ef5f96dc443c08d",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "background/unattributed",
+        "source": "sdk/unattributed",
+        "method": "runQuery",
+        "query": {
+          "parent": "",
+          "collections": [
+            [
+              "promotion_schedules",
+              false
+            ]
+          ],
+          "filters": [
+            [
+              "contentId",
+              "EQUAL"
+            ]
+          ],
+          "order": [],
+          "limit": 200
+        },
+        "calls": 20,
+        "errors": 0,
+        "documentsReturned": 0,
+        "minimumReadEstimate": 20,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "912ec9f546dbf723662e",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "background/unattributed",
+        "source": "sdk/unattributed",
+        "method": "runQuery",
+        "query": {
+          "parent": "",
+          "collections": [
+            [
+              "media_transform_tasks",
+              false
+            ]
+          ],
+          "filters": [
+            [
+              "contentId",
+              "EQUAL"
+            ]
+          ],
+          "order": [],
+          "limit": 200
+        },
+        "calls": 20,
+        "errors": 0,
+        "documentsReturned": 0,
+        "minimumReadEstimate": 20,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "33f4ea68519aed79a096",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "background/unattributed",
+        "source": "/src/services/publishedVideoRetention.js:16:95",
+        "method": "runQuery",
+        "query": {
+          "parent": "",
+          "collections": [
+            [
+              "platform_posts",
+              false
+            ]
+          ],
+          "filters": [
+            [
+              "contentId",
+              "IN"
+            ]
+          ],
+          "order": [],
+          "limit": 200
+        },
+        "calls": 2,
+        "errors": 0,
+        "documentsReturned": 20,
+        "minimumReadEstimate": 20,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "b241c312f069025c82e0",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "background/unattributed",
+        "source": "/src/services/publishedVideoRetention.js:16:95",
+        "method": "runQuery",
+        "query": {
+          "parent": "",
+          "collections": [
+            [
+              "promotion_tasks",
+              false
+            ]
+          ],
+          "filters": [
+            [
+              "contentId",
+              "IN"
+            ]
+          ],
+          "order": [],
+          "limit": 200
+        },
+        "calls": 2,
+        "errors": 0,
+        "documentsReturned": 0,
+        "minimumReadEstimate": 2,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "ce64833d17f8f1171c00",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "background/unattributed",
+        "source": "/src/services/publishedVideoRetention.js:16:95",
+        "method": "runQuery",
+        "query": {
+          "parent": "",
+          "collections": [
+            [
+              "promotion_schedules",
+              false
+            ]
+          ],
+          "filters": [
+            [
+              "contentId",
+              "IN"
+            ]
+          ],
+          "order": [],
+          "limit": 200
+        },
+        "calls": 2,
+        "errors": 0,
+        "documentsReturned": 0,
+        "minimumReadEstimate": 2,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "6f4c9803021a0326c0d3",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "background/unattributed",
+        "source": "/src/services/publishedVideoRetention.js:16:95",
+        "method": "runQuery",
+        "query": {
+          "parent": "",
+          "collections": [
+            [
+              "media_transform_tasks",
+              false
+            ]
+          ],
+          "filters": [
+            [
+              "contentId",
+              "IN"
+            ]
+          ],
+          "order": [],
+          "limit": 200
+        },
+        "calls": 2,
+        "errors": 0,
+        "documentsReturned": 0,
+        "minimumReadEstimate": 2,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "9425024797d2a6c6068d",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "background/unattributed",
+        "source": "/src/services/publishedVideoRetention.js:16:95",
+        "method": "runQuery",
+        "query": {
+          "parent": "",
+          "collections": [
+            [
+              "platform_posts",
+              false
+            ]
+          ],
+          "filters": [
+            [
+              "contentId",
+              "IN"
+            ]
+          ],
+          "order": [],
+          "limit": 3
+        },
+        "calls": 1,
+        "errors": 0,
+        "documentsReturned": 2,
+        "minimumReadEstimate": 2,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "9d24448bc85782e124d8",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "background/unattributed",
+        "source": "/src/services/publishedVideoRetention.js:16:95",
+        "method": "runQuery",
+        "query": {
+          "parent": "",
+          "collections": [
+            [
+              "promotion_tasks",
+              false
+            ]
+          ],
+          "filters": [
+            [
+              "contentId",
+              "IN"
+            ]
+          ],
+          "order": [],
+          "limit": 3
+        },
+        "calls": 1,
+        "errors": 0,
+        "documentsReturned": 3,
+        "minimumReadEstimate": 3,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "7616dd3bd353e951ed7a",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "background/unattributed",
+        "source": "/src/services/publishedVideoRetention.js:16:95",
+        "method": "runQuery",
+        "query": {
+          "parent": "",
+          "collections": [
+            [
+              "promotion_schedules",
+              false
+            ]
+          ],
+          "filters": [
+            [
+              "contentId",
+              "IN"
+            ]
+          ],
+          "order": [],
+          "limit": 3
+        },
+        "calls": 1,
+        "errors": 0,
+        "documentsReturned": 0,
+        "minimumReadEstimate": 1,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "bdc5063c98f93de5397b",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "background/unattributed",
+        "source": "/src/services/publishedVideoRetention.js:16:95",
+        "method": "runQuery",
+        "query": {
+          "parent": "",
+          "collections": [
+            [
+              "media_transform_tasks",
+              false
+            ]
+          ],
+          "filters": [
+            [
+              "contentId",
+              "IN"
+            ]
+          ],
+          "order": [],
+          "limit": 3
+        },
+        "calls": 1,
+        "errors": 0,
+        "documentsReturned": 0,
+        "minimumReadEstimate": 1,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "42cfd8ed2f28f02ae8d3",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "background/unattributed",
+        "source": "/src/services/publishedVideoRetention.js:19:169",
+        "method": "runQuery",
+        "query": {
+          "parent": "",
+          "collections": [
+            [
+              "promotion_tasks",
+              false
+            ]
+          ],
+          "filters": [
+            [
+              "contentId",
+              "EQUAL"
+            ]
+          ],
+          "order": [],
+          "limit": 3
+        },
+        "calls": 2,
+        "errors": 0,
+        "documentsReturned": 3,
+        "minimumReadEstimate": 4,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "a45be85895cabbdd39a5",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "background/unattributed",
+        "source": "/src/services/publishedVideoRetention.js:104:6)",
+        "method": "runQuery",
+        "query": {
+          "parent": "",
+          "collections": [
+            [
+              "user_billing",
+              false
+            ]
+          ],
+          "filters": [
+            [
+              "storageRetention.publishedVideoHours",
+              "EQUAL"
+            ]
+          ],
+          "order": [],
+          "limit": 200
+        },
+        "calls": 1,
+        "errors": 0,
+        "documentsReturned": 1,
+        "minimumReadEstimate": 1,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "479b1d3b0c7145d92094",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "background/unattributed",
+        "source": "/src/services/publishedVideoRetention.js:116:63)",
+        "method": "runQuery",
+        "query": {
+          "parent": "",
+          "collections": [
+            [
+              "content",
+              false
+            ]
+          ],
+          "filters": [
+            [
+              "user_id",
+              "EQUAL"
+            ]
+          ],
+          "order": [
+            [
+              "__name__",
+              "ASCENDING"
+            ]
+          ],
+          "limit": 200
+        },
+        "calls": 1,
+        "errors": 0,
+        "documentsReturned": 2,
+        "minimumReadEstimate": 2,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "71c7bb2d6fd69f1d2e7d",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "background/unattributed",
+        "source": "/src/services/publishedVideoRetention.js:116:63)",
+        "method": "runQuery",
+        "query": {
+          "parent": "",
+          "collections": [
+            [
+              "content",
+              false
+            ]
+          ],
+          "filters": [
+            [
+              "userId",
+              "EQUAL"
+            ]
+          ],
+          "order": [
+            [
+              "__name__",
+              "ASCENDING"
+            ]
+          ],
+          "limit": 200
+        },
+        "calls": 1,
+        "errors": 0,
+        "documentsReturned": 0,
+        "minimumReadEstimate": 1,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "eef40a829c7983288d42",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "background/unattributed",
+        "source": "/src/services/storageCleanupService.js:144:42",
+        "method": "batchGetDocuments",
+        "query": {
+          "parent": "",
+          "collections": [],
+          "filters": [],
+          "order": [],
+          "limit": null
+        },
+        "calls": 1,
+        "errors": 0,
+        "documentsReturned": 1,
+        "minimumReadEstimate": 1,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "51c07cfc66df268f2ea5",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "background/unattributed",
+        "source": "sdk/unattributed",
+        "method": "batchGetDocuments",
+        "query": {
+          "parent": "",
+          "collections": [],
+          "filters": [],
+          "order": [],
+          "limit": null
+        },
+        "calls": 3,
+        "errors": 0,
+        "documentsReturned": 3,
+        "minimumReadEstimate": 3,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "3efbea1fe417817a95e0",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "background/unattributed",
+        "source": "sdk/unattributed",
+        "method": "runQuery",
+        "query": {
+          "parent": "",
+          "collections": [
+            [
+              "promotion_schedules",
+              false
+            ]
+          ],
+          "filters": [
+            [
+              "contentId",
+              "EQUAL"
+            ]
+          ],
+          "order": [],
+          "limit": null
+        },
+        "calls": 2,
+        "errors": 0,
+        "documentsReturned": 2,
+        "minimumReadEstimate": 2,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "06242fec6e930cc443a7",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "/api/admin/system/activity",
+        "source": "/src/routes/adminSystemRoutes.js.baseline.js:240:8",
+        "method": "runQuery",
+        "query": {
+          "parent": "",
+          "collections": [
+            [
+              "activities",
+              false
+            ]
+          ],
+          "filters": [],
+          "order": [
+            [
+              "timestamp",
+              "DESCENDING"
+            ]
+          ],
+          "limit": 20
+        },
+        "calls": 20,
+        "errors": 0,
+        "documentsReturned": 400,
+        "minimumReadEstimate": 400,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "2ec2531ed5d0f65f70ab",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "/api/admin/system/activity",
+        "source": "/src/routes/adminSystemRoutes.js.baseline.js:249:79",
+        "method": "batchGetDocuments",
+        "query": {
+          "parent": "",
+          "collections": [],
+          "filters": [],
+          "order": [],
+          "limit": null
+        },
+        "calls": 400,
+        "errors": 0,
+        "documentsReturned": 400,
+        "minimumReadEstimate": 400,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "02b4f18bfd365305769d",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "/api/admin/system/activity",
+        "source": "/src/routes/adminSystemRoutes.js.optimized.js:245:8",
+        "method": "runQuery",
+        "query": {
+          "parent": "",
+          "collections": [
+            [
+              "activities",
+              false
+            ]
+          ],
+          "filters": [],
+          "order": [
+            [
+              "timestamp",
+              "DESCENDING"
+            ]
+          ],
+          "limit": 20
+        },
+        "calls": 2,
+        "errors": 0,
+        "documentsReturned": 40,
+        "minimumReadEstimate": 40,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      },
+      {
+        "id": "c939d3bf4971f188b91d",
+        "application": "autopromote-node",
+        "project": "demo-autopromote-credits",
+        "route": "/api/admin/system/activity",
+        "source": "/src/routes/adminSystemRoutes.js.optimized.js:256:96",
+        "method": "batchGetDocuments",
+        "query": {
+          "parent": "",
+          "collections": [],
+          "filters": [],
+          "order": [],
+          "limit": null
+        },
+        "calls": 2,
+        "errors": 0,
+        "documentsReturned": 2,
+        "minimumReadEstimate": 2,
+        "writesCommitted": 0,
+        "listenerChanges": 0
+      }
+    ],
+    "endpoints": [
+      {
+        "route": "GET /api/admin/system/activity",
+        "requests": 43,
+        "errors": 2,
+        "p50Ms": 16.687891,
+        "p95Ms": 585.146849,
+        "maxMs": 600.219494,
+        "sampleSize": 43
+      }
+    ],
+    "limitations": [
+      "SDK response/read/write observations, not billing or index/rules/GAX-retry attribution.",
+      "Per-process bounded records; browser/Python/other applications require their own instrumentation.",
+      "Local process/cgroup data does not establish hosted Render plan capacity."
+    ]
+  }
+}

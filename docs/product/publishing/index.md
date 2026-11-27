@@ -1,6 +1,6 @@
 # Publishing
 
-Development documentation • product 1.2.0 • knowledge 1.0.71 • 2026-11-25
+Development documentation • product 1.2.0 • knowledge 1.0.72 • 2026-11-26
 
 Overall feature ratings and working subfeatures are separate. PARTIAL or BROKEN does not mean every control fails; entries identify verified workflows, release state and the remaining limitation. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -33,6 +33,7 @@ Connects supported platform accounts through existing permissions. Displayed pla
 - Provider permissions, token health, account allowance and destination access apply.
 - The current provider must verify the posting identity; a stored connection alone is insufficient.
 - Six-platform external delivery has not been qualified by the connection checks.
+- Free-first development migration: Free and Plus share creative tools and all six destinations. Supported local editing uses no cloud processing tokens. Cloud admission, reset and rolling capacity are enforced only through configured bounded adapters; production rollout and final pricing remain pending. Existing subscriptions and purchased credits are retained.
 
 **Common errors**
 
@@ -78,6 +79,7 @@ Schedules owned completed media through the existing account-linked pipeline. Sc
 - A pending schedule needs an operating scheduler and posting worker. Requested posts continue when the browser closes; empty queues avoid repeated scans. Only a successful provider result confirms publication.
 - Fresh uploads and edited replacement files still require upload allowance. Reusing stored media for a schedule does not increase new-content upload capacity.
 - If this account has opted into 24-hour published-video retention, its owned publishing copies expire 24 hours after every intended destination confirms publication. Pending, paused, failed, recurring, shared or transforming work keeps its file. Expired copies are not selectable for a new schedule; upload the file again. Publication history remains.
+- Free-first development migration: Free and Plus share creative tools and all six destinations. Supported local editing uses no cloud processing tokens. Cloud admission, reset and rolling capacity are enforced only through configured bounded adapters; production rollout and final pricing remain pending. Existing subscriptions and purchased credits are retained.
 
 **Common errors**
 
@@ -164,6 +166,7 @@ Submits selected owned content to eligible connected platforms under the existin
 - TikTok disclosure switches start off for a new post. Cuts, captions, colour correction and minor retouching alone do not require an AI label. Realistic AI-generated or significantly AI-altered media still needs the applicable disclosure.
 - TikTok can apply additional labels automatically. AutoPromote cannot remove TikTok-applied AI labels or change an existing post's commercial label; provider rules still apply.
 - A created Reddit post can lack playable video. Publication requires a completed attachment and accessible media; a link or upload acknowledgement is insufficient.
+- Free-first development migration: Free and Plus share creative tools and all six destinations. Supported local editing uses no cloud processing tokens. Cloud admission, reset and rolling capacity are enforced only through configured bounded adapters; production rollout and final pricing remain pending. Existing subscriptions and purchased credits are retained.
 
 **Common errors**
 

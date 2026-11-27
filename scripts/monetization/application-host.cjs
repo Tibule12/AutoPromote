@@ -52,11 +52,22 @@ const firestore = Object.assign(() => db, {
 let gateway;
 const bucket = new Proxy(rawBucket, {
   get(target, key) {
-    if (key === "upload") return async (file, options) => {
-      if (options?.destination?.startsWith("temp_studio_3d/") && options.destination.endsWith("/overlay.mov") && fs.statSync(file).size > 100 * 1024 ** 2)
-        return require("./upload-local-alpha.cjs")({ file, options, bucket: target, origin: config.storageOrigin, cohort: config.cohort });
-      return target.upload(file, options);
-    };
+    if (key === "upload")
+      return async (file, options) => {
+        if (
+          options?.destination?.startsWith("temp_studio_3d/") &&
+          options.destination.endsWith("/overlay.mov") &&
+          fs.statSync(file).size > 100 * 1024 ** 2
+        )
+          return require("./upload-local-alpha.cjs")({
+            file,
+            options,
+            bucket: target,
+            origin: config.storageOrigin,
+            cohort: config.cohort,
+          });
+        return target.upload(file, options);
+      };
     // Firebase's local Storage emulator has no bucket-IAM metadata endpoint.
     // Model its private transport capability; object bytes/metadata still use SDK I/O.
     if (key === "getMetadata")
@@ -72,9 +83,11 @@ const bucket = new Proxy(rawBucket, {
             meta.metadata?.ownerUid ||
             meta.metadata?.userId ||
             config.cohort.find(id => name.split("/").includes(id));
-          return [await gateway.signedUrl(uid, name, {
-            attachment: /^attachment(?:;|$)/i.test(options.responseDisposition || ""),
-          })];
+          return [
+            await gateway.signedUrl(uid, name, {
+              attachment: /^attachment(?:;|$)/i.test(options.responseDisposition || ""),
+            }),
+          ];
         };
         file.makePublic = async () => {
           throw new Error("PRIVATE_STORAGE_REQUIRED");
@@ -102,12 +115,17 @@ cache("../../firebaseAdmin", { admin: facade, db, storage: facade.storage() });
 if (config.env.CREDITS_LOCAL_FACE_ANALYSIS === "true") {
   const original = require("../../src/utils/cloudRunAuth");
   const adapter = require("./local-face-analysis.cjs").localFaceAnalysis({
-    config, directory: path.dirname(process.argv[2]),
+    config,
+    directory: path.dirname(process.argv[2]),
   });
-  cache("../../src/utils/cloudRunAuth", { ...original,
+  cache("../../src/utils/cloudRunAuth", {
+    ...original,
     buildWorkerRequestConfig: async (target, options = {}) =>
-      ["/track-studio-faces", "/preview-silence"].some(endpoint => target === config.worker.origin + endpoint)
-        ? { ...options, adapter } : original.buildWorkerRequestConfig(target, options),
+      ["/track-studio-faces", "/preview-silence"].some(
+        endpoint => target === config.worker.origin + endpoint
+      )
+        ? { ...options, adapter }
+        : original.buildWorkerRequestConfig(target, options),
   });
 }
 const { createWalletService } = require("../../src/services/unifiedCredits/wallet");
@@ -118,11 +136,11 @@ const { createSourceGateway } = require("../../src/services/unifiedCredits/sourc
 const {
   createLocalProcessVerifier,
 } = require("../../src/services/unifiedCredits/workerVerification");
-const reviewBounds = require('./local-review-bounds.cjs').localReviewBounds(process.env);
+const reviewBounds = require("./local-review-bounds.cjs").localReviewBounds(process.env);
 if (reviewBounds.longer) {
   // The local wallet must reserve the full enforced local runtime ceiling.
   // Symbolic per-unit test prices remain; no production pricing is loaded.
-  for (const operation of ['studio.render', 'clips.render'])
+  for (const operation of ["studio.render", "clips.render"])
     config.policy.operations[operation].maxUnits = reviewBounds.renderCpuSeconds;
 }
 const service = createWalletService({
@@ -313,47 +331,67 @@ app.locals.sharedCreditPilot = integration;
 // admission keeps its additional tighter per-operation limits.
 app.use(rateLimit({ windowMs: 60000, max: 1200, standardHeaders: true, legacyHeaders: false }));
 // A canonical 33-point RGB cube can exceed 2 MiB in the normal Studio body.
-const localRequestBytes=Number(process.env.CREDITS_LOCAL_MAX_REQUEST_BYTES || 4*1024*1024);
-if(!Number.isSafeInteger(localRequestBytes)||localRequestBytes<512*1024||localRequestBytes>4*1024*1024)
-  throw Error('Local request limit must be 512 KiB–4 MiB.');
+const localRequestBytes = Number(process.env.CREDITS_LOCAL_MAX_REQUEST_BYTES || 4 * 1024 * 1024);
+if (
+  !Number.isSafeInteger(localRequestBytes) ||
+  localRequestBytes < 512 * 1024 ||
+  localRequestBytes > 4 * 1024 * 1024
+)
+  throw Error("Local request limit must be 512 KiB–4 MiB.");
 app.use(express.json({ limit: localRequestBytes }));
 // A separately served, immutable candidate build needs real signed-in QA
 // before replacing the local App. Opt in only exact loopback origins; normal
 // runs retain the single-origin boundary and all existing Auth/admission.
 const candidateOrigins = config.previewOrigins || [];
-if (!Array.isArray(candidateOrigins) || candidateOrigins.length > 2 || candidateOrigins.some(value => {
-  try { const url = new URL(value); return url.protocol !== 'http:' || url.hostname !== '127.0.0.1' || url.origin !== value; }
-  catch { return true; }
-})) throw Error('Candidate builds require at most two exact loopback origins.');
-if (process.env.STUDIO_BACKGROUND_LONG_DEMO === 'true') {
-  const bounds = require('./local-review-bounds.cjs').localReviewBounds(process.env);
+if (
+  !Array.isArray(candidateOrigins) ||
+  candidateOrigins.length > 2 ||
+  candidateOrigins.some(value => {
+    try {
+      const url = new URL(value);
+      return url.protocol !== "http:" || url.hostname !== "127.0.0.1" || url.origin !== value;
+    } catch {
+      return true;
+    }
+  })
+)
+  throw Error("Candidate builds require at most two exact loopback origins.");
+if (process.env.STUDIO_BACKGROUND_LONG_DEMO === "true" || process.env.FREE_FIRST_DEMO === "true") {
+  const bounds = require("./local-review-bounds.cjs").localReviewBounds(process.env);
   // The Storage emulator's GCS endpoint finalizes the first PUT instead of
   // acknowledging partial GCS chunks. Its bounded local review transfer must
   // therefore send the actual complete bytes in one PUT. Production resumable
   // uploads and the normal ownership/size/hash completion checks are unchanged.
-  app.use('/api/media/multicam/uploads/start', (_req, res, next) => {
+  app.use("/api/media/multicam/uploads/start", (_req, res, next) => {
     const send = res.json.bind(res);
     res.json = body => {
-      if (body?.uploadUrl && Number(body.expectedSizeBytes) > 0 &&
-          Number(body.expectedSizeBytes) <= bounds.maxSourceBytes &&
-          new URL(body.uploadUrl).origin === config.storageOrigin)
-        return send({ ...body, chunkSizeBytes: Math.ceil(body.expectedSizeBytes / 262144) * 262144 });
+      if (
+        body?.uploadUrl &&
+        Number(body.expectedSizeBytes) > 0 &&
+        Number(body.expectedSizeBytes) <= bounds.maxSourceBytes &&
+        new URL(body.uploadUrl).origin === config.storageOrigin
+      )
+        return send({
+          ...body,
+          chunkSizeBytes: Math.ceil(body.expectedSizeBytes / 262144) * 262144,
+        });
       return send(body);
     };
     next();
   });
 }
 app.use((req, res, next) => {
-  const origin = req.get('Origin');
-  if (origin && origin !== config.origin && !candidateOrigins.includes(origin)) return res.sendStatus(403);
+  const origin = req.get("Origin");
+  if (origin && origin !== config.origin && !candidateOrigins.includes(origin))
+    return res.sendStatus(403);
   if (origin && candidateOrigins.includes(origin)) {
-    res.set('Access-Control-Allow-Origin', origin);
-    res.vary('Origin');
-    res.set('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
-    const headers = req.get('Access-Control-Request-Headers');
+    res.set("Access-Control-Allow-Origin", origin);
+    res.vary("Origin");
+    res.set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+    const headers = req.get("Access-Control-Request-Headers");
     if (headers && !/^[a-z0-9, _-]{1,2048}$/i.test(headers)) return res.sendStatus(403);
-    if (headers) res.set('Access-Control-Allow-Headers', headers);
-    if (req.method === 'OPTIONS') return res.sendStatus(204);
+    if (headers) res.set("Access-Control-Allow-Headers", headers);
+    if (req.method === "OPTIONS") return res.sendStatus(204);
   }
   res.set("Cache-Control", "no-store");
   next();
@@ -371,9 +409,16 @@ app.use("/api/auth", require("../../src/authRoutes"));
   // It has no model/provider/project actions; its journal belongs to this demo.
   const { createAssistance } = require("../../src/productAssistance");
   const { privateJournal } = require("../../src/productAssistance/journal");
-  app.use("/api/product-assistance", require("../../src/routes/productAssistanceRoutes")({
-    service: createAssistance({ journal: privateJournal(path.join(path.dirname(process.argv[2]), "product-help.private.json")) }),
-  }));
+  app.use(
+    "/api/product-assistance",
+    require("../../src/routes/productAssistanceRoutes")({
+      service: createAssistance({
+        journal: privateJournal(
+          path.join(path.dirname(process.argv[2]), "product-help.private.json")
+        ),
+      }),
+    })
+  );
 }
 app.use("/api/paypal-subscriptions", (req, res, next) => {
   if (req.method === "GET" && req.path === "/plans")
@@ -386,14 +431,29 @@ app.use("/api", auth, (req, res, next) => {
   // Block every unpriced/provider/admin mutation; allow ordinary own profile and workspace saving.
   if (
     req.method !== "GET" &&
-    !(['/media/track-studio-faces', '/media/preview-silence'].includes(req.path) && config.env.CREDITS_LOCAL_FACE_ANALYSIS === 'true') &&
-    !(req.path==='/studio/director/creative-plan' && process.env.STUDIO_DIRECTOR_LOCAL_PLANNER==='true') &&
-    !(req.path==='/media/studio-3d/preview' && require('../../src/services/studio3DLocal').configuration()) &&
-    !(process.env.STUDIO_BACKGROUND_DEMO==='true' && (
-      req.path==='/studio/director/projects/revisions' ||
-      (req.path==='/studio/director/creative-plan' && process.env.STUDIO_DIRECTOR_LOCAL_PLANNER==='true') ||
-      /^\/media\/studio-subject-masks\/(?:requests$|jobs\/[a-f0-9]{64}\/(?:cancel|subject(?:\/reuse)?)$)/.test(req.path) ||
-      /^\/media\/studio-subject-vfx(?:$|\/[A-Za-z0-9_-]{8,128}(?:\/refresh)?$)/.test(req.path))) &&
+    !(process.env.FREE_FIRST_DEMO === "true" && req.path === "/usage/processing/quote") &&
+    !(
+      ["/media/track-studio-faces", "/media/preview-silence"].includes(req.path) &&
+      config.env.CREDITS_LOCAL_FACE_ANALYSIS === "true"
+    ) &&
+    !(
+      req.path === "/studio/director/creative-plan" &&
+      process.env.STUDIO_DIRECTOR_LOCAL_PLANNER === "true"
+    ) &&
+    !(
+      req.path === "/media/studio-3d/preview" &&
+      require("../../src/services/studio3DLocal").configuration()
+    ) &&
+    !(
+      process.env.STUDIO_BACKGROUND_DEMO === "true" &&
+      (req.path === "/studio/director/projects/revisions" ||
+        (req.path === "/studio/director/creative-plan" &&
+          process.env.STUDIO_DIRECTOR_LOCAL_PLANNER === "true") ||
+        /^\/media\/studio-subject-masks\/(?:requests$|jobs\/[a-f0-9]{64}\/(?:cancel|subject(?:\/reuse)?)$)/.test(
+          req.path
+        ) ||
+        /^\/media\/studio-subject-vfx(?:$|\/[A-Za-z0-9_-]{8,128}(?:\/refresh)?$)/.test(req.path))
+    ) &&
     !/^\/(?:credit-pilot\/|media\/(?:process|analyze|render-clip|studio-assets\/(?:resolve|source-frame|source-frame-rate)|multicam\/uploads\/(?:start|complete|abort))$|content\/(?:upload(?:\/(?:source-file|readiness))?$|[^/]+\/promotion-schedules$|promotion-schedules\/[^/]+\/(?:resume|reschedule|pause)$)|users\/me\/accept-terms$|workspaces(?:\/|$))/.test(
       req.path
     )
@@ -406,7 +466,32 @@ app.use("/api", auth, (req, res, next) => {
     return res.sendStatus(403);
   next();
 });
-app.use("/api/credit-pilot", integration.router);
+if (process.env.FREE_FIRST_DEMO === "true") {
+  const runtime = require("../../src/services/processingTokens/runtime");
+  const renewable = runtime.service();
+  const adapter = require("../../src/services/processingTokens/localAdapter").createLocalAdapter({
+    db,
+    worker: config.worker,
+    resolveSource: async (uid, body) => {
+      const primary = await gateway.describeForRequest(uid, body, "/api/media/process");
+      return {
+        contentHash: primary.contentHash,
+        objectGeneration: primary.objectGeneration,
+        sources: [primary],
+      };
+    },
+  });
+  Object.assign(runtime.adapters, { "studio.render": adapter, "clips.analyze": adapter });
+  app.use(
+    require("../../src/middlewares/processingBudgetMiddleware").createProcessingGuard({
+      service: renewable,
+      authenticate: auth,
+      adapters: runtime.adapters,
+    })
+  );
+  app.use("/api/usage", require("../../src/routes/usageRoutes"));
+}
+if (process.env.FREE_FIRST_DEMO !== "true") app.use("/api/credit-pilot", integration.router);
 // Clearly labelled local destination; no provider OAuth token or real account.
 app.get("/api/platform/status", (_req, res) =>
   res.json({
@@ -423,6 +508,20 @@ app.get("/api/facebook/status", (_req, res) =>
   res.json({ connected: true, pages: [{ id: "local-page", name: "Local simulated destination" }] })
 );
 app.get("/api/media/scan-preflight", async (req, res) => {
+  if (process.env.FREE_FIRST_DEMO === "true") {
+    const state = await require("../../src/services/processingTokens/runtime")
+      .service()
+      .status(req.user.uid);
+    return res.json({
+      allowed: state.remaining >= 20,
+      balance: state.remaining,
+      requiredCredits: 20,
+      planAllowed: true,
+      canAfford: state.remaining >= 20,
+      topUpsAllowed: false,
+      planName: "AutoPromote Free",
+    });
+  }
   const account = await service.getAccount(req.user.uid);
   res.json({
     allowed: account.balance > 0,
@@ -435,10 +534,18 @@ app.get("/api/media/scan-preflight", async (req, res) => {
     message: "Exact cost requires the uploaded source quote.",
   });
 });
-if(process.env.STUDIO_DIRECTOR_LOCAL_PLANNER==='true')app.use("/api/studio/director/creative-plan",require("../../src/routes/studioDirectorCreativeRoutes"));
+if (process.env.STUDIO_DIRECTOR_LOCAL_PLANNER === "true")
+  app.use(
+    "/api/studio/director/creative-plan",
+    require("../../src/routes/studioDirectorCreativeRoutes")
+  );
 app.use("/api/users", require("../../src/userRoutes"));
 app.use("/api/workspaces", require("../../src/routes/workspaceRoutes"));
-if(process.env.STUDIO_BACKGROUND_DEMO==='true')app.use("/api/studio/director/projects/revisions",require("../../src/routes/studioProjectRevisionRoutes"));
+if (process.env.STUDIO_BACKGROUND_DEMO === "true")
+  app.use(
+    "/api/studio/director/projects/revisions",
+    require("../../src/routes/studioProjectRevisionRoutes")
+  );
 app.use(
   "/api/content",
   (req, res, next) => {
@@ -471,10 +578,14 @@ app.use("/api/clips", require("../../src/routes/clipRoutes"));
 app.use("/api/ai-video", require("../../src/retiredFeatureResponse"));
 app.use("/api/analytics", require("../../src/analyticsRoutes"));
 // Actual plan/usage presentation against this emulator, with no payment writes.
-app.use("/api/paypal-subscriptions", (req, res, next) => {
-  if (req.method !== "GET") return res.status(405).json({ error: "DEMO_PAYMENTS_DISABLED" });
-  return next();
-}, require("../../src/routes/paypalSubscriptionRoutes"));
+app.use(
+  "/api/paypal-subscriptions",
+  (req, res, next) => {
+    if (req.method !== "GET") return res.status(405).json({ error: "DEMO_PAYMENTS_DISABLED" });
+    return next();
+  },
+  require("../../src/routes/paypalSubscriptionRoutes")
+);
 app.use("/api/promotion-tasks", require("../../src/routes/promotionTaskRoutes"));
 app.use("/api", (_req, res) =>
   res.status(404).json({ error: "Not available in isolated demonstration" })
@@ -491,14 +602,21 @@ const interval = setInterval(async () => {
   if (busy) return;
   busy = true;
   try {
-    await integration.reconcilePending();
+    if (process.env.FREE_FIRST_DEMO === "true") {
+      const runtime = require("../../src/services/processingTokens/runtime");
+      await runtime.adapters["studio.render"].reconcilePending(runtime.service());
+    } else await integration.reconcilePending();
   } finally {
     busy = false;
   }
 }, 1000);
 (async () => {
-  await service.initialiseControl();
-  for (const uid of config.cohort) await service.enroll(uid);
+  if (process.env.FREE_FIRST_DEMO === "true" && !(await db.collection("processing_control").doc("global").get()).exists)
+    await require("../../src/services/processingTokens/runtime").service().configure({ enabled: true });
+  if (process.env.FREE_FIRST_DEMO !== "true") {
+    await service.initialiseControl();
+    for (const uid of config.cohort) await service.enroll(uid);
+  }
   const server = app.listen(new URL(config.origin).port, "127.0.0.1", () =>
     process.send?.({ ready: true })
   );

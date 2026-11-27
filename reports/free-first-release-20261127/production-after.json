@@ -1,0 +1,98 @@
+[
+  {
+    "origin": "https://api.autopromote.org",
+    "checkedAtUtc": "2026-11-27T04:05:48.452730+00:00",
+    "/api/version": {
+      "status": 200,
+      "data": {
+        "ok": true,
+        "version": "1.2.0",
+        "commit": "2c92c8c978acac837dfa97f7082c9a08dd964539",
+        "securityPolicy": "security-owner-bootstrap-20261027",
+        "generatedAt": "2026-11-27T04:05:48.742Z"
+      }
+    },
+    "/api/paypal-subscriptions/plans": {
+      "status": 200,
+      "data": {
+        "plans": [
+          {
+            "id": "free",
+            "price": 0
+          },
+          {
+            "id": "premium",
+            "price": 14.99
+          },
+          {
+            "id": "pro",
+            "price": 34.99
+          },
+          {
+            "id": "enterprise",
+            "price": 99.99
+          }
+        ]
+      }
+    },
+    "/api/admin/system/runtime-profile": {
+      "status": 401,
+      "data": {}
+    }
+  },
+  {
+    "origin": "https://autopromote.onrender.com",
+    "checkedAtUtc": "2026-11-27T04:05:49.949878+00:00",
+    "/api/version": {
+      "status": 200,
+      "data": {
+        "ok": true,
+        "version": "1.2.0",
+        "commit": "2c92c8c978acac837dfa97f7082c9a08dd964539",
+        "securityPolicy": "security-owner-bootstrap-20261027",
+        "generatedAt": "2026-11-27T04:05:50.224Z"
+      }
+    },
+    "/api/paypal-subscriptions/plans": {
+      "status": 200,
+      "data": {
+        "plans": [
+          {
+            "id": "free",
+            "price": 0
+          },
+          {
+            "id": "premium",
+            "price": 14.99
+          },
+          {
+            "id": "pro",
+            "price": 34.99
+          },
+          {
+            "id": "enterprise",
+            "price": 99.99
+          }
+        ]
+      }
+    },
+    "/api/admin/system/runtime-profile": {
+      "status": 401,
+      "data": {}
+    }
+  },
+  {
+    "origin": "https://autopromote.org",
+    "mainJs": "/static/js/main.1bf65d4b.js",
+    "jsSha256": "0b750ecb55a127db3fbe51d5050acf8494eecd1eb85892f3eb84f65b4e600676",
+    "verifiedPaymentNotice": true,
+    "freeFirstCheckoutCopyPresent": false
+  },
+  {
+    "origin": "https://api.autopromote.org",
+    "mainJs": "/static/js/main.63928a3c.js",
+    "jsSha256": "3080b05e774aa2ef70f16848cfc5fb5e41800c6e12c72d949ffde30fdb824cb6",
+    "verifiedPaymentNotice": true,
+    "freeFirstCheckoutCopyPresent": false
+  }
+]

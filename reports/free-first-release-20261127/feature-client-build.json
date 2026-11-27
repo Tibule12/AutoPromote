@@ -1,0 +1,13 @@
+{
+  "buildDirectory": "/tmp/autopromote-free-first-final-qualified-client-20261127",
+  "strictCI": true,
+  "result": "Compiled successfully",
+  "localEmulators": true,
+  "renewableDemoFlag": true,
+  "productionDeployment": false,
+  "mainJs": "static/js/main.fe02fffe.js",
+  "sha256": "46dc34156dea4aa9f70ff354b228bd79500c59751ea0f3c89baf4a7ebafdda77",
+  "limitations": [
+    "Private demo build only. No new authenticated browser flow or provider payment is inferred from compilation."
+  ]
+}

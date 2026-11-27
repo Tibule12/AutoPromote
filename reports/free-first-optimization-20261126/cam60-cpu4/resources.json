@@ -1,0 +1,284 @@
+{
+  "sampledTreePeakRssBytes": 538218496,
+  "status": "completed",
+  "wallSecondsIncludingImport": 354.11576490299194,
+  "cpuSeconds": 610.634297,
+  "largestProcessPeakRssKiB": 334256,
+  "cpuAffinity": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "threads": 4,
+  "providerChargesStarted": false,
+  "actualCloudExpenditureUsd": 0,
+  "invoiceAttributedHistoricalCostUsd": null,
+  "sourceBytes": 77554732,
+  "sourceSha256": "7a16b8ba2eba836eac74bcfb1f830313907ac0e19f314e636d4b7f833643578c",
+  "stages": [
+    {
+      "program": "ffmpeg",
+      "output": "d7266be4b732cfdf87c667d9b01f5ec9_win_av.mp4.tmp.mp4",
+      "wallSeconds": 19.6144
+    },
+    {
+      "program": "ffmpeg",
+      "output": "2dc4a668858b0df7fe0b3fcbc782ca44_win_av.mp4.tmp.mp4",
+      "wallSeconds": 21.4525
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_preflight_src_0_current_start.wav",
+      "wallSeconds": 0.1796
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_preflight_ref_0_current_start.wav",
+      "wallSeconds": 0.172
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_preflight_src_0_current_middle.wav",
+      "wallSeconds": 0.1433
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_preflight_ref_0_current_middle.wav",
+      "wallSeconds": 0.161
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_preflight_src_0_current_end.wav",
+      "wallSeconds": 0.1188
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_preflight_ref_0_current_end.wav",
+      "wallSeconds": 0.1395
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_preflight_src_1_current_start.wav",
+      "wallSeconds": 0.3213
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_preflight_ref_1_current_start.wav",
+      "wallSeconds": 0.2226
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_preflight_src_1_current_middle.wav",
+      "wallSeconds": 0.159
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_preflight_ref_1_current_middle.wav",
+      "wallSeconds": 0.1477
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_preflight_src_1_current_end.wav",
+      "wallSeconds": 0.1672
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_preflight_ref_1_current_end.wav",
+      "wallSeconds": 0.2372
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_continuous_sync_src_0_0.wav",
+      "wallSeconds": 0.2031
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_continuous_sync_ref_0_0.wav",
+      "wallSeconds": 0.1904
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_continuous_sync_src_0_1.wav",
+      "wallSeconds": 0.1804
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_continuous_sync_ref_0_1.wav",
+      "wallSeconds": 0.3435
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_continuous_sync_src_1_0.wav",
+      "wallSeconds": 0.2219
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_continuous_sync_ref_1_0.wav",
+      "wallSeconds": 0.1944
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_continuous_sync_src_1_1.wav",
+      "wallSeconds": 0.1693
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_continuous_sync_ref_1_1.wav",
+      "wallSeconds": 0.1466
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_multicam_segment_0.mp4",
+      "wallSeconds": 163.4307
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_multicam_segment_1.mp4",
+      "wallSeconds": 120.5919
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_multicam_video.mp4",
+      "wallSeconds": 0.2922
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_external_audio_input.wav",
+      "wallSeconds": 0.3799
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_multicam_audio.m4a",
+      "wallSeconds": 3.2565
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_multicam.mp4",
+      "wallSeconds": 0.2887
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_src_0.wav",
+      "wallSeconds": 0.1398
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_out_0.wav",
+      "wallSeconds": 0.1482
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_src_1.wav",
+      "wallSeconds": 0.1322
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_out_1.wav",
+      "wallSeconds": 0.2311
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_src_2.wav",
+      "wallSeconds": 0.104
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_out_2.wav",
+      "wallSeconds": 0.1174
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_src_3.wav",
+      "wallSeconds": 0.1347
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_out_3.wav",
+      "wallSeconds": 0.1216
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_src_4.wav",
+      "wallSeconds": 0.123
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_out_4.wav",
+      "wallSeconds": 0.2328
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_src_5.wav",
+      "wallSeconds": 0.1234
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_out_5.wav",
+      "wallSeconds": 0.1158
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_src_0.wav",
+      "wallSeconds": 0.1442
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_out_0.wav",
+      "wallSeconds": 0.137
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_src_1.wav",
+      "wallSeconds": 0.2382
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_out_1.wav",
+      "wallSeconds": 0.1528
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_src_2.wav",
+      "wallSeconds": 0.1064
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_out_2.wav",
+      "wallSeconds": 0.1547
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_src_3.wav",
+      "wallSeconds": 0.1523
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_out_3.wav",
+      "wallSeconds": 0.1459
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_src_4.wav",
+      "wallSeconds": 0.134
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_out_4.wav",
+      "wallSeconds": 0.1861
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_src_5.wav",
+      "wallSeconds": 0.1215
+    },
+    {
+      "program": "ffmpeg",
+      "output": "7a4e439c-24bb-4534-b801-7d999c30f5b6_postsync_out_5.wav",
+      "wallSeconds": 0.1112
+    }
+  ],
+  "mode": "multicam",
+  "baseline": false,
+  "workerSourceSha256": "9a36746dd9a340c6a12b63b11ffc3b892d20212180e580d6c310aa33021d0486"
+}

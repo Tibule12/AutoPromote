@@ -63,9 +63,11 @@ function selectMediaWorker(endpoint, payload = {}, env = process.env) {
       : endpoint === "/process-video" ? budget + 1 : 0;
   // Production editing and scanning prefer the qualified GPU at every size.
   // Keep the estimate for telemetry; it must not silently send short jobs to CPU.
-  const useGpu = Boolean(gpu);
+  const { costRoutingEnabled, boundedBasicRender } = require("./processingTokens/costRouting");
+  const economicalCpu = costRoutingEnabled(env) && boundedBasicRender(endpoint, payload, seconds);
+  const useGpu = Boolean(gpu) && !economicalCpu;
   return { workerUrl: useGpu ? gpu : cpu, device: useGpu ? "gpu" : "cpu", gpuUrl: gpu,
-    reason: useGpu ? "gpu_primary" : "gpu_not_configured", estimatedCpuSeconds, sourceSeconds: seconds };
+    reason: economicalCpu ? "qualified_short_cpu" : useGpu ? "gpu_primary" : "gpu_not_configured", estimatedCpuSeconds, sourceSeconds: seconds };
 }
 
 function cpuWorkerUrl(endpoint, env = process.env) {
@@ -149,6 +151,10 @@ async function postMediaWorker(endpoint, payload, { timeoutMs = 600000, onRoute,
   };
   try { return await call(route); }
   catch (error) {
+    // Read-only analysis can still incur CPU or model spend. Under renewable
+    // accounting an uncertain/failed attempt keeps its original liability;
+    // a second worker needs its own reservation and verified attempt identity.
+    if (require("./processingTokens/runtime").enabled()) throw error;
     if (route.device === "gpu") {
       // Capacity errors before render acceptance, and read-only analysis
       // failures, can use the qualified CPU lane without a second charge.

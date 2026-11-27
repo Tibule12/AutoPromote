@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Preserve exactly the declared device education records during guest-session cleanup; account tokens still clear",
-  "reviewed_at": "2026-11-25T11:41:54.445Z",
-  "catalog_sha256": "c09a26f3a093fe05b546f1006e2da1ed4c5f10efb8e49ab84c2fe77a452e29c1",
+  "reason": "Finalize independent release report and portable before/after evidence with production migration disabled.",
+  "reviewed_at": "2026-11-27T04:34:34.064Z",
+  "catalog_sha256": "eecc391b0e634e380f0b393842ba8a83bc3f8c12b6cbd72f46e427a2a634e270",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "1439670e68fa50d006246770f0714d64af8ab8af770a6f055d84d1ab82bf1ca8"
+      "sha256": "2ecf41123a055336a531eb471e11e9b6a5effe16967634fa7a6bf89d40ea6471"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -71,7 +71,7 @@
     },
     {
       "path": "frontend/src/components/MultiCamCombiner.js",
-      "sha256": "e402ff353f91c2cb7f479a06e973e8e93da6b0fafa01369f437253c52f1c4a58"
+      "sha256": "bc187d0a0f37f3640acf2becfcae921841a0ce73f46ed2520d2dbfdf73688ad6"
     },
     {
       "path": "frontend/src/components/PlatformIcon.js",
@@ -203,7 +203,7 @@
     },
     {
       "path": "frontend/src/components/VideoEditor.js",
-      "sha256": "1f22cf3a12ec9f847c76d76210196518ba721efd568f0c487a9a8877e2012f4c"
+      "sha256": "53529cd0231abae3f73f413bfc7102ca3c080a682bc7dd491a7d2ff0932464d2"
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
@@ -211,11 +211,11 @@
     },
     {
       "path": "frontend/src/components/ViralScanner.js",
-      "sha256": "a1d1ebae962f0f16bd795d911d8dcbb9a3bc711c0aa50e63bd974e0f674b3030"
+      "sha256": "3314bfefea5195965e9d3bf90113a8db021255ede98fad3f3018f1eb4851fd9d"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
-      "sha256": "4de0ec43d476d794ec1e29e130e33fbb46a4f930a732485c8fa8df5a361d8017"
+      "sha256": "a653ea4485136408328012682c19d65e8cfbebe9ce4a043592e7aaa26cb4e596"
     },
     {
       "path": "frontend/src/components/motion/logoGlyphs.v1.json",
@@ -499,7 +499,7 @@
     },
     {
       "path": "package.json",
-      "sha256": "4e3181c179f8005c748a66083642775269d3a64f89f40737c9030c23a1cb43c5"
+      "sha256": "cfbac3e48d1882a3a90e1770710fb9a9cf70425ad268f34d0bb78c26d96d57d9"
     },
     {
       "path": "python_media_worker/assets/studio-text-metrics.v1.json",
@@ -511,7 +511,7 @@
     },
     {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "fd52d3b4acd94ced6e40ee7e655350e48ca05d4886186f449fa749e0f131205b"
+      "sha256": "99661a8c3e9c12b22b10f62a708156888d70f2f7142716b384b67d12424584d0"
     },
     {
       "path": "python_media_worker/studio_audio.py",
@@ -576,6 +576,10 @@
     {
       "path": "reports/footer-pages-20261021/README.md",
       "sha256": "81b423cc6400f882991a565d24573f2e9fddec6661dcfedd32d14cc037a0510e"
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/README.md",
+      "sha256": "d43a7d4ea9990a8a1a61a467d52dcbc1aceef1cdc6c69196571234cd15d9f92c"
     },
     {
       "path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
@@ -647,7 +651,7 @@
     },
     {
       "path": "src/contentRoutes.js",
-      "sha256": "4a90be8f7ef05b3a868ec152d1dc010f0c90644d2bb65dc74c5f6d191e5e4797"
+      "sha256": "5e207e081c3e20c8b874b9fc3560168970bf1dee32aeea543312542e10a4c184"
     },
     {
       "path": "src/creativeTemplates/showcase.js",
@@ -703,7 +707,7 @@
     },
     {
       "path": "src/server.js",
-      "sha256": "4b17e1bf2b33ab6bc661e4281d392405c94a775be193773eae05b40a3adb71eb"
+      "sha256": "6ad3a26996b3b6e4e935dd7047fab1610a1507fa4a3d6fa8b3cbc76e8a3d3e67"
     },
     {
       "path": "src/services/__tests__/publishedVideoRetention.test.js",
@@ -711,7 +715,7 @@
     },
     {
       "path": "src/services/backgroundActivityService.js",
-      "sha256": "2164c9b32536bf0fe963cbbc65700c1a3c7560ce51e92f84387b7cab5b2d3657"
+      "sha256": "7a7eb00d9ea76333bfe1f6b265be25c4525b9bf7e4266e0fe9b3db983170ad7b"
     },
     {
       "path": "src/services/backgroundWorkService.js",
@@ -719,7 +723,7 @@
     },
     {
       "path": "src/services/billingService.js",
-      "sha256": "95b510e2ba1304b742d8a4974024534abd98f7becd6e300ca31768d58e09ccb3"
+      "sha256": "9c9d3881f2a8571a347e327587fec39e2bad3fbae282aaf0a540046ddc7e62e9"
     },
     {
       "path": "src/services/clipSelectionSettings.js",
@@ -727,7 +731,7 @@
     },
     {
       "path": "src/services/cloudRunJobService.js",
-      "sha256": "40f342c7af53851a2eb391d54fbbd72e9e8159b5aa2a7704d022c82be6509d47"
+      "sha256": "729fc1b9a48e60cd0a51a5f1c911b81ae436876d782ed87a5f7282122422c4d6"
     },
     {
       "path": "src/services/contentFactoryProviders.js",
@@ -747,15 +751,15 @@
     },
     {
       "path": "src/services/platformPoster.js",
-      "sha256": "0b4c2aab764e4afd466a8597d15bcec66d8f4a5778930c87e5a5eddd183f22a2"
+      "sha256": "e24769694271e5233d9c932bf738fbf0d8d4864836d904dc98ba948c34e6bf61"
     },
     {
       "path": "src/services/promotionTaskQueue.js",
-      "sha256": "ae9979a7e6b600a9a202bc6f4d4fe06b65368a44f1a4fc545e6f31ba442e526b"
+      "sha256": "b53445edda1e2d0f1cd0b537e9f83eb043e4ae608e79483dc36bea368f57589d"
     },
     {
       "path": "src/services/publishedVideoRetention.js",
-      "sha256": "76f82f5cfc7a9e52eaadcb18625cee51cd1b97855f204ab1eb64a4695db6f081"
+      "sha256": "2fd5e2f71e9defecffc8b39caa9416618c626e95f40ce5f06355d396682a3ecb"
     },
     {
       "path": "src/services/publishingIntent.js",
@@ -799,7 +803,7 @@
     },
     {
       "path": "src/services/studioSubjectVfxService.js",
-      "sha256": "bcc70319002ed130e882f2d5537fefeb56cd3bf673091431ad58339842b13acf"
+      "sha256": "90faf0f5db32f22d08db1e3316dcc95a2df7454ce17a8906eaed967207125cf1"
     },
     {
       "path": "src/services/uploadAllowance.js",
@@ -815,11 +819,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "ca3f1a70734fd4384ec711c3fd7556c6c67eb5e8d2cd8fd33783343896bb2058"
+      "sha256": "21fc2547516d83e1ade71b06c774bb62d942e3b1e025fdf0b97ceb75c1d87bf1"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "9eb6b6ed5de4995f85ca83bc21190ed1c4ef370c3e60db9221e619fcae359ad6"
+      "sha256": "0e3ab6886579721e98fd5107eaebdcf0cd8bab9ede09bc0f99e885b8a4547814"
     },
     {
       "path": "worker.js",

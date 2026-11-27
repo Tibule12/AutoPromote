@@ -1,0 +1,38 @@
+[
+  {
+    "origin": "https://autopromote.org",
+    "versionEndpointStatus": 404,
+    "mainJs": "/static/js/main.1bf65d4b.js",
+    "jsSha256": "0b750ecb55a127db3fbe51d5050acf8494eecd1eb85892f3eb84f65b4e600676",
+    "verifiedPaymentNotice": true,
+    "fullFreeFirstCopyPresent": false
+  },
+  {
+    "origin": "https://api.autopromote.org",
+    "version": {
+      "ok": true,
+      "version": "1.2.0",
+      "commit": "3f11ebf67793d49610bc449357a21bfb1d7a5b14",
+      "securityPolicy": "security-owner-bootstrap-20261027",
+      "generatedAt": "2026-11-27T04:03:25.361Z"
+    },
+    "mainJs": "/static/js/main.67f9bc12.js",
+    "jsSha256": "202f856c653a39f76190ddfa1c226c5ef6398b2d033d75ea7094ba15091dd291",
+    "verifiedPaymentNotice": false,
+    "fullFreeFirstCopyPresent": false
+  },
+  {
+    "origin": "https://autopromote.onrender.com",
+    "version": {
+      "ok": true,
+      "version": "1.2.0",
+      "commit": "3f11ebf67793d49610bc449357a21bfb1d7a5b14",
+      "securityPolicy": "security-owner-bootstrap-20261027",
+      "generatedAt": "2026-11-27T04:03:27.970Z"
+    },
+    "mainJs": "/static/js/main.67f9bc12.js",
+    "jsSha256": "202f856c653a39f76190ddfa1c226c5ef6398b2d033d75ea7094ba15091dd291",
+    "verifiedPaymentNotice": false,
+    "fullFreeFirstCopyPresent": false
+  }
+]

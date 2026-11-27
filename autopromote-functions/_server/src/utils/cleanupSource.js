@@ -1,4 +1,5 @@
 const { admin } = require("../firebaseAdmin");
+const { errorSummary } = require("./logSanitizer");
 
 function normalizeComparableUrl(value) {
   return typeof value === "string" ? value.trim() : "";
@@ -143,7 +144,7 @@ async function hasPendingDependentTasks(contentId, currentPlatform) {
   } catch (error) {
     console.warn(
       "[Cleanup] Dependency check failed; skipping deletion to avoid breaking queued work:",
-      error.message
+      errorSummary(error)
     );
     return true;
   }
@@ -186,9 +187,22 @@ async function cleanupSourceFile(fileUrl, options = {}) {
   } catch (error) {
     console.warn(
       "[Cleanup] Content lookup failed; skipping deletion to avoid breaking history/previews:",
-      error.message
+      errorSummary(error)
     );
     return { status: "skipped_content_lookup_failed", error: error.message };
+  }
+
+  if (referencedContent?.data) {
+    const owner = referencedContent.data.user_id || referencedContent.data.userId || referencedContent.data.uid;
+    if (owner) {
+      try {
+        const billing = await admin.firestore().collection("user_billing").doc(owner).get();
+        if (billing.data()?.storageRetention?.publishedVideoHours === 24)
+          return { status: "skipped_published_retention_managed", contentId };
+      } catch (error) {
+        return { status: "skipped_retention_lookup_failed", contentId };
+      }
+    }
   }
 
   if (shouldKeepReferencedSource(fileUrl, referencedContent?.data)) {
@@ -205,7 +219,7 @@ async function cleanupSourceFile(fileUrl, options = {}) {
     return { status: "skipped_pending_dependencies", contentId };
   }
 
-  console.log(`[Cleanup] Attempting to delete source file: ${fileUrl}`);
+  console.log("[Cleanup] Attempting source deletion", { contentId });
 
   try {
     const bucket = admin.storage().bucket();
@@ -223,11 +237,11 @@ async function cleanupSourceFile(fileUrl, options = {}) {
       }
     } else {
       // Safe logging (prevent format string injection)
-      console.log("[Cleanup] Could not parse valid storage path from URL:", fileUrl);
+      console.log("[Cleanup] Could not resolve source storage path", { contentId });
       return { status: "skipped_unparseable_path", contentId };
     }
   } catch (error) {
-    console.warn("[Cleanup] ⚠️ Failed to delete source file:", fileUrl, error.message);
+    console.warn("[Cleanup] Source deletion failed", { contentId, ...errorSummary(error) });
     // Swallow error to preventing crashing the main request
     return { status: "failed", contentId, error: error.message };
   }

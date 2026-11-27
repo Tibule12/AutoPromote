@@ -1,0 +1,20 @@
+{
+  "sampledTreePeakRssBytes": 158973952,
+  "status": "failed",
+  "wallSecondsIncludingImport": 5.5848220080079045,
+  "cpuSeconds": 3.306165,
+  "largestProcessPeakRssKiB": 154992,
+  "cpuAffinity": [
+    0,
+    1
+  ],
+  "threads": 2,
+  "providerChargesStarted": false,
+  "actualCloudExpenditureUsd": 0,
+  "invoiceAttributedHistoricalCostUsd": null,
+  "sourceBytes": 77554732,
+  "sourceSha256": "7a16b8ba2eba836eac74bcfb1f830313907ac0e19f314e636d4b7f833643578c",
+  "stages": [],
+  "mode": "captions",
+  "baseline": false
+}

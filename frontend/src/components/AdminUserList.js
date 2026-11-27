@@ -254,7 +254,7 @@ const AdminUserList = () => {
               whiteSpace: "nowrap",
             }}
           >
-            {testerActive ? "Founding Tester" : testerGranted ? "Tester expired" : "Starter"}
+            {testerActive ? "Founding Tester" : testerGranted ? "Tester expired" : "AutoPromote Free"}
           </span>
         );
       },

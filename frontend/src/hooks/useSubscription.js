@@ -6,23 +6,23 @@ import { creditPilotEnabled } from "../utils/creditPilot";
 const FREE_FALLBACK = {
   planId: "free",
   credits: {
-    monthlyAllocation: 15,
-    monthlyRemaining: 15,
+    monthlyAllocation: 0,
+    monthlyRemaining: 0,
     topUpBalance: 0,
-    remaining: 15,
+    remaining: 0,
   },
   editing: {
-    allPaidFeaturesUnlocked: false,
-    topUpsEnabled: false,
+    allPaidFeaturesUnlocked: true,
+    topUpsEnabled: true,
     features: {
-      watermarkRemoval: { enabled: false },
-      audioExtract: { enabled: false },
-      multicam: { enabled: false },
-      autoDirector: { enabled: false },
-      flowEdit: { enabled: false },
-      thumbnailLab: { enabled: false },
-      findViralClips: { enabled: false },
-      viralClipStudio: { enabled: false },
+      watermarkRemoval: { enabled: true },
+      audioExtract: { enabled: true },
+      multicam: { enabled: true },
+      autoDirector: { enabled: true },
+      flowEdit: { enabled: true },
+      thumbnailLab: { enabled: true },
+      findViralClips: { enabled: true },
+      viralClipStudio: { enabled: true },
     },
   },
 };
@@ -42,9 +42,15 @@ export const useSubscription = () => {
       remaining: profile?.totalCredits ?? FREE_FALLBACK.credits.remaining,
     };
     const rawEditing = profile?.editing || FREE_FALLBACK.editing;
-    const editing = { ...rawEditing, features: Object.fromEntries(
-      Object.entries(rawEditing.features || {}).filter(([key]) => !["smartPromoSummary", "ideaVideoPreview", "ideaVideoRender", "analytics"].includes(key))
-    ) };
+    const editing = {
+      ...rawEditing,
+      features: Object.fromEntries(
+        Object.entries(rawEditing.features || {}).filter(
+          ([key]) =>
+            !["smartPromoSummary", "ideaVideoPreview", "ideaVideoRender", "analytics"].includes(key)
+        )
+      ),
+    };
     const capabilityFeatures = Object.fromEntries(
       Object.entries(editing.features || {}).map(([featureId, config]) => [
         featureId,
@@ -61,7 +67,8 @@ export const useSubscription = () => {
   }, [profile]);
 
   const canUseFeature = feature =>
-    !["smartPromoSummary", "ideaVideoPreview", "ideaVideoRender", "analytics"].includes(feature) && Boolean(
+    !["smartPromoSummary", "ideaVideoPreview", "ideaVideoRender", "analytics"].includes(feature) &&
+    Boolean(
       (creditPilotEnabled() && ["findViralClips", "viralClipStudio"].includes(feature)) ||
       isRuntimeE2EEnabled() ||
       normalized.editing?.features?.[feature]?.enabled ||

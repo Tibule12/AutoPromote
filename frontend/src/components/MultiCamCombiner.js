@@ -3960,10 +3960,10 @@ function MultiCamCombiner({
       ? "Use Cam Combiner footage as your visual pool, then optionally drive pacing, camera switches, and speed ramps from uploaded audio or a master source."
       : "Load camera angles and clean audio, then let AutoPromote prove sync and direct the MP4 automatically before paid render.";
   const billingMessage = !canUseFeature("multicam")
-    ? "Upgrade to a paid plan to unlock Cam Combiner, Auto Director, and Flow Edit."
+    ? "Cam Combiner, Auto Director, and Flow Edit are available on Free and Plus."
     : isFlowWorkspace
-      ? "Included on paid plans. Flow Edit preview, Auto Director, and local rhythm shaping do not spend generation credits."
-      : "Included on paid plans. Editing and preview are included; clean-audio sync and server MP4 render spend credits when you run them.";
+      ? "Available on Free and Plus. Flow Edit preview, Auto Director, and local rhythm shaping do not spend generation credits."
+      : "Available on Free and Plus. Editing and preview are included; clean-audio sync and server MP4 render spend credits when you run them.";
   const studioMonitorSources = useMemo(
     () => visibleCameraSources.filter(isVideoSource).slice(0, 3),
     [visibleCameraSources]

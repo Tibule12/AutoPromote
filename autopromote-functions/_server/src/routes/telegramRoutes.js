@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../authMiddleware");
+const workspaceScope = require("../middlewares/workspaceScope");
 const { db } = require("../firebaseAdmin");
 const logger = require("../services/logger");
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
@@ -248,7 +249,7 @@ router.get("/auth/start", authMiddleware, async (req, res) => {
  */
 router.post("/auth/prepare", authMiddleware, tgWriteLimiter, async (req, res) => {
   try {
-    const uid = req.userId || req.user?.uid || "anonymous";
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req) || "anonymous";
     if (!BOT_USERNAME)
       return res.status(500).json({ ok: false, error: "telegram_bot_not_configured" });
 
@@ -282,7 +283,7 @@ router.post("/auth/prepare", authMiddleware, tgWriteLimiter, async (req, res) =>
  */
 router.post("/auth/callback", authMiddleware, tgWriteLimiter, async (req, res) => {
   try {
-    const uid = req.user.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     const { authData } = req.body;
 
     if (!authData || !authData.id || !authData.hash) {
@@ -303,7 +304,7 @@ router.post("/auth/callback", authMiddleware, tgWriteLimiter, async (req, res) =
     }
 
     // Store the connection
-    const result = await telegramService.storeTelegramAuth(uid, authData);
+    const result = await telegramService.storeTelegramAuth({ uid, authData });
 
     res.json(result);
   } catch (error) {
@@ -319,9 +320,9 @@ router.post("/auth/callback", authMiddleware, tgWriteLimiter, async (req, res) =
  * GET /api/telegram/status
  * Check if user has connected Telegram
  */
-router.get("/status", authMiddleware, async (req, res) => {
+router.get("/status", authMiddleware, workspaceScope, async (req, res) => {
   try {
-    const uid = req.user.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     const connection = await telegramService.getUserTelegramConnection(uid);
 
     if (!connection) {
@@ -334,11 +335,18 @@ router.get("/status", authMiddleware, async (req, res) => {
     res.json({
       connected: true,
       platform: "telegram",
-      userId: connection.userId,
-      username: connection.username,
-      firstName: connection.firstName,
-      lastName: connection.lastName,
-      photoUrl: connection.photoUrl,
+      userId:
+        connection.userId || connection.profile?.id || connection.meta?.chatId || connection.chatId,
+      username:
+        connection.username || connection.profile?.username || connection.meta?.username || null,
+      firstName:
+        connection.firstName ||
+        connection.profile?.first_name ||
+        connection.meta?.firstName ||
+        null,
+      lastName:
+        connection.lastName || connection.profile?.last_name || connection.meta?.lastName || null,
+      photoUrl: connection.photoUrl || connection.profile?.photo_url || null,
       connectedAt: connection.connectedAt,
     });
   } catch (error) {
@@ -356,7 +364,7 @@ router.get("/status", authMiddleware, async (req, res) => {
  */
 router.delete("/disconnect", authMiddleware, tgWriteLimiter, async (req, res) => {
   try {
-    const uid = req.user.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
 
     await db.collection("users").doc(uid).collection("connections").doc("telegram").delete();
 
@@ -378,154 +386,38 @@ router.delete("/disconnect", authMiddleware, tgWriteLimiter, async (req, res) =>
  * Webhook endpoint for Telegram bot updates
  */
 router.post("/webhook", async (req, res) => {
-  try {
-    // Verify webhook secret if configured
-    const secret = req.headers["x-telegram-bot-api-secret-token"];
-    if (WEBHOOK_SECRET && secret !== WEBHOOK_SECRET) {
-      return res.status(401).json({ error: "invalid_webhook_secret" });
-    }
-
-    const update = req.body;
-
-    // Log webhook received
-    logger.info("Telegram webhook received", {
-      updateId: update.update_id,
-      message: update.message ? "present" : "none",
-      chatId: update.message?.chat?.id,
-    });
-
-    // Handle different update types
-    if (update.message) {
-      const chatId = update.message.chat.id;
-      const text = update.message.text || "";
-      const fromUser = update.message.from || {};
-
-      // Handle /start command (both plain and deep link)
-      if (text.startsWith("/start")) {
-        // Check if there is a deep link parameter
-        const parts = text.split(" ");
-        if (parts.length > 1) {
-          const token = parts[1].trim();
-          if (token) {
-            // This is a deep link authentication
-            try {
-              const stateDoc = await db.collection("oauth_states").doc(token).get();
-              if (stateDoc.exists) {
-                const stateData = stateDoc.data();
-                // Check expiry
-                if (stateData.expiresAt && stateData.expiresAt > Date.now()) {
-                  const uid = stateData.uid;
-
-                  // Save connection
-                  await db
-                    .collection("users")
-                    .doc(uid)
-                    .collection("connections")
-                    .doc("telegram")
-                    .set(
-                      {
-                        connected: true,
-                        profile: {
-                          id: chatId,
-                          username: fromUser.username || null,
-                          first_name: fromUser.first_name || null,
-                          last_name: fromUser.last_name || null,
-                        },
-                        meta: {
-                          chatId: chatId,
-                          auth_date: Math.floor(Date.now() / 1000),
-                          via: "deep_link",
-                        },
-                        connectedAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString(),
-                      },
-                      { merge: true }
-                    );
-
-                  // Mark state as used/delete it
-                  await db.collection("oauth_states").doc(token).delete();
-
-                  // Send success message
-                  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      chat_id: chatId,
-                      text: "✅ Successfully connected to AutoPromote! You can now use this bot to manage your content.",
-                    }),
-                  });
-
-                  logger.info(`Telegram connected via deep link for user ${uid}`);
-                  return res.json({ ok: true });
-                } else {
-                  // Expired
-                  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      chat_id: chatId,
-                      text: "⚠️ This connection link has expired. Please try connecting again from the dashboard.",
-                    }),
-                  });
-                }
-              } else {
-                // Invalid or expired (not found)
-                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    chat_id: chatId,
-                    text: "⚠️ Invalid or expired connection link. Please try again from the dashboard.",
-                  }),
-                });
-              }
-            } catch (err) {
-              logger.error("Error processing Telegram deep link:", err);
-              await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  chat_id: chatId,
-                  text: "❌ An error occurred while connecting. Please contact support.",
-                }),
-              });
-            }
-          }
-        } else {
-          // Regular /start
-          logger.info(`New chat started with ID: ${chatId}`);
-          await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              chat_id: chatId,
-              text: "👋 Welcome to AutoPromote Bot! To connect your account, please use the 'Connect' button in your AutoPromote dashboard.",
-            }),
-          });
-        }
-      }
-    }
-
-    // Always respond 200 to acknowledge receipt
-    res.json({ ok: true });
-  } catch (error) {
-    logger.error("Telegram webhook error:", error);
-    res.status(500).json({ error: error.message });
+  const secret = req.headers["x-telegram-bot-api-secret-token"];
+  if (!WEBHOOK_SECRET && require("../utils/authAuthority").isHostedRuntime())
+    return res.status(503).json({ error: "webhook_not_configured" });
+  if (WEBHOOK_SECRET && secret !== WEBHOOK_SECRET) return res.status(401).json({ error: "invalid_webhook_secret" });
+  const message = req.body?.message;
+  if (!message || message.chat?.type !== "private" || !/^\/start(?:\s|$)/.test(message.text || "")) return res.json({ ok: true });
+  const state = String(message.text || "").split(/\s+/)[1];
+  let text = "Use Connect Telegram in your AutoPromote dashboard to link this bot. Publishing to a channel requires separate destination authorisation.";
+  if (state) {
+    try {
+      const uid = await require("../services/communityPublishing").consumeTelegramConnection(state, message);
+      require("../utils/simpleCache").setCache(`platform_connections_status_${uid}`, null, 0);
+      text = "Successfully connected to AutoPromote. Return to Connections to configure your publishing channels or groups.";
+    } catch (_) { text = "Invalid or expired connection link. Please connect again from AutoPromote."; }
   }
+  try { await require("../services/communityPublishing").telegram("sendMessage", { chat_id: message.chat.id, text }); }
+  catch (_) { logger.warn("Telegram connection response could not be delivered"); }
+  return res.json({ ok: true });
 });
 
 /**
  * POST /api/telegram/test-message
  * Test endpoint to send a message via bot (for testing)
  */
-router.post("/test-message", authMiddleware, tgWriteLimiter, async (req, res) => {
+router.post("/test-message", authMiddleware, workspaceScope, tgWriteLimiter, async (req, res) => {
   try {
-    const uid = req.user.uid;
-    const { message } = req.body;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
+    const { message, destinationId } = req.body;
 
     const result = await telegramService.postToTelegram({
       uid,
-      payload: { message: message || "Test message from AutoPromote!" },
+      payload: { destinationId, message: message || "Test message from AutoPromote!" },
     });
 
     res.json(result);

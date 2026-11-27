@@ -1,0 +1,111 @@
+// Real App checks against the explicitly owned local Auth/Firestore/Storage demo.
+const fs = require('node:fs');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+const { chromium } = require('@playwright/test');
+const option = (name, fallback) => {const i=process.argv.indexOf(name);return i<0?fallback:process.argv[i+1];};
+(async () => {
+  const directory = option('--demo');
+  const info = JSON.parse(fs.readFileSync(path.join(directory,'browser-private.json')));
+  const origin = option('--origin',info.origin), source=option('--source','reports/free-first-20261126/native-output.mp4');
+  assert.equal(new URL(origin).hostname,'127.0.0.1'); assert.equal(new URL(info.origin).hostname,'127.0.0.1');
+  assert.ok(info.email.endsWith('@example.test'));
+  const folder=option('--report-dir','reports/free-first-20261126');
+  fs.mkdirSync(folder,{recursive:true});
+  const report={scope:'actual local App and emulator identity; no production or provider publication',checks:[],errors:[],dialogs:[]};
+  const browser=await chromium.launch({headless:true,args:['--mute-audio']});
+  let token;
+  try {
+    for (const width of [1440,390,360]) {
+      const context=await browser.newContext({viewport:{width,height:1000},timezoneId:'Africa/Johannesburg',reducedMotion:'reduce'});
+      await context.route('**/*',r=>{const u=new URL(r.request().url());return ['127.0.0.1','localhost'].includes(u.hostname)||['data:','blob:'].includes(u.protocol)?r.continue():r.abort();});
+      const page=await context.newPage();page.on('pageerror',e=>report.errors.push(e.message));
+      await page.goto(origin+'/pricing');await page.locator('[data-plan-id=plus]').waitFor();
+      assert.equal(await page.locator('[data-plan-id]').count(),2);
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
+      await page.screenshot({path:`${folder}/pricing-${width}.png`,fullPage:true});
+      report.checks.push({name:'real-public-pricing',width,twoPlans:true,noOverflow:true});
+      await context.close();
+    }
+    const context=await browser.newContext({viewport:{width:1440,height:1000},timezoneId:'Africa/Johannesburg',recordVideo:{dir:folder+'/browser-recordings',size:{width:1440,height:1000}}});
+    await context.route('**/*',r=>{const u=new URL(r.request().url());return ['127.0.0.1','localhost'].includes(u.hostname)||['data:','blob:'].includes(u.protocol)?r.continue():r.abort();});
+    const page=await context.newPage();page.setDefaultTimeout(20000);
+    page.on('pageerror',e=>report.errors.push(e.message));
+    page.on('response', async response=>{
+      if (['/api/media/render-clip','/api/media/process'].includes(new URL(response.url()).pathname) && response.request().method()==='POST') {
+        const data=await response.json().catch(()=>null); if(data?.jobId)report.nativeJobId=data.jobId;
+      }
+    });
+    page.on('request',r=>{if(new URL(r.url()).pathname==='/api/users/profile')token=r.headers().authorization;});
+    page.on('dialog',async dialog=>{report.dialogs.push(dialog.message());await dialog.accept();});
+    const usage=async()=>{assert.ok(token);const r=await fetch(info.origin+'/api/usage/processing',{headers:{Authorization:token}});assert.equal(r.status,200);return (await r.json());};
+    await page.goto(origin);
+    const close=page.getByRole('button',{name:'Close video showcase',exact:true});if(await close.isVisible())await close.click();
+    await page.getByText('Sign In',{exact:true}).first().click();
+    await page.locator('input[type=email]').fill(info.email);await page.locator('input[type=password]').fill(info.password);
+    await page.locator('#agreeTerms').check();await page.getByRole('button',{name:'Enter AutoPromote',exact:true}).click();
+    await page.getByRole('button',{name:'Billing',exact:true}).click();
+    await page.getByRole('heading',{name:'Your processing allowance'}).waitFor();
+    const before=await usage();report.before=before;
+    await page.screenshot({path:folder+'/billing-final.png',fullPage:true});
+    await page.getByRole('button',{name:'Viral Clip Studio',exact:true}).click();
+    await page.getByLabel('Choose videos for Studio').setInputFiles(source);
+    await page.getByRole('button',{name:'Open Creator Studio',exact:true}).click();
+    await page.getByRole('button',{name:'Graphics',exact:true}).click();
+    await page.getByRole('button',{name:/Headline.*Bold hook copy/}).click();
+    const text=page.getByLabel('Title text',{exact:true});await text.fill('Create for free');await text.blur();
+    await page.getByTitle('Undo (Ctrl/Cmd+Z)',{exact:true}).click();
+    assert.notEqual(await text.inputValue(),'Create for free');
+    await page.getByTitle('Redo (Ctrl/Cmd+Shift+Z or Ctrl/Cmd+Y)',{exact:true}).click();
+    assert.equal(await text.inputValue(),'Create for free');
+    const show=page.getByRole('button',{name:'Show media',exact:true});if(await show.isVisible())await show.click();
+    const details=page.locator('.studio-project-rail__head');if(!await details.evaluate(n=>n.open))await details.locator('summary').click();
+    const projectName=option('--project-name','Free-first allowance workflow');await page.getByLabel('Project name',{exact:true}).fill(projectName);
+    await page.getByTestId('studio-save-project').click();
+    await page.locator('.studio-project-save-state.is-saved').waitFor();
+    const afterEdit=await usage();assert.equal(afterEdit.processing.remaining,before.processing.remaining);
+    report.checks.push({name:'free-native-local-edit',sourceUpload:true,titleEdit:true,undoRedo:true,projectSaved:true,noTokensDeducted:true});
+    await page.screenshot({path:folder+'/free-edit-timeline.png'});
+    await page.reload();
+    await page.getByRole('button',{name:'Viral Clip Studio',exact:true}).click();
+    await page.getByRole('button',{name:projectName,exact:true}).click();
+    await page.getByRole('button',{name:'Graphics',exact:true}).click();
+    // A reopened project selects no title until its existing layer is selected.
+    const title=page.getByRole('button',{name:/Create for free/}).first();if(await title.isVisible())await title.click();
+    await page.screenshot({path:folder+'/free-project-reopened.png'});
+    report.checks.push({name:'saved-project-reopened',savedProjectVisible:true});
+    await page.getByRole('button',{name:'Export',exact:true}).click();
+    console.log('Export panel',await page.locator('.export-btn').allTextContents());
+    report.exportPanel=await page.locator('body').innerText().then(t=>t.slice(-1800));
+    await page.locator('.export-btn').first().click();
+    await page.waitForTimeout(600);
+    report.afterExportClick=await page.locator('body').innerText().then(t=>t.slice(-5000));
+    console.log('After export click',report.afterExportClick);
+    await page.screenshot({path:folder+'/export-click-state.png'});
+    // The existing App exports asynchronously; the worker and allowance must both settle.
+    let after;
+    const exportWait=Number(option('--export-wait-seconds','45'));
+    assert.ok(Number.isSafeInteger(exportWait)&&exportWait>=45&&exportWait<=600);
+    for(let n=0;n<exportWait;n++) {after=await usage();if(after.processing.rollingSpentTokens>before.processing.rollingSpentTokens&&after.processing.activeJobs===0)break;await page.waitForTimeout(1000);}
+    report.after=after;
+    assert.ok(after.processing.remaining<before.processing.remaining,'actual export reconciles a deduction');
+    assert.equal(after.balances.purchasedCredits,before.balances.purchasedCredits,'legacy wallet preserved');
+    if (report.nativeJobId) {
+      const statusResponse=await fetch(info.origin+`/api/media/status/${report.nativeJobId}`,{headers:{Authorization:token}});
+      assert.equal(statusResponse.status,200);const job=await statusResponse.json();
+      const outputUrl=job.outputUrl||job.output_url||job.job?.outputUrl;
+      assert.equal(new URL(outputUrl).hostname,'127.0.0.1');
+      const movie=await fetch(outputUrl,{headers:{Authorization:token}});
+      assert.equal(movie.status,200);
+      const bytes=Buffer.from(await movie.arrayBuffer());
+      assert.ok(bytes.length>1024);fs.writeFileSync(folder+'/studio-free-output.mp4',bytes);
+      report.download={bytes:bytes.length,sha256:require('node:crypto').createHash('sha256').update(bytes).digest('hex')};
+    }
+    report.checks.push({name:'actual-studio-export',deduction:before.processing.remaining-after.processing.remaining,legacyWalletPreserved:true});
+    await page.screenshot({path:folder+'/free-export-finished.png'});
+    await context.close();
+    assert.deepEqual(report.errors,[]);
+    console.log(JSON.stringify({checks:report.checks,remaining:after.processing.remaining}));
+  } catch(error) {report.failure=error.message;throw error;}
+  finally {fs.writeFileSync(folder+'/browser-evidence.json',JSON.stringify(report,null,2)+'\n');await browser.close();}
+})().catch(e=>{console.error(e);process.exitCode=1;});

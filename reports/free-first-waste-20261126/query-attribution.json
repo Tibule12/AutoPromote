@@ -1,0 +1,1287 @@
+{
+  "sampleEntries": 100,
+  "earliestSampleUtc": "2026-11-26T19:25:16.889349Z",
+  "latestSampleUtc": "2026-11-26T19:30:03.919423Z",
+  "queryGroups": [
+    {
+      "method": "google.firestore.v1.Firestore.RunQuery",
+      "collections": [
+        "promotion_schedules"
+      ],
+      "filters": [
+        {
+          "field": "contentId",
+          "operator": "EQUAL"
+        }
+      ],
+      "limit": 200,
+      "observedRequests": 15
+    },
+    {
+      "method": "google.firestore.v1.Firestore.RunQuery",
+      "collections": [
+        "media_transform_tasks"
+      ],
+      "filters": [
+        {
+          "field": "contentId",
+          "operator": "EQUAL"
+        }
+      ],
+      "limit": 200,
+      "observedRequests": 15
+    },
+    {
+      "method": "google.firestore.v1.Firestore.RunQuery",
+      "collections": [
+        "promotion_tasks"
+      ],
+      "filters": [
+        {
+          "field": "contentId",
+          "operator": "EQUAL"
+        }
+      ],
+      "limit": 200,
+      "observedRequests": 15
+    },
+    {
+      "method": "google.firestore.v1.Firestore.RunQuery",
+      "collections": [
+        "platform_posts"
+      ],
+      "filters": [
+        {
+          "field": "contentId",
+          "operator": "EQUAL"
+        }
+      ],
+      "limit": 200,
+      "observedRequests": 15
+    },
+    {
+      "method": "google.firestore.v1.Firestore.Listen",
+      "collections": [
+        "promotion_tasks"
+      ],
+      "filters": [
+        {
+          "field": "type",
+          "operator": "EQUAL"
+        },
+        {
+          "field": "status",
+          "operator": "IN"
+        }
+      ],
+      "limit": 100,
+      "observedRequests": 10
+    },
+    {
+      "method": "google.firestore.v1.Firestore.Commit",
+      "collections": [],
+      "filters": [],
+      "limit": null,
+      "observedRequests": 6
+    },
+    {
+      "method": "google.firestore.v1.Firestore.BatchGetDocuments",
+      "collections": [],
+      "filters": [],
+      "limit": null,
+      "observedRequests": 6
+    },
+    {
+      "method": "google.firestore.v1.Firestore.Listen",
+      "collections": [
+        "promotion_schedules"
+      ],
+      "filters": [
+        {
+          "field": "isActive",
+          "operator": "EQUAL"
+        },
+        {
+          "field": "status",
+          "operator": "EQUAL"
+        }
+      ],
+      "limit": 100,
+      "observedRequests": 5
+    },
+    {
+      "method": "google.firestore.v1.Firestore.Listen",
+      "collections": [
+        "promotion_schedules"
+      ],
+      "filters": [
+        {
+          "field": "status",
+          "operator": "EQUAL"
+        }
+      ],
+      "limit": 100,
+      "observedRequests": 4
+    },
+    {
+      "method": "google.firestore.v1.Firestore.Listen",
+      "collections": [],
+      "filters": [],
+      "limit": null,
+      "observedRequests": 3
+    },
+    {
+      "method": "google.firestore.v1.Firestore.Listen",
+      "collections": [
+        "payouts"
+      ],
+      "filters": [
+        {
+          "field": "status",
+          "operator": "EQUAL"
+        }
+      ],
+      "limit": 1,
+      "observedRequests": 2
+    },
+    {
+      "method": "google.firestore.v1.Firestore.RunQuery",
+      "collections": [
+        "system_locks"
+      ],
+      "filters": [
+        {
+          "field": "expiresAt",
+          "operator": "LESS_THAN"
+        }
+      ],
+      "limit": 100,
+      "observedRequests": 1
+    },
+    {
+      "method": "google.firestore.v1.Firestore.Listen",
+      "collections": [
+        "earnings_events"
+      ],
+      "filters": [
+        {
+          "field": "processed",
+          "operator": "EQUAL"
+        }
+      ],
+      "limit": 1,
+      "observedRequests": 1
+    },
+    {
+      "method": "google.firestore.v1.Firestore.RunQuery",
+      "collections": [
+        "generated_clips"
+      ],
+      "filters": [
+        {
+          "field": "expiresAt",
+          "operator": "LESS_THAN"
+        }
+      ],
+      "limit": 50,
+      "observedRequests": 1
+    },
+    {
+      "method": "google.firestore.v1.Firestore.RunQuery",
+      "collections": [
+        "video_edits"
+      ],
+      "filters": [
+        {
+          "field": "type",
+          "operator": "EQUAL"
+        }
+      ],
+      "limit": 50,
+      "observedRequests": 1
+    }
+  ],
+  "retentionSignatureMatches": 60,
+  "matchedSource": "src/services/publishedVideoRetention.js (old four per-content dependency preflight queries)",
+  "attributionConfidence": "Unique four-query collection/filter/limit signature matches repository source. Sample is not the complete 30-day workload or exact per-endpoint bill.",
+  "observedWrites": [
+    {
+      "collection": "system_locks",
+      "fields": [
+        "expiresAt"
+      ]
+    },
+    {
+      "collection": "system_locks",
+      "fields": [
+        "expiresAt"
+      ]
+    },
+    {
+      "collection": "system_locks",
+      "fields": [
+        "expiresAt"
+      ]
+    },
+    {
+      "collection": "system_locks",
+      "fields": [
+        "expiresAt"
+      ]
+    },
+    {
+      "collection": "system_locks",
+      "fields": [
+        "expiresAt"
+      ]
+    },
+    {
+      "collection": "system_locks",
+      "fields": [
+        "expiresAt"
+      ]
+    }
+  ],
+  "contentWriteSamples": [
+    {
+      "timestamp": "2026-11-27T02:44:53.712759Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:53.513575Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:53.318795Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:53.120623Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:52.925104Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:52.728685Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:52.461375Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:52.265368Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:52.065524Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:51.876231Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:51.682689Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:51.485944Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:51.290211Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:51.086357Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:50.886102Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:50.685121Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:50.495275Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:50.304902Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:50.109153Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:49.906688Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:49.712804Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:49.444516Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:49.185278Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:48.984479Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:48.789130Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:48.588237Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:48.382587Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:48.180178Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:47.974788Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:47.773817Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:47.581337Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:47.379006Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:47.170252Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:46.975347Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:46.781648Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:46.548110Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:46.343775Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:46.144340Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:45.919165Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:45.653576Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:45.459810Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:45.262794Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:45.067599Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:44.864310Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:44.662242Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:44.463984Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:44.268807Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:44.070362Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:43.873216Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:43.679999Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:43.486735Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:43.291852Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:43.088933Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:42.880127Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:42.677804Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:42.481151Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:42.275124Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:42.070967Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:41.868055Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:41.672333Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:41.476750Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:41.262123Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:41.066537Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:40.867839Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:40.660818Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:40.468197Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:40.269016Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:40.066238Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:39.869643Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:39.676861Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:39.473016Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:39.279463Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:39.084645Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:38.873074Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:38.680611Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:38.485483Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:38.289894Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:38.087280Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:37.891703Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:37.692453Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:37.496525Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:37.293278Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:37.082353Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:36.880971Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:36.680344Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:36.483268Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:36.287611Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:36.083923Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:35.856266Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:35.649125Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:35.440306Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:35.240933Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:35.035630Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:34.829245Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:34.620026Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:34.386646Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:34.189Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:33.985160Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:33.781383Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    },
+    {
+      "timestamp": "2026-11-27T02:44:33.574287Z",
+      "fields": [
+        "sourceDeleteAfter",
+        "sourceRetentionDays",
+        "sourceRetentionStatus",
+        "sourceRetentionUpdatedAt",
+        "storagePath"
+      ]
+    }
+  ],
+  "endpointCandidates": [
+    {
+      "source": "src/server.js",
+      "work": "Storage cleanup timer -> storageCleanupService.cleanupPublishedVideos -> publishedVideoRetention",
+      "queries": "user_billing, content owner pages, four contentId dependency queries"
+    },
+    {
+      "source": "src/routes/adminSystemRoutes.js",
+      "endpoints": [
+        "/api/admin/system/activity",
+        "/api/admin/system/api-metrics",
+        "/api/admin/system/errors",
+        "/api/admin/system/firebase-usage"
+      ],
+      "work": "activity user joins, API-request history, error pages and aggregate counts"
+    },
+    {
+      "source": "frontend/src/components/SystemHealthPanel.js",
+      "work": "Five GETs and a full integration scan per 10s auto-refresh before change"
+    },
+    {
+      "source": "src/services/backgroundWorkService.js",
+      "work": "Queue/schedule listeners (not per-tick queries); listener changes/reconnects are separately chargeable"
+    },
+    {
+      "source": "src/services/contentRecoveryService.js",
+      "work": "Diagnostic cron persists diagnosis and a content summary; independent of interactive users"
+    },
+    {
+      "source": "autopromote-functions/index.js",
+      "work": "Four content-update trigger deliveries per source update, including unrelated fields"
+    },
+    {
+      "source": "frontend/src/components/UserLiveLogViewer.js",
+      "work": "Three five-document listeners; hidden-tab grace now releases them"
+    }
+  ],
+  "applications": "Observed Node gRPC activity uses a shared service principal; these samples alone do not distinguish every Render/thulani/operator process. New opt-in SDK instrumentation records application, route, code source and query shape without filter values.",
+  "measuredReadCountAttributionComplete": false,
+  "productionWrites": 0
+}

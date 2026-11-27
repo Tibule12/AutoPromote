@@ -32,9 +32,48 @@ jest.mock("../firebaseAdmin", () => {
   };
 });
 
-const { checkBotEntitlement, getEffectiveTierSnapshot } = require("../services/billingService");
+const { checkBotEntitlement, getEffectiveTierSnapshot, getPlatformPostMonthlyQuota } = require("../services/billingService");
 
 describe("billingService entitlement enforcement", () => {
+  it("keeps daily destination capacity account-specific without lowering larger plans", () => {
+    expect(getPlatformPostMonthlyQuota("premium", null, null, { publishingAllowance: { monthlyLimit: 1000 } })).toBe(1000);
+    expect(getPlatformPostMonthlyQuota("premium")).toBe(150);
+    expect(getPlatformPostMonthlyQuota("enterprise", null, null, { publishingAllowance: { monthlyLimit: 1000 } })).toBe(2000);
+  });
+  it("uses a server-owned upload allowance without upgrading or resetting usage", async () => {
+    const billing = { tier: "premium", status: "active", uploads_this_month: 20,
+      uploadAllowance: { monthlyLimit: 150 } };
+    const snapshot = await getEffectiveTierSnapshot("user-1", billing,
+      { subscriptionTier: "premium", subscriptionStatus: "active" });
+    expect(snapshot.tierId).toBe("premium");
+    expect(snapshot.tier.monthly_upload_cap).toBe(150);
+    expect(snapshot.billingData.uploads_this_month).toBe(20);
+  });
+
+  it("ignores a user-profile upload allowance", async () => {
+    const snapshot = await getEffectiveTierSnapshot("user-1",
+      { tier: "premium", status: "active" },
+      { subscriptionTier: "premium", subscriptionStatus: "active", uploadAllowance: { monthlyLimit: 9999 } });
+    expect(snapshot.tier.monthly_upload_cap).toBe(20);
+  });
+  it("raises only the account with a server-owned publishing allowance", () => {
+    expect(getPlatformPostMonthlyQuota("premium", null, null, {
+      publishingAllowance: { monthlyLimit: 1000 },
+    })).toBe(1000);
+    expect(getPlatformPostMonthlyQuota("premium")).toBe(150);
+    expect(getPlatformPostMonthlyQuota("enterprise", null, null, {
+      publishingAllowance: { monthlyLimit: 1000 },
+    })).toBe(2000);
+  });
+
+  it.each([0, -1, 10001, 150.5, "1000", NaN, null])(
+    "ignores an invalid publishing allowance: %p", value => {
+      expect(getPlatformPostMonthlyQuota("premium", null, null, {
+        publishingAllowance: { monthlyLimit: value },
+      })).toBe(150);
+    }
+  );
+
   it("denies free-tier bot boost access when the plan does not include it", async () => {
     await expect(checkBotEntitlement("user-1", "bot_boost")).rejects.toThrow(
       "requires a paid subscription"
@@ -49,5 +88,48 @@ describe("billingService entitlement enforcement", () => {
     );
 
     expect(snapshot.tierId).toBe("free");
+  });
+
+  it("shares six destinations while retaining active Founding Tester resource grants", async () => {
+    const snapshot = await getEffectiveTierSnapshot(
+      "tester-1",
+      { tier: "free", status: "inactive" },
+      {
+        subscriptionTier: "free",
+        subscriptionStatus: "inactive",
+        testerAccess: {
+          programId: "founding_testers_2026",
+          status: "active",
+          planId: "pro",
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        },
+      }
+    );
+
+    expect(snapshot.tierId).toBe("pro");
+    expect(snapshot.accessSource).toBe("tester_program");
+    expect(snapshot.status).toBe("promotional");
+    expect(snapshot.tier.monthly_upload_cap).toBe(10);
+    expect(snapshot.tier.platform_limit).toBe(6);
+  });
+
+  it("removes Founding Tester entitlements after expiry", async () => {
+    const snapshot = await getEffectiveTierSnapshot(
+      "tester-1",
+      { tier: "free", status: "inactive" },
+      {
+        subscriptionTier: "free",
+        subscriptionStatus: "inactive",
+        testerAccess: {
+          programId: "founding_testers_2026",
+          status: "active",
+          planId: "pro",
+          expiresAt: new Date(Date.now() - 1000).toISOString(),
+        },
+      }
+    );
+
+    expect(snapshot.tierId).toBe("free");
+    expect(snapshot.accessSource).toBe("subscription");
   });
 });

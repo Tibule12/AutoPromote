@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.71 • 2026-11-25
+Development documentation • product 1.2.0 • knowledge 1.0.72 • 2026-11-26
 
 Overall feature ratings and working subfeatures are separate. PARTIAL or BROKEN does not mean every control fails; entries identify verified workflows, release state and the remaining limitation. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -41,6 +41,7 @@ Shows the real composition as separate front-to-back layer and group rows, with 
 
 - This dated development snapshot does not establish professional or production readiness.
 - One real 20-second footage/title/music/SFX project exercises group pointer move, trim, opacity keys, locks, group deletion/undo, source split/history and exact cold reopen. Broader source-occurrence attachment/reordering, group split/duplicate, nested audio/video/owned 3D timing and continuous/full picture/sound remain unqualified. Group trim preserves hidden keys and source phase; it does not retime/stretch child content.
+- Free-first development migration: Free and Plus share creative tools and all six destinations. Supported local editing uses no cloud processing tokens. Cloud admission, reset and rolling capacity are enforced only through configured bounded adapters; production rollout and final pricing remain pending. Existing subscriptions and purchased credits are retained.
 
 **Common errors**
 
@@ -1515,6 +1516,8 @@ Renders the canonical project through the shared worker. A deployed 45-second GP
 - The timing result is one production project, not a capacity or completion-time guarantee. Actual concurrent-user throughput, forced GPU-to-CPU failover, cold starts and host loss remain separate.
 - This dated development snapshot does not establish professional or production readiness.
 - The 15 October programme-clock repair removes an erroneous black fade over dim footage. A20s CPU export completes in244.079s with all480 decoded picture frames unchanged; full colour/raster/live sound remains unqualified.
+- Free-first development migration: Free and Plus share creative tools and all six destinations. Supported local editing uses no cloud processing tokens. Cloud admission, reset and rolling capacity are enforced only through configured bounded adapters; production rollout and final pricing remain pending. Existing subscriptions and purchased credits are retained.
+- 26 November local qualification includes a real signed-in 60-second title/edit/save/reopen/export and complete finished playback. Local measurements and whole-environment reference estimates do not approve final allowances, price, production dispatch, independent multicam, all effects/background/3D combinations or external publication.
 
 **Common errors**
 
@@ -1562,6 +1565,7 @@ Downloads the exact completed movie. The released 45-second GPU export is verifi
 - Main separately implements ProRes/MOV with PCM and explicit video bitrate. Implementation and retained evidence must be checked for the requested delivery combination.
 - Match first source uses a constant output rate. Preservation of variable-rate timestamps remains a separate qualification.
 - All devices, delivery combinations, long-job recovery and whole predictive picture/audio parity are not qualified.
+- Free-first development migration: Free and Plus share creative tools and all six destinations. Supported local editing uses no cloud processing tokens. Cloud admission, reset and rolling capacity are enforced only through configured bounded adapters; production rollout and final pricing remain pending. Existing subscriptions and purchased credits are retained.
 
 **Common errors**
 

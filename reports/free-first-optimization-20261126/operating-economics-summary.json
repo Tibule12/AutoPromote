@@ -1,0 +1,107 @@
+{
+  "scenarios": 30,
+  "components": 39,
+  "financiallyValidated": false,
+  "selected": [
+    {
+      "users": 100,
+      "conversion": 0,
+      "averageNetUsd": -57.809086,
+      "stressNetUsd": -120.290046,
+      "breakEven": {
+        "average": 0.15,
+        "maximum": 0.41
+      }
+    },
+    {
+      "users": 100,
+      "conversion": 0.05,
+      "averageNetUsd": -37.991909,
+      "stressNetUsd": -105.592921,
+      "breakEven": {
+        "average": 0.15,
+        "maximum": 0.41
+      }
+    },
+    {
+      "users": 1000,
+      "conversion": 0,
+      "averageNetUsd": -85.028425,
+      "stressNetUsd": -709.838025,
+      "breakEven": {
+        "average": 0.022,
+        "maximum": 0.242
+      }
+    },
+    {
+      "users": 1000,
+      "conversion": 0.05,
+      "averageNetUsd": 113.143345,
+      "stressNetUsd": -562.866775,
+      "breakEven": {
+        "average": 0.022,
+        "maximum": 0.242
+      }
+    },
+    {
+      "users": 10000,
+      "conversion": 0,
+      "averageNetUsd": -357.22182,
+      "stressNetUsd": -6605.31782,
+      "breakEven": {
+        "average": 0.0091,
+        "maximum": 0.2248
+      }
+    },
+    {
+      "users": 10000,
+      "conversion": 0.05,
+      "averageNetUsd": 1624.49588,
+      "stressNetUsd": -5135.60532,
+      "breakEven": {
+        "average": 0.0091,
+        "maximum": 0.2248
+      }
+    },
+    {
+      "users": 100000,
+      "conversion": 0,
+      "averageNetUsd": -3079.155769,
+      "stressNetUsd": -65835.115769,
+      "breakEven": {
+        "average": 0.00777,
+        "maximum": 0.22398
+      }
+    },
+    {
+      "users": 100000,
+      "conversion": 0.05,
+      "averageNetUsd": 16738.021231,
+      "stressNetUsd": -51137.990769,
+      "breakEven": {
+        "average": 0.00777,
+        "maximum": 0.22398
+      }
+    },
+    {
+      "users": 1000000,
+      "conversion": 0,
+      "averageNetUsd": -31953.495261,
+      "stressNetUsd": -659523.095261,
+      "breakEven": {
+        "average": 0.008068,
+        "maximum": 0.224372
+      }
+    },
+    {
+      "users": 1000000,
+      "conversion": 0.05,
+      "averageNetUsd": 166080.274739,
+      "stressNetUsd": -512551.845261,
+      "breakEven": {
+        "average": 0.008068,
+        "maximum": 0.224372
+      }
+    }
+  ]
+}

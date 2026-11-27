@@ -1,0 +1,443 @@
+const crypto = require("crypto");
+const admin = require("firebase-admin");
+
+const DEFAULT_MAX_UPLOAD_BYTES = 12 * 1024 * 1024 * 1024;
+const DEFAULT_RETENTION_HOURS = 72;
+const ALLOWED_PURPOSES = new Set(["camera_original", "external_audio", "studio_source", "studio_project"]);
+const DURABLE_STUDIO_PURPOSES = new Set(["studio_source", "studio_project"]);
+
+function sanitizeFileName(value) {
+  const safe = String(value || "media.bin")
+    .trim()
+    .replace(/[^A-Za-z0-9._-]+/g, "_")
+    .replace(/^\.+/, "")
+    .slice(0, 120);
+  return safe || "media.bin";
+}
+
+function resolveIngestBucketName() {
+  const configured =
+    process.env.MULTICAM_INGEST_BUCKET || process.env.FIREBASE_STORAGE_BUCKET || "";
+  if (configured) return configured.replace(/^gs:\/\//, "").replace(/\/$/, "");
+
+  try {
+    return String(admin.app().options.storageBucket || "")
+      .replace(/^gs:\/\//, "")
+      .replace(/\/$/, "");
+  } catch (_error) {
+    return "";
+  }
+}
+
+function getMaxUploadBytes() {
+  const parsed = Number(process.env.MULTICAM_MAX_SOURCE_UPLOAD_BYTES || DEFAULT_MAX_UPLOAD_BYTES);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_MAX_UPLOAD_BYTES;
+}
+
+function getRetentionHours() {
+  const parsed = Number(
+    process.env.MULTICAM_INGEST_RETENTION_HOURS || DEFAULT_RETENTION_HOURS
+  );
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_RETENTION_HOURS;
+}
+
+function getDeleteAfterFromCompletion(completedAtMs = Date.now()) {
+  return new Date(completedAtMs + getRetentionHours() * 60 * 60 * 1000).toISOString();
+}
+
+function buildIngestStoragePath({ userId, fileName, sizeBytes, lastModified, fingerprint, purpose }) {
+  const normalizedPurpose = String(purpose || "camera_original");
+  const identity = [
+    userId,
+    normalizedPurpose,
+    fingerprint || "",
+    fileName || "",
+    Number(sizeBytes || 0),
+    Number(lastModified || 0),
+  ].join(":");
+  const digest = crypto.createHash("sha256").update(identity).digest("hex").slice(0, 24);
+  const prefix = DURABLE_STUDIO_PURPOSES.has(normalizedPurpose)
+    ? "studio/sources"
+    : "temp/multicam-ingest";
+  return `${prefix}/${userId}/${digest}_${sanitizeFileName(fileName)}`;
+}
+
+function assertOwnedIngestPath(userId, storagePath) {
+  const path = String(storagePath || "");
+  const allowedPrefixes = [`temp/multicam-ingest/${userId}/`, `studio/sources/${userId}/`];
+  if (
+    !allowedPrefixes.some(prefix => path.startsWith(prefix) && path.length > prefix.length) ||
+    path.includes("..") ||
+    path.includes("\\") ||
+    /[\x00-\x1f\x7f]/.test(path)
+  ) {
+    const error = new Error("Upload does not belong to this user");
+    error.statusCode = 403;
+    throw error;
+  }
+}
+
+function buildFirebaseDownloadUrl(bucketName, storagePath, token) {
+  return (
+    `https://firebasestorage.googleapis.com/v0/b/${encodeURIComponent(bucketName)}` +
+    `/o/${encodeURIComponent(storagePath)}?alt=media&token=${encodeURIComponent(token)}`
+  );
+}
+
+function getDownloadTokenFromUrl(value) {
+  try {
+    return new URL(String(value || "")).searchParams.get("token") || "";
+  } catch (_error) {
+    return "";
+  }
+}
+
+async function verifyOwnedIngestObject({ userId, source, purpose }) {
+  const storagePath = source?.storagePath || source?.storage_path;
+  assertOwnedIngestPath(userId, storagePath);
+  const durableStudioSource = storagePath.startsWith(`studio/sources/${userId}/`);
+  const bucketName = resolveIngestBucketName();
+  if (!bucketName) {
+    const error = new Error("Multicam ingest bucket is not configured");
+    error.statusCode = 503;
+    throw error;
+  }
+
+  const [metadata] = await admin.storage().bucket(bucketName).file(storagePath).getMetadata();
+  const customMetadata = metadata.metadata || {};
+  const studioCameraSource =
+    purpose === "camera_original" &&
+    durableStudioSource &&
+    DURABLE_STUDIO_PURPOSES.has(customMetadata.purpose);
+  if (customMetadata.ownerUid !== userId || (!studioCameraSource && customMetadata.purpose !== purpose)) {
+    const error = new Error("Render source ownership or purpose does not match");
+    error.statusCode = 403;
+    throw error;
+  }
+  if (Number(metadata.size || 0) <= 0) {
+    const error = new Error("Render source is empty");
+    error.statusCode = 409;
+    throw error;
+  }
+
+  let verifiedUrl = source?.url;
+  if (studioCameraSource) {
+    // Imported masters use short signed URLs. Ignore the browser URL and mint
+    // a fresh one from the verified owner-scoped Storage object.
+    [verifiedUrl] = await admin.storage().bucket(bucketName).file(storagePath).getSignedUrl({
+      action: "read",
+      expires: Date.now() + 24 * 60 * 60 * 1000,
+    });
+  } else {
+    const urlToken = getDownloadTokenFromUrl(source?.url);
+    const storedTokens = String(customMetadata.firebaseStorageDownloadTokens || "").split(",");
+    if (!urlToken || !storedTokens.includes(urlToken)) {
+      const error = new Error("Render source download token does not match its upload");
+      error.statusCode = 403;
+      throw error;
+    }
+  }
+
+  const deleteAfter = Date.parse(customMetadata.deleteAfter || "");
+  if (Number.isFinite(deleteAfter) && deleteAfter <= Date.now()) {
+    const error = new Error("Render source has expired; upload it again");
+    error.statusCode = 410;
+    throw error;
+  }
+
+  return {
+    storagePath,
+    url: verifiedUrl,
+    size: Number(metadata.size),
+    deleteAfter: customMetadata.deleteAfter || null,
+  };
+}
+
+async function verifyMulticamRenderInputs({ userId, sources, externalAudio }) {
+  const cameraSources = Array.isArray(sources) ? sources : [];
+  const checks = cameraSources.map(source =>
+    verifyOwnedIngestObject({ userId, source, purpose: "camera_original" })
+  );
+  if (externalAudio?.url) {
+    checks.push(
+      verifyOwnedIngestObject({ userId, source: externalAudio, purpose: "external_audio" })
+    );
+  }
+  return Promise.all(checks);
+}
+
+async function recoverMulticamUpload({ userId, source, purpose }) {
+  const storagePath = source?.storagePath || source?.storage_path;
+  assertOwnedIngestPath(userId, storagePath);
+  const bucketName = resolveIngestBucketName();
+  if (!bucketName) {
+    const error = new Error("Multicam ingest bucket is not configured");
+    error.statusCode = 503;
+    throw error;
+  }
+
+  const [metadata] = await admin.storage().bucket(bucketName).file(storagePath).getMetadata();
+  const customMetadata = metadata.metadata || {};
+  if (customMetadata.ownerUid !== userId || customMetadata.purpose !== purpose) {
+    const error = new Error("Recoverable source ownership or purpose does not match");
+    error.statusCode = 403;
+    throw error;
+  }
+  if (Number(metadata.size || 0) <= 0) {
+    const error = new Error("Recoverable source is empty");
+    error.statusCode = 409;
+    throw error;
+  }
+
+  const deleteAfter = Date.parse(customMetadata.deleteAfter || "");
+  if (Number.isFinite(deleteAfter) && deleteAfter <= Date.now()) {
+    const error = new Error("Recoverable source has expired");
+    error.statusCode = 410;
+    throw error;
+  }
+
+  const storedTokens = String(customMetadata.firebaseStorageDownloadTokens || "")
+    .split(",")
+    .map(token => token.trim())
+    .filter(Boolean);
+  const existingToken = getDownloadTokenFromUrl(source?.url);
+  const downloadToken = storedTokens.includes(existingToken) ? existingToken : storedTokens[0];
+  if (!downloadToken) {
+    const error = new Error("Recoverable source has no Firebase download token");
+    error.statusCode = 409;
+    throw error;
+  }
+
+  return {
+    url: buildFirebaseDownloadUrl(bucketName, storagePath, downloadToken),
+    storagePath,
+    size: Number(metadata.size),
+    deleteAfter: customMetadata.deleteAfter || null,
+    cacheKey: `${bucketName}/${storagePath}#${metadata.generation || "current"}`,
+  };
+}
+
+async function startMulticamUpload({
+  userId,
+  fileName,
+  contentType,
+  sizeBytes,
+  lastModified,
+  fingerprint,
+  purpose,
+  origin,
+}) {
+  const normalizedSize = Number(sizeBytes || 0);
+  const normalizedPurpose = String(purpose || "camera_original");
+  if (!userId) {
+    const error = new Error("Authenticated user is required");
+    error.statusCode = 401;
+    throw error;
+  }
+  if (!Number.isFinite(normalizedSize) || normalizedSize <= 0) {
+    const error = new Error("A non-empty source file is required");
+    error.statusCode = 400;
+    throw error;
+  }
+  if (normalizedSize > getMaxUploadBytes()) {
+    const error = new Error(
+      `Source is larger than the ${Math.round(getMaxUploadBytes() / 1024 / 1024 / 1024)} GiB upload limit`
+    );
+    error.statusCode = 413;
+    throw error;
+  }
+  if (!ALLOWED_PURPOSES.has(normalizedPurpose)) {
+    const error = new Error("Unsupported multicam upload purpose");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const bucketName = resolveIngestBucketName();
+  if (!bucketName) {
+    const error = new Error("MULTICAM_INGEST_BUCKET or FIREBASE_STORAGE_BUCKET is required");
+    error.statusCode = 503;
+    throw error;
+  }
+
+  const storagePath = buildIngestStoragePath({
+    userId,
+    fileName,
+    sizeBytes: normalizedSize,
+    lastModified,
+    fingerprint,
+    purpose: normalizedPurpose,
+  });
+  const bucket = admin.storage().bucket(bucketName);
+  const file = bucket.file(storagePath);
+  // The path is derived from the file fingerprint, so a retry of an already
+  // completed multi-gigabyte upload can safely reuse the verified object. This
+  // avoids forcing users to transfer the same podcast again after a later
+  // analysis or transcription failure.
+  try {
+    const [existingMetadata] = await file.getMetadata();
+    const customMetadata = existingMetadata?.metadata || {};
+    const deleteAfterMs = Date.parse(customMetadata.deleteAfter || "");
+    const existingToken = String(customMetadata.firebaseStorageDownloadTokens || "")
+      .split(",")
+      .map(value => value.trim())
+      .find(Boolean);
+    const reusable =
+      customMetadata.ownerUid === userId &&
+      customMetadata.purpose === normalizedPurpose &&
+      Number(existingMetadata.size || 0) === normalizedSize &&
+      Number(customMetadata.expectedSizeBytes || 0) === normalizedSize &&
+      existingToken &&
+      (!Number.isFinite(deleteAfterMs) || deleteAfterMs > Date.now());
+    if (reusable) {
+      return {
+        alreadyCompleted: true,
+        url: buildFirebaseDownloadUrl(bucketName, storagePath, existingToken),
+        uploadUrl: null,
+        storagePath,
+        bucketName,
+        downloadToken: existingToken,
+        deleteAfter: customMetadata.deleteAfter || null,
+        expectedSizeBytes: normalizedSize,
+        size: normalizedSize,
+        ...((customMetadata.contentHash || customMetadata.sha256) ? { contentHash: customMetadata.contentHash || customMetadata.sha256 } : {}),
+        chunkSizeBytes: 16 * 1024 * 1024,
+      };
+    }
+  } catch (error) {
+    // A missing object is the normal first-upload path. Surface only storage
+    // failures that are not a simple 404.
+    const statusCode = Number(error?.code || error?.statusCode || 0);
+    if (statusCode && statusCode !== 404) throw error;
+  }
+
+  const downloadToken = crypto.randomUUID();
+  const uploadStartedAt = new Date().toISOString();
+  // Uniform-access Studio buckets reject legacy per-object ACLs only when
+  // the browser finishes the transfer. Keep IAM authoritative there; retain
+  // the existing private ACL on legacy buckets and all camera/audio paths.
+  const studioPurpose = ["studio_source", "studio_project"].includes(normalizedPurpose);
+  const uniformStudioBucket = studioPurpose &&
+    (await bucket.getMetadata())[0]?.iamConfiguration?.uniformBucketLevelAccess?.enabled === true;
+  const [uploadUrl] = await file.createResumableUpload({
+    origin: origin || undefined,
+    ...(uniformStudioBucket ? {} : { private: true }),
+    metadata: {
+      contentType: String(contentType || "application/octet-stream").slice(0, 200),
+      cacheControl: "private, no-store, max-age=0",
+      contentDisposition: `attachment; filename="${sanitizeFileName(fileName)}"`,
+      metadata: {
+        ownerUid: userId,
+        purpose: normalizedPurpose,
+        expectedSizeBytes: String(normalizedSize),
+        uploadStartedAt,
+        firebaseStorageDownloadTokens: downloadToken,
+      },
+    },
+  });
+
+  return {
+    uploadUrl,
+    storagePath,
+    bucketName,
+    downloadToken,
+    deleteAfter: null,
+    expectedSizeBytes: normalizedSize,
+    chunkSizeBytes: 16 * 1024 * 1024,
+  };
+}
+
+async function completeMulticamUpload({ userId, storagePath, downloadToken, sizeBytes }) {
+  assertOwnedIngestPath(userId, storagePath);
+  const bucketName = resolveIngestBucketName();
+  if (!bucketName) {
+    const error = new Error("Multicam ingest bucket is not configured");
+    error.statusCode = 503;
+    throw error;
+  }
+
+  const file = admin.storage().bucket(bucketName).file(storagePath);
+  const [metadata] = await file.getMetadata();
+  const customMetadata = metadata.metadata || {};
+  if (customMetadata.ownerUid !== userId) {
+    const error = new Error("Upload ownership metadata does not match");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  const actualSize = Number(metadata.size || 0);
+  const expectedSize = Number(customMetadata.expectedSizeBytes || sizeBytes || 0);
+  if (!actualSize || (expectedSize > 0 && actualSize !== expectedSize)) {
+    const error = new Error(`Upload is incomplete (${actualSize}/${expectedSize || "unknown"} bytes)`);
+    error.statusCode = 409;
+    throw error;
+  }
+
+  const storedTokens = String(customMetadata.firebaseStorageDownloadTokens || "").split(",");
+  if (!downloadToken || !storedTokens.includes(downloadToken)) {
+    const error = new Error("Upload completion token does not match");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  // Retention starts only after Firebase has finalized the complete object.
+  // Starting this clock when a resumable upload session is created steals
+  // hours from large uploads and can make a freshly completed source expire.
+  const completedAt = new Date();
+  const durableStudioSource = storagePath.startsWith(`studio/sources/${userId}/`);
+  if (durableStudioSource && !DURABLE_STUDIO_PURPOSES.has(customMetadata.purpose)) {
+    const error = new Error("This Studio upload has the wrong purpose");
+    error.statusCode = 403;
+    throw error;
+  }
+  const deleteAfter = durableStudioSource
+    ? null
+    : getDeleteAfterFromCompletion(completedAt.getTime());
+  // Only bounded Studio assets enter the model runtime. Hash the finalized,
+  // generation-pinned bytes server-side; never trust a client-supplied hash.
+  // Camera originals/external audio and larger Studio recordings keep their
+  // existing upload/synchronization behavior.
+  const {hashCompletedStudioSource,MAX_MODEL_SOURCE_BYTES}=require('./studioCompletedSourceHash');
+  const contentHash=durableStudioSource && actualSize<=MAX_MODEL_SOURCE_BYTES
+    ? await hashCompletedStudioSource({bucket:admin.storage().bucket(bucketName),storagePath,
+        generation:metadata.generation,size:actualSize}) : null;
+  await file.setMetadata({
+    ...(durableStudioSource ? {} : { customTime: completedAt.toISOString() }),
+    metadata: {
+      ...customMetadata,
+      uploadCompletedAt: completedAt.toISOString(),
+      ...(contentHash?{sha256:contentHash,contentHash}:{}),
+      ...(deleteAfter ? { deleteAfter } : {}),
+    },
+  });
+
+  return {
+    url: buildFirebaseDownloadUrl(bucketName, storagePath, downloadToken),
+    storagePath,
+    bucketName,
+    size: actualSize,
+    ...(contentHash?{contentHash}:{}),
+    generation: metadata.generation || null,
+    deleteAfter,
+    cacheKey: `${bucketName}/${storagePath}#${metadata.generation || "current"}`,
+  };
+}
+
+async function abortMulticamUpload({ userId, storagePath }) {
+  assertOwnedIngestPath(userId, storagePath);
+  const bucketName = resolveIngestBucketName();
+  if (!bucketName) return { status: "not_configured" };
+  await admin.storage().bucket(bucketName).file(storagePath).delete({ ignoreNotFound: true });
+  return { status: "deleted", storagePath };
+}
+
+module.exports = {
+  abortMulticamUpload,
+  buildFirebaseDownloadUrl,
+  buildIngestStoragePath,
+  completeMulticamUpload,
+  recoverMulticamUpload,
+  resolveIngestBucketName,
+  sanitizeFileName,
+  startMulticamUpload,
+  verifyMulticamRenderInputs,
+};

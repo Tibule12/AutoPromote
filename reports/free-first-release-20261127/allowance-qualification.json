@@ -1,0 +1,551 @@
+{
+  "priceUsd": 4.99,
+  "freeWindowTokens": 100,
+  "freeWindowDays": 6,
+  "freeRolling30DayTokens": 500,
+  "plusUsageWindowTokens": 500,
+  "plusUsageWindowHours": 24,
+  "plusRolling30DayTokens": 2000,
+  "numericalLimitsFinal": false,
+  "rows": [
+    {
+      "workflow": "60s basic native worker export",
+      "referenceRecommendedTokens": 20,
+      "referenceReservationTokens": 30,
+      "conditionalFreeOperationsPerSixDays": 4,
+      "qualifiedProductionOperationsPerSixDays": null,
+      "qualification": "Retained local output/resource evidence; all-in tariff and production adapter not qualified.",
+      "outputBytes": 38935983,
+      "measuredLocal": {
+        "sampledTreePeakRssBytes": 431144960,
+        "status": "completed",
+        "wallSecondsIncludingImport": 94.97119692497654,
+        "cpuSeconds": 149.11457700000003,
+        "largestProcessPeakRssKiB": 272204,
+        "cpuAffinity": [
+          0,
+          1
+        ],
+        "threads": 2,
+        "providerChargesStarted": false,
+        "actualCloudExpenditureUsd": 0,
+        "invoiceAttributedHistoricalCostUsd": null,
+        "sourceBytes": 77554732,
+        "sourceSha256": "7a16b8ba2eba836eac74bcfb1f830313907ac0e19f314e636d4b7f833643578c",
+        "stages": [
+          {
+            "program": "ffmpeg",
+            "output": "26851877-c29d-4a41-ac26-d109d71bad5f_input.mp4",
+            "wallSeconds": 25.0527
+          },
+          {
+            "program": "ffmpeg",
+            "output": "26851877-c29d-4a41-ac26-d109d71bad5f_trimmed.mp4",
+            "wallSeconds": 0.1762
+          },
+          {
+            "program": "ffmpeg",
+            "output": "-",
+            "wallSeconds": 0.6208
+          },
+          {
+            "program": "ffmpeg",
+            "output": "26851877-c29d-4a41-ac26-d109d71bad5f_viral.mp4",
+            "wallSeconds": 51.9402
+          }
+        ],
+        "mode": "render",
+        "baseline": false
+      },
+      "actualNewCloudExpenditureUsd": 0,
+      "attributedInvoiceUsd": null
+    },
+    {
+      "workflow": "60s multilingual word-timed captions",
+      "referenceRecommendedTokens": 10,
+      "referenceReservationTokens": 30,
+      "conditionalFreeOperationsPerSixDays": 8,
+      "qualifiedProductionOperationsPerSixDays": null,
+      "qualification": "Retained local output/resource evidence; all-in tariff and production adapter not qualified.",
+      "outputBytes": 29685,
+      "measuredLocal": {
+        "sampledTreePeakRssBytes": 1628688384,
+        "status": "completed",
+        "wallSecondsIncludingImport": 144.4164401939779,
+        "cpuSeconds": 245.40837100000002,
+        "largestProcessPeakRssKiB": 1590516,
+        "cpuAffinity": [
+          0,
+          1
+        ],
+        "threads": 2,
+        "providerChargesStarted": false,
+        "actualCloudExpenditureUsd": 0,
+        "invoiceAttributedHistoricalCostUsd": null,
+        "sourceBytes": 77554732,
+        "sourceSha256": "7a16b8ba2eba836eac74bcfb1f830313907ac0e19f314e636d4b7f833643578c",
+        "stages": [],
+        "mode": "captions",
+        "baseline": false
+      },
+      "actualNewCloudExpenditureUsd": 0,
+      "attributedInvoiceUsd": null
+    },
+    {
+      "workflow": "184s Find Viral Clips + 45s export",
+      "referenceRecommendedTokens": 38,
+      "referenceReservationTokens": 70,
+      "conditionalFreeOperationsPerSixDays": 1,
+      "qualifiedProductionOperationsPerSixDays": null,
+      "qualification": "Retained local output/resource evidence; all-in tariff and production adapter not qualified.",
+      "outputBytes": 16525119,
+      "measuredLocal": {
+        "sampledTreePeakRssBytes": 1986498560,
+        "status": "completed",
+        "wallSecondsIncludingImport": 295.3578843679861,
+        "cpuSeconds": 852.968245,
+        "largestProcessPeakRssKiB": 1813184,
+        "cpuAffinity": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "threads": 4,
+        "providerChargesStarted": false,
+        "actualCloudExpenditureUsd": 0,
+        "invoiceAttributedHistoricalCostUsd": null,
+        "sourceBytes": 217765078,
+        "sourceSha256": "5a3a0cbf4b4372507d3bfddeb4f47170442e213eabd4f80432ca82a29421ce05",
+        "stages": [
+          {
+            "program": "ffmpeg",
+            "output": "165ff26b-1b48-417b-af0e-4b7d62e036fa_analyze_input.mp4",
+            "wallSeconds": 31.6446
+          },
+          {
+            "program": "ffmpeg",
+            "output": "13077fd7-7e32-49c3-abb4-169e9b1c4ad2_clip.mp4",
+            "wallSeconds": 45.3948
+          }
+        ],
+        "mode": "find",
+        "baseline": false,
+        "workerSourceSha256": "524f28bc927e57982c1c7befc6aa884873ae82dfb3228a60c558c86d015d05c9"
+      },
+      "actualNewCloudExpenditureUsd": 0,
+      "attributedInvoiceUsd": null
+    },
+    {
+      "workflow": "60s two-stream Cam edit + external audio",
+      "referenceRecommendedTokens": 50,
+      "referenceReservationTokens": 60,
+      "conditionalFreeOperationsPerSixDays": 1,
+      "qualifiedProductionOperationsPerSixDays": null,
+      "qualification": "Retained local output/resource evidence; all-in tariff and production adapter not qualified.",
+      "outputBytes": 78978707,
+      "measuredLocal": {
+        "sampledTreePeakRssBytes": 595820544,
+        "status": "completed",
+        "wallSecondsIncludingImport": 215.9050850860076,
+        "cpuSeconds": 561.6158140000001,
+        "largestProcessPeakRssKiB": 362004,
+        "cpuAffinity": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "threads": 4,
+        "providerChargesStarted": false,
+        "actualCloudExpenditureUsd": 0,
+        "invoiceAttributedHistoricalCostUsd": null,
+        "sourceBytes": 77554732,
+        "sourceSha256": "7a16b8ba2eba836eac74bcfb1f830313907ac0e19f314e636d4b7f833643578c",
+        "stages": [
+          {
+            "program": "ffmpeg",
+            "output": "3d27ec3477c88a2c6bc2d1fbee09686d_win_av.mp4.tmp.mp4",
+            "wallSeconds": 13.7558
+          },
+          {
+            "program": "ffmpeg",
+            "output": "481904086ba599c936424ebda7ba08ff_win_av.mp4.tmp.mp4",
+            "wallSeconds": 14.1602
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_preflight_src_0_current_start.wav",
+            "wallSeconds": 0.0924
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_preflight_ref_0_current_start.wav",
+            "wallSeconds": 0.0744
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_preflight_src_0_current_middle.wav",
+            "wallSeconds": 0.0906
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_preflight_ref_0_current_middle.wav",
+            "wallSeconds": 0.0746
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_preflight_src_0_current_end.wav",
+            "wallSeconds": 0.0905
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_preflight_ref_0_current_end.wav",
+            "wallSeconds": 0.0839
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_preflight_src_1_current_start.wav",
+            "wallSeconds": 0.0972
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_preflight_ref_1_current_start.wav",
+            "wallSeconds": 0.074
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_preflight_src_1_current_middle.wav",
+            "wallSeconds": 0.0934
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_preflight_ref_1_current_middle.wav",
+            "wallSeconds": 0.0889
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_preflight_src_1_current_end.wav",
+            "wallSeconds": 0.0855
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_preflight_ref_1_current_end.wav",
+            "wallSeconds": 0.0765
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_continuous_sync_src_0_0.wav",
+            "wallSeconds": 0.0882
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_continuous_sync_ref_0_0.wav",
+            "wallSeconds": 0.0742
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_continuous_sync_src_0_1.wav",
+            "wallSeconds": 0.0947
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_continuous_sync_ref_0_1.wav",
+            "wallSeconds": 0.0811
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_continuous_sync_src_1_0.wav",
+            "wallSeconds": 0.0796
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_continuous_sync_ref_1_0.wav",
+            "wallSeconds": 0.0691
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_continuous_sync_src_1_1.wav",
+            "wallSeconds": 0.0853
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_continuous_sync_ref_1_1.wav",
+            "wallSeconds": 0.0779
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_multicam_segment_0.mp4",
+            "wallSeconds": 86.2671
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_multicam_segment_1.mp4",
+            "wallSeconds": 85.6405
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_multicam_video.mp4",
+            "wallSeconds": 0.1631
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_external_audio_input.wav",
+            "wallSeconds": 0.1236
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_multicam_audio.m4a",
+            "wallSeconds": 2.0101
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_multicam.mp4",
+            "wallSeconds": 0.1517
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_src_0.wav",
+            "wallSeconds": 0.1226
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_out_0.wav",
+            "wallSeconds": 0.109
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_src_1.wav",
+            "wallSeconds": 0.1131
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_out_1.wav",
+            "wallSeconds": 0.1043
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_src_2.wav",
+            "wallSeconds": 0.0803
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_out_2.wav",
+            "wallSeconds": 0.0957
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_src_3.wav",
+            "wallSeconds": 0.1257
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_out_3.wav",
+            "wallSeconds": 0.0964
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_src_4.wav",
+            "wallSeconds": 0.1002
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_out_4.wav",
+            "wallSeconds": 0.1077
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_src_5.wav",
+            "wallSeconds": 0.0977
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_out_5.wav",
+            "wallSeconds": 0.0902
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_src_0.wav",
+            "wallSeconds": 0.0997
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_out_0.wav",
+            "wallSeconds": 0.0873
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_src_1.wav",
+            "wallSeconds": 0.1239
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_out_1.wav",
+            "wallSeconds": 0.1174
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_src_2.wav",
+            "wallSeconds": 0.0929
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_out_2.wav",
+            "wallSeconds": 0.0781
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_src_3.wav",
+            "wallSeconds": 0.1188
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_out_3.wav",
+            "wallSeconds": 0.1053
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_src_4.wav",
+            "wallSeconds": 0.1298
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_out_4.wav",
+            "wallSeconds": 0.1106
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_src_5.wav",
+            "wallSeconds": 0.0979
+          },
+          {
+            "program": "ffmpeg",
+            "output": "42b4a6c3-c898-4650-9a25-9aee22a2833b_postsync_out_5.wav",
+            "wallSeconds": 0.0839
+          }
+        ],
+        "mode": "multicam",
+        "baseline": true,
+        "camSourceMaxLongEdge": 1920,
+        "workerSourceSha256": "1c97719664bb9c5f497f8b856a99018600143ccacb2f9a0beb6413b80a8974ed"
+      },
+      "actualNewCloudExpenditureUsd": 0,
+      "attributedInvoiceUsd": null
+    },
+    {
+      "workflow": "60s visual effect + keyed title motion",
+      "referenceRecommendedTokens": 40,
+      "referenceReservationTokens": 70,
+      "conditionalFreeOperationsPerSixDays": 1,
+      "qualifiedProductionOperationsPerSixDays": null,
+      "qualification": "Retained local output/resource evidence; all-in tariff and production adapter not qualified.",
+      "outputBytes": 24831297,
+      "measuredLocal": {
+        "sampledTreePeakRssBytes": 976478208,
+        "status": "completed",
+        "wallSecondsIncludingImport": 295.7116651379911,
+        "cpuSeconds": 763.589612,
+        "largestProcessPeakRssKiB": 802816,
+        "cpuAffinity": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "threads": 4,
+        "providerChargesStarted": false,
+        "actualCloudExpenditureUsd": 0,
+        "invoiceAttributedHistoricalCostUsd": null,
+        "sourceBytes": 38935983,
+        "sourceSha256": "d563280d6d3f60c275be7900bafb71d4c67bcdc6531b811dcb19b904aeb3c526",
+        "stages": [
+          {
+            "program": "ffmpeg",
+            "output": "fb9c4bb2-8192-427a-a816-b61da0e764e9_segment_v_0.mp4",
+            "wallSeconds": 8.2568
+          },
+          {
+            "program": "ffmpeg",
+            "output": "fb9c4bb2-8192-427a-a816-b61da0e764e9_segment_a_0.m4a",
+            "wallSeconds": 2.3003
+          },
+          {
+            "program": "ffmpeg",
+            "output": "fb9c4bb2-8192-427a-a816-b61da0e764e9_trimmed.mp4",
+            "wallSeconds": 2.625
+          },
+          {
+            "program": "ffmpeg",
+            "output": "fb9c4bb2-8192-427a-a816-b61da0e764e9_cropped.mp4",
+            "wallSeconds": 35.4589
+          },
+          {
+            "program": "ffmpeg",
+            "output": "fb9c4bb2-8192-427a-a816-b61da0e764e9_finish.mp4",
+            "wallSeconds": 21.7458
+          },
+          {
+            "program": "ffmpeg",
+            "output": "fb9c4bb2-8192-427a-a816-b61da0e764e9_creative_0.mp4",
+            "wallSeconds": 158.4092
+          },
+          {
+            "program": "ffmpeg",
+            "output": "-",
+            "wallSeconds": 0.4086
+          },
+          {
+            "program": "ffmpeg",
+            "output": "fb9c4bb2-8192-427a-a816-b61da0e764e9_viral.mp4",
+            "wallSeconds": 36.6977
+          }
+        ],
+        "mode": "render",
+        "baseline": false,
+        "workerSourceSha256": "99661a8c3e9c12b22b10f62a708156888d70f2f7142716b384b67d12424584d0"
+      },
+      "actualNewCloudExpenditureUsd": 0,
+      "attributedInvoiceUsd": null
+    },
+    {
+      "workflow": "Actual signed-in 60s title/edit/save/reopen/export",
+      "referenceRecommendedTokens": 32,
+      "referenceReservationTokens": 32,
+      "conditionalFreeOperationsPerSixDays": 3,
+      "qualifiedProductionOperationsPerSixDays": null,
+      "qualification": "Retained local output/resource evidence; all-in tariff and production adapter not qualified.",
+      "outputBytes": 26797595,
+      "measuredLocal": {
+        "wallSeconds": 189.61585149701568,
+        "cpuSeconds": 417.03707299999996,
+        "peakRssKiB": 757536,
+        "cpuCeilingSeconds": 600,
+        "localFileCeilingBytes": 134217728,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null,
+        "status": "completed",
+        "wallSecondsIncludingImport": 189.61585149701568,
+        "sourceBytes": 38935983,
+        "resourceScope": "local native process + children; peak RSS is largest process, not aggregate tree"
+      },
+      "actualNewCloudExpenditureUsd": 0,
+      "attributedInvoiceUsd": null
+    }
+  ],
+  "measuredLocalNativeAccounting": {
+    "scope": "Same retained normally signed-in 60s edit/export, local CPU-reference accounting only; excludes unqualified all-in cloud delivery.",
+    "reservedTokens": 30,
+    "consumedTokens": 24,
+    "completedIdenticalOperationsPerFreshSixDayWindow": 3,
+    "windowTokensLeftAfterThree": 28
+  },
+  "publisherAndScheduler": {
+    "qualifiedProductionOperationsPerSixDays": null,
+    "reason": "Six actual provider deliveries and production durable scheduler/publisher accounting are not qualified. No paid/provider publication started."
+  },
+  "backgroundAndThreeD": {
+    "qualifiedProductionOperationsPerSixDays": null,
+    "reason": "Full first-use workflows, billed resource/network envelopes and actual production adapters remain unqualified."
+  },
+  "warning": "A conditional reference count is not a production entitlement or validated maximum. Reservations, rolling ceilings, unfinished jobs, failures, source duration and workflow combination change admission. Do not launch Free with every useful workflow refused."
+}

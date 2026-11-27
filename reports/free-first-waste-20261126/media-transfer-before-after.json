@@ -1,0 +1,26 @@
+{
+  "scope": "Real local Firebase Storage emulator, real GCS SDK, retained actual Studio 60s MP4. No cloud resources/data changed.",
+  "results": [
+    {
+      "name": "before",
+      "wallMs": 807.3982239999996,
+      "cpuMs": 1134.365,
+      "backendMediaReuploadBytes": 26797595,
+      "deliveredBytes": 26797595,
+      "sha256": "632606ea5293c2e14e8dda2ef52b504585213c50d05cb41fe0e5f1fe4c441931",
+      "sourceGeneration": "1795750101301"
+    },
+    {
+      "name": "after",
+      "wallMs": 416.8652460000003,
+      "cpuMs": 505,
+      "backendMediaReuploadBytes": 0,
+      "deliveredBytes": 26797595,
+      "sha256": "632606ea5293c2e14e8dda2ef52b504585213c50d05cb41fe0e5f1fe4c441931",
+      "sourceGeneration": "1795750102471"
+    }
+  ],
+  "retainsFullSourceSha256Validation": true,
+  "remainingBackendIngressBytes": 26797595,
+  "cloudCopyQualified": false
+}

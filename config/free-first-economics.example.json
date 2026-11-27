@@ -1,0 +1,13 @@
+{
+  "basis": "illustrative assumptions; no attributed billing export available",
+  "currency": "USD",
+  "priceMicros": 4990000,
+  "feeBasisPoints": 440,
+  "feeFixedMicros": 300000,
+  "feeBasis": "sensitivity assumption; confirm merchant country, cross-border and currency fees",
+  "fixedMonthlyMicros": 150000000,
+  "free": { "averageProcessingMicros": 60000, "maximumProcessingMicros": 500000, "averageStorageMicros": 10000, "maximumStorageMicros": 25000, "averageNetworkMicros": 10000, "maximumNetworkMicros": 25000 },
+  "plus": { "averageProcessingMicros": 500000, "maximumProcessingMicros": 2000000, "averageStorageMicros": 50000, "maximumStorageMicros": 150000, "averageNetworkMicros": 50000, "maximumNetworkMicros": 100000 },
+  "advertisingRevenueMicros": 0,
+  "investmentMicros": 0
+}

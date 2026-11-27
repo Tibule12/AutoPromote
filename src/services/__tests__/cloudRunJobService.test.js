@@ -18,6 +18,8 @@ describe("cloudRunJobService", () => {
     mockRequest.mockReset();
     delete process.env.MULTICAM_GPU_RENDER_JOB_NAME;
     delete process.env.MULTICAM_GPU_PRIMARY;
+    delete process.env.MEDIA_WORKER_ROUTING_POLICY;
+    delete process.env.FREE_FIRST_USAGE_ENABLED;
     if (originalName === undefined) delete process.env.MULTICAM_RENDER_JOB_NAME;
     else process.env.MULTICAM_RENDER_JOB_NAME = originalName;
     if (originalFastName === undefined) delete process.env.MULTICAM_FAST_RENDER_JOB_NAME;
@@ -30,6 +32,18 @@ describe("cloudRunJobService", () => {
     else process.env.NODE_ENV = originalNodeEnv;
     if (originalRender === undefined) delete process.env.RENDER;
     else process.env.RENDER = originalRender;
+  });
+  it("opt-in short manual Cam edit uses the existing CPU job without changing its output or retrying", async () => {
+    process.env.MEDIA_WORKER_ROUTING_POLICY="cost-aware-v1";
+    process.env.NODE_ENV="production";
+    process.env.GOOGLE_CLOUD_PROJECT="example-project";
+    mockRequest.mockResolvedValue({data:{name:"projects/example-project/locations/us-central1/operations/cpu"}});
+    const {executeMulticamRenderJob}=require('../cloudRunJobService');
+    const result=await executeMulticamRenderJob({jobId:'short-manual',dispatchToken:'one-token',multicamRequest:{
+      sources:[{id:'a'},{id:'b'}],overlapDuration:60,burnCaptions:false,segments:[{camera_id:'a',timeline_start:0,timeline_end:60}]}});
+    expect(result).toMatchObject({device:'cpu',routeReason:'qualified_short_cpu'});
+    expect(mockRequest.mock.calls[0][0].url).toContain('cam-combiner-render-fast-job:run');
+    expect(mockRequest).toHaveBeenCalledTimes(1);
   });
 
   it("builds a one-task execution with only scoped render identity overrides", () => {

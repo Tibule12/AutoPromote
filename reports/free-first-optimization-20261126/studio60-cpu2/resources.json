@@ -1,0 +1,41 @@
+{
+  "sampledTreePeakRssBytes": 431144960,
+  "status": "completed",
+  "wallSecondsIncludingImport": 94.97119692497654,
+  "cpuSeconds": 149.11457700000003,
+  "largestProcessPeakRssKiB": 272204,
+  "cpuAffinity": [
+    0,
+    1
+  ],
+  "threads": 2,
+  "providerChargesStarted": false,
+  "actualCloudExpenditureUsd": 0,
+  "invoiceAttributedHistoricalCostUsd": null,
+  "sourceBytes": 77554732,
+  "sourceSha256": "7a16b8ba2eba836eac74bcfb1f830313907ac0e19f314e636d4b7f833643578c",
+  "stages": [
+    {
+      "program": "ffmpeg",
+      "output": "26851877-c29d-4a41-ac26-d109d71bad5f_input.mp4",
+      "wallSeconds": 25.0527
+    },
+    {
+      "program": "ffmpeg",
+      "output": "26851877-c29d-4a41-ac26-d109d71bad5f_trimmed.mp4",
+      "wallSeconds": 0.1762
+    },
+    {
+      "program": "ffmpeg",
+      "output": "-",
+      "wallSeconds": 0.6208
+    },
+    {
+      "program": "ffmpeg",
+      "output": "26851877-c29d-4a41-ac26-d109d71bad5f_viral.mp4",
+      "wallSeconds": 51.9402
+    }
+  ],
+  "mode": "render",
+  "baseline": false
+}

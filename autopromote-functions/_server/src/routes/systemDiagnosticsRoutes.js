@@ -247,10 +247,6 @@ function checkEnvironmentVariables() {
     OPENAI_API_KEY: "AI features disabled",
     PAYPAL_CLIENT_ID: "Payments disabled",
     PAYPAL_CLIENT_SECRET: "Payments disabled",
-    ZEPTOMAIL_API_KEY: "Email service may not work",
-    ZEPTOMAIL_API_URL: "Email service may not work",
-    ZEPTOMAIL_FROM_EMAIL: "Email service may not work",
-    ZEPTOMAIL_FROM_NAME: "Email service may not work",
   };
 
   Object.entries(importantVars).forEach(([varName, impact]) => {
@@ -258,6 +254,14 @@ function checkEnvironmentVariables() {
       warnings.push(`Missing ${varName} - ${impact}`);
     }
   });
+
+  const zeptoToken = process.env.ZEPTOMAIL_SEND_MAIL_TOKEN || process.env.ZEPTOMAIL_API_KEY;
+  const zeptoSender = process.env.ZEPTOMAIL_FROM_EMAIL || process.env.EMAIL_FROM;
+  if (!zeptoToken || !zeptoSender || process.env.EMAIL_SENDER_MODE === "disabled") {
+    warnings.push(
+      "ZeptoMail is incomplete - add a Send Mail Token and verified sender email, and enable email delivery"
+    );
+  }
 
   return {
     status: issues.length > 0 ? "error" : warnings.length > 0 ? "warning" : "ok",
@@ -594,19 +598,18 @@ async function checkStorageAccess() {
  * Check Email Service
  */
 function checkEmailService() {
-  const zeptoKey = process.env.ZEPTOMAIL_API_KEY;
-  const zeptoUrl = process.env.ZEPTOMAIL_API_URL;
-  const zeptoFromEmail = process.env.ZEPTOMAIL_FROM_EMAIL;
-  const zeptoFromName = process.env.ZEPTOMAIL_FROM_NAME;
+  const zeptoKey = process.env.ZEPTOMAIL_SEND_MAIL_TOKEN || process.env.ZEPTOMAIL_API_KEY;
+  const zeptoFromEmail = process.env.ZEPTOMAIL_FROM_EMAIL || process.env.EMAIL_FROM;
   const mode = process.env.EMAIL_SENDER_MODE;
+  const provider = String(process.env.EMAIL_PROVIDER || "").toLowerCase();
 
-  const configured = !!(zeptoKey && zeptoUrl && zeptoFromEmail && zeptoFromName);
+  const configured = Boolean(zeptoKey && zeptoFromEmail && mode !== "disabled");
 
   return {
     status: configured ? "ok" : "warning",
     critical: false,
     message: configured ? "Email service configured" : "No email service configured",
-    provider: mode || (configured ? "zeptomail" : "none"),
+    provider: configured ? provider || "zeptomail" : "none",
     zeptomail_configured: configured,
   };
 }

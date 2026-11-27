@@ -1,8 +1,14 @@
 const express = require("express");
 const router = express.Router();
+const { pipeline: streamPipeline } = require("node:stream/promises");
+const { nodeReadable, streamStorageUpload } = require("./utils/mediaStreams");
+const { admitMediaTransfer } = require("./utils/mediaTransferBudget");
 const { db, admin } = require("./firebaseAdmin");
 const logger = require("./utils/logger");
+const { CONTENT_LIST_FIELDS, contentListSummary } = require("./utils/contentListSummary");
 const { extractOwnedStoragePathFromUrl } = require("./utils/cleanupSource");
+const { contentSource, directContentSource } = require("./utils/contentSource");
+const { enrichPublisherAssets } = require("./utils/publisherAssetMetadata");
 const authMiddleware = require("./authMiddleware");
 const Joi = require("joi");
 const crypto = require("crypto");
@@ -20,6 +26,9 @@ const billingService = require("./services/billingService");
 const complianceService = require("./services/complianceService");
 const { getVariantStats } = require("./services/variantStatsService");
 const { getPlanCapabilities } = require("./config/subscriptionPlans");
+const { applyTesterCapabilityAllowlist } = require("./config/testerProgram");
+
+router.use(authMiddleware, require("./middlewares/teamContentBoundary"));
 
 // --- OPTIMIZATION START: Eager Loading for Performance ---
 // Previously lazy-loaded inside request handler causing 2-5s lag per upload.
@@ -40,10 +49,13 @@ const {
 
 async function ensureRecoveryLabAccess(userId) {
   const snapshot = await billingService.getEffectiveTierSnapshot(userId);
-  const entitlements = getPlanCapabilities(snapshot.tierId);
+  const entitlements = applyTesterCapabilityAllowlist(
+    getPlanCapabilities(snapshot.tierId),
+    snapshot.testerAccess
+  );
 
-  if (!entitlements.analytics.recoveryLab) {
-    const error = new Error("Recovery Lab is available on Studio and Agency plans.");
+  if (!entitlements.recoveryLab) {
+    const error = new Error("Recovery Lab is available on Free and Plus, subject to processing capacity.");
     error.statusCode = 403;
     error.entitlements = entitlements;
     throw error;
@@ -306,7 +318,7 @@ function buildDownloadFilename(record, mediaUrl) {
   return `${baseName}.${inferDownloadExtension(mediaUrl, record.type)}`;
 }
 
-async function getOwnedContentSnapshot(userId, identifier) {
+async function getOwnedContentSnapshot(userId, identifier, workspaceId) {
   let contentDoc = await db.collection("content").doc(identifier).get();
   if (!contentDoc.exists) {
     const q = await db
@@ -319,7 +331,7 @@ async function getOwnedContentSnapshot(userId, identifier) {
   if (!contentDoc || !contentDoc.exists) return null;
   const data = contentDoc.data() || {};
   const ownerId = data.user_id || data.userId || data.uid || data.ownerId || data.creatorId || null;
-  if (ownerId !== userId) return null;
+  if (ownerId !== userId || workspaceId !== undefined && (data.workspace_id || null) !== workspaceId) return null;
   return { id: contentDoc.id, data };
 }
 
@@ -340,11 +352,11 @@ function toPositiveFiniteNumber(value) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 }
 
-async function getPromotionQuotaSnapshot(userId, tierId) {
+async function getPromotionQuotaSnapshot(userId, tierId, testerAccess = null, billingData = {}) {
   const plan = getPlan(tierId);
   const platformPostQuotaRaw =
     billingService && typeof billingService.getPlatformPostMonthlyQuota === "function"
-      ? billingService.getPlatformPostMonthlyQuota(tierId, plan)
+      ? billingService.getPlatformPostMonthlyQuota(tierId, plan, testerAccess, billingData)
       : 0;
   const normalizedQuota =
     toPositiveFiniteNumber(platformPostQuotaRaw) ||
@@ -374,7 +386,7 @@ async function getPromotionQuotaSnapshot(userId, tierId) {
   };
 }
 
-async function evaluateUploadReadiness(userId, options = {}) {
+async function evaluateUploadReadiness(userId, options = {}, { uploadRequired = true } = {}) {
   const targetPlatforms = Array.isArray(options.target_platforms)
     ? options.target_platforms.filter(Boolean)
     : [];
@@ -388,11 +400,11 @@ async function evaluateUploadReadiness(userId, options = {}) {
     ? "queued_new_upload"
     : "publish_now";
 
-  const [{ tierId, tier }, usageStats] = await Promise.all([
+  const [{ tierId, tier, testerAccess, billingData }, usageStats] = await Promise.all([
     billingService.getEffectiveTierSnapshot(userId),
     getUserUsageStats(userId),
   ]);
-  const promotionQuota = await getPromotionQuotaSnapshot(userId, tierId);
+  const promotionQuota = await getPromotionQuotaSnapshot(userId, tierId, testerAccess, billingData);
 
   const base = {
     allowed: true,
@@ -405,7 +417,7 @@ async function evaluateUploadReadiness(userId, options = {}) {
     publishMode,
   };
 
-  if (usageStats.limit !== Infinity && usageStats.remaining <= 0) {
+  if (uploadRequired && usageStats.limit !== Infinity && usageStats.remaining <= 0) {
     return {
       ...base,
       allowed: false,
@@ -502,7 +514,7 @@ router.post(
   rateLimitMiddleware(20, 60000),
   async (req, res) => {
     try {
-      const userId = req.userId || req.user?.uid;
+      const userId = require("./middlewares/workspaceScope").resourceUserId(req);
       if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
       if (shouldBypassUploadReadinessForTest(req)) {
@@ -535,10 +547,10 @@ router.post(
   "/upload/source-file",
   authMiddleware,
   rateLimitMiddleware(10, 60000),
-  express.raw({ type: "*/*", limit: "500mb" }),
+  admitMediaTransfer,
   async (req, res) => {
     try {
-      const userId = req.userId || req.user?.uid;
+      const userId = require("./middlewares/workspaceScope").resourceUserId(req);
       if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
       const mediaType = normalizeSingleStringInput(
@@ -551,20 +563,12 @@ router.post(
         return res.status(400).json({ error: "Invalid media type" });
       }
 
-      const fileBuffer = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body || "");
-      if (!fileBuffer.length) {
-        return res.status(400).json({ error: "Missing upload body" });
-      }
-      if (fileBuffer.length > 500 * 1024 * 1024) {
-        return res.status(400).json({ error: "File too large" });
-      }
-
       const rawFileName = normalizeSingleStringInput(
         req.headers["x-file-name"] || req.query.fileName,
         "untitled"
       );
       const safeFileName = sanitizeUploadFileName(rawFileName);
-      const storagePath = `uploads/${mediaType}s/${Date.now()}_${safeFileName}`;
+      const storagePath = `uploads/${mediaType}s/${userId}/${crypto.randomUUID()}_${safeFileName}`;
       const downloadToken = crypto.randomUUID();
       const bucket = admin.storage().bucket();
       const contentType = normalizeSingleStringInput(
@@ -572,8 +576,7 @@ router.post(
         "application/octet-stream"
       );
 
-      await bucket.file(storagePath).save(fileBuffer, {
-        resumable: false,
+      const size = await streamStorageUpload(req, bucket.file(storagePath), {
         contentType,
         metadata: {
           contentType,
@@ -589,13 +592,14 @@ router.post(
         ok: true,
         storagePath,
         url: buildFirebaseDownloadUrl(bucket.name, storagePath, downloadToken),
-        size: fileBuffer.length,
+        size,
       });
     } catch (error) {
       logger.error("[upload.source-file] Failed to store uploaded media", {
         error: error && error.message ? error.message : String(error),
       });
-      return res.status(500).json({ error: "Failed to upload source file" });
+      if (!res.destroyed && !res.headersSent)
+        return res.status(error.status || 500).json({ error: error.status ? error.message : "Failed to upload source file" });
     }
   }
 );
@@ -702,6 +706,7 @@ function rateLimitMiddleware(limit = 10, windowMs = 60000) {
     }
     rateLimitMap.set(key, entry);
     if (entry.count > limit) {
+      res.set('Retry-After', String(Math.max(1,Math.ceil((entry.start+windowMs-now)/1000))));
       return res.status(429).json({ error: "Rate limit exceeded. Please try again later." });
     }
     next();
@@ -712,6 +717,7 @@ function rateLimitMiddleware(limit = 10, windowMs = 60000) {
 router.post(
   "/upload",
   authMiddleware,
+  require("./services/unifiedCredits/application").applicationCreditRoute("publisher.publish", db),
   usageLimitMiddleware(),
 
   costControlMiddleware,
@@ -746,7 +752,7 @@ router.post(
           .join(" | ");
         console.log("[upload.debug.headers]", safeHeaderDump);
       } catch (e) {}
-      const userId = req.userId || req.user?.uid;
+      const userId = require("./middlewares/workspaceScope").resourceUserId(req);
       try {
         console.debug("[upload] userUsage:", req.userUsage);
       } catch (e) {}
@@ -803,46 +809,16 @@ router.post(
       // -------------------------------------------------
 
       // Helper function to determine content intent based on platform flags
-      function determineContentIntent(platformOptions) {
-        if (!platformOptions) return "organic";
-        let tier = "organic";
-
-        // Check each platform's options
-        const platforms = Object.keys(platformOptions);
-        for (const p of platforms) {
-          const opts = platformOptions[p];
-          if (!opts) continue;
-
-          // SPONSORED SIGNS (Highest Priority)
-          if (
-            (p === "tiktok" &&
-              opts.commercial &&
-              (opts.commercial.yourBrand || opts.commercial.brandedContent)) || // TikTok Brand (Updated structure)
-            (p === "instagram" && opts.isPaidPartnership) || // IG Paid Partnership
-            (p === "facebook" && opts.isPaidPartnership) || // Facebook Paid Partnership
-            (p === "pinterest" && opts.isPaidPartnership) || // Pinterest Paid Partnership
-            (p === "youtube" && opts.paidPromotion) // YT Paid Promotion usually implies sponsorship
-          ) {
-            return "sponsored";
-          }
-
-          // COMMERCIAL SIGNS (Medium Priority)
-          if (
-            (p === "tiktok" &&
-              (opts.commercialContent || (opts.commercial && opts.commercial.isCommercial))) || // TikTok Commercial flag
-            (p === "linkedin" && opts.isPromotional) || // LinkedIn Promotional
-            (p === "reddit" && opts.isPromotional) // Reddit Promotional
-          ) {
-            tier = "commercial";
-          }
-        }
-        return tier;
-      }
+      const { determineContentIntent } = require('./services/publishingIntent');
 
       const detectedIntent = determineContentIntent(platform_options);
+      for (const platform of (target_platforms || []).filter(p => ["telegram", "discord"].includes(p))) {
+        try { await require("./services/communityPublishing").resolveDestination(userId, platform, platform_options?.[platform] || {}); }
+        catch (e) { return res.status(409).json({ error: e.errorClass ? e.message : "Verify the publishing destination." }); }
+      }
 
       if (!req.body.isDryRun) {
-        if (!shouldBypassUploadReadinessForTest(req)) {
+        if (!require("./services/unifiedCredits/application").getApplicationContext(userId) && !shouldBypassUploadReadinessForTest(req)) {
           const readiness = await evaluateUploadReadiness(userId, {
             target_platforms,
             scheduled_promotion_time,
@@ -923,6 +899,7 @@ router.post(
         description || firstPlatformText(["description", "caption", "message", "commentary"]) || ""
       ).trim();
 
+      const uploadedSource = directContentSource({ meta: req.body.meta });
       const contentData = {
         title: resolvedTitle,
         type,
@@ -948,11 +925,14 @@ router.post(
         monetization_settings: monetization_settings || {}, // Persist TikTok/Revenue settings
         protocol7: protocol7 || {}, // Persist Protocol 7 settings
         meta: req.body.meta,
+        ...(uploadedSource ? { source: uploadedSource } : {}),
         duration:
           typeof (req.body.meta && req.body.meta.duration) === "number"
             ? req.body.meta.duration
             : undefined,
         user_id: userId,
+        workspace_id: req.workspaceId || null,
+        created_by: req.actorUserId || userId,
         created_at: new Date(),
         // Approval status used by admin UI/routes. Keep in sync with `status` for compatibility.
         // IMMEDIATE PUBLISH MODE: All users are auto-approved per user request.
@@ -1047,6 +1027,7 @@ router.post(
         // so the user gets a 200 OK immediately while the system works in the background.
         const distributionManager = require("./services/distributionManager");
         if (
+          !require("./services/unifiedCredits/application").getApplicationContext(userId) &&
           target_platforms &&
           target_platforms.length > 0 &&
           !hasAnyExplicitFutureSchedule(scheduled_promotion_time, platform_schedule_times)
@@ -1079,7 +1060,7 @@ router.post(
 
         // Track Usage (Increment upload counter)
         // Fire-and-forget to not block response
-        billingService
+        if (!require("./services/unifiedCredits/application").getApplicationContext(userId)) billingService
           .trackUploadUsage(userId)
           // Security Fix: Prevent externally-controlled format string vulnerability (CodeQL #960)
           // Move userId out of the first argument to console.error
@@ -1178,8 +1159,10 @@ router.post(
       };
 
       // Start the background processes (do not await)
-      backgroundOptimization();
-      trackUsage(userId).catch(e => {
+      const localCreditContext = require("./services/unifiedCredits/application").getApplicationContext(userId);
+      if (!localCreditContext) backgroundOptimization();
+      else await localCreditContext.bindJob("content", content.id);
+      if (!localCreditContext) trackUsage(userId).catch(e => {
         console.warn("[upload] Failed to track usage:", e && e.message ? e.message : e);
       });
 
@@ -1205,29 +1188,13 @@ router.post(
 router.get("/my-content", authMiddleware, async (req, res) => {
   const startMs = Date.now();
   try {
-    const userId = req.userId || req.user?.uid;
-    const includeStats = parseBooleanQuery(req.query.includeStats, true);
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
+    const publisherAssets = parseBooleanQuery(req.query.publisherAssets, false);
+    const summaryOnly = !publisherAssets && parseBooleanQuery(req.query.summary, false);
+    const includeStats = !summaryOnly && parseBooleanQuery(req.query.includeStats, true);
     const statsLimit = includeStats
       ? parsePositiveInt(req.query.statsLimit, 12, { min: 0, max: 50 })
       : 0;
-    // Debugging aid: optionally log sanitized user info when diagnosing 403 issues
-    if (process.env.DEBUG_CONTENT === "true") {
-      try {
-        console.log("[DEBUG][/api/content/my-content] userId=", userId);
-        console.log(
-          "[DEBUG][/api/content/my-content] req.user=",
-          JSON.stringify({
-            uid: req.user?.uid,
-            email: req.user?.email,
-            role: req.user?.role,
-            isAdmin: req.user?.isAdmin,
-            fromCollection: req.user?.fromCollection,
-          })
-        );
-      } catch (e) {
-        /* ignore logging failures */
-      }
-    }
     if (!userId) {
       console.warn(
         "[GET /my-content][unauthorized] ip=%s path=%s",
@@ -1236,12 +1203,26 @@ router.get("/my-content", authMiddleware, async (req, res) => {
       );
       return res.status(401).json({ error: "Unauthorized" });
     }
-    const contentRef = db
+    // This route is already behind the same Auth, terms and workspace gates.
+    // A login access probe needs none of the user's content records.
+    if (parseBooleanQuery(req.query.accessCheck, false)) {
+      return res.json({ ok: true, meta: { accessChecked: true } });
+    }
+    let contentRef = db
       .collection("content")
       .where("user_id", "==", userId)
       .orderBy("created_at", "desc");
+    if (summaryOnly) contentRef = contentRef.select(...CONTENT_LIST_FIELDS);
     const snapshot = await contentRef.get();
-    const docs = snapshot.docs;
+    const docs = snapshot.docs.filter(doc => require("./middlewares/teamContentBoundary").inScope(req, doc.data()));
+    // The Publisher's explicit source picker may show only this actor's own
+    // personal files alongside shared files. Other team members never receive
+    // those records until the actor submits a release for review.
+    if (req.workspaceId && publisherAssets) {
+      const personal = await db.collection("content").where("user_id", "==", req.actorUserId).orderBy("created_at", "desc").limit(120).get();
+      for (const doc of personal.docs) if (!doc.data().workspace_id && !docs.some(item => item.id === doc.id)) docs.push(doc);
+    }
+    const recordsById = new Map(docs.map(doc => [doc.id, doc.data()]));
     const docsToEnrich = new Set();
 
     if (includeStats && statsLimit > 0) {
@@ -1256,7 +1237,9 @@ router.get("/my-content", authMiddleware, async (req, res) => {
     const contentWithStats = await Promise.all(
       docs.map(async doc => {
         const data = doc.data();
-        const item = { id: doc.id, ...data };
+        const item = { id: doc.id, ...(summaryOnly ? contentListSummary(data) : data) };
+        const source = contentSource(data, recordsById);
+        if (source) item.source = source;
 
         if (docsToEnrich.has(doc.id)) {
           try {
@@ -1274,19 +1257,23 @@ router.get("/my-content", authMiddleware, async (req, res) => {
       })
     );
 
+    const contentForResponse = publisherAssets
+      ? await enrichPublisherAssets(contentWithStats, admin.storage().bucket())
+      : contentWithStats;
     const took = Date.now() - startMs;
     if (took > 500)
       console.warn(
-        "[GET /my-content][slow] userId=%s took=%dms ip=%s",
-        userId,
+        "[GET /my-content][slow] took=%dms count=%d summary=%s",
         took,
-        req.ip || req.headers["x-forwarded-for"] || "unknown"
+        contentForResponse.length,
+        summaryOnly
       );
     res.json({
-      content: contentWithStats,
+      content: contentForResponse,
       meta: {
         statsIncluded: includeStats,
         statsLimit,
+        summary: summaryOnly,
       },
     });
   } catch (error) {
@@ -1299,19 +1286,17 @@ router.get("/my-content", authMiddleware, async (req, res) => {
 router.get("/my-promotion-schedules", authMiddleware, async (req, res) => {
   const startMs = Date.now();
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     const limit = parsePositiveInt(req.query.limit, 100, { min: 1, max: 250 });
     const summaryOnly = parseBooleanQuery(req.query.summary, false);
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });
     }
-    const schedulesRef = db
-      .collection("promotion_schedules")
-      .where("user_id", "==", userId)
-      .orderBy("startTime", "desc")
-      .limit(limit);
+    const schedulesRef = await require('./services/publishingScheduleQuery').ownedScheduleQuery(db,userId,{
+      limit,from:req.query.from,until:req.query.until,cursor:req.query.cursor,workspaceId:req.workspaceId || null
+    });
     const snapshot = await schedulesRef.get();
-    const schedules = snapshot.docs.map(doc =>
+    const schedules = snapshot.docs.filter(doc => require("./middlewares/teamContentBoundary").inScope(req, doc.data())).map(doc =>
       summaryOnly ? summarizeSchedule(doc) : { id: doc.id, ...doc.data() }
     );
 
@@ -1334,9 +1319,11 @@ router.get("/my-promotion-schedules", authMiddleware, async (req, res) => {
         limit,
         summary: summaryOnly,
         hasMore: snapshot.size >= limit,
+        nextCursor: snapshot.size >= limit ? snapshot.docs.at(-1)?.id || null : null,
       },
     });
   } catch (error) {
+    if (error.status === 400 || error.status === 404) return res.status(error.status).json({error:error.message});
     console.error("[GET /my-promotion-schedules] Error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
@@ -1345,7 +1332,7 @@ router.get("/my-promotion-schedules", authMiddleware, async (req, res) => {
 // GET /repost-activity - Aggregated repost dashboard data for the current user
 router.get("/repost-activity", authMiddleware, async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     // 1. Fetch user's content that has autoRepostState
@@ -1475,15 +1462,19 @@ router.get("/repost-activity", authMiddleware, async (req, res) => {
 });
 
 // POST /:contentId/promotion-schedules - Create a new promotion schedule
-router.post("/:contentId/promotion-schedules", authMiddleware, async (req, res) => {
+router.post("/:contentId/promotion-schedules", authMiddleware, require("./services/unifiedCredits/application").applicationCreditRoute("queue.dispatch", db), async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const { contentId } = req.params;
-    const { time, frequency, platforms = [], platformOptions = {} } = req.body;
+    const { time, frequency, platforms = [], platformOptions = {}, platformTimes = {}, timezone = "UTC" } = req.body;
 
     if (!time) return res.status(400).json({ error: "Missing required field: time" });
+    if (!platformOptions || typeof platformOptions !== "object" || Array.isArray(platformOptions) ||
+        !platformTimes || typeof platformTimes !== "object" || Array.isArray(platformTimes) ||
+        (frequency && !["once", "daily", "weekly", "monthly"].includes(frequency)))
+      return res.status(400).json({ error: "Invalid destination scheduling settings" });
 
     // Verify content belongs to user
     const contentDoc = await db.collection("content").doc(contentId).get();
@@ -1492,35 +1483,75 @@ router.post("/:contentId/promotion-schedules", authMiddleware, async (req, res) 
     if ((content.user_id || content.userId) !== userId)
       return res.status(403).json({ error: "Forbidden" });
 
+    require("./services/contentMediaDependency").assertAvailable(content);
+
+    const allowedPlatforms = ["youtube", "tiktok", "instagram", "linkedin", "facebook", "reddit", "telegram", "discord"];
+    if (!Array.isArray(platforms) || !platforms.length ||
+        new Set(platforms).size !== platforms.length || platforms.some(p => !allowedPlatforms.includes(p)))
+      return res.status(400).json({ error: "Choose explicit supported destinations" });
+    for (const platform of platforms) {
+      const instant = Date.parse(platformTimes[platform] || time);
+      if (!Number.isFinite(instant) || instant <= Date.now())
+        return res.status(400).json({ error: "Choose future destination times" });
+      const settings = platformOptions[platform] || {};
+      const ownedUrls = [content.url, content.persistentMediaUrl, content.mediaUrl, content.media_url, content.downloadInfo?.url, content.processedUrl].filter(Boolean);
+      if ([settings.media_url, settings.videoUrl].filter(Boolean).some(url => !ownedUrls.includes(url)))
+        return res.status(400).json({ error: "Use the selected owned media when scheduling existing content" });
+    }
+    for (const platform of platforms.filter(p => ["telegram", "discord"].includes(p))) {
+      try { await require("./services/communityPublishing").resolveDestination(userId, platform, platformOptions[platform] || {}); }
+      catch (e) { return res.status(409).json({ error: e.errorClass ? e.message : "Verify the publishing destination." }); }
+    }
+    try { new Intl.DateTimeFormat("en", { timeZone: timezone }); }
+    catch (_) { return res.status(400).json({ error: "Choose a valid timezone" }); }
+    // This route schedules an already owned content record. It never uploads
+    // bytes or creates another content record. Distribution/plan limits still
+    // apply; a second content-upload allowance is not required.
+    if (!shouldBypassUploadReadinessForTest(req)) {
+      const readiness = await evaluateUploadReadiness(userId, {
+        target_platforms: platforms, scheduled_promotion_time: time,
+        platform_schedule_times: platformTimes,
+      }, { uploadRequired: false });
+      if (!readiness.allowed) return res.status(403).json({ error: readiness.message, code: readiness.code, context: readiness.context });
+    }
+
     const promotionService = require("./promotionService");
     const schedules = [];
-    const platformList = platforms.length > 0 ? platforms : ["all"];
+    const platformList = platforms;
 
     for (const platform of platformList) {
       const scheduleData = {
         platform,
-        startTime: time,
+        startTime: platformTimes[platform] || time,
         frequency: frequency || "once",
-        ...(platformOptions[platform] || {}),
+        timezone,
+        platformSpecificSettings: platformOptions[platform] || {},
       };
       const schedule = await promotionService.schedulePromotion(contentId, scheduleData);
       // Store user_id so GET /my-promotion-schedules can find it
       await db.collection("promotion_schedules").doc(schedule.id).update({ user_id: userId });
       schedule.user_id = userId;
+      if (req.workspaceId) {
+        await db.collection("promotion_schedules").doc(schedule.id).update({
+          workspace_id: req.workspaceId,
+          created_by: req.actorUserId || userId,
+        });
+        schedule.workspace_id = req.workspaceId;
+      }
       schedules.push(schedule);
     }
 
     res.json({ success: true, schedules });
   } catch (error) {
     console.error("[POST /:contentId/promotion-schedules] Error:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(error.status || 500).json({ error: error.status ? error.message : "Internal server error", ...(error.code ? { code: error.code } : {}) });
   }
 });
 
 // POST /promotion-schedules/:id/pause - Pause a promotion schedule
 router.post("/promotion-schedules/:id/pause", authMiddleware, async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const { id } = req.params;
@@ -1538,9 +1569,9 @@ router.post("/promotion-schedules/:id/pause", authMiddleware, async (req, res) =
 });
 
 // POST /promotion-schedules/:id/resume - Resume a promotion schedule
-router.post("/promotion-schedules/:id/resume", authMiddleware, async (req, res) => {
+router.post("/promotion-schedules/:id/resume", authMiddleware, require("./services/unifiedCredits/application").applicationCreditRoute("queue.dispatch", db), async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const { id } = req.params;
@@ -1558,9 +1589,9 @@ router.post("/promotion-schedules/:id/resume", authMiddleware, async (req, res) 
 });
 
 // POST /promotion-schedules/:id/reschedule - Reschedule a promotion
-router.post("/promotion-schedules/:id/reschedule", authMiddleware, async (req, res) => {
+router.post("/promotion-schedules/:id/reschedule", authMiddleware, require("./services/unifiedCredits/application").applicationCreditRoute("queue.dispatch", db), async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const { id } = req.params;
@@ -1593,7 +1624,7 @@ router.post("/promotion-schedules/:id/reschedule", authMiddleware, async (req, r
 // PATCH /promotion-schedules/:id/post-copy - Edit copy before a platform task starts.
 router.patch("/promotion-schedules/:id/post-copy", authMiddleware, async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
     const { title, caption } = req.body || {};
     if (typeof title !== "string" || typeof caption !== "string" || title.length > 160 || caption.length > 5000) {
@@ -1635,7 +1666,7 @@ router.patch("/promotion-schedules/:id/post-copy", authMiddleware, async (req, r
 // DELETE /promotion-schedules/:id - Delete a promotion schedule
 router.delete("/promotion-schedules/:id", authMiddleware, async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const { id } = req.params;
@@ -1705,7 +1736,7 @@ router.get("/", authMiddleware, async (req, res) => {
 // GET /status/:id - Return lightweight status for a content item (auth required)
 router.get("/status/:id", authMiddleware, async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
     const id = req.params.id;
     // Try direct doc id first
@@ -1736,12 +1767,12 @@ router.get("/status/:id", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/:id/download", authMiddleware, async (req, res) => {
+router.get("/:id/download", authMiddleware, admitMediaTransfer, async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-    const ownedContent = await getOwnedContentSnapshot(userId, req.params.id);
+    const ownedContent = await getOwnedContentSnapshot(userId, req.params.id, req.workspaceId || null);
     if (!ownedContent) return res.status(404).json({ error: "Content not found" });
 
     const mediaUrl = resolveContentMediaUrl(ownedContent.data);
@@ -1789,30 +1820,19 @@ router.get("/:id/download", authMiddleware, async (req, res) => {
     const contentLength = upstream.headers.get("content-length");
     if (contentLength) res.setHeader("Content-Length", contentLength);
 
-    if (upstream.body && typeof upstream.body.pipe === "function") {
-      upstream.body.on("error", error => {
-        console.error("[GET /:id/download] stream error:", error);
-        if (!res.headersSent) return res.status(502).json({ error: "Download stream failed" });
-        res.end();
-      });
-      upstream.body.pipe(res);
-      return;
-    }
-
-    const buffer = Buffer.from(await upstream.arrayBuffer());
-    return res.send(buffer);
+    await streamPipeline(nodeReadable(upstream.body), res);
   } catch (error) {
     console.error("[GET /:id/download] Error:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    if (!res.headersSent && !res.destroyed) return res.status(500).json({ error: "Internal server error" });
   }
 });
 
 router.post("/:id/repost-preview", authMiddleware, async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-    const ownedContent = await getOwnedContentSnapshot(userId, req.params.id);
+    const ownedContent = await getOwnedContentSnapshot(userId, req.params.id, req.workspaceId || null);
     if (!ownedContent) return res.status(404).json({ error: "Content not found" });
 
     const record = ownedContent.data || {};
@@ -1900,7 +1920,7 @@ router.post("/:id/repost-preview", authMiddleware, async (req, res) => {
 // GET /:id - Get individual content
 router.get("/:id", authMiddleware, async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });
     }
@@ -1919,7 +1939,7 @@ router.get("/:id", authMiddleware, async (req, res) => {
 // GET /:id/analytics - Get analytics for content
 router.get("/:id/analytics", authMiddleware, async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     // Verify content ownership
@@ -1950,11 +1970,11 @@ router.get("/:id/analytics", authMiddleware, async (req, res) => {
 // GET /:id/diagnosis - Get (or compute) diagnosis for owned content
 router.get("/:id/diagnosis", authMiddleware, async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
     await ensureRecoveryLabAccess(userId);
 
-    const owned = await getOwnedContentSnapshot(userId, req.params.id);
+    const owned = await getOwnedContentSnapshot(userId, req.params.id, req.workspaceId || null);
     if (!owned) return res.status(404).json({ error: "Content not found" });
     const contentId = owned.id || req.params.id;
 
@@ -1981,11 +2001,11 @@ router.get("/:id/diagnosis", authMiddleware, async (req, res) => {
 // POST /:id/diagnosis/remediate - Trigger remediation actions for owned content
 router.post("/:id/diagnosis/remediate", authMiddleware, async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
     await ensureRecoveryLabAccess(userId);
 
-    const owned = await getOwnedContentSnapshot(userId, req.params.id);
+    const owned = await getOwnedContentSnapshot(userId, req.params.id, req.workspaceId || null);
     if (!owned) return res.status(404).json({ error: "Content not found" });
     const contentId = owned.id || req.params.id;
 
@@ -2011,11 +2031,11 @@ router.post("/:id/diagnosis/remediate", authMiddleware, async (req, res) => {
 // GET /:id/diagnosis/history - List remediation history for owned content
 router.get("/:id/diagnosis/history", authMiddleware, async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
     await ensureRecoveryLabAccess(userId);
 
-    const owned = await getOwnedContentSnapshot(userId, req.params.id);
+    const owned = await getOwnedContentSnapshot(userId, req.params.id, req.workspaceId || null);
     if (!owned) return res.status(404).json({ error: "Content not found" });
     const contentId = owned.id || req.params.id;
 
@@ -2041,11 +2061,11 @@ router.get("/:id/diagnosis/history", authMiddleware, async (req, res) => {
 // GET /:id/diagnosis/policy - Read auto-remediation policy for owned content
 router.get("/:id/diagnosis/policy", authMiddleware, async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
     await ensureRecoveryLabAccess(userId);
 
-    const owned = await getOwnedContentSnapshot(userId, req.params.id);
+    const owned = await getOwnedContentSnapshot(userId, req.params.id, req.workspaceId || null);
     if (!owned) return res.status(404).json({ error: "Content not found" });
     const contentId = owned.id || req.params.id;
 
@@ -2065,11 +2085,11 @@ router.get("/:id/diagnosis/policy", authMiddleware, async (req, res) => {
 // PUT /:id/diagnosis/policy - Update auto-remediation policy for owned content
 router.put("/:id/diagnosis/policy", authMiddleware, async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
     await ensureRecoveryLabAccess(userId);
 
-    const owned = await getOwnedContentSnapshot(userId, req.params.id);
+    const owned = await getOwnedContentSnapshot(userId, req.params.id, req.workspaceId || null);
     if (!owned) return res.status(404).json({ error: "Content not found" });
     const contentId = owned.id || req.params.id;
 
@@ -2094,11 +2114,11 @@ router.put("/:id/diagnosis/policy", authMiddleware, async (req, res) => {
 // POST /:id/diagnosis/run-auto - Execute due auto policy for this content only
 router.post("/:id/diagnosis/run-auto", authMiddleware, async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
     await ensureRecoveryLabAccess(userId);
 
-    const owned = await getOwnedContentSnapshot(userId, req.params.id);
+    const owned = await getOwnedContentSnapshot(userId, req.params.id, req.workspaceId || null);
     if (!owned) return res.status(404).json({ error: "Content not found" });
     const contentId = owned.id || req.params.id;
 
@@ -2245,7 +2265,7 @@ router.get("/leaderboard", authMiddleware, async (req, res) => {
 // POST /growth-squad - Create growth squad
 router.post("/growth-squad", authMiddleware, async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });
     }
@@ -2265,7 +2285,7 @@ router.post("/growth-squad", authMiddleware, async (req, res) => {
 // POST /viral-challenge - Create viral challenge
 router.post("/viral-challenge", authMiddleware, async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });
     }
@@ -2285,7 +2305,7 @@ router.post("/viral-challenge", authMiddleware, async (req, res) => {
 // POST /detect-fraud/:contentId - Detect fraud
 router.post("/detect-fraud/:contentId", authMiddleware, async (req, res) => {
   try {
-    const userId = req.userId || req.user?.uid;
+    const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });
     }
@@ -2302,4 +2322,5 @@ router.post("/detect-fraud/:contentId", authMiddleware, async (req, res) => {
   }
 });
 
+router.evaluateUploadReadiness = evaluateUploadReadiness;
 module.exports = router;

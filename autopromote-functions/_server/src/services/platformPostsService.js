@@ -111,6 +111,7 @@ async function recordPlatformPost({
     metrics: null, // placeholder for Phase 3
     normalizedScore: null, // placeholder for Phase 4
     lastMetricsCheck: null,
+    next_check_at: null,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   };
@@ -190,6 +191,8 @@ async function tryCreatePlatformPostLock({
     externalId: null,
     payload: payload || {},
     rawOutcome: null,
+    metrics: null,
+    next_check_at: null,
     shortlinkCode: shortlinkCode || null,
     createdAt: now,
     updatedAt: now,
@@ -221,6 +224,7 @@ async function finalizePlatformPostById(
     taskId = null,
     reason = null,
     shortlinkCode = null,
+    publicationPending = false,
   }
 ) {
   if (!id) throw new Error("id required");
@@ -232,7 +236,12 @@ async function finalizePlatformPostById(
     null;
   const update = {
     rawOutcome: sanitizeOutcome(outcome),
-    success: success === null ? outcome && outcome.success !== false : success,
+    success: publicationPending
+      ? null
+      : success === null
+        ? outcome && outcome.success !== false
+        : success,
+    publicationPending,
     externalId:
       externalId ||
       outcome.externalId ||

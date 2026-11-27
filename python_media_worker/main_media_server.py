@@ -23,6 +23,10 @@ import tempfile
 import urllib.request
 import urllib.parse
 import warnings
+try:
+    from .processing_provider_budget import assert_provider_budget
+except ImportError:
+    from processing_provider_budget import assert_provider_budget
 import cv2  # OpenCV (Phase 1)
 try:
     from .studio_render_scratch import studio_render_scratch_directory
@@ -450,6 +454,11 @@ def get_faster_whisper_model(model_name=None):
             "device": load_device,
             "compute_type": load_compute_type,
         }
+        if load_device == "cpu":
+            cpu_threads = int(os.getenv("FASTER_WHISPER_CPU_THREADS", "4"))
+            if not 1 <= cpu_threads <= 32:
+                raise ValueError("FASTER_WHISPER_CPU_THREADS must be between 1 and 32")
+            model_options["cpu_threads"] = cpu_threads
         reality_model_name = str(
             os.getenv("AUTOPROMOTE_REALITY_WHISPER_MODEL")
             or "digiphyte/swivuriso-turbo"
@@ -1539,9 +1548,8 @@ async def materialize_cached_audio_input(source_url, local_path, cache_key=None,
 
 def get_cfr_cache_dir():
     """Persistent cache directory for normalized CFR sources — survives across renders."""
-    cache_dir = os.path.join(
-        os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp/cfr-cache"))
-    )
+    cache_dir = os.getenv("MULTICAM_CFR_CACHE_DIR") or os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../tmp/cfr-cache"))
     os.makedirs(cache_dir, exist_ok=True)
     return cache_dir
 
@@ -2018,6 +2026,7 @@ def classify_caption_segment_languages_with_openai(segments):
     try:
         import requests
 
+        assert_provider_budget()
         response = requests.post(
             (os.getenv("OPENAI_API_BASE") or "https://api.openai.com")
             + "/v1/chat/completions",
@@ -2087,6 +2096,7 @@ def transcribe_with_openai_diarization(file_path, *, language=None):
     api_key = str(os.getenv("OPENAI_API_KEY") or os.getenv("OPENAI_KEY") or "").strip()
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY is not configured for diarized captions")
+    assert_provider_budget()
     import requests
 
     audio_file = tempfile.NamedTemporaryFile(suffix=".mp3", delete=False)
@@ -2125,6 +2135,7 @@ def transcribe_with_openai_diarization(file_path, *, language=None):
         if normalized_lang and normalized_lang not in {"za-mixed", "und"}:
             form_data["language"] = normalized_lang
         with open(audio_path, "rb") as audio_stream:
+            assert_provider_budget()
             response = requests.post(
                 (os.getenv("OPENAI_API_BASE") or "https://api.openai.com")
                 + "/v1/audio/transcriptions",
@@ -2196,6 +2207,18 @@ def transcription_model_has_unmapped_languages(model_name):
 
 
 def transcribe_with_hints(file_path, *, word_timestamps=False, language=None, prompt_hint="", task=None, model_name=None):
+    try:
+        from .processing_result_cache import cached_result, transcription_identity
+    except ImportError:
+        from processing_result_cache import cached_result, transcription_identity
+    options = dict(word_timestamps=word_timestamps, language=language,
+                   prompt_hint=prompt_hint, task=task, model_name=model_name)
+    return cached_result(file_path, transcription_identity(options),
+                         lambda: _transcribe_with_hints_uncached(file_path, **options),
+                         observer=lambda event: logger.info("TRANSCRIPTION_REUSE %s", json.dumps(event)))
+
+
+def _transcribe_with_hints_uncached(file_path, *, word_timestamps=False, language=None, prompt_hint="", task=None, model_name=None):
     normalized_language = normalize_transcription_language(language)
     engine = get_transcription_engine()
     # Faster-Whisper tokenizes an empty string as a leading-space prompt.
@@ -7386,6 +7409,7 @@ def generate_creative_social_captions(clip, content_type=None):
 
     try:
         import requests
+        assert_provider_budget()
         response = requests.post(
             (os.getenv("OPENAI_API_BASE") or "https://api.openai.com") + "/v1/chat/completions",
             headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
@@ -7461,6 +7485,7 @@ def generate_thumbnail_copy_with_ai(clip, content_type=None, visual_note=None, f
     try:
         import requests
 
+        assert_provider_budget()
         response = requests.post(
             (os.getenv("OPENAI_API_BASE") or "https://api.openai.com") + "/v1/chat/completions",
             headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
@@ -7599,6 +7624,7 @@ def rerank_clip_candidates_with_ai(
     try:
         import requests
 
+        assert_provider_budget()
         response = requests.post(
             (os.getenv("OPENAI_API_BASE") or "https://api.openai.com") + "/v1/chat/completions",
             headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
@@ -9936,6 +9962,7 @@ def build_visual_chapter_notes(video_path, source_duration, max_frames=16):
         )
 
     try:
+        assert_provider_budget()
         response = requests.post(
             (os.getenv("OPENAI_API_BASE") or "https://api.openai.com") + "/v1/chat/completions",
             headers={
@@ -14221,7 +14248,12 @@ async def analyze_clips(request: Dict[str, Any]):
         # 1. Materialize the source video locally. This handles Firebase signed URLs
         # and falls back to direct HTTP download when ffmpeg cannot ingest a URL.
         logger.info(f"Materializing video source for analysis from {video_url}...")
-        raw_input_path = await materialize_video_input(video_url, raw_input_path, keep_audio=True)
+        # Analysis already builds a bounded proxy below. Download the original
+        # once instead of first encoding a full-size CFR mezzanine and then
+        # encoding that a second time. Original bytes retain audio detail; final
+        # exports still use their existing canonical ingest/delivery pipeline.
+        raw_input_path = await materialize_video_input(
+            video_url, raw_input_path, keep_audio=True, preserve_source_bytes=True)
         try:
             logger.info("Normalizing clip analysis source for stable scene/motion detection...")
             await create_promo_analysis_copy(raw_input_path, input_path)
@@ -23498,6 +23530,7 @@ def generate_gpt_director_plan(speaker_timeline, offsets, algo_timeline, request
 
     try:
         import requests
+        assert_provider_budget()
         response = requests.post(
             (os.getenv("OPENAI_API_BASE") or "https://api.openai.com") + "/v1/chat/completions",
             headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
@@ -31378,6 +31411,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
     visualizer_path = None
     reframe_source_cleanup_path = None
     creative_adjusted_paths = []
+    deferred_neutral_finish = ""
     creative_environment_paths = []
     creative_receipt = {
         "status": "not_requested",
@@ -32395,6 +32429,14 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         adjustment_graph = build_studio_adjustment_timeline_filter(
             finish_filter, adjustment_layers, get_media_duration(working_path),
         )
+        try:
+            from .studio_finish_reuse import can_fuse_neutral_finish
+        except ImportError:
+            from studio_finish_reuse import can_fuse_neutral_finish
+        if (not adjustment_graph and can_fuse_neutral_finish(
+                finish_filter, adjustment_layers=adjustment_layers, request=request)):
+            deferred_neutral_finish, finish_filter = finish_filter, ""
+            logger.info("Neutral finish reuses the final compositor; no intermediate encode")
         if finish_filter or adjustment_graph:
             finish_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_finish.mp4")
             sequence_temp_paths.add(finish_path)
@@ -33169,6 +33211,10 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             base_width, base_height = delivery_profile["width"], delivery_profile["height"]
             filter_chain.append(f"[0:v]scale={base_width}:{base_height}:flags=lanczos,setsar=1[studio_composition_canvas];")
             current_v_label = "studio_composition_canvas"
+
+        if deferred_neutral_finish:
+            filter_chain.append(f"[{current_v_label}]{deferred_neutral_finish}[studio_neutral_finish];")
+            current_v_label = "studio_neutral_finish"
 
         if request.add_hook and request.hook_text:
             rendered_hook_start = rendered_timeline_time(request.hook_start_time)

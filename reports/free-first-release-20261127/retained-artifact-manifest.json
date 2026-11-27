@@ -1,0 +1,880 @@
+{
+  "artifacts": [
+    {
+      "path": "reports/free-first-20261126/billing-final.png",
+      "bytes": 542707,
+      "sha256": "99acd17b4f876524520ed2a3231d044fa85bd055e3d4bc3e32e599e934514b86",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/native-output.mp4",
+      "bytes": 55860,
+      "sha256": "1e72a1a03a20b324541cc94b95fe1a9c29ed2388ab3f415fe52ca0ea8b237363",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/pricing-1440.png",
+      "bytes": 187008,
+      "sha256": "24dae28add00995b7947023ff7d721434b09c8ef96fd1a617199d34f0751d3c7",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/pricing-390.png",
+      "bytes": 183948,
+      "sha256": "1bbf0250e9b13a84b3e099d22bc69777f7eb6b897aa2b2e3636e44f82593b056",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/free-project-reopened.png",
+      "bytes": 209055,
+      "sha256": "df001cf2e5ded6f3f0ecba194a5c1702f3759120bc979bccd805ff28c9b1bcb9",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/free-export-finished.png",
+      "bytes": 218945,
+      "sha256": "55741d131ad232eb67d3ef6a3d5a8e90fa2b429d968b649faff832c80c48dbf4",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/free-studio.png",
+      "bytes": 113380,
+      "sha256": "d7a9b92512cd5e6352575b7a283003ec2ba7d75555bb6f1728ec2cf9b711aabf",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/free-studio-final.png",
+      "bytes": 278757,
+      "sha256": "522a3890021b5882b7f66daba9fdc007c233bba98a9c17dff654aed7b0db49ec",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/export-click-state.png",
+      "bytes": 241666,
+      "sha256": "877c9330f357531dde96b6e4c8e8b43c506c0f464563cfdd7f77555b9fe248d5",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/pricing-360.png",
+      "bytes": 182661,
+      "sha256": "ffb32fe7556c101061baff66c5a25d69318cd91385c740378d0b6de4de85f64e",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/billing-desktop.png",
+      "bytes": 541574,
+      "sha256": "644bd039d72a7746f324f20a72dfea0d6d0c17acaa4285fe460906cb3d851668",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/finished-frame.png",
+      "bytes": 119941,
+      "sha256": "d137d4980e85965b6da7bf0a5ccf066d6bc8488293407e0df7bc3e9760fa866a",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/studio-free-output.mp4",
+      "bytes": 267143,
+      "sha256": "51708b0c4c83983c3e104b740a78d16f1f43d8b28aceb0cdf596e50eefecb3e4",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/graphics-inspection.png",
+      "bytes": 266419,
+      "sha256": "494ce78ccd20a3723be7fedd0ddcf1d38db388b2d28b74358e304236161309fa",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/free-edit-timeline.png",
+      "bytes": 251695,
+      "sha256": "97cb576c62a683c2228463558d8d3420ef967a0ce95d50aaa17423b08fb1d565",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/browser-recordings/page@49ac5f92f93b3c524cb1407a761f4de0.webm",
+      "bytes": 2056158,
+      "sha256": "f161db47e36ee15c3f6688969027e6d6063508e08936522f81bc9dc901b95ef4",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/browser-recordings/page@abd0270de673ed8ecc00db4513758f2f.webm",
+      "bytes": 2217003,
+      "sha256": "9903e48661c5529449b62d277786ce1914ffdb2f647f6d97562759bc2e501490",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/browser-recordings/page@a46ed4675c005417cdb0f5a2ad188993.webm",
+      "bytes": 890481,
+      "sha256": "135f81a241c96b471006871670affc107d1f7a3a2615353156ec110b81c8db1b",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/browser-recordings/page@66c66750db6b59fda98a698df8ee7f58.webm",
+      "bytes": 6484564,
+      "sha256": "94d7bcca8ae54b76c8aede172b03f8468f7b7c0ca2a90f6535e9f9cfe2cb9629",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/browser-recordings/page@668957a5a5e85a8d5f97720adca06ba5.webm",
+      "bytes": 2149194,
+      "sha256": "0b73ec783f160da38adee9d8a06670e0e5017f7b112c8a3441225416c9f664ab",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/browser-recordings/page@78d586349772c1c2565c0f2d635ea13e.webm",
+      "bytes": 899397,
+      "sha256": "7fdd03ab7d3ec1a02dd6af48ecc4746706f15ecbbb1803d9918afd65b89aefc2",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/browser-recordings/page@c7d130c4dd53547d1c63fd3fb3345642.webm",
+      "bytes": 3619737,
+      "sha256": "cac037a29a2e59cf99c3ba6d15dc52c1abe756abceb3519a70c0928ec6e9cf50",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/browser-recordings/page@ee159c0cbea935c72d83ca6106189eb3.webm",
+      "bytes": 2379562,
+      "sha256": "d013ce71b46bf0a8fdf97acc45df69c335360cd05301b89cd456448819a6d023",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/welcome-comparison/baseline-1440.png",
+      "bytes": 433338,
+      "sha256": "9e0203fec48d65c80218a2fa92020c01ac7c1c18a09e95de141d625445349884",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/welcome-comparison/candidate-1440.png",
+      "bytes": 433887,
+      "sha256": "917a01b4fe696ab8e247fe3b127e1f20088044e68f55c3dbd7e4514fda25aac7",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-20261126/finished-playback/page@6d48c9d1c088be078f5b3096fc165f3d.webm",
+      "bytes": 125121,
+      "sha256": "a4280c201579c51fcf3160e52d3a71ca6e7bfb86c8231e158568d0a4b823cfae",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/finder180-cpu4/artifact-0.mp4",
+      "bytes": 16525119,
+      "sha256": "6ed55dc1bf1c4470ec9acd44d3fd0520c1c25599912ad801401315ba62736e6a",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-fused/billing-final.png",
+      "bytes": 542840,
+      "sha256": "a7c7e47c5f55d36338d98d706e341193fe1a83a7695820275eafa8879881b8cc",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-fused/pricing-1440.png",
+      "bytes": 187008,
+      "sha256": "24dae28add00995b7947023ff7d721434b09c8ef96fd1a617199d34f0751d3c7",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-fused/pricing-390.png",
+      "bytes": 183948,
+      "sha256": "1bbf0250e9b13a84b3e099d22bc69777f7eb6b897aa2b2e3636e44f82593b056",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-fused/free-project-reopened.png",
+      "bytes": 213933,
+      "sha256": "a56a9fcd6fb3a1a8d25ab6df5976bba433bd3c5b809c93b2cf4b3689cbd8fd29",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-fused/export-click-state.png",
+      "bytes": 243581,
+      "sha256": "71fdf4881a28bddeb0acba933a941f48bec5983eda99d8665bae0fcaf6daf036",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-fused/pricing-360.png",
+      "bytes": 182661,
+      "sha256": "ffb32fe7556c101061baff66c5a25d69318cd91385c740378d0b6de4de85f64e",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-fused/free-edit-timeline.png",
+      "bytes": 251082,
+      "sha256": "f11e8d9472b0cdb962767fec9d7e9fa359501ad3f0551e6252f83737b30e39a1",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-verified/billing-final.png",
+      "bytes": 542870,
+      "sha256": "cd4991daad556be6f527496197e05d5abd579b8f2f35b88c1ba4fecc67d37cb9",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-verified/pricing-1440.png",
+      "bytes": 187008,
+      "sha256": "24dae28add00995b7947023ff7d721434b09c8ef96fd1a617199d34f0751d3c7",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-verified/pricing-390.png",
+      "bytes": 183948,
+      "sha256": "1bbf0250e9b13a84b3e099d22bc69777f7eb6b897aa2b2e3636e44f82593b056",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-verified/free-project-reopened.png",
+      "bytes": 214455,
+      "sha256": "b310c190c73bc5e9a7255dffef577cf444adc7105b97916a90279a43acf8a055",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-verified/free-export-finished.png",
+      "bytes": 400975,
+      "sha256": "daff7f4f1aee2595ec61e360570aa1127c004937fbb67bdeb3b480cbd3f6c335",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-verified/export-click-state.png",
+      "bytes": 244234,
+      "sha256": "8fb38faa60d34b77af191573191892dc10066f8a41115465769185bfcd044fe7",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-verified/pricing-360.png",
+      "bytes": 182661,
+      "sha256": "ffb32fe7556c101061baff66c5a25d69318cd91385c740378d0b6de4de85f64e",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-verified/finished-frame.png",
+      "bytes": 565699,
+      "sha256": "11c20084979489ebf805e3ba422a0764036fe4c3bc4da6fa005da8b56bf99bc5",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-verified/studio-free-output.mp4",
+      "bytes": 26797595,
+      "sha256": "632606ea5293c2e14e8dda2ef52b504585213c50d05cb41fe0e5f1fe4c441931",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-verified/free-edit-timeline.png",
+      "bytes": 251779,
+      "sha256": "5fdb343234e86e9c63906e0e2fc9ddaac1b30e83b6c023190e699f0ba02b9938",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-verified/title-frame.png",
+      "bytes": 774232,
+      "sha256": "2eca37a31acd08689ad923398779b3f1b139983b7f3ad9f18a44184a4e3b0072",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/studio60-cpu2/artifact-0.mp4",
+      "bytes": 38935983,
+      "sha256": "d563280d6d3f60c275be7900bafb71d4c67bcdc6531b811dcb19b904aeb3c526",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/cam60-cpu4-matched-before/artifact-0.mp4",
+      "bytes": 78978707,
+      "sha256": "1108990576bad4fe57ab43c47ee70b720d723785f52ab7486667006260ec254c",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/effects60-cpu4/artifact-0.mp4",
+      "bytes": 24831297,
+      "sha256": "1890320db1a2eeeab71ece9f44fe5a83f7cdab4559c73f46718ddaec06788d9f",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/native60-matched-before/artifact-0.mp4",
+      "bytes": 25313725,
+      "sha256": "ad365deab26da43f9e3f399f42477db4c2f1a4c433dd9812e4764d1cde85110b",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/native60-matched-after/artifact-0.mp4",
+      "bytes": 26818825,
+      "sha256": "9b5710fbed15d51ac458406da905d70cd285f829adbb03ae9aa1e0d1948d0ec4",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60/billing-final.png",
+      "bytes": 542708,
+      "sha256": "cab05f17a916d030dc77bc5d6b51c294b08a2090318148763e98ff0371758bb8",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60/pricing-1440.png",
+      "bytes": 187008,
+      "sha256": "24dae28add00995b7947023ff7d721434b09c8ef96fd1a617199d34f0751d3c7",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60/pricing-390.png",
+      "bytes": 183948,
+      "sha256": "1bbf0250e9b13a84b3e099d22bc69777f7eb6b897aa2b2e3636e44f82593b056",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60/pricing-360.png",
+      "bytes": 182661,
+      "sha256": "ffb32fe7556c101061baff66c5a25d69318cd91385c740378d0b6de4de85f64e",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/cam60-cpu4-optimized/artifact-0.mp4",
+      "bytes": 78978707,
+      "sha256": "1108990576bad4fe57ab43c47ee70b720d723785f52ab7486667006260ec254c",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-final/billing-final.png",
+      "bytes": 542708,
+      "sha256": "cab05f17a916d030dc77bc5d6b51c294b08a2090318148763e98ff0371758bb8",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-final/pricing-1440.png",
+      "bytes": 187008,
+      "sha256": "24dae28add00995b7947023ff7d721434b09c8ef96fd1a617199d34f0751d3c7",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-final/pricing-390.png",
+      "bytes": 183948,
+      "sha256": "1bbf0250e9b13a84b3e099d22bc69777f7eb6b897aa2b2e3636e44f82593b056",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-final/free-project-reopened.png",
+      "bytes": 213344,
+      "sha256": "87fe05106b1a1dc92d2e24c018c0b78608b49eec3b1bc703ac47d23f9c36fec3",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-final/export-click-state.png",
+      "bytes": 243113,
+      "sha256": "5f3d2aecb3bcc1a7c592ba6c7065c2f8055b7278d742fdb3d5d7b09f2aeade15",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-final/pricing-360.png",
+      "bytes": 182661,
+      "sha256": "ffb32fe7556c101061baff66c5a25d69318cd91385c740378d0b6de4de85f64e",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-final/free-edit-timeline.png",
+      "bytes": 249476,
+      "sha256": "021f896c2c57d298aefb6f8edb37a1883b278c64c56c1a2c764ac750d8571fe2",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-complete/billing-final.png",
+      "bytes": 553631,
+      "sha256": "a86f6467d37c44340e83e6eba38e2ee3755ac5d9e642361a43b4a0d97df01799",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-complete/pricing-1440.png",
+      "bytes": 187008,
+      "sha256": "24dae28add00995b7947023ff7d721434b09c8ef96fd1a617199d34f0751d3c7",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-complete/pricing-390.png",
+      "bytes": 183948,
+      "sha256": "1bbf0250e9b13a84b3e099d22bc69777f7eb6b897aa2b2e3636e44f82593b056",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-complete/free-project-reopened.png",
+      "bytes": 214242,
+      "sha256": "49526738e3337a43e0489b819eb18415162ebcb1267137595998fccae478ab44",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-complete/export-click-state.png",
+      "bytes": 243910,
+      "sha256": "4fdfd4feb98100e0d70c8c6c2e83ea810df55f219d00dbdf911ea558b1eef6c8",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-complete/pricing-360.png",
+      "bytes": 182661,
+      "sha256": "ffb32fe7556c101061baff66c5a25d69318cd91385c740378d0b6de4de85f64e",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-complete/free-edit-timeline.png",
+      "bytes": 251539,
+      "sha256": "ab33af03d1604b4c75e681d53b4f507d1c9f80eeae01306e1a766e1ddda34b67",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/captions60-sa-cpu2/generated-captions.vtt",
+      "bytes": 1761,
+      "sha256": "3775bab572a723666dc1bf44d1f6e7bbd73d793108fa77848f2d33e82a904afe",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/captions60-sa-cpu2/generated-captions.srt",
+      "bytes": 1819,
+      "sha256": "ab3323071ed734d665144b82aa222a23aafa0375b03727475c663f776a3336d1",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/cam60-cpu4/artifact-0.mp4",
+      "bytes": 72553751,
+      "sha256": "695c43b067e933cd042d7de96d3de5defeac58f04046ea50c9adf84c1c6bf031",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-fused/browser-recordings/page@b619ac63212265f8acee7d32feb8e5ca.webm",
+      "bytes": 13164620,
+      "sha256": "cc616e38e470a75b318eaf196c92e63db1c7083aec6ae422e2309251aaaaa8a6",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-verified/browser-recordings/page@4348634c6c1e3e19cdecd52952a46fc0.webm",
+      "bytes": 17371316,
+      "sha256": "e97c5fe8fb93ee11df8fac360d4442ede5a9d7e3e861d155d02cd559ab03c6d1",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-verified/finished-playback/page@e2bfaf2fab0ceffd8ad7a4ec5ec76f4e.webm",
+      "bytes": 1212101,
+      "sha256": "7672e16495d9a0e1a8d7d7632402858c3d32b710253d74870b0a5586f4b2ac24",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-verified/finished-playback/page@14fb32cc269ab18e626e053c282c05eb.webm",
+      "bytes": 8599207,
+      "sha256": "04435ede42f4754fb82366281ae9f7d541350a39b3836dea41a528fefd7e94ca",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/cam60-cpu4-matched-before/media-cache/ee66a55dcf8944aa6e415b0c5fb8965f.wav",
+      "bytes": 11520150,
+      "sha256": "5dab0628a91782efddc0d5d5a5924704082b9560850907f2654cd42be65c79a1",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/cam60-cpu4-matched-before/cfr-cache/3d27ec3477c88a2c6bc2d1fbee09686d_win_av.mp4",
+      "bytes": 53987841,
+      "sha256": "8dc14ce9d11db92612f12b9837ab6f4beb450771610f5ae3f0d252253d74601f",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/cam60-cpu4-matched-before/cfr-cache/481904086ba599c936424ebda7ba08ff_win_av.mp4",
+      "bytes": 70554858,
+      "sha256": "601d39a65aff42a87a2c35ee542a2722ca4316bea4f3620779e6f827bdd198e5",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60/browser-recordings/page@2f0f6d5bfd6cef27b6f861845f286037.webm",
+      "bytes": 1302562,
+      "sha256": "ccdc665504ee98ec7ac70ab93ddc462da1e403233eb344039e32bcf343e1e88f",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/cam60-cpu4-optimized/media-cache/ee66a55dcf8944aa6e415b0c5fb8965f.wav",
+      "bytes": 11520150,
+      "sha256": "5dab0628a91782efddc0d5d5a5924704082b9560850907f2654cd42be65c79a1",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/cam60-cpu4-optimized/cfr-cache/3d27ec3477c88a2c6bc2d1fbee09686d_win_av.mp4",
+      "bytes": 53987841,
+      "sha256": "8dc14ce9d11db92612f12b9837ab6f4beb450771610f5ae3f0d252253d74601f",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/cam60-cpu4-optimized/cfr-cache/481904086ba599c936424ebda7ba08ff_win_av.mp4",
+      "bytes": 70554858,
+      "sha256": "601d39a65aff42a87a2c35ee542a2722ca4316bea4f3620779e6f827bdd198e5",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-final/browser-recordings/page@ae2aa2bc1e9532c90e174575e2976914.webm",
+      "bytes": 12742298,
+      "sha256": "4d26feaa5b30549c1cabbcf7aa800bd7e3261bd2c9bc0faaccb868702ad41f2e",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-optimization-20261126/actual-studio60-complete/browser-recordings/page@114642576b05957385a93dea8f00cc95.webm",
+      "bytes": 15758948,
+      "sha256": "3cc97f3a766538528358931e65ae6d1c942a296861a8c70516e85a0a8514f761",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-waste-20261126/client/workspace.png",
+      "bytes": 235421,
+      "sha256": "85cc9ed93f9dd85945fa9740985de42834a5fe1d0126cd9dd70a41fd815a52c9",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-waste-20261126/client/contextual-help.png",
+      "bytes": 152438,
+      "sha256": "eac6f041177090f28a7c8ad39286c9100699f74ef4408aa576b0f1b7e5886f91",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-waste-20261126/client/billing.png",
+      "bytes": 396626,
+      "sha256": "ba9364165684e399412dbadad56fcc46e3a2fd904a680838116b099a9cc30d2b",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-waste-20261126/client-initial/workspace.png",
+      "bytes": 235857,
+      "sha256": "a4ee34982f276becd51f32f733c3c318c0d914bfd9dece9afca87cfd66098937",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-waste-20261126/client-initial/billing.png",
+      "bytes": 396577,
+      "sha256": "ed50dbfb622b1c048cebc1871b7d26daa3a0df63631797b62f36f17ad4ee1991",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-waste-20261126/client-initial/failure.png",
+      "bytes": 442941,
+      "sha256": "558efb5d1c83009ae2b45c347444e7335081a25b0159b17c4e4d1be23490bdd6",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-waste-20261126/welcome/baseline-1440.png",
+      "bytes": 433887,
+      "sha256": "917a01b4fe696ab8e247fe3b127e1f20088044e68f55c3dbd7e4514fda25aac7",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-waste-20261126/welcome/candidate-1200.png",
+      "bytes": 372259,
+      "sha256": "fdeb4f8933d12718ad0fdc35cd3f92a55d0b36708b401045c18e31ca2f145078",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-waste-20261126/welcome/candidate-1440.png",
+      "bytes": 433887,
+      "sha256": "917a01b4fe696ab8e247fe3b127e1f20088044e68f55c3dbd7e4514fda25aac7",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-waste-20261126/welcome/baseline-1200.png",
+      "bytes": 372259,
+      "sha256": "fdeb4f8933d12718ad0fdc35cd3f92a55d0b36708b401045c18e31ca2f145078",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-waste-20261126/welcome/candidate-360.png",
+      "bytes": 125211,
+      "sha256": "4c5c2c08fcf818c004ed3a44969a8188533f254bd6493bf22b61434aa85fc14b",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-waste-20261126/welcome/baseline-360.png",
+      "bytes": 125211,
+      "sha256": "4c5c2c08fcf818c004ed3a44969a8188533f254bd6493bf22b61434aa85fc14b",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-waste-20261126/welcome/candidate-390.png",
+      "bytes": 136483,
+      "sha256": "94ec0125b55c2d847adea320546568f04357cb90cfa983535f2d9686b3d69d4d",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-waste-20261126/welcome/baseline-390.png",
+      "bytes": 136474,
+      "sha256": "2b98297a164c1b167e27e35fae1b3c63bf1f8618b5d499b8de535623df83c7c8",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-waste-20261126/client/recordings/page@3c81ee2d3f9e90fb770eb117b7b8a2ee.webm",
+      "bytes": 1262894,
+      "sha256": "6c9936e7e62b0afe34a9d75e9085f2f95f91e7166a2242e994984752ddcac3f5",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-waste-20261126/client-initial/recordings/page@722dff9bd66bc7493713ea949fe92084.webm",
+      "bytes": 4811320,
+      "sha256": "482944b98937b3252a821f4713487765dde30dddbae78f0a843138aa866fe332",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-workspace-third-attempt/failure.png",
+      "bytes": 113209,
+      "sha256": "b01bb8422f09961085539ce3085b3812d1e93b042634726ee43b66ef3aa5b17e",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-workspace-legacy-free-refusal/failure.png",
+      "bytes": 351293,
+      "sha256": "c9e3969422e64014e4a4adf65c49c532d91b103cd0c6ecbae78aaf6f54b7fb5a",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-workspace-before-billing-copy/workspace.png",
+      "bytes": 237889,
+      "sha256": "8f5ad4b42be1a137b823c666c6520ca22f526f3d4d5004f9e534b98584b0c804",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-workspace-before-billing-copy/help.png",
+      "bytes": 149851,
+      "sha256": "9d931578d255781154fa1820a7b3cd2e18641beee52cc8251eae4afd9bb1ab0b",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-workspace-initial/failure.png",
+      "bytes": 113653,
+      "sha256": "dcb2ac9aab63ceed81841ead72139aca6f861efbe119ebd89b622ec15f2d4abb",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-welcome/baseline-1440.png",
+      "bytes": 433338,
+      "sha256": "9e0203fec48d65c80218a2fa92020c01ac7c1c18a09e95de141d625445349884",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-welcome/candidate-1200.png",
+      "bytes": 371978,
+      "sha256": "b7db480e143a1406a462c31acad8bf5d365b37349dc41f0bacdd722c8eda73bc",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-welcome/candidate-1440.png",
+      "bytes": 433338,
+      "sha256": "9e0203fec48d65c80218a2fa92020c01ac7c1c18a09e95de141d625445349884",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-welcome/baseline-1200.png",
+      "bytes": 371978,
+      "sha256": "b7db480e143a1406a462c31acad8bf5d365b37349dc41f0bacdd722c8eda73bc",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-welcome/candidate-360.png",
+      "bytes": 124779,
+      "sha256": "cd4af2b3a83f9d9ffe15e8a04009498f366ae4c3d324f899f5be5b5772606103",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-welcome/baseline-360.png",
+      "bytes": 124779,
+      "sha256": "cd4af2b3a83f9d9ffe15e8a04009498f366ae4c3d324f899f5be5b5772606103",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-welcome/candidate-390.png",
+      "bytes": 135998,
+      "sha256": "a7bda77cd8dba7f13c93e24a58beec6d5f04f693939dc110ea1addd47a862262",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-welcome/baseline-390.png",
+      "bytes": 135998,
+      "sha256": "a7bda77cd8dba7f13c93e24a58beec6d5f04f693939dc110ea1addd47a862262",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-workspace-restart-race/failure.png",
+      "bytes": 6489,
+      "sha256": "cb9c3b8047859412e8abcaed51ad9ecefb4bd820c8849af4992e593d500d1836",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-workspace/workspace.png",
+      "bytes": 490648,
+      "sha256": "035a06cca7b43104bd921eaf383da51bd90177a7c56b299e95a03d3ab0de59d5",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-workspace/help.png",
+      "bytes": 149853,
+      "sha256": "e92286ecbc1f5438aaa90d3aad919d15fc3dfbd3911762a0cf68cfdd4620b90e",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-workspace-second-attempt/failure.png",
+      "bytes": 113215,
+      "sha256": "6255f43cf189de448a8e41c6442a3859bd6e5a655b820611b8c183d9a78b8b15",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-workspace-third-attempt/recordings/page@33ccf2987e0e1b5c262264b9c0b82981.webm",
+      "bytes": 1800177,
+      "sha256": "249dca5cfb55b6e9a5ffae1f321f28520c77567c010a11c8916ebaaae5a17e81",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-workspace-legacy-free-refusal/recordings/page@1de050c25754cef575fc81362fdcb234.webm",
+      "bytes": 3211575,
+      "sha256": "21f0592767244f0053b0e4e72a95f34c7500dbe40a4ed1c88de0972e9ffefd69",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-workspace-before-billing-copy/recordings/page@70b84b584fed6ca05e176470c1cf30ad.webm",
+      "bytes": 1270127,
+      "sha256": "b0ffaffa1b675b95ddf0c88bda365f4de0b637f03e6660b7a1ad31ed06695ec7",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-workspace-initial/recordings/page@cb60e4a4f29faedcacd62401e21edbf7.webm",
+      "bytes": 1256289,
+      "sha256": "472859579f8bab85b34923ed661c270fcc1b46ca860f1683d633313b9a0d6d1e",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-workspace-restart-race/recordings/page@e8dd99e9995b1774682ea82010a219fd.webm",
+      "bytes": 4118,
+      "sha256": "2b7439783d108aeefe39ef69c6e6d2cbb4017091b53fc4be56806df42ec26dee",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-workspace/recordings/page@3a68bb9fb22601da6b01d3a9ea520a77.webm",
+      "bytes": 1529061,
+      "sha256": "ffcf9f128a4ce7cf96727499107897217f0950c90dd1101d43a862d289b2cdba",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    },
+    {
+      "path": "reports/free-first-release-20261127/safe-workspace-second-attempt/recordings/page@f8a27c64e0d7c03076d37959f6adbb00.webm",
+      "bytes": 1758848,
+      "sha256": "a393bfab7428b248b61d92fd05e4339b42d3f75c85afb2f92d6d020750edab48",
+      "retainedLocally": true,
+      "includedInPublicGit": false
+    }
+  ],
+  "note": "Native outputs/source media and headless browser recordings remain preserved locally; no additional creative render or public media upload."
+}

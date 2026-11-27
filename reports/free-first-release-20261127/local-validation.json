@@ -1,0 +1,117 @@
+{
+  "results": [
+    {
+      "retainedLocalLog": "reports/free-first-release-20261127/feature-branch-regression-complete.log",
+      "sha256": "ef391ba4a9215a1e0db0f0476ccbb021c577fb20e2fd31f8bf8264317a1c59f7",
+      "passingCases": 73,
+      "overlapsOtherRows": true
+    },
+    {
+      "retainedLocalLog": "reports/free-first-release-20261127/billing-client-tests-final.log",
+      "sha256": "029a62a39bf96dcf8c2826d298dcdbfeda493351a99e7a4836f825c38f9cab35",
+      "passingCases": 4,
+      "overlapsOtherRows": true
+    },
+    {
+      "retainedLocalLog": "reports/free-first-release-20261127/worker-admission-tests.log",
+      "sha256": "fe008aab760eb03ccac7578e2b84665b1b50b0d7f855b17a0c7a8d039435b658",
+      "passingCases": 2,
+      "overlapsOtherRows": true
+    },
+    {
+      "retainedLocalLog": "reports/free-first-release-20261127/cam-runner-regression.log",
+      "sha256": "47062afeff6f0a72885603f04612aab75f789e3ff63cbd8fc4b55bd74500cf45",
+      "passingCases": 8,
+      "overlapsOtherRows": true
+    },
+    {
+      "retainedLocalLog": "reports/free-first-release-20261127/retention-cache-qualified-tests.log",
+      "sha256": "3b8886d25e21461dc20bcfa379af6f01b1f3dd5ee3f71b5f3ea0d7f9ffa175c0",
+      "passingCases": 12,
+      "overlapsOtherRows": true
+    },
+    {
+      "retainedLocalLog": "reports/free-first-release-20261127/retention-cache-existing-regression.log",
+      "sha256": "a4960b9d6bc3bbb5eb020bee130ffff1da514eacc6e544b99c709123b1c4914d",
+      "passingCases": 21,
+      "overlapsOtherRows": true
+    },
+    {
+      "retainedLocalLog": "reports/free-first-release-20261127/portable-before-after-tests.log",
+      "sha256": "e1e18f79cf7f5eba38305225d51a0b51d592f8938b9a2ddd5b2d4bd626ace515",
+      "passingCases": 9,
+      "overlapsOtherRows": true
+    },
+    {
+      "retainedLocalLog": "reports/free-first-release-20261127/portable-output-transfer-tests.log",
+      "sha256": "68c1e090a06101f61445d1c7f7b5f4cf5d6e9180c21023f42833efc2411a762b",
+      "passingCases": 1,
+      "overlapsOtherRows": true
+    }
+  ],
+  "sourceHashes": [
+    {
+      "path": "src/services/processingTokens/service.js",
+      "sha256": "bd56cc2f53e0ff984daedb06ec2f843f3ccb11c9a99a0bd15ca548d7b75cd39e"
+    },
+    {
+      "path": "src/services/processingTokens/cloudRunAdapter.js",
+      "sha256": "80d575bc9aa514b36b3ca4c64cfb44f8f3f402405974fcb8f65fb438601af9f8"
+    },
+    {
+      "path": "src/services/processingTokens/runtime.js",
+      "sha256": "802dc662540d098bb31b52bff412f2c430202ae6e3fcee16237f04f02df22ffc"
+    },
+    {
+      "path": "src/services/processingTokens/operatingEconomics.js",
+      "sha256": "348218313e5eced994b8069eaf786cfbd448342710ccffa48fd2911e512e0fff"
+    },
+    {
+      "path": "src/services/processingTokens/policy.js",
+      "sha256": "5f7ca202fc2148e50a89402646bd7f1b9dc4f7ff8de82ec1c4b9694ee4fb5845"
+    },
+    {
+      "path": "src/services/processingTokens/localAdapter.js",
+      "sha256": "eae9a144d7d9bf8be25732fb3730331c6a0874dbf1468519afbacea8b3ea92a2"
+    },
+    {
+      "path": "src/services/processingTokens/economics.js",
+      "sha256": "9b40a17c92ba7479f1a8f27799617dbc2b99f1573c8510c86fa21ccea25ce092"
+    },
+    {
+      "path": "src/services/processingTokens/costRouting.js",
+      "sha256": "88f4330f97795a484af4cb5ce831f7b4f30ce72089421f790ffec0daac3265ec"
+    },
+    {
+      "path": "src/services/publishedVideoRetention.js",
+      "sha256": "2fd5e2f71e9defecffc8b39caa9416618c626e95f40ce5f06355d396682a3ecb"
+    },
+    {
+      "path": "src/services/payments/subscriptionVerification.js",
+      "sha256": "096b3834570d0cbacf94ef5117fd288d3c6eccc21052813ff718843aef213dc5"
+    },
+    {
+      "path": "python_media_worker/renewable_job_admission.py",
+      "sha256": "bbbc08ca450e114bb4123537a59a97d047eb69d0a2bcee4b475cd9a00f114773"
+    },
+    {
+      "path": "python_media_worker/multicam_job_runner.py",
+      "sha256": "5be3d49e6ea16355a904f4f8a7b3e9bfa8a1f3f70eaf46c583e3551777fc97f6"
+    },
+    {
+      "path": "frontend/src/components/PayPalSubscriptionPanel.js",
+      "sha256": "ba0d8c32d3e365ed192bb5c564832b47af0d1cb891b515857a2452e4dc583c09"
+    },
+    {
+      "path": "frontend/src/components/ProcessingUsage.js",
+      "sha256": "0c573060185572824784d8972161348ec981d3e1491626bd28f6e4e4f6644022"
+    },
+    {
+      "path": "autopromote-functions/index.js",
+      "sha256": "1f08fa6d2c00879ff4f7f543b2a9355bae61e5c4df89b8ddb54098b4ec03ce1e"
+    }
+  ],
+  "productionProviderCalls": false,
+  "warning": "Rows overlap; do not add counts. Provider transport fixtures are not actual Cloud Run or merchant payment qualification. Full native-source output/recordings stay local and are separately hashed.",
+  "strictClientBuild": "feature-client-build.json"
+}

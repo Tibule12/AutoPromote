@@ -78,6 +78,54 @@ async function main() {
       console.warn("[copy-server] No server src found at", sourceDir);
     }
 
+    // Server dispatchers import canonical CommonJS creative contracts from the
+    // frontend source tree. Include exactly those files and their relative
+    // dependencies: importing the lazy Functions export alone misses this gap.
+    const frontendRoot = path.join(repoRoot, "frontend");
+    const pending = [];
+    const copied = new Set();
+    const staticRequires = text => [...text.matchAll(/require\(["']([^"']+)["']\)/g)].map(match => match[1]);
+    async function discover(directory) {
+      for (const entry of await fsp.readdir(directory, { withFileTypes: true })) {
+        if (entry.isSymbolicLink() || entry.name === "__tests__") continue;
+        const filename = path.join(directory, entry.name);
+        if (entry.isDirectory()) await discover(filename);
+        else if (/\.(?:c?js)$/.test(entry.name)) {
+          for (const dependency of staticRequires(await fsp.readFile(filename, "utf8"))) {
+            if (dependency.startsWith(".") && dependency.includes("frontend/"))
+              pending.push(path.resolve(path.dirname(filename), dependency));
+          }
+        }
+      }
+    }
+    await discover(sourceDir);
+    await fsp.rm(path.join(destPkgDir, "frontend"), { recursive: true, force: true });
+    while (pending.length) {
+      let filename = pending.pop();
+      if (!path.extname(filename)) filename += ".js";
+      if (!filename.startsWith(frontendRoot + path.sep))
+        throw new Error("Creative contract dependency leaves frontend tree");
+      if (copied.has(filename)) continue;
+      const stat = await fsp.lstat(filename);
+      if (!stat.isFile() || stat.isSymbolicLink()) throw new Error("Creative contract must be a regular file");
+      copied.add(filename);
+      const body = await fsp.readFile(filename, "utf8");
+      for (const dependency of staticRequires(body))
+        if (dependency.startsWith(".")) pending.push(path.resolve(path.dirname(filename), dependency));
+      await copyRecursive(filename, path.join(destPkgDir, path.relative(repoRoot, filename)), repoRoot);
+    }
+    console.log(`[copy-server] Copied ${copied.size} shared creative contract dependencies`);
+    const serverContracts = [
+      "contracts/model-capabilities-v1.json",
+      "contracts/creative-templates-v1.json",
+      "config/model-runtime/registry.v1.json",
+      "config/model-runtime/local-cuda-evaluation.v1.json",
+      "config/creative-templates/registry.v1.json",
+    ];
+    for (const filename of serverContracts)
+      await copyRecursive(path.join(repoRoot, filename), path.join(destPkgDir, filename), repoRoot);
+    console.log(`[copy-server] Copied ${serverContracts.length} model/template schemas and registries`);
+
     // Copy a few root-level files that src modules expect to import from project root
     // e.g., src/firebaseAdmin.js expects to require('../firebaseAdmin') which would
     // look for a file at functions/_server/firebaseAdmin.js

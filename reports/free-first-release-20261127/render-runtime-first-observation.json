@@ -1,0 +1,36 @@
+{
+  "checkedAtUtc": "2026-11-27T04:07:43.856Z",
+  "status": 200,
+  "httpWallMs": 746.963855,
+  "usesExistingOwnerSession": true,
+  "originalSessionUnchanged": true,
+  "profile": {
+    "success": true,
+    "profile": {
+      "enabled": false,
+      "processId": 94,
+      "uptimeMs": 254737,
+      "activeRequests": 0,
+      "peakConcurrentRequests": 0,
+      "rssBytes": 202502144,
+      "heapUsedBytes": 113785904,
+      "peakProcessRssKiB": 213452,
+      "cpuUserMicros": 4593218,
+      "cpuSystemMicros": 709562,
+      "cgroup": {
+        "memoryMax": "536870912",
+        "cpuMax": "50000 100000"
+      },
+      "firestore": [],
+      "endpoints": [],
+      "limitations": [
+        "SDK response/read/write observations, not billing or index/rules/GAX-retry attribution.",
+        "Per-process bounded records; browser/Python/other applications require their own instrumentation.",
+        "Local process/cgroup data does not establish hosted Render plan capacity."
+      ]
+    }
+  },
+  "limitation": "One observation after release; not a before/after hosted load curve or billing attribution.",
+  "explicitClientDocumentOrBalanceWrites": 0,
+  "normalServerReadActivityMayBeRecorded": true
+}

@@ -1,0 +1,12 @@
+{
+  "headless": true,
+  "muted": true,
+  "mockedResponses": false,
+  "checks": [
+    "ordinary emulator sign-in",
+    "retained native-movie excerpt decodes in ordinary Studio; UI regression only, no new full workflow claim",
+    "real contextual captions-help response"
+  ],
+  "errors": [],
+  "paidOperations": 0
+}

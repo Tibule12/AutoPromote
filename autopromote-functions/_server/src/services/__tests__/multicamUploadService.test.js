@@ -1,0 +1,394 @@
+const mockFileObjects = new Map();
+let mockUniformAccess = false;
+
+jest.mock("firebase-admin", () => ({
+  app: jest.fn(() => ({ options: { storageBucket: "test-bucket" } })),
+  storage: jest.fn(() => ({
+    bucket: jest.fn(bucketName => ({
+      getMetadata: jest.fn(async () => [{ iamConfiguration: { uniformBucketLevelAccess: { enabled: mockUniformAccess } } }]),
+      file: jest.fn(storagePath => {
+        const key = `${bucketName}/${storagePath}`;
+        if (!mockFileObjects.has(key)) {
+          mockFileObjects.set(key, {
+            createResumableUpload: jest.fn(async () => ["https://upload.example/session"]),
+            getMetadata: jest.fn().mockRejectedValue({ code: 404 }),
+            setMetadata: jest.fn(async () => [{}]),
+            delete: jest.fn(async () => {}),
+          });
+        }
+        return mockFileObjects.get(key);
+      }),
+    })),
+  })),
+}));
+
+const {
+  buildIngestStoragePath,
+  completeMulticamUpload,
+  recoverMulticamUpload,
+  startMulticamUpload,
+  verifyMulticamRenderInputs,
+} = require("../multicamUploadService");
+
+describe("multicam upload service", () => {
+  beforeEach(() => {
+    mockFileObjects.clear();
+    mockUniformAccess = false;
+    process.env.MULTICAM_INGEST_BUCKET = "test-bucket";
+  });
+
+  it("builds a stable, owner-scoped object path", () => {
+    const input = {
+      userId: "user-1",
+      fileName: "Camera One.MOV",
+      sizeBytes: 1234,
+      lastModified: 999,
+      fingerprint: "camera-one:1234:999",
+    };
+    const first = buildIngestStoragePath(input);
+    const second = buildIngestStoragePath(input);
+
+    expect(first).toBe(second);
+    expect(first).toMatch(/^temp\/multicam-ingest\/user-1\/[a-f0-9]{24}_Camera_One\.MOV$/);
+  });
+
+  it("starts a private resumable upload without consuming its retention window", async () => {
+    const result = await startMulticamUpload({
+      userId: "user-1",
+      fileName: "camera.mov",
+      contentType: "video/quicktime",
+      sizeBytes: 2048,
+      lastModified: 999,
+      fingerprint: "camera:2048:999",
+      purpose: "camera_original",
+      origin: "https://autopromote.org",
+    });
+
+    expect(result.uploadUrl).toBe("https://upload.example/session");
+    expect(result.storagePath).toContain("temp/multicam-ingest/user-1/");
+    expect(result.deleteAfter).toBeNull();
+    const file = mockFileObjects.get(`test-bucket/${result.storagePath}`);
+    expect(file.createResumableUpload).toHaveBeenCalledWith(
+      expect.objectContaining({
+        origin: "https://autopromote.org",
+        private: true,
+        metadata: expect.objectContaining({
+          contentType: "video/quicktime",
+          metadata: expect.objectContaining({ uploadStartedAt: expect.any(String) }),
+        }),
+      })
+    );
+    const uploadOptions = file.createResumableUpload.mock.calls[0][0];
+    expect(uploadOptions.metadata.metadata.deleteAfter).toBeUndefined();
+  });
+
+  it("stores full Studio sources durably using the large resumable upload transport", async () => {
+    const result = await startMulticamUpload({
+      userId: "user-1",
+      fileName: "full-podcast.mp4",
+      contentType: "video/mp4",
+      sizeBytes: 2_611_147_007,
+      lastModified: 999,
+      fingerprint: "full-podcast:2611147007:999",
+      purpose: "studio_source",
+      origin: "https://autopromote.org",
+    });
+
+    const file = mockFileObjects.get(`test-bucket/${result.storagePath}`);
+    expect(result.storagePath).toContain("studio/sources/user-1/");
+    expect(file.createResumableUpload).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metadata: expect.objectContaining({
+          metadata: expect.objectContaining({
+            ownerUid: "user-1",
+            purpose: "studio_source",
+            expectedSizeBytes: "2611147007",
+          }),
+        }),
+      })
+    );
+  });
+
+  it("does not request a rejected legacy ACL for a Studio upload into a uniform-access bucket", async () => {
+    mockUniformAccess = true;
+    const result = await startMulticamUpload({userId:"user-1",fileName:"source.mp4",contentType:"video/mp4",
+      sizeBytes:2048,lastModified:999,purpose:"studio_project",origin:"http://localhost:5000"});
+    const file=mockFileObjects.get(`test-bucket/${result.storagePath}`);
+    expect(file.createResumableUpload.mock.calls[0][0]).not.toHaveProperty("private");
+    expect(file.createResumableUpload.mock.calls[0][0].metadata.metadata.ownerUid).toBe("user-1");
+  });
+
+  it("keeps completed Studio project media without a three-day expiry", async () => {
+    const storagePath = buildIngestStoragePath({
+      userId: "user-1",
+      fileName: "scene-two.mp4",
+      sizeBytes: 2048,
+      lastModified: 999,
+      purpose: "studio_project",
+    });
+    const file = {
+      createResumableUpload: jest.fn(),
+      getMetadata: jest.fn().mockResolvedValue([{
+        size: "2048",
+        generation: "12",
+        metadata: {
+          ownerUid: "user-1",
+          purpose: "studio_project",
+          expectedSizeBytes: "2048",
+          firebaseStorageDownloadTokens: "token-1",
+        },
+      }]),
+      createReadStream: jest.fn(() => require('node:stream').Readable.from([Buffer.alloc(2048)])),
+      setMetadata: jest.fn(async () => [{}]),
+      delete: jest.fn(),
+    };
+    mockFileObjects.set(`test-bucket/${storagePath}`, file);
+
+    const completed = await completeMulticamUpload({
+      userId: "user-1",
+      storagePath,
+      downloadToken: "token-1",
+      sizeBytes: 2048,
+    });
+
+    expect(completed.deleteAfter).toBeNull();
+    expect(file.setMetadata).toHaveBeenCalledWith({
+      metadata: expect.objectContaining({
+        ownerUid: "user-1",
+        purpose: "studio_project",
+        uploadCompletedAt: expect.any(String),
+      }),
+    });
+    expect(file.setMetadata.mock.calls[0][0].metadata.deleteAfter).toBeUndefined();
+  });
+
+  it("reuses a completed matching Studio source instead of uploading gigabytes twice", async () => {
+    const input = {
+      userId: "user-1",
+      fileName: "full-podcast.mp4",
+      contentType: "video/mp4",
+      sizeBytes: 2_611_147_007,
+      lastModified: 999,
+      fingerprint: "full-podcast:2611147007:999",
+      purpose: "studio_source",
+      origin: "https://autopromote.org",
+    };
+    const storagePath = buildIngestStoragePath(input);
+    const file = mockFileObjects.get(`test-bucket/${storagePath}`) || {
+      createResumableUpload: jest.fn(),
+      getMetadata: jest.fn(),
+      setMetadata: jest.fn(),
+      delete: jest.fn(),
+    };
+    file.getMetadata.mockResolvedValue([
+      {
+        size: String(input.sizeBytes),
+        metadata: {
+          ownerUid: input.userId,
+          purpose: input.purpose,
+          expectedSizeBytes: String(input.sizeBytes),
+          deleteAfter: "2099-01-01T00:00:00.000Z",
+          firebaseStorageDownloadTokens: "existing-token",
+        },
+      },
+    ]);
+    mockFileObjects.set(`test-bucket/${storagePath}`, file);
+
+    const result = await startMulticamUpload(input);
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        alreadyCompleted: true,
+        storagePath,
+        size: input.sizeBytes,
+      })
+    );
+    expect(result.url).toContain("existing-token");
+    expect(file.createResumableUpload).not.toHaveBeenCalled();
+  });
+
+  it("rejects completion when the uploaded byte count is incomplete", async () => {
+    const storagePath = buildIngestStoragePath({
+      userId: "user-1",
+      fileName: "camera.mov",
+      sizeBytes: 2048,
+      lastModified: 999,
+      fingerprint: "camera:2048:999",
+    });
+    const file = mockFileObjects.get(`test-bucket/${storagePath}`) || (() => {
+      const mock = {
+        createResumableUpload: jest.fn(),
+        getMetadata: jest.fn(),
+        setMetadata: jest.fn(),
+        delete: jest.fn(),
+      };
+      mockFileObjects.set(`test-bucket/${storagePath}`, mock);
+      return mock;
+    })();
+    file.getMetadata.mockResolvedValue([
+      {
+        size: "1024",
+        metadata: {
+          ownerUid: "user-1",
+          expectedSizeBytes: "2048",
+          firebaseStorageDownloadTokens: "token-1",
+        },
+      },
+    ]);
+
+    await expect(
+      completeMulticamUpload({
+        userId: "user-1",
+        storagePath,
+        downloadToken: "token-1",
+        sizeBytes: 2048,
+      })
+    ).rejects.toMatchObject({ statusCode: 409 });
+  });
+
+  it("starts retention when Firebase confirms the complete upload", async () => {
+    const storagePath = "temp/multicam-ingest/user-1/camera.mov";
+    const file = {
+      createResumableUpload: jest.fn(),
+      getMetadata: jest.fn().mockResolvedValue([
+        {
+          size: "2048",
+          generation: "12",
+          metadata: {
+            ownerUid: "user-1",
+            purpose: "camera_original",
+            expectedSizeBytes: "2048",
+            uploadStartedAt: "2026-07-15T01:00:00.000Z",
+            firebaseStorageDownloadTokens: "token-1",
+          },
+        },
+      ]),
+      setMetadata: jest.fn(async () => [{}]),
+      delete: jest.fn(),
+    };
+    mockFileObjects.set(`test-bucket/${storagePath}`, file);
+
+    const completed = await completeMulticamUpload({
+      userId: "user-1",
+      storagePath,
+      downloadToken: "token-1",
+      sizeBytes: 2048,
+    });
+
+    expect(Date.parse(completed.deleteAfter)).toBeGreaterThan(Date.now());
+    expect(file.setMetadata).toHaveBeenCalledWith(
+      expect.objectContaining({
+        customTime: expect.any(String),
+        metadata: expect.objectContaining({
+          uploadCompletedAt: expect.any(String),
+          deleteAfter: completed.deleteAfter,
+        }),
+      })
+    );
+  });
+
+  it("verifies render URLs against owner, purpose, path, and download token", async () => {
+    const storagePath = "temp/multicam-ingest/user-1/camera.mp4";
+    const file = {
+      createResumableUpload: jest.fn(),
+      getMetadata: jest.fn().mockResolvedValue([
+        {
+          size: "4096",
+          metadata: {
+            ownerUid: "user-1",
+            purpose: "camera_original",
+            firebaseStorageDownloadTokens: "token-1",
+            deleteAfter: new Date(Date.now() + 60000).toISOString(),
+          },
+        },
+      ]),
+      delete: jest.fn(),
+    };
+    mockFileObjects.set(`test-bucket/${storagePath}`, file);
+
+    await expect(
+      verifyMulticamRenderInputs({
+        userId: "user-1",
+        sources: [
+          {
+            storagePath,
+            url: "https://firebasestorage.googleapis.com/v0/b/test-bucket/o/camera?alt=media&token=token-1",
+          },
+        ],
+      })
+    ).resolves.toHaveLength(1);
+  });
+
+  it("accepts an owned durable Studio project as a camera source and replaces its browser URL", async () => {
+    const storagePath = "studio/sources/user-1/imported-master.mp4";
+    const getSignedUrl = jest.fn(async () => ["https://signed.example/verified-imported-master"]);
+    mockFileObjects.set(`test-bucket/${storagePath}`, {
+      getMetadata: jest.fn().mockResolvedValue([{
+        size: "4096",
+        contentType: "video/mp4",
+        metadata: { ownerUid: "user-1", purpose: "studio_project" },
+      }]),
+      getSignedUrl,
+    });
+
+    const verified = await verifyMulticamRenderInputs({
+      userId: "user-1",
+      sources: [{
+        storagePath,
+        url: "https://attacker.example/wrong-video.mp4",
+      }],
+    });
+
+    expect(verified[0].url).toBe("https://signed.example/verified-imported-master");
+    expect(getSignedUrl).toHaveBeenCalledWith({ action: "read", expires: expect.any(Number) });
+  });
+
+  it("rebuilds a Firebase media URL when a saved job contains a local path", async () => {
+    const storagePath = "temp/multicam-ingest/user-1/camera.mov";
+    mockFileObjects.set(`test-bucket/${storagePath}`, {
+      createResumableUpload: jest.fn(),
+      getMetadata: jest.fn().mockResolvedValue([
+        {
+          size: "4096",
+          generation: "12",
+          metadata: {
+            ownerUid: "user-1",
+            purpose: "camera_original",
+            firebaseStorageDownloadTokens: "token-1",
+            deleteAfter: new Date(Date.now() + 60000).toISOString(),
+          },
+        },
+      ]),
+      delete: jest.fn(),
+    });
+
+    const recovered = await recoverMulticamUpload({
+      userId: "user-1",
+      purpose: "camera_original",
+      source: {
+        storagePath,
+        url: "/home/user/project/tmp/camera.mov",
+      },
+    });
+
+    expect(recovered.url).toBe(
+      "https://firebasestorage.googleapis.com/v0/b/test-bucket/o/temp%2Fmulticam-ingest%2Fuser-1%2Fcamera.mov?alt=media&token=token-1"
+    );
+    expect(recovered.storagePath).toBe(storagePath);
+    expect(recovered.cacheKey).toBe(`test-bucket/${storagePath}#12`);
+  });
+
+  it("rejects another user's ingest path before dispatch", async () => {
+    await expect(
+      verifyMulticamRenderInputs({
+        userId: "user-1",
+        sources: [
+          {
+            storagePath: "temp/multicam-ingest/user-2/camera.mp4",
+            url: "https://example.test/video?token=token-1",
+          },
+        ],
+      })
+    ).rejects.toMatchObject({ statusCode: 403 });
+  });
+});

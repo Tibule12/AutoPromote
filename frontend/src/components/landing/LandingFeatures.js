@@ -78,8 +78,8 @@ export default function LandingFeatures() {
         ))}
       </div>
       <p className="lp-feature-note">
-        Multi-camera and premium creative tools are available on paid plans. Analysis, audio sync
-        and server exports use credits.
+        All creative tools are available on Free and Plus. Analysis, audio sync and server exports
+        use credits.
       </p>
     </section>
   );

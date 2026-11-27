@@ -7,7 +7,7 @@ const { apiLimiter } = require("../middleware/rateLimiter");
 const { getCreditBreakdown } = require("../creditSystem");
 const { getEffectiveTierSnapshot } = require("../services/billingService");
 const {
-  SUBSCRIPTION_PLANS,
+  ALL_SUBSCRIPTION_PLANS: SUBSCRIPTION_PLANS,
   getPlanCapabilities,
   normalizePlanId,
   CREDIT_TOP_UP_PACKS,
@@ -51,9 +51,7 @@ router.get("/profile", apiLimiter, async (req, res) => {
       userId,
       planId: normalizedPlanId,
       planName: tierSnapshot.testerAccess ? "Founding Tester" : plan.name,
-      tierName: tierSnapshot.testerAccess
-        ? "Founding Tester"
-        : capabilities.planName || plan.name,
+      tierName: tierSnapshot.testerAccess ? "Founding Tester" : capabilities.planName || plan.name,
       price: tierSnapshot.testerAccess ? 0 : plan.price,
       monthlyCredits: {
         allocation: credits.monthlyAllocation,

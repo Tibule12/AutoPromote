@@ -1,0 +1,25 @@
+{
+  "fullDecodePassed": true,
+  "probe": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "width": 1080,
+        "height": 1920,
+        "r_frame_rate": "30/1"
+      },
+      {
+        "codec_name": "aac",
+        "sample_rate": "48000",
+        "channels": 2,
+        "r_frame_rate": "0/0"
+      }
+    ],
+    "format": {
+      "duration": "60.000000",
+      "size": "25313725"
+    }
+  },
+  "sha256": "ad365deab26da43f9e3f399f42477db4c2f1a4c433dd9812e4764d1cde85110b"
+}

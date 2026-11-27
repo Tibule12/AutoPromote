@@ -99,7 +99,7 @@ router.post("/message", authMiddleware, chatRateLimit, async (req, res) => {
 
         return res.status(403).json({
           error: "Daily Limit Reached",
-          message: `🔒 **Daily Limit Reached**\n\nYou have used your ${FREE_LIMIT} free messages for today. \n\n**Upgrade to Pro** for:\n✅ Unlimited AI Chat\n✅ Viral AI Clips\n✅ Priority Support`,
+          message: `🔒 **Daily Limit Reached**\n\nYou have used your ${FREE_LIMIT} free messages for today. \n\nMore cloud capacity is available with AutoPromote Plus. Your projects and supported local editing remain available.`,
           isUpgradeTrigger: true,
         });
       }
@@ -345,7 +345,7 @@ async function getUserContext(userId) {
     context.contentCount = contentSnapshot.data().count;
 
     // Check basic permissions
-    context.hasAIClips = context.plan === "pro" || context.plan === "enterprise";
+    context.hasAIClips = true;
 
     return context;
   } catch (error) {

@@ -1,0 +1,16 @@
+[
+  {
+    "pid": 1437555,
+    "cwd": "/tmp/autopromote-safe-release-20261127",
+    "scripts": [
+      "application-demo.cjs"
+    ]
+  },
+  {
+    "pid": 1459449,
+    "cwd": "/tmp/autopromote-safe-release-20261127",
+    "scripts": [
+      "application-host.cjs"
+    ]
+  }
+]

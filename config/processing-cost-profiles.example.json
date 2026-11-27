@@ -1,0 +1,66 @@
+{
+  "currency": "USD",
+  "basis": "Reference-rate sensitivity model; not attributed cloud bills or a production admission policy",
+  "sources": [
+    "https://cloud.google.com/run/pricing",
+    "https://docs.cloud.google.com/run/docs/configuring/jobs/gpu?hl=en",
+    "https://cloud.google.com/storage/pricing"
+  ],
+  "cpuMicrosPerVcpuSecond": 18,
+  "memoryMicrosPerGiBSecond": 2,
+  "gpuRtxMicrosPerSecond": 365.22,
+  "gpuL4MicrosPerSecond": 186.7,
+  "minimumJobSeconds": 60,
+  "optimizedStartupSecondsAssumption": 10,
+  "baselineGpuStartupSecondsAssumption": 30,
+  "baselineGpuSpeedupAssumption": 4,
+  "networkUsdPerGiBAssumption": 0.12,
+  "storageUsdPerGiBMonthAssumption": 0.02,
+  "retentionDaysAssumption": 6,
+  "databaseAndRequestMicrosAssumption": 200,
+  "costMargin": 1.25,
+  "freeWindowTokens": 100,
+  "freeRollingTokens": 500,
+  "plusRenewalTokens": 500,
+  "plusRollingTokens": 2000,
+  "finalAllowancesApproved": false,
+  "profiles": {
+    "studio60": {
+      "cpu": 2,
+      "memoryGiB": 4,
+      "qualification": "local CPU affinity and memory measured; cloud candidate not provisioned",
+      "proposedReservationTokens": 30
+    },
+    "captions60": {
+      "cpu": 2,
+      "memoryGiB": 4,
+      "qualification": "same pinned multilingual model/int8; offline local only",
+      "proposedReservationTokens": 30
+    },
+    "finder180": {
+      "cpu": 4,
+      "memoryGiB": 4,
+      "qualification": "real 184s input + 45s output on canonical worker; cloud candidate not provisioned",
+      "proposedReservationTokens": 70
+    },
+    "cam60": {
+      "cpu": 4,
+      "memoryGiB": 4,
+      "qualification": "Completed canonical 60s two-stream external-audio proof at full 1920 CFR input; derived common-source streams, independent cameras/auto-switch remain unqualified",
+      "proposedReservationTokens": 60
+    },
+    "nativeStudio60": {
+      "cpu": 4,
+      "memoryGiB": 8,
+      "qualification": "actual App workflow; same renderer, no cloud charges",
+      "proposedReservationTokens": 30
+    },
+    "effects60": {
+      "cpu": 4,
+      "memoryGiB": 4,
+      "qualification": "Completed canonical 60s beat-echo + keyed-title motion; worker replay, not a signed-in App effects-flow qualification",
+      "proposedReservationTokens": 70
+    }
+  },
+  "renderOutboundUsdPerGBAssumption": 0.15
+}

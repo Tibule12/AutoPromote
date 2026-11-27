@@ -1,0 +1,7 @@
+{
+  "scope": "owned local emulator only; no production balance mutation",
+  "signedNoDispatchReceipts": 1,
+  "remaining": 100,
+  "activeJobs": 0,
+  "rollingSpentTokens": 30
+}

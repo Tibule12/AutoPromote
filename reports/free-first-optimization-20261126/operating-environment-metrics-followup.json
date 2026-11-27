@@ -1,0 +1,230 @@
+{
+  "capturedAtUtc": "2026-11-26T18:43:13.216137+00:00",
+  "requests": {
+    "firestoreDataIndexBytes": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "firestoreBackupBytes": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "firestorePitrBytes": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "functionExecutionDuration": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "hostingMetricDescriptors": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "authMetricDescriptors": {
+      "httpStatus": 200,
+      "truncated": false
+    }
+  },
+  "metrics": {
+    "firestoreDataIndexBytes": [
+      {
+        "resource": {
+          "type": "firestore.googleapis.com/Database",
+          "labels": {
+            "project_id": "autopromote-cc6d3",
+            "location": "us-central1",
+            "database_id": "(default)"
+          }
+        },
+        "points": 30,
+        "latestSampleAtUtc": "2026-11-26T18:43:13.216137Z",
+        "latestValue": 3624739867.0
+      }
+    ],
+    "firestoreBackupBytes": [],
+    "firestorePitrBytes": [],
+    "functionExecutionDuration": [
+      {
+        "resource": {
+          "type": "cloud_function",
+          "labels": {
+            "project_id": "autopromote-cc6d3",
+            "function_name": "autoRewardCreators",
+            "region": "us-central1"
+          }
+        },
+        "points": 30,
+        "latestSampleAtUtc": "2026-11-26T18:43:13.216137Z",
+        "executionCount": 496048,
+        "executionTimeSumRaw": 3863223443187.771,
+        "unit": "ns",
+        "sumExecutionSeconds": 3863.223443187771
+      },
+      {
+        "resource": {
+          "type": "cloud_function",
+          "labels": {
+            "project_id": "autopromote-cc6d3",
+            "function_name": "createPromotionOnApproval",
+            "region": "us-central1"
+          }
+        },
+        "points": 30,
+        "latestSampleAtUtc": "2026-11-26T18:43:13.216137Z",
+        "executionCount": 496048,
+        "executionTimeSumRaw": 4344299731783.965,
+        "unit": "ns",
+        "sumExecutionSeconds": 4344.2997317839645
+      },
+      {
+        "resource": {
+          "type": "cloud_function",
+          "labels": {
+            "region": "us-central1",
+            "function_name": "createPromotionOnContentCreate",
+            "project_id": "autopromote-cc6d3"
+          }
+        },
+        "points": 30,
+        "latestSampleAtUtc": "2026-11-26T18:43:13.216137Z",
+        "executionCount": 801,
+        "executionTimeSumRaw": 57375682065.888725,
+        "unit": "ns",
+        "sumExecutionSeconds": 57.375682065888725
+      },
+      {
+        "resource": {
+          "type": "cloud_function",
+          "labels": {
+            "region": "us-central1",
+            "project_id": "autopromote-cc6d3",
+            "function_name": "handleLandingPageIntent"
+          }
+        },
+        "points": 30,
+        "latestSampleAtUtc": "2026-11-26T18:43:13.216137Z",
+        "executionCount": 496024,
+        "executionTimeSumRaw": 3252237577103.0234,
+        "unit": "ns",
+        "sumExecutionSeconds": 3252.2375771030233
+      },
+      {
+        "resource": {
+          "type": "cloud_function",
+          "labels": {
+            "region": "us-central1",
+            "function_name": "handleSmartLinkIntent",
+            "project_id": "autopromote-cc6d3"
+          }
+        },
+        "points": 30,
+        "latestSampleAtUtc": "2026-11-26T18:43:13.216137Z",
+        "executionCount": 496061,
+        "executionTimeSumRaw": 3843945250212.389,
+        "unit": "ns",
+        "sumExecutionSeconds": 3843.945250212389
+      }
+    ]
+  },
+  "hostingMetricDescriptors": [
+    {
+      "type": "firebasehosting.googleapis.com/network/monthly_sent",
+      "unit": "By",
+      "metricKind": "GAUGE"
+    },
+    {
+      "type": "firebasehosting.googleapis.com/network/monthly_sent_limit",
+      "unit": "By",
+      "metricKind": "GAUGE"
+    },
+    {
+      "type": "firebasehosting.googleapis.com/network/sent_bytes_count",
+      "unit": "By",
+      "metricKind": "DELTA"
+    },
+    {
+      "type": "firebasehosting.googleapis.com/storage/limit",
+      "unit": "By",
+      "metricKind": "GAUGE"
+    },
+    {
+      "type": "firebasehosting.googleapis.com/storage/total_bytes",
+      "unit": "By",
+      "metricKind": "GAUGE"
+    }
+  ],
+  "authMetricDescriptors": [
+    {
+      "type": "identitytoolkit.googleapis.com/mfa/totp/enrollment_attempt_count",
+      "unit": "1",
+      "metricKind": "DELTA"
+    },
+    {
+      "type": "identitytoolkit.googleapis.com/mfa/totp/sign_in_challenge_attempt_count",
+      "unit": "1",
+      "metricKind": "DELTA"
+    },
+    {
+      "type": "identitytoolkit.googleapis.com/password_policy/weak_password_sign_in_count",
+      "unit": "1",
+      "metricKind": "DELTA"
+    },
+    {
+      "type": "identitytoolkit.googleapis.com/quota/free_daily_signin/exceeded",
+      "unit": "1",
+      "metricKind": "DELTA"
+    },
+    {
+      "type": "identitytoolkit.googleapis.com/recaptcha/risk_scores",
+      "unit": "1",
+      "metricKind": "DELTA"
+    },
+    {
+      "type": "identitytoolkit.googleapis.com/recaptcha/sms_tf_risk_scores",
+      "unit": "1",
+      "metricKind": "DELTA"
+    },
+    {
+      "type": "identitytoolkit.googleapis.com/recaptcha/token_count",
+      "unit": "1",
+      "metricKind": "DELTA"
+    },
+    {
+      "type": "identitytoolkit.googleapis.com/recaptcha/verdict_count",
+      "unit": "1",
+      "metricKind": "DELTA"
+    },
+    {
+      "type": "identitytoolkit.googleapis.com/usage/blocked_sms_count",
+      "unit": "1",
+      "metricKind": "DELTA"
+    },
+    {
+      "type": "identitytoolkit.googleapis.com/usage/daily_new_signin_count",
+      "unit": "1",
+      "metricKind": "DELTA"
+    },
+    {
+      "type": "identitytoolkit.googleapis.com/usage/monthly_new_signin_count",
+      "unit": "1",
+      "metricKind": "DELTA"
+    },
+    {
+      "type": "identitytoolkit.googleapis.com/usage/sent_sms_count",
+      "unit": "1",
+      "metricKind": "DELTA"
+    },
+    {
+      "type": "identitytoolkit.googleapis.com/usage/verification_sms_count",
+      "unit": "1",
+      "metricKind": "DELTA"
+    }
+  ],
+  "functionExecutionDurationDescriptor": {
+    "type": "cloudfunctions.googleapis.com/function/execution_times",
+    "unit": "ns",
+    "description": "Distribution of functions execution times in nanoseconds.",
+    "metricKind": "DELTA"
+  }
+}

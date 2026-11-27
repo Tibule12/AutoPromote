@@ -8,6 +8,7 @@ const notificationEngine = require("./notificationEngine"); // User Notification
 const billingService = require("./billingService"); // Usage Tracking
 // Defer requiring youtubeService and mediaTransform until function call time to avoid circular import issues
 const crypto = require("crypto");
+const { classifyPublishingError } = require("./publishingTaskErrors");
 
 /**
  * Guerrilla Warfare Rate Limits
@@ -54,28 +55,7 @@ function handleIndexError(e, context, sampleLink) {
 // Rationale: Queries in processNextYouTubeTask() & other selectors chain where(type==), where(status in/==), orderBy(createdAt)
 // Without it you will see repeated warnings: [IDX][yt_task_select] Missing Firestore index.
 
-function classifyError(message = "") {
-  const m = message.toLowerCase();
-  if (
-    m.includes("quota") ||
-    m.includes("rate limit") ||
-    m.includes("too many requests") ||
-    m.includes("429")
-  )
-    return "rate_limit";
-  if (m.includes("timeout") || m.includes("network") || m.includes("fetch failed"))
-    return "transient";
-  if (m.includes("auth") || m.includes("unauthorized") || m.includes("permission")) return "auth";
-  if (m.includes("not found")) return "not_found";
-  if (
-    m.includes("exceeds maximum allowed size") ||
-    m.includes("too large") ||
-    m.includes("corrupt") ||
-    m.includes("invalid file")
-  )
-    return "validation";
-  return "generic";
-}
+const classifyError = classifyPublishingError;
 
 function computeNextAttempt(attempts, classification) {
   // Exponential backoff with jitter, classification-based modifier
@@ -91,6 +71,7 @@ function canRetry(classification) {
   if (classification === "auth") return false; // require manual intervention
   if (classification === "not_found") return false; // likely unrecoverable for this resource
   if (classification === "validation") return false; // user/content input must change
+  if (classification === "publication_unconfirmed") return false;
   return true;
 }
 
@@ -149,6 +130,12 @@ function buildPlatformPostHash({ platform, contentId, payload = {} }) {
     media: payload.mediaUrl || payload.videoUrl || payload.imageUrl || "",
   };
 
+  if (["telegram", "discord"].includes(platform)) {
+    const options = payload.platformOptions?.[platform] || payload.platformOptions || payload;
+    canonical.destination = options.destinationId || options.chatId || options.channelId || "";
+    canonical.deliveryMode = options.deliveryMode || "native";
+    canonical.media = options.media_url || canonical.media;
+  }
   return crypto
     .createHash("sha256")
     .update(`${platform}|${contentId}|${JSON.stringify(canonical)}`, "utf8")
@@ -173,10 +160,30 @@ async function replaceSignedTask(ref, current, patch) {
   return next;
 }
 
+async function claimReadyTask(ref, taskId) {
+  // A query is only a candidate list. Recheck and claim atomically so multiple
+  // instances (or an expired global worker lease) cannot publish the same task.
+  return db.runTransaction(async transaction => {
+    const snapshot = await transaction.get(ref);
+    if (!snapshot.exists) return null;
+    const current = snapshot.data();
+    if (!isTaskReadyForProcessing(current)) return null;
+    if (!current._testStub) {
+      const { verifySignature } = require("../utils/docSigner");
+      if (!verifySignature(current)) return null;
+    }
+    const next = signTaskDocument({ ...current, ...buildProcessingUpdate(taskId, current) });
+    transaction.set(ref, next);
+    return next;
+  });
+}
+
 async function notifyPublishingQuotaBlocked({ uid, platform, contentId, quota, used, planTier }) {
   if (!uid) return;
   const dashboardUrl =
-    process.env.PUBLIC_SITE_URL || process.env.APP_PUBLIC_URL || "https://autopromote.org/#/billing";
+    process.env.PUBLIC_SITE_URL ||
+    process.env.APP_PUBLIC_URL ||
+    "https://autopromote.org/#/billing";
   let userData = {};
   let contentData = {};
   try {
@@ -284,14 +291,16 @@ async function enqueueYouTubeUploadTask({
     const { attachSignature } = require("../utils/docSigner");
     task = attachSignature(baseTask);
   } catch (_) {}
-  await ref.set(task);
+  await require("./contentMediaDependency").writeMediaDependency(db, contentId, ref, task);
   try {
     require("./metricsRecorder").incrCounter("tiktok.enqueue.succeeded");
   } catch (_) {}
   return { id: ref.id, ...task };
 }
 
-async function processNextYouTubeTask() {
+async function processNextYouTubeTask({ background = false } = {}) {
+  require("./processingTokens/runtime").assertDispatch();
+  if (background && !await require("./backgroundWorkService").hasTasks("youtube_upload")) return null;
   // Fetch one queued task (simple FIFO by createdAt)
   let snapshot;
   try {
@@ -324,7 +333,7 @@ async function processNextYouTubeTask() {
     }
   }
   if (!selectedDoc) return null; // none ready yet
-  const task = { id: selectedDoc.id, ...selectedData };
+  let task = { id: selectedDoc.id, ...selectedData };
   let taskData = { ...selectedData };
 
   // Verify signature before processing
@@ -350,7 +359,9 @@ async function processNextYouTubeTask() {
   }
 
   const taskRef = selectedDoc.ref;
-  taskData = await replaceSignedTask(taskRef, taskData, buildProcessingUpdate(task.id, taskData));
+  taskData = await claimReadyTask(taskRef, task.id);
+  if (!taskData) return null;
+  task = { id: selectedDoc.id, ...taskData };
 
   try {
     const { uploadVideo } = require("./youtubeService");
@@ -403,7 +414,7 @@ async function processNextYouTubeTask() {
     return { taskId: task.id, outcome };
   } catch (err) {
     const attempts = (task.attempts || 0) + 1;
-    const classification = classifyError(err.message);
+    const classification = classifyError(err);
     const retryable = attempts < MAX_ATTEMPTS && canRetry(classification);
     const nextAttemptAt = retryable
       ? new Date(computeNextAttempt(attempts, classification)).toISOString()
@@ -462,6 +473,7 @@ async function enqueuePlatformPostTask({
   skipIfDuplicate = true,
   forceRepost = false,
 }) {
+  require("./unifiedCredits/application").assertApplicationDatabase(db);
   console.log("[enqueue] called with", { contentId, uid, platform, reason, payload });
   // Fast-path for tests/CI: avoid heavy quota/content-count/duplicate checks and external API calls
   if (
@@ -637,6 +649,8 @@ async function enqueuePlatformPostTask({
         .digest("hex");
     } catch (_) {}
     await ref.set(baseTask);
+    const localCreditContext = require("./unifiedCredits/application").getApplicationContext(uid);
+    if (localCreditContext) await localCreditContext.bindJob("promotion_tasks", ref.id);
     return { id: ref.id, ...baseTask };
   }
   if (!contentId || !uid || !platform) throw new Error("contentId, uid, platform required");
@@ -750,14 +764,14 @@ async function enqueuePlatformPostTask({
   try {
     console.log("[enqueue] checking quota for uid", uid);
     const { getEffectiveTierSnapshot } = require("./billingService");
-    const { tierId: planTier } = await getEffectiveTierSnapshot(uid);
+    const { tierId: planTier, testerAccess, billingData } = await getEffectiveTierSnapshot(uid);
     console.log("[enqueue] plan tier:", planTier);
     const { getPlan } = require("./planService");
     const { getPlatformPostMonthlyQuota } = require("./billingService");
     const plan = getPlan(planTier);
     const quota =
       getPlatformPostMonthlyQuota && typeof getPlatformPostMonthlyQuota === "function"
-        ? getPlatformPostMonthlyQuota(planTier, plan)
+        ? getPlatformPostMonthlyQuota(planTier, plan, testerAccess, billingData)
         : plan.monthlyTaskQuota || 0;
     if (quota > 0) {
       // Count successful or still-live platform post tasks this calendar month.
@@ -927,7 +941,7 @@ async function enqueuePlatformPostTask({
     const { attachSignature } = require("../utils/docSigner");
     task = attachSignature(baseTask);
   } catch (_) {}
-  await ref.set(task);
+  await require("./contentMediaDependency").writeMediaDependency(db, contentId, ref, task);
   try {
     const { recordPlatformPostDuplicate, recordTaskEnqueued } = require("./aggregationService");
     recordPlatformPostDuplicate(false);
@@ -972,7 +986,9 @@ async function enqueueMediaTransform({ contentId, uid, meta, sourceUrl }) {
   return task;
 }
 
-async function processNextPlatformTask() {
+async function processNextPlatformTask({ background = false } = {}) {
+  require("./processingTokens/runtime").assertDispatch();
+  if (background && !await require("./backgroundWorkService").hasTasks("platform_post")) return null;
   // Fetch small batch of queued tasks then pick highest priority dynamically (velocity-aware)
   let snapshot;
   try {
@@ -1043,7 +1059,7 @@ async function processNextPlatformTask() {
     }
   }
   if (!selectedDoc) return null;
-  const task = { id: selectedDoc.id, ...selectedData };
+  let task = { id: selectedDoc.id, ...selectedData };
   let taskData = { ...selectedData };
 
   // Debug visibility (User explicitly requested upload logs)
@@ -1078,11 +1094,9 @@ async function processNextPlatformTask() {
   } catch (e) {
     console.log("[process] signature verification error", e && e.message);
   }
-  taskData = await replaceSignedTask(
-    selectedDoc.ref,
-    taskData,
-    buildProcessingUpdate(task.id, taskData)
-  );
+  taskData = await claimReadyTask(selectedDoc.ref, task.id);
+  if (!taskData) return null;
+  task = { id: selectedDoc.id, ...taskData };
   let lockId = null; // promote to function-scope so catch handlers can access it
   try {
     const { dispatchPlatformPost } = require("./platformPoster");
@@ -1102,9 +1116,12 @@ async function processNextPlatformTask() {
     }
 
     // De-duplicate and acquire an atomic lock for this post (create-if-not-exists keyed by platform+postHash)
-    let lockId = null;
     try {
-      const postHash = task.postHash;
+      const postHash = task.postHash || (
+        ["telegram", "discord"].includes(task.platform)
+          ? buildPlatformPostHash({ platform: task.platform, contentId: task.contentId, payload: task.payload || {} })
+          : null
+      );
       const { tryCreatePlatformPostLock } = require("./platformPostsService");
       if (postHash) {
         const lock = await tryCreatePlatformPostLock({
@@ -1130,19 +1147,24 @@ async function processNextPlatformTask() {
           }
           // If another task owns the lock, attempt takeover if the lock is stale
           if (existing.taskId && existing.taskId !== task.id) {
+            if (existing.publicationPending) {
+              await replaceSignedTask(selectedDoc.ref, taskData, {
+                status: "skipped",
+                skippedReason: "duplicate_pending",
+                updatedAt: new Date().toISOString(),
+              });
+              return { taskId: task.id, skipped: true, reason: "duplicate_pending", existing };
+            }
             if (existing.success === false) {
               try {
-                await db
-                  .collection("platform_posts")
-                  .doc(lock.id)
-                  .set(
-                    {
-                      taskId: task.id,
-                      success: null,
-                      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-                    },
-                    { merge: true }
-                  );
+                await db.collection("platform_posts").doc(lock.id).set(
+                  {
+                    taskId: task.id,
+                    success: null,
+                    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+                  },
+                  { merge: true }
+                );
                 lockId = lock.id;
               } catch (e) {
                 await selectedDoc.ref.update({
@@ -1154,109 +1176,114 @@ async function processNextPlatformTask() {
                 return { taskId: task.id, skipped: true, reason: "duplicate_pending", existing };
               }
             } else
-            try {
-              const LOCK_TAKEOVER_MS = parseInt(
-                process.env.PLATFORM_POST_LOCK_TAKEOVER_MS || "300000",
-                10
-              ); // default 5min
-              const { tryTakeoverPlatformPostLock } = require("./platformPostsService");
-              const {
-                recordLockTakeoverAttempt,
-                recordLockTakeoverSuccess,
-                recordLockTakeoverFailure,
-              } = require("./aggregationService");
               try {
-                recordLockTakeoverAttempt(task.platform);
-              } catch (_) {}
-              const takeover = await tryTakeoverPlatformPostLock({
-                platform: task.platform,
-                postHash,
-                newTaskId: task.id,
-                takeoverThresholdMs: LOCK_TAKEOVER_MS,
-              });
-              try {
-                await recordLockTakeoverAttempt(task.platform);
-              } catch (_) {}
-              if (takeover && takeover.taken) {
-                // We successfully took over the lock
+                const LOCK_TAKEOVER_MS = parseInt(
+                  process.env.PLATFORM_POST_LOCK_TAKEOVER_MS || "300000",
+                  10
+                ); // default 5min
+                const { tryTakeoverPlatformPostLock } = require("./platformPostsService");
+                const {
+                  recordLockTakeoverAttempt,
+                  recordLockTakeoverSuccess,
+                  recordLockTakeoverFailure,
+                } = require("./aggregationService");
                 try {
-                  recordLockTakeoverSuccess(task.platform);
+                  recordLockTakeoverAttempt(task.platform);
                 } catch (_) {}
-                lockId = takeover.id;
-              } else {
-                // record failure (clear reason handled below)
+                const takeover = await tryTakeoverPlatformPostLock({
+                  platform: task.platform,
+                  postHash,
+                  newTaskId: task.id,
+                  takeoverThresholdMs: LOCK_TAKEOVER_MS,
+                });
                 try {
-                  recordLockTakeoverFailure(task.platform);
+                  await recordLockTakeoverAttempt(task.platform);
                 } catch (_) {}
-                // If a success already exists, treat as duplicate_recent_post
-                if (takeover && takeover.reason === "already_success") {
-                  await selectedDoc.ref.update({
-                    status: "skipped",
-                    skippedReason: "duplicate_recent_post",
-                    skippedExisting:
-                      (takeover.existing &&
-                        (takeover.existing.externalId || takeover.existing.id)) ||
-                      null,
-                    updatedAt: new Date().toISOString(),
-                  });
-                  return {
-                    taskId: task.id,
-                    skipped: true,
-                    reason: "duplicate_recent_post",
-                    existing: takeover.existing,
-                  };
-                }
-                // Fallback: attempt inline takeover transactionally here if threshold elapsed
-                try {
-                  const ref = db.collection("platform_posts").doc(lock.id);
-                  await db.runTransaction(async tx => {
-                    const snap = await tx.get(ref);
-                    if (!snap.exists) throw new Error("lock_missing");
-                    const data = snap.data();
-                    if (data.success === true) throw new Error("already_success");
-                    // normalize updatedAt
-                    let updatedMs = 0;
-                    const u = data.updatedAt;
-                    if (u && typeof u.toMillis === "function") updatedMs = u.toMillis();
-                    else if (typeof u === "string") updatedMs = Date.parse(u);
-                    else if (typeof u === "number") updatedMs = u;
-                    else if (u && u.seconds) updatedMs = u.seconds * 1000;
-                    if (Date.now() - updatedMs < LOCK_TAKEOVER_MS) throw new Error("not_expired");
-                    tx.update(ref, {
-                      taskId: task.id,
-                      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-                    });
-                  });
-                  // If transaction succeeded, we own lock
+                if (takeover && takeover.taken) {
+                  // We successfully took over the lock
                   try {
                     recordLockTakeoverSuccess(task.platform);
                   } catch (_) {}
-                  lockId = lock.id;
-                } catch (txErr) {
-                  // record failure
+                  lockId = takeover.id;
+                } else {
+                  // record failure (clear reason handled below)
                   try {
                     recordLockTakeoverFailure(task.platform);
                   } catch (_) {}
-                  // still can't take over - mark duplicate_pending
-                  await selectedDoc.ref.update({
-                    status: "skipped",
-                    skippedReason: "duplicate_pending",
-                    skippedExisting: existing.externalId || existing.id || null,
-                    updatedAt: new Date().toISOString(),
-                  });
-                  return { taskId: task.id, skipped: true, reason: "duplicate_pending", existing };
+                  // If a success already exists, treat as duplicate_recent_post
+                  if (takeover && takeover.reason === "already_success") {
+                    await selectedDoc.ref.update({
+                      status: "skipped",
+                      skippedReason: "duplicate_recent_post",
+                      skippedExisting:
+                        (takeover.existing &&
+                          (takeover.existing.externalId || takeover.existing.id)) ||
+                        null,
+                      updatedAt: new Date().toISOString(),
+                    });
+                    return {
+                      taskId: task.id,
+                      skipped: true,
+                      reason: "duplicate_recent_post",
+                      existing: takeover.existing,
+                    };
+                  }
+                  // Fallback: attempt inline takeover transactionally here if threshold elapsed
+                  try {
+                    const ref = db.collection("platform_posts").doc(lock.id);
+                    await db.runTransaction(async tx => {
+                      const snap = await tx.get(ref);
+                      if (!snap.exists) throw new Error("lock_missing");
+                      const data = snap.data();
+                      if (data.success === true) throw new Error("already_success");
+                      // normalize updatedAt
+                      let updatedMs = 0;
+                      const u = data.updatedAt;
+                      if (u && typeof u.toMillis === "function") updatedMs = u.toMillis();
+                      else if (typeof u === "string") updatedMs = Date.parse(u);
+                      else if (typeof u === "number") updatedMs = u;
+                      else if (u && u.seconds) updatedMs = u.seconds * 1000;
+                      if (Date.now() - updatedMs < LOCK_TAKEOVER_MS) throw new Error("not_expired");
+                      tx.update(ref, {
+                        taskId: task.id,
+                        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+                      });
+                    });
+                    // If transaction succeeded, we own lock
+                    try {
+                      recordLockTakeoverSuccess(task.platform);
+                    } catch (_) {}
+                    lockId = lock.id;
+                  } catch (txErr) {
+                    // record failure
+                    try {
+                      recordLockTakeoverFailure(task.platform);
+                    } catch (_) {}
+                    // still can't take over - mark duplicate_pending
+                    await selectedDoc.ref.update({
+                      status: "skipped",
+                      skippedReason: "duplicate_pending",
+                      skippedExisting: existing.externalId || existing.id || null,
+                      updatedAt: new Date().toISOString(),
+                    });
+                    return {
+                      taskId: task.id,
+                      skipped: true,
+                      reason: "duplicate_pending",
+                      existing,
+                    };
+                  }
                 }
+              } catch (e) {
+                // On any error, fall back to duplicate_pending to avoid racing
+                await selectedDoc.ref.update({
+                  status: "skipped",
+                  skippedReason: "duplicate_pending",
+                  skippedExisting: existing.externalId || existing.id || null,
+                  updatedAt: new Date().toISOString(),
+                });
+                return { taskId: task.id, skipped: true, reason: "duplicate_pending", existing };
               }
-            } catch (e) {
-              // On any error, fall back to duplicate_pending to avoid racing
-              await selectedDoc.ref.update({
-                status: "skipped",
-                skippedReason: "duplicate_pending",
-                skippedExisting: existing.externalId || existing.id || null,
-                updatedAt: new Date().toISOString(),
-              });
-              return { taskId: task.id, skipped: true, reason: "duplicate_pending", existing };
-            }
           } else {
             // Otherwise, allow own task to proceed if taskId matches or no owner is present
             lockId = lock.id; // use existing doc id
@@ -1266,6 +1293,9 @@ async function processNextPlatformTask() {
         }
       }
     } catch (e) {
+      if (["telegram", "discord"].includes(task.platform)) {
+        throw require("./publishingTaskErrors").publishingError("Could not acquire the publication lock.", "transient");
+      }
       // Non-fatal; proceed without lock (best-effort)
       console.warn(
         "[platform_post][lock] acquisition failed, proceeding without atomic lock:",
@@ -1569,12 +1599,21 @@ async function processNextPlatformTask() {
       payload,
       reason: task.reason,
       uid: task.uid,
+      submissionReceipt: taskData.publicationReceipt || null,
+      onSubmissionAccepted: async receipt => {
+        taskData = await replaceSignedTask(selectedDoc.ref, taskData, {
+          publicationReceipt: receipt,
+          publicationPending: !!receipt,
+          updatedAt: new Date().toISOString(),
+        });
+      },
     });
     if (!simulatedResult || simulatedResult.success === false) {
       const err = new Error(
         simulatedResult?.error || `Platform post failed for ${task.platform || "unknown"}`
       );
       err.platformResult = simulatedResult || null;
+      err.errorClass = simulatedResult?.errorClass;
       throw err;
     }
     if (selectedVariant) {
@@ -1623,10 +1662,18 @@ async function processNextPlatformTask() {
     } catch (_) {}
     await replaceSignedTask(selectedDoc.ref, taskData, {
       status: "completed",
+      publicationPending: false,
       outcome: simulatedResult,
       completedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
+    if (["telegram", "discord"].includes(task.platform)) {
+      try {
+        await require("./communityPublishing").recordScheduleOutcome(task, simulatedResult);
+      } catch (_) {
+        console.warn("[community] Schedule receipt update deferred; durable task receipt retained.");
+      }
+    }
     // Record persistent platform post (Phase 1) — use atomic lock doc if present
     try {
       if (lockId) {
@@ -1654,42 +1701,6 @@ async function processNextPlatformTask() {
           reason: task.reason,
           shortlinkCode: payload.__shortlinkCode || null,
         });
-
-        // --- MISSION CONTROL INJECTION (The "Win" for Users) ---
-        // Trigger Organic Mission immediately after successful publish
-        try {
-          const communityEngine = require("./communityEngine");
-          const targetUrl =
-            simulatedResult.videoUrl ||
-            simulatedResult.externalId ||
-            simulatedResult.url ||
-            simulatedResult.permlink ||
-            simulatedResult.shareId;
-          if (targetUrl && (task.platform === "tiktok" || task.platform === "youtube")) {
-            // 1. Default Mission: "Operation First Contact"
-            // 2,000 views target via community swarm.
-            // Looks organic because it IS organic (real people).
-            await communityEngine.triggerPriorityBotSurge(targetUrl, task.platform, 2000, "view");
-            // Track as 1 "Mission Launch" per upload
-            await billingService.trackBotUsage(task.uid, 1);
-
-            // 2. Extra Boosts (User Selected) - Check top-level task props OR hidden payload props
-            const repostParams = task.repost_boost || (task.payload && task.payload.repost_boost);
-            const shareParams = task.share_boost || (task.payload && task.payload.share_boost);
-
-            if (repostParams) {
-              await communityEngine.triggerPriorityBotSurge(targetUrl, task.platform, 15, "repost");
-              // Track extra actions as distinct events if desired, or bundle them.
-              await billingService.trackBotUsage(task.uid, 1);
-            }
-            if (shareParams) {
-              await communityEngine.triggerPriorityBotSurge(targetUrl, task.platform, 25, "share");
-              await billingService.trackBotUsage(task.uid, 1);
-            }
-          }
-        } catch (surgeErr) {
-          console.warn("[Mission Control] Priority Surge Trigger Failed:", surgeErr);
-        }
 
         // Notify user about success
         if (task.uid) {
@@ -1739,7 +1750,7 @@ async function processNextPlatformTask() {
     return { taskId: task.id, outcome: simulatedResult };
   } catch (err) {
     const attempts = (task.attempts || 0) + 1;
-    const classification = classifyError(err.message);
+    const classification = classifyError(err);
     if (classification === "rate_limit") {
       // GUERRILLA LOGIC: If we hit a wall, we don't just back off for 15 mins.
       // We check the specific platform Penalty Box duration and vanish.
@@ -1784,6 +1795,16 @@ async function processNextPlatformTask() {
     }
 
     const retryable = attempts < MAX_ATTEMPTS && canRetry(classification);
+    if (!retryable && ["telegram", "discord"].includes(task.platform)) {
+      try {
+        await require("./communityPublishing").recordScheduleOutcome(task, {
+          success: false, error: err.message, errorClass: classification,
+          publicationPending: !!taskData.publicationReceipt,
+        });
+      } catch (_) {
+        console.warn("[community] Schedule failure update deferred; task evidence retained.");
+      }
+    }
     const nextAttemptAt = retryable ? new Date(nextAttemptTimestamp).toISOString() : null;
 
     const failed = {
@@ -1795,11 +1816,7 @@ async function processNextPlatformTask() {
       updatedAt: new Date().toISOString(),
       failedAt: new Date().toISOString(),
     };
-    if (retryable) {
-      taskData = await replaceSignedTask(selectedDoc.ref, taskData, failed);
-    } else {
-      await selectedDoc.ref.update(failed);
-    }
+    taskData = await replaceSignedTask(selectedDoc.ref, taskData, failed);
     if (failed.status === "failed") {
       try {
         await db
@@ -1831,8 +1848,10 @@ async function processNextPlatformTask() {
       if (lockId) {
         const { finalizePlatformPostById } = require("./platformPostsService");
         await finalizePlatformPostById(lockId, {
-          outcome: { success: false, error: err.message },
-          success: false,
+          outcome: { success: false, error: err.message, errorClass: classification },
+          // A pending provider receipt must keep the deduplication lock.
+          success: taskData.publicationReceipt ? null : false,
+          publicationPending: !!taskData.publicationReceipt,
           payload: task.payload,
           uid: task.uid,
           taskId: task.id,

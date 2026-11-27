@@ -1,0 +1,274 @@
+// An accurate paused source frame uses the same -ss / fps / PTS sampling as
+// Studio's deterministic sequence renderer. It is transient preview media,
+// never a generated asset or an alternate final rendering engine.
+const fs = require('node:fs/promises');
+const os = require('node:os');
+const path = require('node:path');
+const crypto = require('node:crypto');
+const { execFile } = require('node:child_process');
+const { promisify } = require('node:util');
+const { pipeline } = require('node:stream/promises');
+const { createWriteStream } = require('node:fs');
+const { Transform } = require('node:stream');
+const { getStudioSourceBucket, resolveOwnedStudioVideoSource, sourceError } = require('./studioSourceService');
+const execute = promisify(execFile);
+const { SEQUENCE_SAMPLER, ORIGINAL_SEQUENCE_SAMPLER, sequencePictureWindow } = require('../../frontend/src/components/studioSequencePictureClock');
+const SAMPLER = 'studio-sequence-source-frame-v1';
+const TEXTURE_SAMPLER = 'studio-3d-texture-frame-v1';
+// Sources are streamed to private disk, never held in the API heap. Reserve
+// their full size (plus a possible legacy derivative) before starting a read.
+const MAX_SOURCE_BYTES = 512 * 1024 * 1024;
+const MAX_CACHE_BYTES = 640 * 1024 * 1024;
+const MIN_FREE_BYTES = 64 * 1024 * 1024;
+const MAX_SEQUENCE_BYTES = 32 * 1024 * 1024;
+const LOCAL_VIDEO_INPUT = ['-protocol_whitelist','file,pipe','-format_whitelist','mov,matroska,avi,mpeg,mpegts'];
+const TTL = 2 * 60 * 1000;
+const sources = new Map();
+const activeOwners = new Set();
+let cacheQueue = Promise.resolve();
+function exclusiveCache(action) {
+  const result = cacheQueue.then(action);
+  cacheQueue = result.catch(() => {});
+  return result;
+}
+
+function validateFrameRequest(input) {
+  const fields = ['storagePath', 'sourceContentHash', 'sourceGeneration', 'start', 'end', 'fps', 'frameIndex', 'sampling',
+    'programmeStart', 'programmeDuration'];
+  const sequence = [SEQUENCE_SAMPLER,ORIGINAL_SEQUENCE_SAMPLER].includes(input?.sampling);
+  const hasHash = Object.hasOwn(input || {}, 'sourceContentHash');
+  const hasGeneration = Object.hasOwn(input || {}, 'sourceGeneration');
+  if (!input || Object.keys(input).some(key => !fields.includes(key)) ||
+      typeof input.storagePath !== 'string' || !(hasHash || hasGeneration) ||
+      (hasHash && !/^[a-f0-9]{64}$/.test(input.sourceContentHash || '')) ||
+      (hasGeneration && (typeof input.sourceGeneration !== 'string' || !/^[1-9]\d{0,31}$/.test(input.sourceGeneration))) ||
+      ![input.start, input.end, input.fps].every(value => typeof value === 'number' && Number.isFinite(value)) ||
+      input.start < 0 || input.start > 21600 || input.end <= input.start || input.end-input.start > 90 ||
+      input.fps < 1 || input.fps > 120 || !Number.isSafeInteger(input.frameIndex) || input.frameIndex < 0 ||
+      (sequence ? ![input.programmeStart, input.programmeDuration].every(value => typeof value === 'number' && Number.isFinite(value)) ||
+        input.programmeStart < 0 || input.programmeDuration <= 0 || input.programmeDuration > 90 || input.end > 90 ||
+        input.programmeStart + input.end-input.start > input.programmeDuration + .00002 ||
+        ![24,25,30,50,60].includes(input.fps) ||
+        input.frameIndex >= sequencePictureWindow(input.programmeStart, input.end-input.start,
+          input.programmeDuration, input.start, 30, input.fps).frames
+        : Object.hasOwn(input, 'programmeStart') || Object.hasOwn(input, 'programmeDuration') ||
+          Object.hasOwn(input, 'sampling') && (input.sampling !== TEXTURE_SAMPLER || input.fps !== 30 || input.end-input.start > 10 ||
+            input.frameIndex >= Math.ceil(Number(((input.end-input.start)*input.fps).toFixed(8))))) ||
+      input.frameIndex >= Math.ceil((input.end-input.start)*input.fps)) {
+    throw sourceError(422, 'STUDIO_FRAME_INVALID', 'Choose a frame inside a saved source clip');
+  }
+  return input;
+}
+
+function sourceFrameArgs(file, { start, end, fps, frameIndex, sampling, programmeStart, programmeDuration }, sourceFps = 30) {
+  // Match prepare_video_texture's PTS reset BEFORE CFR conversion. Sequence
+  // sampling deliberately retains its existing, different trim semantics.
+  const texture = sampling === TEXTURE_SAMPLER;
+  if ([SEQUENCE_SAMPLER,ORIGINAL_SEQUENCE_SAMPLER].includes(sampling)) {
+    const original = sampling === ORIGINAL_SEQUENCE_SAMPLER;
+    const window = sequencePictureWindow(programmeStart, end-start, programmeDuration, start, original?sourceFps:30, fps);
+    // Decode the same CFR30 ingest samples, then apply the canonical sequence
+    // phase. Do not seek the original VFR stream to a differently rounded cut.
+    // Intermediate lossy encoding is excluded; paired pixel tolerance is
+    // measured against actual renderer output, never assumed byte-identical.
+    return ['-nostdin', '-hide_banner', '-loglevel', 'error', '-threads', '2',
+      ...(original?['-ss',String(Math.floor(window.sourceFrame/sourceFps*1e6)/1e6)]:[]),
+      ...LOCAL_VIDEO_INPUT, '-i', file, '-filter_threads', '1',
+      '-vf', (original?'':`fps=30,trim=start_frame=${window.sourceFrame},`) + `settb=1/90000,setpts=PTS-STARTPTS+(${window.phase.toFixed(9)})/TB,` +
+        `fps=${fps}:start_time=0:round=up,tpad=stop_mode=clone:stop_duration=${(1/fps).toFixed(9)},` +
+        `setpts=PTS-STARTPTS,select=eq(n\\,${frameIndex}),scale='min(1920,iw)':-2,` +
+        'format=rgb24,setparams=range=full:color_primaries=bt709:color_trc=iec61966-2-1:colorspace=gbr',
+      // The programme canvas consumes decoded RGB code values in sRGB. A PNG
+      // must describe that RGB surface, not inherit the compressed video's
+      // primaries/transfer metadata as if it were still that video signal.
+      '-map', '0:v:0', '-an', '-frames:v', '1', '-threads', '2', '-c:v', 'png',
+      '-color_primaries', 'bt709', '-color_trc', 'iec61966-2-1', '-f', 'image2pipe', 'pipe:1'];
+  }
+  return ['-nostdin', '-hide_banner', '-loglevel', 'error', '-threads', '2',
+    '-ss', String(start), ...LOCAL_VIDEO_INPUT, '-i', file, ...(texture ? [] : ['-t', String(end-start)]), '-filter_threads', '1',
+    '-vf', (texture
+      ? `setpts=PTS-STARTPTS,fps=${fps}:start_time=0:round=near,select=eq(n\\,${frameIndex}),scale=1280:720:force_original_aspect_ratio=decrease`
+      : `fps=${fps},setpts=PTS-STARTPTS,select=eq(n\\,${frameIndex}),scale='min(1920,iw)':-2`) +
+        ',format=rgb24,setparams=range=full:color_primaries=bt709:color_trc=iec61966-2-1:colorspace=gbr',
+    // Every PNG describes the decoded RGB surface, including ordinary and
+    // texture frames. Inherited P3/video transfer tags recolour these bytes.
+    '-map', '0:v:0', '-an', '-frames:v', '1', '-threads', '2', '-c:v', 'png',
+    '-color_primaries', 'bt709', '-color_trc', 'iec61966-2-1', '-f', 'image2pipe', 'pipe:1'];
+}
+
+async function probeSourceFrameRate(file, signal) {
+  const { stdout } = await execute('ffprobe', ['-v', 'error', ...LOCAL_VIDEO_INPUT, '-i', file, '-select_streams', 'v:0',
+    '-show_entries', 'stream=avg_frame_rate', '-of', 'json'], { timeout: 10000, maxBuffer: 65536, signal });
+  const frameRate = String(JSON.parse(stdout).streams?.[0]?.avg_frame_rate || '');
+  const [numerator, denominator] = frameRate.split('/').map(Number);
+  const fps = numerator / denominator;
+  if (!/^\d+\/[1-9]\d*$/.test(frameRate) || !Number.isFinite(fps) || fps <= 0)
+    throw sourceError(422, 'STUDIO_FRAME_MISSING', 'The source picture clock is unavailable');
+  return frameRate;
+}
+
+async function decodeSourceFrame(file, request, signal) {
+  let sourceFps = 30;
+  if (request.sampling === ORIGINAL_SEQUENCE_SAMPLER) {
+    const [numerator, denominator] = (await probeSourceFrameRate(file, signal)).split('/').map(Number);
+    sourceFps = numerator / denominator;
+  }
+  const { stdout } = await execute('ffmpeg', sourceFrameArgs(file, request, sourceFps), {
+    timeout: 30000, maxBuffer: 12 * 1024 * 1024, encoding: 'buffer', killSignal: 'SIGKILL', signal,
+  });
+  if (!stdout.length || !stdout.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10])))
+    throw sourceError(422, 'STUDIO_FRAME_MISSING', 'This source has no picture at the selected frame');
+  return stdout;
+}
+
+async function prepareSequencePreviewSource(file, output, signal) {
+  // Match materialize_video_input's ordinary CFR30 ingest, including its
+  // quantisation. Sampling the untouched upload alone predicts a different
+  // close-up after those source pixels are enlarged in the final renderer.
+  await execute('ffmpeg', ['-nostdin','-hide_banner','-loglevel','error','-fflags','+genpts',
+    '-threads','2',...LOCAL_VIDEO_INPUT,'-i',file,'-t','90','-c:v','libx264','-threads','2','-preset','ultrafast',
+    '-crf','23','-vf','fps=30','-an','-vsync','cfr','-movflags','+faststart',
+    '-fs',String(MAX_SEQUENCE_BYTES+1),'-y',output],
+  {timeout:30000,maxBuffer:1024*1024,killSignal:'SIGKILL',signal});
+  const size=(await fs.stat(output)).size;
+  if (!size || size>=MAX_SEQUENCE_BYTES) {
+    await fs.rm(output,{force:true});
+    throw sourceError(422,'STUDIO_FRAME_SEQUENCE_LIMIT','Accurate sequence frames exceed the preview resource limit');
+  }
+  return {file:output,size};
+}
+
+async function prune(reservation = 0, limit = MAX_CACHE_BYTES) {
+  let size = [...sources.values()].reduce((sum, item) => sum + item.reserved, 0);
+  for (const [key, item] of [...sources].sort((a,b) => a[1].used-b[1].used)) {
+    if (item.refs || (!item.failed && Date.now()-item.used < TTL && size + reservation <= limit)) continue;
+    sources.delete(key); size -= item.reserved;
+    await fs.rm(item.folder, { recursive: true, force: true });
+  }
+  return size;
+}
+setInterval(() => exclusiveCache(() => prune()).catch(() => {}), TTL).unref();
+
+async function reserveSource(owned, signal) {
+  const key = crypto.createHash('sha256').update(`${owned.kind}:${owned.bucketName}:${owned.storagePath}:${owned.generation}`).digest('hex');
+  return exclusiveCache(async () => {
+    let cached = sources.get(key);
+    if (cached && !cached.failed) {
+      cached.refs++; cached.used = Date.now();
+      return cached;
+    }
+    const reserved = owned.size + MAX_SEQUENCE_BYTES;
+    const disk = await fs.statfs(os.tmpdir());
+    // Some serverless hosts mount /tmp in RAM. A disk allowance must never
+    // silently become a larger memory allowance on those hosts.
+    const limit = Number(disk.type) === 0x01021994 ? 128 * 1024 * 1024 : MAX_CACHE_BYTES;
+    if (reserved > limit)
+      throw sourceError(422, 'STUDIO_FRAME_SOURCE_LIMIT', 'This preview host needs disk storage for a larger source');
+    const size = await prune(reserved, limit);
+    if (size + reserved > limit)
+      throw sourceError(429, 'STUDIO_FRAME_BUSY', 'A preview source is still being prepared. Try again shortly.');
+    const available = await fs.statfs(os.tmpdir());
+    const pending = [...sources.values()].reduce((sum, item) => sum + item.reserved - (item.diskBytes || 0), 0);
+    if (Number(available.bavail) * Number(available.bsize) < reserved + pending + MIN_FREE_BYTES)
+      throw sourceError(503, 'STUDIO_FRAME_DISK_BUSY', 'Preview storage is busy. Try again shortly.');
+    signal?.throwIfAborted();
+    const folder = await fs.mkdtemp(path.join(os.tmpdir(), 'studio-source-frame-'));
+    await fs.chmod(folder, 0o700);
+    const file = path.join(folder, 'source');
+    cached = { folder, file, reserved, size: owned.size, used: Date.now(), refs: 1 };
+    sources.set(key, cached);
+    cached.ready = (async () => {
+      try {
+        const object = getStudioSourceBucket(owned.kind, owned.bucketName).file(owned.storagePath, { generation: owned.generation });
+        const hash = crypto.createHash('sha256');
+        let received = 0;
+        const meter = new Transform({ transform(chunk, _encoding, callback) {
+          received += chunk.length;
+          if (received > owned.size) return callback(new Error('Source exceeds its declared size'));
+          hash.update(chunk); callback(null, chunk);
+        } });
+        await pipeline(object.createReadStream({ validation: 'crc32c', decompress: false }), meter,
+          createWriteStream(file, { mode: 0o600, flags: 'wx' }),
+          { signal: AbortSignal.any([signal, AbortSignal.timeout(60000)].filter(Boolean)) });
+        if (received !== owned.size) throw new Error('Source size changed');
+        cached.diskBytes = received;
+        cached.hash = hash.digest('hex');
+      } catch (_) {
+        cached.failed = true;
+        // Admission remains reserved until the partial file is deleted.
+        await fs.rm(folder, { recursive: true, force: true });
+        throw sourceError(503, 'STUDIO_FRAME_SOURCE_UNAVAILABLE', 'Could not prepare this saved source');
+      }
+    })();
+    return cached;
+  });
+}
+
+async function withOwnedSource({ ownerUid, request, signal }, inspect) {
+  // Authorization is checked even when bytes are already cached. The exact
+  // storage generation is then pinned throughout download/decode.
+  const owned = await resolveOwnedStudioVideoSource({ userId: ownerUid, storagePath: request.storagePath, signRead: false });
+  if (request.sourceGeneration && owned.generation !== request.sourceGeneration)
+    throw sourceError(409, 'STUDIO_FRAME_SOURCE_CHANGED', 'The saved source generation has changed. Refresh its link.');
+  if (!owned.generation || !Number.isSafeInteger(owned.size) || owned.size <= 0 || owned.size > MAX_SOURCE_BYTES)
+    throw sourceError(422, 'STUDIO_FRAME_SOURCE_LIMIT', 'Accurate paused frames are unavailable for this source');
+  if (activeOwners.has(ownerUid) || activeOwners.size >= 2)
+    throw sourceError(429, 'STUDIO_FRAME_BUSY', 'A preview frame is still being prepared');
+  activeOwners.add(ownerUid);
+  let cached;
+  try {
+    cached = await reserveSource(owned, signal);
+    await cached.ready;
+    if (signal?.aborted) throw new Error('Preview request was superseded');
+    if (request.sourceContentHash && cached.hash !== request.sourceContentHash)
+      throw sourceError(409, 'STUDIO_FRAME_SOURCE_CHANGED', 'The source bytes no longer match this project');
+    return await inspect(cached, owned);
+  } catch (error) {
+    if (error.statusCode) throw error;
+    throw sourceError(503, 'STUDIO_FRAME_UNAVAILABLE', 'Accurate paused preview is temporarily unavailable');
+  } finally {
+    await exclusiveCache(async () => {
+      if (cached) { cached.refs--; cached.used = Date.now(); }
+      await prune();
+    }).catch(() => {}).finally(() => activeOwners.delete(ownerUid));
+  }
+}
+
+async function getOwnedSourceFrame({ ownerUid, input, signal }) {
+  const request = validateFrameRequest(input);
+  return withOwnedSource({ ownerUid, request, signal }, async (cached, owned) => {
+    let pictureSource = cached.file;
+    if (request.sampling === SEQUENCE_SAMPLER) {
+      if (!cached.sequenceReady) cached.sequenceReady = prepareSequencePreviewSource(cached.file,
+        path.join(cached.folder, 'sequence.mp4'), signal).then(prepared => {
+        cached.size += prepared.size;
+        cached.diskBytes += prepared.size;
+        return prepared.file;
+      }).catch(async error => {
+        cached.sequenceReady = null;
+        await fs.rm(path.join(cached.folder, 'sequence.mp4'), { force: true });
+        throw error;
+      });
+      pictureSource = await cached.sequenceReady;
+    }
+    const image = await decodeSourceFrame(pictureSource, request, signal);
+    return { sampler: request.sampling || SAMPLER, sourceContentHash: cached.hash, sourceGeneration: owned.generation,
+      ...([SEQUENCE_SAMPLER, ORIGINAL_SEQUENCE_SAMPLER].includes(request.sampling) ? { sampling: request.sampling,
+        programmeStart: request.programmeStart, programmeDuration: request.programmeDuration } : {}),
+      start: request.start, end: request.end, fps: request.fps, frameIndex: request.frameIndex,
+      imageContentHash: crypto.createHash('sha256').update(image).digest('hex'),
+      image: image.toString('base64'), contentType: 'image/png' };
+  });
+}
+
+function getOwnedSourceFrameRate({ ownerUid, storagePath, signal }) {
+  return withOwnedSource({ ownerUid, request: { storagePath }, signal }, async (cached, owned) => {
+    cached.frameRate ??= await probeSourceFrameRate(cached.file, signal);
+    const [numerator, denominator] = cached.frameRate.split('/').map(Number);
+    if (numerator / denominator < 1 || numerator / denominator > 120)
+      throw sourceError(422, 'STUDIO_SOURCE_RATE_UNSUPPORTED', 'Match Source requires a rate between 1 and 120 fps.');
+    return { frameRate: cached.frameRate, sourceGeneration: owned.generation };
+  });
+}
+
+module.exports = { getOwnedSourceFrame, getOwnedSourceFrameRate, validateFrameRequest, sourceFrameArgs, decodeSourceFrame, prepareSequencePreviewSource };

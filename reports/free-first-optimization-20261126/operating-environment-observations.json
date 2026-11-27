@@ -1,0 +1,3999 @@
+{
+  "project": "autopromote-cc6d3",
+  "capturedAtUtc": "2026-11-26T18:39:20.221051+00:00",
+  "windowStartUtc": "2026-10-27T18:39:20.221051+00:00",
+  "windowEndUtc": "2026-11-26T18:39:20.221051+00:00",
+  "methods": [
+    "GET"
+  ],
+  "workloadsStarted": false,
+  "productionWrites": 0,
+  "invoiceAttributedUsd": null,
+  "requestStatus": {
+    "runServices": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "runJobs": {
+      "httpStatus": 400,
+      "truncated": false
+    },
+    "functions": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "firestoreDatabases": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "firestoreBackupSchedules": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "firestoreBackups": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "scheduler": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "taskQueues": {
+      "httpStatus": 200,
+      "truncated": true
+    },
+    "artifacts": {
+      "httpStatus": 400,
+      "truncated": false
+    },
+    "buildsGlobal": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "buildsRegional": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "hostingSites": {
+      "httpStatus": 403,
+      "truncated": false
+    },
+    "authConfig": {
+      "httpStatus": 403,
+      "truncated": false
+    },
+    "loggingBuckets": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "loggingSinks": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "computeInstances": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "buckets": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "enabledServices": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "firestoreReads": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "firestoreWrites": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "firestoreDeletes": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "firestoreStoredBytes": {
+      "httpStatus": 404,
+      "truncated": false
+    },
+    "firestoreSnapshotListeners": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "firestoreConnections": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "runBillableSeconds": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "runRequests": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "functionExecutions": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "taskAttempts": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "loggingIngestedBytes": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "artifactStoredBytes": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "storageBytes": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "storageNetworkBytes": {
+      "httpStatus": 200,
+      "truncated": false
+    },
+    "storageRequests": {
+      "httpStatus": 200,
+      "truncated": false
+    }
+  },
+  "metrics": {
+    "firestoreReads": {
+      "available": true,
+      "kind": "DELTA",
+      "series": 3,
+      "truncated": false,
+      "rows": [
+        {
+          "resource": {},
+          "metricLabels": {
+            "type": "LOOKUP"
+          },
+          "points": 30,
+          "observedSum": 1180538.0,
+          "latestValue": 45832.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {},
+          "metricLabels": {
+            "type": "NOT_FOUND"
+          },
+          "points": 30,
+          "observedSum": 8465.0,
+          "latestValue": 27.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {},
+          "metricLabels": {
+            "type": "QUERY"
+          },
+          "points": 30,
+          "observedSum": 31066317.0,
+          "latestValue": 527188.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        }
+      ]
+    },
+    "firestoreWrites": {
+      "available": true,
+      "kind": "DELTA",
+      "series": 3,
+      "truncated": false,
+      "rows": [
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 30,
+          "observedSum": 84895.0,
+          "latestValue": 183.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 30,
+          "observedSum": 746736.0,
+          "latestValue": 23890.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 24,
+          "observedSum": 173.0,
+          "latestValue": 6.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        }
+      ]
+    },
+    "firestoreDeletes": {
+      "available": true,
+      "kind": "DELTA",
+      "series": 1,
+      "truncated": false,
+      "rows": [
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 30,
+          "observedSum": 30881.0,
+          "latestValue": 3.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        }
+      ]
+    },
+    "firestoreStoredBytes": {
+      "available": false,
+      "kind": "GAUGE",
+      "series": 0,
+      "truncated": false,
+      "rows": []
+    },
+    "firestoreSnapshotListeners": {
+      "available": true,
+      "kind": "GAUGE",
+      "series": 2,
+      "truncated": false,
+      "rows": [
+        {
+          "resource": {
+            "location": "us-central1",
+            "database_id": "(default)"
+          },
+          "metricLabels": {},
+          "points": 16,
+          "observedMaximum": 24.0,
+          "latestValue": 15.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 16,
+          "observedMaximum": 24.0,
+          "latestValue": 15.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        }
+      ]
+    },
+    "firestoreConnections": {
+      "available": true,
+      "kind": "GAUGE",
+      "series": 2,
+      "truncated": false,
+      "rows": [
+        {
+          "resource": {
+            "database_id": "(default)",
+            "location": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 16,
+          "observedMaximum": 24.0,
+          "latestValue": 15.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 16,
+          "observedMaximum": 24.0,
+          "latestValue": 15.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        }
+      ]
+    },
+    "runBillableSeconds": {
+      "available": true,
+      "kind": "DELTA",
+      "series": 43,
+      "truncated": false,
+      "rows": [
+        {
+          "resource": {
+            "location": "us-central1",
+            "job_name": "autopromote-model-v1-segmentation"
+          },
+          "metricLabels": {},
+          "points": 2,
+          "observedSum": 679.1838458477632,
+          "latestValue": 531.9740814631102,
+          "latestSampleAtUtc": "2026-11-16T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "job_name": "cam-combiner-render-fast-job"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 60.17428230449948,
+          "latestValue": 60.17428230449948,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "job_name": "cam-combiner-render-gpu-job"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 232.45970929609217,
+          "latestValue": 232.45970929609217,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "cam-combiner-worker",
+            "location": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 0.0,
+          "latestValue": 0.0,
+          "latestSampleAtUtc": "2026-10-31T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "cam-combiner-worker"
+          },
+          "metricLabels": {},
+          "points": 2,
+          "observedSum": 99.19999999999999,
+          "latestValue": 72.3,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "cam-combiner-worker",
+            "location": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 22.714467496473347,
+          "latestValue": 22.714467496473347,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "cam-combiner-worker"
+          },
+          "metricLabels": {},
+          "points": 2,
+          "observedSum": 18.446250812136185,
+          "latestValue": 11.8,
+          "latestSampleAtUtc": "2026-11-21T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "cam-combiner-worker",
+            "location": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 20.2,
+          "latestValue": 20.2,
+          "latestSampleAtUtc": "2026-11-22T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-gpu",
+            "location": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 504.7371347702991,
+          "latestValue": 504.7371347702991,
+          "latestSampleAtUtc": "2026-11-19T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-gpu"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 2369.044550346783,
+          "latestValue": 2369.044550346783,
+          "latestSampleAtUtc": "2026-11-19T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-gpu",
+            "location": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 2,
+          "observedSum": 5025.626900688303,
+          "latestValue": 2874.4902272853033,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-gpu"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 723.9936494130001,
+          "latestValue": 723.9936494130001,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-gpu"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 607.0761590354754,
+          "latestValue": 607.0761590354754,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-gpu",
+            "location": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 680.0365115200001,
+          "latestValue": 680.0365115200001,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-gpu"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 310.164615554,
+          "latestValue": 310.164615554,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-gpu"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 3225.1234152148995,
+          "latestValue": 3225.1234152148995,
+          "latestSampleAtUtc": "2026-11-21T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-gpu",
+            "location": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 2058.817539891104,
+          "latestValue": 2058.817539891104,
+          "latestSampleAtUtc": "2026-11-21T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-gpu"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 2475.943418679,
+          "latestValue": 2475.943418679,
+          "latestSampleAtUtc": "2026-11-22T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-gpu"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 1264.493170007,
+          "latestValue": 1264.493170007,
+          "latestSampleAtUtc": "2026-11-22T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-v1",
+            "location": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 43.3,
+          "latestValue": 43.3,
+          "latestSampleAtUtc": "2026-11-12T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-v1",
+            "location": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 3,
+          "observedSum": 96.73002031569209,
+          "latestValue": 25.03002031569209,
+          "latestSampleAtUtc": "2026-10-31T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 78.24978025008882,
+          "latestValue": 78.24978025008882,
+          "latestSampleAtUtc": "2026-11-03T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-v1",
+            "location": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 37.6,
+          "latestValue": 37.6,
+          "latestSampleAtUtc": "2026-11-05T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-v1",
+            "location": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 2,
+          "observedSum": 390.5006347586617,
+          "latestValue": 276.1453724605161,
+          "latestSampleAtUtc": "2026-11-06T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 200.1,
+          "latestValue": 200.1,
+          "latestSampleAtUtc": "2026-11-06T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {},
+          "points": 2,
+          "observedSum": 237.70754154247533,
+          "latestValue": 125.90754154247531,
+          "latestSampleAtUtc": "2026-11-10T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-v1",
+            "location": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 29.479716432028205,
+          "latestValue": 29.479716432028205,
+          "latestSampleAtUtc": "2026-11-10T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-v1",
+            "location": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 2,
+          "observedSum": 52.20677671481139,
+          "latestValue": 37.0,
+          "latestSampleAtUtc": "2026-11-18T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {},
+          "points": 2,
+          "observedSum": 432.58758315287355,
+          "latestValue": 397.8514438665851,
+          "latestSampleAtUtc": "2026-11-19T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-v1",
+            "location": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 386.0756167674647,
+          "latestValue": 386.0756167674647,
+          "latestSampleAtUtc": "2026-11-19T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {},
+          "points": 2,
+          "observedSum": 721.9432991990263,
+          "latestValue": 154.11508186217145,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-v1",
+            "location": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 33.188988801435826,
+          "latestValue": 33.188988801435826,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 35.300000000000004,
+          "latestValue": 35.300000000000004,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-v1",
+            "location": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 33.5,
+          "latestValue": 33.5,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {},
+          "points": 2,
+          "observedSum": 26.150017501292005,
+          "latestValue": 0.0,
+          "latestSampleAtUtc": "2026-11-21T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-v1",
+            "location": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 2,
+          "observedSum": 35.9,
+          "latestValue": 13.599999999999998,
+          "latestSampleAtUtc": "2026-11-21T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 45.7,
+          "latestValue": 45.7,
+          "latestSampleAtUtc": "2026-11-21T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 32.1,
+          "latestValue": 32.1,
+          "latestSampleAtUtc": "2026-11-22T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 74.2,
+          "latestValue": 74.2,
+          "latestSampleAtUtc": "2026-11-22T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 52.27696169741469,
+          "latestValue": 52.27696169741469,
+          "latestSampleAtUtc": "2026-11-22T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "thulani-api"
+          },
+          "metricLabels": {},
+          "points": 6,
+          "observedSum": 0.0,
+          "latestValue": 0.0,
+          "latestSampleAtUtc": "2026-11-18T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "thulani-frontend",
+            "location": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 3,
+          "observedSum": 58.46597854362605,
+          "latestValue": 21.3,
+          "latestSampleAtUtc": "2026-11-21T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "thulani-worker",
+            "location": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 8.8,
+          "latestValue": 8.8,
+          "latestSampleAtUtc": "2026-10-31T18:39:20.221051Z"
+        }
+      ]
+    },
+    "runRequests": {
+      "available": true,
+      "kind": "DELTA",
+      "series": 45,
+      "truncated": false,
+      "rows": [
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "cam-combiner-worker"
+          },
+          "metricLabels": {
+            "response_code": "403"
+          },
+          "points": 1,
+          "observedSum": 1.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-10-31T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "cam-combiner-worker"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 2,
+          "observedSum": 6.0,
+          "latestValue": 4.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "cam-combiner-worker",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 1.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "cam-combiner-worker",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 2,
+          "observedSum": 2.0,
+          "latestValue": 0.0,
+          "latestSampleAtUtc": "2026-11-21T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "cam-combiner-worker",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 2.0,
+          "latestValue": 2.0,
+          "latestSampleAtUtc": "2026-11-22T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-gpu",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 3.0,
+          "latestValue": 3.0,
+          "latestSampleAtUtc": "2026-11-19T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-gpu"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 7.0,
+          "latestValue": 7.0,
+          "latestSampleAtUtc": "2026-11-19T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-gpu"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 2,
+          "observedSum": 14.0,
+          "latestValue": 8.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-gpu",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "403"
+          },
+          "points": 1,
+          "observedSum": 1.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-19T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-gpu"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 2.0,
+          "latestValue": 2.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-gpu",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 2.0,
+          "latestValue": 2.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-gpu"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 2.0,
+          "latestValue": 2.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-gpu"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 2.0,
+          "latestValue": 2.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-gpu",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 12.0,
+          "latestValue": 12.0,
+          "latestSampleAtUtc": "2026-11-21T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-gpu",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 5.0,
+          "latestValue": 5.0,
+          "latestSampleAtUtc": "2026-11-21T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-gpu"
+          },
+          "metricLabels": {
+            "response_code": "500"
+          },
+          "points": 1,
+          "observedSum": 1.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-21T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-gpu"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 9.0,
+          "latestValue": 9.0,
+          "latestSampleAtUtc": "2026-11-22T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-gpu",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 6.0,
+          "latestValue": 6.0,
+          "latestSampleAtUtc": "2026-11-22T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-v1",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 1.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-12T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 3,
+          "observedSum": 3.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-10-31T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 4.0,
+          "latestValue": 4.0,
+          "latestSampleAtUtc": "2026-11-03T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-v1",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 3.0,
+          "latestValue": 3.0,
+          "latestSampleAtUtc": "2026-11-05T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 2,
+          "observedSum": 43.0,
+          "latestValue": 30.0,
+          "latestSampleAtUtc": "2026-11-06T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {
+            "response_code": "500"
+          },
+          "points": 1,
+          "observedSum": 2.0,
+          "latestValue": 2.0,
+          "latestSampleAtUtc": "2026-11-06T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 7.0,
+          "latestValue": 7.0,
+          "latestSampleAtUtc": "2026-11-06T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-v1",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "500"
+          },
+          "points": 1,
+          "observedSum": 1.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-06T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-v1",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 2,
+          "observedSum": 9.0,
+          "latestValue": 3.0,
+          "latestSampleAtUtc": "2026-11-10T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 4.0,
+          "latestValue": 4.0,
+          "latestSampleAtUtc": "2026-11-10T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 2,
+          "observedSum": 5.0,
+          "latestValue": 2.0,
+          "latestSampleAtUtc": "2026-11-18T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 2,
+          "observedSum": 9.0,
+          "latestValue": 5.0,
+          "latestSampleAtUtc": "2026-11-19T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {
+            "response_code": "503"
+          },
+          "points": 1,
+          "observedSum": 1.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-19T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 3.0,
+          "latestValue": 3.0,
+          "latestSampleAtUtc": "2026-11-19T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-v1",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 2,
+          "observedSum": 16.0,
+          "latestValue": 4.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 3.0,
+          "latestValue": 3.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 3.0,
+          "latestValue": 3.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 3.0,
+          "latestValue": 3.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 2,
+          "observedSum": 3.0,
+          "latestValue": 0.0,
+          "latestSampleAtUtc": "2026-11-21T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 2,
+          "observedSum": 3.0,
+          "latestValue": 0.0,
+          "latestSampleAtUtc": "2026-11-21T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 3.0,
+          "latestValue": 3.0,
+          "latestSampleAtUtc": "2026-11-21T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 3.0,
+          "latestValue": 3.0,
+          "latestSampleAtUtc": "2026-11-22T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "media-worker-v1",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 4.0,
+          "latestValue": 4.0,
+          "latestSampleAtUtc": "2026-11-22T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "service_name": "media-worker-v1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 1,
+          "observedSum": 3.0,
+          "latestValue": 3.0,
+          "latestSampleAtUtc": "2026-11-22T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "thulani-api",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "403"
+          },
+          "points": 6,
+          "observedSum": 21.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-18T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "thulani-frontend",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "200"
+          },
+          "points": 3,
+          "observedSum": 14.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-21T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "service_name": "thulani-worker",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "404"
+          },
+          "points": 1,
+          "observedSum": 1.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-10-31T18:39:20.221051Z"
+        }
+      ]
+    },
+    "functionExecutions": {
+      "available": true,
+      "kind": "DELTA",
+      "series": 5,
+      "truncated": false,
+      "rows": [
+        {
+          "resource": {
+            "region": "us-central1",
+            "function_name": "autoRewardCreators"
+          },
+          "metricLabels": {},
+          "points": 30,
+          "observedSum": 496023.0,
+          "latestValue": 21801.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "region": "us-central1",
+            "function_name": "createPromotionOnApproval"
+          },
+          "metricLabels": {},
+          "points": 30,
+          "observedSum": 495917.0,
+          "latestValue": 21801.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "region": "us-central1",
+            "function_name": "createPromotionOnContentCreate"
+          },
+          "metricLabels": {},
+          "points": 30,
+          "observedSum": 801.0,
+          "latestValue": 25.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "region": "us-central1",
+            "function_name": "handleLandingPageIntent"
+          },
+          "metricLabels": {},
+          "points": 30,
+          "observedSum": 495921.0,
+          "latestValue": 21801.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "function_name": "handleSmartLinkIntent",
+            "region": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 30,
+          "observedSum": 495985.0,
+          "latestValue": 21801.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        }
+      ]
+    },
+    "taskAttempts": {
+      "available": true,
+      "kind": "DELTA",
+      "series": 0,
+      "truncated": false,
+      "rows": []
+    },
+    "loggingIngestedBytes": {
+      "available": true,
+      "kind": "DELTA",
+      "series": 16,
+      "truncated": false,
+      "rows": [
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 4,
+          "observedSum": 5122.0,
+          "latestValue": 1213.0,
+          "latestSampleAtUtc": "2026-11-19T18:39:20.221051Z"
+        },
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 30,
+          "observedSum": 12005689620.0,
+          "latestValue": 328300197.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 5,
+          "observedSum": 783391.0,
+          "latestValue": 207112.0,
+          "latestSampleAtUtc": "2026-11-21T18:39:20.221051Z"
+        },
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 30,
+          "observedSum": 6408484431.0,
+          "latestValue": 282659547.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 10,
+          "observedSum": 437562.0,
+          "latestValue": 764.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 18,
+          "observedSum": 2173209.0,
+          "latestValue": 908.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 799.0,
+          "latestValue": 799.0,
+          "latestSampleAtUtc": "2026-11-17T18:39:20.221051Z"
+        },
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 7,
+          "observedSum": 11283.0,
+          "latestValue": 1449.0,
+          "latestSampleAtUtc": "2026-11-25T18:39:20.221051Z"
+        },
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 1797.0,
+          "latestValue": 1797.0,
+          "latestSampleAtUtc": "2026-11-18T18:39:20.221051Z"
+        },
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 865.0,
+          "latestValue": 865.0,
+          "latestSampleAtUtc": "2026-10-31T18:39:20.221051Z"
+        },
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 30,
+          "observedSum": 125295268.0,
+          "latestValue": 1039913.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 30,
+          "observedSum": 10387912.0,
+          "latestValue": 68695.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 7,
+          "observedSum": 57698.0,
+          "latestValue": 2894.0,
+          "latestSampleAtUtc": "2026-11-21T18:39:20.221051Z"
+        },
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 18,
+          "observedSum": 104809.0,
+          "latestValue": 766.0,
+          "latestSampleAtUtc": "2026-11-24T18:39:20.221051Z"
+        },
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 1,
+          "observedSum": 1394.0,
+          "latestValue": 1394.0,
+          "latestSampleAtUtc": "2026-11-16T18:39:20.221051Z"
+        },
+        {
+          "resource": {},
+          "metricLabels": {},
+          "points": 2,
+          "observedSum": 12625.0,
+          "latestValue": 2733.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        }
+      ]
+    },
+    "artifactStoredBytes": {
+      "available": true,
+      "kind": "GAUGE",
+      "series": 2,
+      "truncated": false,
+      "rows": [
+        {
+          "resource": {
+            "location": "us",
+            "repository_id": "gcr.io"
+          },
+          "metricLabels": {},
+          "points": 13,
+          "observedMaximum": 1527304470401.0,
+          "latestValue": 1527304470401.0,
+          "latestSampleAtUtc": "2026-11-22T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "repository_id": "thulani-repo",
+            "location": "us-central1"
+          },
+          "metricLabels": {},
+          "points": 1,
+          "observedMaximum": 62888615256.0,
+          "latestValue": 62888615256.0,
+          "latestSampleAtUtc": "2026-11-19T18:39:20.221051Z"
+        }
+      ]
+    },
+    "storageBytes": {
+      "available": true,
+      "kind": "GAUGE",
+      "series": 6,
+      "truncated": false,
+      "rows": [
+        {
+          "resource": {
+            "location": "us",
+            "bucket_name": "341498038874-global-cloudbuild-logs"
+          },
+          "metricLabels": {},
+          "points": 7,
+          "observedMaximum": 347351.0,
+          "latestValue": 86290.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d"
+          },
+          "metricLabels": {},
+          "points": 30,
+          "observedMaximum": 45246663709.0,
+          "latestValue": 45246663709.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app"
+          },
+          "metricLabels": {},
+          "points": 30,
+          "observedMaximum": 12378887958.0,
+          "latestValue": 12330600588.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us",
+            "bucket_name": "autopromote-cc6d3_cloudbuild"
+          },
+          "metricLabels": {},
+          "points": 7,
+          "observedMaximum": 23726794.0,
+          "latestValue": 23726794.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "gcf-sources-341498038874-us-central1"
+          },
+          "metricLabels": {},
+          "points": 30,
+          "observedMaximum": 81308480.0,
+          "latestValue": 81308480.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "run-sources-autopromote-cc6d3-us-central1"
+          },
+          "metricLabels": {},
+          "points": 30,
+          "observedMaximum": 8108802.0,
+          "latestValue": 8108802.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        }
+      ]
+    },
+    "storageNetworkBytes": {
+      "available": true,
+      "kind": "DELTA",
+      "series": 40,
+      "truncated": false,
+      "rows": [
+        {
+          "resource": {
+            "location": "us",
+            "bucket_name": "341498038874-global-cloudbuild-logs"
+          },
+          "metricLabels": {
+            "response_code": "NOT_FOUND",
+            "method": "GetObjectMetadata"
+          },
+          "points": 2,
+          "observedSum": 873.0,
+          "latestValue": 0.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us",
+            "bucket_name": "341498038874-global-cloudbuild-logs"
+          },
+          "metricLabels": {
+            "response_code": "NOT_FOUND",
+            "method": "ReadObject"
+          },
+          "points": 1,
+          "observedSum": 14090.0,
+          "latestValue": 14090.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us",
+            "bucket_name": "341498038874-global-cloudbuild-logs"
+          },
+          "metricLabels": {
+            "method": "ComposeObject",
+            "response_code": "OK"
+          },
+          "points": 2,
+          "observedSum": 111852.0,
+          "latestValue": 23130.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "341498038874-global-cloudbuild-logs",
+            "location": "us"
+          },
+          "metricLabels": {
+            "method": "DeleteObject",
+            "response_code": "OK"
+          },
+          "points": 2,
+          "observedSum": 0.0,
+          "latestValue": 0.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us",
+            "bucket_name": "341498038874-global-cloudbuild-logs"
+          },
+          "metricLabels": {
+            "method": "GetBucketMetadata",
+            "response_code": "OK"
+          },
+          "points": 2,
+          "observedSum": 3347.0,
+          "latestValue": 635.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "341498038874-global-cloudbuild-logs",
+            "location": "us"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "GetObjectMetadata"
+          },
+          "points": 2,
+          "observedSum": 2832.0,
+          "latestValue": 0.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "341498038874-global-cloudbuild-logs",
+            "location": "us"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "WriteObject"
+          },
+          "points": 2,
+          "observedSum": 133817.0,
+          "latestValue": 25501.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "341498038874-global-cloudbuild-logs",
+            "location": "us"
+          },
+          "metricLabels": {
+            "method": "ComposeObject",
+            "response_code": "RESOURCE_EXHAUSTED"
+          },
+          "points": 1,
+          "observedSum": 1262.0,
+          "latestValue": 1262.0,
+          "latestSampleAtUtc": "2026-11-19T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d"
+          },
+          "metricLabels": {
+            "response_code": "CANCELLED",
+            "method": "ReadObject"
+          },
+          "points": 4,
+          "observedSum": 1067220992.0,
+          "latestValue": 325058560.0,
+          "latestSampleAtUtc": "2026-10-31T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d"
+          },
+          "metricLabels": {
+            "method": "ReadObject",
+            "response_code": "INVALID_ARGUMENT"
+          },
+          "points": 1,
+          "observedSum": 440.0,
+          "latestValue": 440.0,
+          "latestSampleAtUtc": "2026-10-30T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "NOT_FOUND",
+            "method": "GetObjectMetadata"
+          },
+          "points": 4,
+          "observedSum": 11588.0,
+          "latestValue": 1638.0,
+          "latestSampleAtUtc": "2026-11-15T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "ComposeObject"
+          },
+          "points": 1,
+          "observedSum": 1116.0,
+          "latestValue": 1116.0,
+          "latestSampleAtUtc": "2026-11-15T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "DeleteObject"
+          },
+          "points": 1,
+          "observedSum": 0.0,
+          "latestValue": 0.0,
+          "latestSampleAtUtc": "2026-11-16T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "GetBucketMetadata"
+          },
+          "points": 4,
+          "observedSum": 19409.0,
+          "latestValue": 1493.0,
+          "latestSampleAtUtc": "2026-11-15T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "GetBucketStorageLayout"
+          },
+          "points": 1,
+          "observedSum": 144.0,
+          "latestValue": 144.0,
+          "latestSampleAtUtc": "2026-11-15T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "method": "GetObjectMetadata",
+            "response_code": "OK"
+          },
+          "points": 5,
+          "observedSum": 1336615.0,
+          "latestValue": 1116.0,
+          "latestSampleAtUtc": "2026-11-15T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "ListObjects"
+          },
+          "points": 2,
+          "observedSum": 55209.0,
+          "latestValue": 53348.0,
+          "latestSampleAtUtc": "2026-11-16T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "method": "ReadObject",
+            "response_code": "OK"
+          },
+          "points": 6,
+          "observedSum": 4154644221.0,
+          "latestValue": 592979343.0,
+          "latestSampleAtUtc": "2026-11-16T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "TestIamPermissions"
+          },
+          "points": 1,
+          "observedSum": 51.0,
+          "latestValue": 51.0,
+          "latestSampleAtUtc": "2026-11-09T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "method": "UpdateObjectMetadata",
+            "response_code": "OK"
+          },
+          "points": 3,
+          "observedSum": 21820.0,
+          "latestValue": 5733.0,
+          "latestSampleAtUtc": "2026-10-31T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "WriteObject"
+          },
+          "points": 5,
+          "observedSum": 50126.0,
+          "latestValue": 25494.0,
+          "latestSampleAtUtc": "2026-11-16T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "method": "ReadObject",
+            "response_code": "CANCELLED"
+          },
+          "points": 17,
+          "observedSum": 5207981165.0,
+          "latestValue": 423982583.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "method": "ReadObject",
+            "response_code": "FAILED_PRECONDITION"
+          },
+          "points": 10,
+          "observedSum": 0.0,
+          "latestValue": 0.0,
+          "latestSampleAtUtc": "2026-11-12T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "method": "ReadObject",
+            "response_code": "INVALID_ARGUMENT"
+          },
+          "points": 6,
+          "observedSum": 27720.0,
+          "latestValue": 220.0,
+          "latestSampleAtUtc": "2026-11-17T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app"
+          },
+          "metricLabels": {
+            "method": "GetObjectMetadata",
+            "response_code": "NOT_FOUND"
+          },
+          "points": 19,
+          "observedSum": 4991041.0,
+          "latestValue": 29004.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "NOT_FOUND",
+            "method": "ReadObject"
+          },
+          "points": 1,
+          "observedSum": 276.0,
+          "latestValue": 276.0,
+          "latestSampleAtUtc": "2026-10-29T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app"
+          },
+          "metricLabels": {
+            "method": "DeleteObject",
+            "response_code": "OK"
+          },
+          "points": 3,
+          "observedSum": 0.0,
+          "latestValue": 0.0,
+          "latestSampleAtUtc": "2026-11-19T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app"
+          },
+          "metricLabels": {
+            "method": "GetBucketMetadata",
+            "response_code": "OK"
+          },
+          "points": 15,
+          "observedSum": 920855.0,
+          "latestValue": 24120.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "GetBucketStorageLayout"
+          },
+          "points": 1,
+          "observedSum": 740.0,
+          "latestValue": 740.0,
+          "latestSampleAtUtc": "2026-11-19T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "GetObjectMetadata"
+          },
+          "points": 19,
+          "observedSum": 55722860.0,
+          "latestValue": 1095422.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app"
+          },
+          "metricLabels": {
+            "method": "ListObjects",
+            "response_code": "OK"
+          },
+          "points": 24,
+          "observedSum": 530810.0,
+          "latestValue": 7680.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "method": "ReadObject",
+            "response_code": "OK"
+          },
+          "points": 22,
+          "observedSum": 24021866399.0,
+          "latestValue": 1701907280.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "TestIamPermissions"
+          },
+          "points": 1,
+          "observedSum": 51.0,
+          "latestValue": 51.0,
+          "latestSampleAtUtc": "2026-11-09T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app"
+          },
+          "metricLabels": {
+            "method": "UpdateObjectMetadata",
+            "response_code": "OK"
+          },
+          "points": 10,
+          "observedSum": 332156.0,
+          "latestValue": 5414.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app"
+          },
+          "metricLabels": {
+            "method": "WriteObject",
+            "response_code": "OK"
+          },
+          "points": 15,
+          "observedSum": 991496.0,
+          "latestValue": 32368.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app"
+          },
+          "metricLabels": {
+            "method": "ReadObject",
+            "response_code": "PERMISSION_DENIED"
+          },
+          "points": 1,
+          "observedSum": 361.0,
+          "latestValue": 361.0,
+          "latestSampleAtUtc": "2026-11-06T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us",
+            "bucket_name": "autopromote-cc6d3_cloudbuild"
+          },
+          "metricLabels": {
+            "method": "GetBucketMetadata",
+            "response_code": "OK"
+          },
+          "points": 2,
+          "observedSum": 3980.0,
+          "latestValue": 995.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us",
+            "bucket_name": "autopromote-cc6d3_cloudbuild"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "GetObjectMetadata"
+          },
+          "points": 2,
+          "observedSum": 3745.0,
+          "latestValue": 795.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3_cloudbuild",
+            "location": "us"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "ReadObject"
+          },
+          "points": 2,
+          "observedSum": 329537.0,
+          "latestValue": 5447.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us",
+            "bucket_name": "autopromote-cc6d3_cloudbuild"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "WriteObject"
+          },
+          "points": 2,
+          "observedSum": 4232.0,
+          "latestValue": 1060.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        }
+      ]
+    },
+    "storageRequests": {
+      "available": true,
+      "kind": "DELTA",
+      "series": 43,
+      "truncated": false,
+      "rows": [
+        {
+          "resource": {
+            "bucket_name": "341498038874-global-cloudbuild-logs",
+            "location": "us"
+          },
+          "metricLabels": {
+            "response_code": "NOT_FOUND",
+            "method": "GetObjectMetadata"
+          },
+          "points": 2,
+          "observedSum": 4.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us",
+            "bucket_name": "341498038874-global-cloudbuild-logs"
+          },
+          "metricLabels": {
+            "method": "ReadObject",
+            "response_code": "NOT_FOUND"
+          },
+          "points": 1,
+          "observedSum": 272.0,
+          "latestValue": 272.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "341498038874-global-cloudbuild-logs",
+            "location": "us"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "ComposeObject"
+          },
+          "points": 2,
+          "observedSum": 148.0,
+          "latestValue": 51.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "341498038874-global-cloudbuild-logs",
+            "location": "us"
+          },
+          "metricLabels": {
+            "method": "DeleteObject",
+            "response_code": "OK"
+          },
+          "points": 2,
+          "observedSum": 148.0,
+          "latestValue": 51.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us",
+            "bucket_name": "341498038874-global-cloudbuild-logs"
+          },
+          "metricLabels": {
+            "method": "GetBucketMetadata",
+            "response_code": "OK"
+          },
+          "points": 2,
+          "observedSum": 5.0,
+          "latestValue": 2.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "341498038874-global-cloudbuild-logs",
+            "location": "us"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "GetObjectMetadata"
+          },
+          "points": 2,
+          "observedSum": 4.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "341498038874-global-cloudbuild-logs",
+            "location": "us"
+          },
+          "metricLabels": {
+            "method": "WriteObject",
+            "response_code": "OK"
+          },
+          "points": 2,
+          "observedSum": 154.0,
+          "latestValue": 52.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "341498038874-global-cloudbuild-logs",
+            "location": "us"
+          },
+          "metricLabels": {
+            "method": "ComposeObject",
+            "response_code": "RESOURCE_EXHAUSTED"
+          },
+          "points": 1,
+          "observedSum": 2.0,
+          "latestValue": 2.0,
+          "latestSampleAtUtc": "2026-11-19T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "CANCELLED",
+            "method": "ReadObject"
+          },
+          "points": 4,
+          "observedSum": 272.0,
+          "latestValue": 68.0,
+          "latestSampleAtUtc": "2026-10-31T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "method": "ReadObject",
+            "response_code": "INVALID_ARGUMENT"
+          },
+          "points": 1,
+          "observedSum": 2.0,
+          "latestValue": 2.0,
+          "latestSampleAtUtc": "2026-10-30T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "method": "GetObjectMetadata",
+            "response_code": "NOT_FOUND"
+          },
+          "points": 4,
+          "observedSum": 26.0,
+          "latestValue": 4.0,
+          "latestSampleAtUtc": "2026-11-15T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "method": "ComposeObject",
+            "response_code": "OK"
+          },
+          "points": 1,
+          "observedSum": 1.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-15T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "method": "DeleteObject",
+            "response_code": "OK"
+          },
+          "points": 1,
+          "observedSum": 19.0,
+          "latestValue": 19.0,
+          "latestSampleAtUtc": "2026-11-16T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d"
+          },
+          "metricLabels": {
+            "method": "GetBucketMetadata",
+            "response_code": "OK"
+          },
+          "points": 4,
+          "observedSum": 13.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-15T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d"
+          },
+          "metricLabels": {
+            "method": "GetBucketStorageLayout",
+            "response_code": "OK"
+          },
+          "points": 1,
+          "observedSum": 1.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-15T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "GetObjectMetadata"
+          },
+          "points": 5,
+          "observedSum": 725.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-15T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "ListObjects"
+          },
+          "points": 2,
+          "observedSum": 13.0,
+          "latestValue": 8.0,
+          "latestSampleAtUtc": "2026-11-16T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "ReadObject"
+          },
+          "points": 6,
+          "observedSum": 679.0,
+          "latestValue": 19.0,
+          "latestSampleAtUtc": "2026-11-16T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d"
+          },
+          "metricLabels": {
+            "method": "TestIamPermissions",
+            "response_code": "OK"
+          },
+          "points": 1,
+          "observedSum": 1.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-09T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d"
+          },
+          "metricLabels": {
+            "method": "UpdateObjectMetadata",
+            "response_code": "OK"
+          },
+          "points": 3,
+          "observedSum": 12.0,
+          "latestValue": 3.0,
+          "latestSampleAtUtc": "2026-10-31T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3-viral-studio-3d"
+          },
+          "metricLabels": {
+            "method": "WriteObject",
+            "response_code": "OK"
+          },
+          "points": 5,
+          "observedSum": 34.0,
+          "latestValue": 18.0,
+          "latestSampleAtUtc": "2026-11-16T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app"
+          },
+          "metricLabels": {
+            "method": "ReadObject",
+            "response_code": "CANCELLED"
+          },
+          "points": 23,
+          "observedSum": 1773.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app"
+          },
+          "metricLabels": {
+            "response_code": "FAILED_PRECONDITION",
+            "method": "ReadObject"
+          },
+          "points": 11,
+          "observedSum": 905.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-24T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "INVALID_ARGUMENT",
+            "method": "ReadObject"
+          },
+          "points": 7,
+          "observedSum": 121.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-22T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "method": "GetObjectMetadata",
+            "response_code": "NOT_FOUND"
+          },
+          "points": 24,
+          "observedSum": 13621.0,
+          "latestValue": 18.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app"
+          },
+          "metricLabels": {
+            "method": "ReadObject",
+            "response_code": "NOT_FOUND"
+          },
+          "points": 1,
+          "observedSum": 2.0,
+          "latestValue": 2.0,
+          "latestSampleAtUtc": "2026-10-29T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app"
+          },
+          "metricLabels": {
+            "method": "DeleteObject",
+            "response_code": "OK"
+          },
+          "points": 5,
+          "observedSum": 26.0,
+          "latestValue": 17.0,
+          "latestSampleAtUtc": "2026-11-23T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "GetBucketMetadata"
+          },
+          "points": 20,
+          "observedSum": 392.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "method": "GetBucketStorageLayout",
+            "response_code": "OK"
+          },
+          "points": 1,
+          "observedSum": 5.0,
+          "latestValue": 5.0,
+          "latestSampleAtUtc": "2026-11-19T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "method": "GetObjectMetadata",
+            "response_code": "OK"
+          },
+          "points": 25,
+          "observedSum": 55000.0,
+          "latestValue": 212.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app"
+          },
+          "metricLabels": {
+            "method": "ListObjects",
+            "response_code": "OK"
+          },
+          "points": 30,
+          "observedSum": 21315.0,
+          "latestValue": 720.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "ReadObject"
+          },
+          "points": 28,
+          "observedSum": 9755.0,
+          "latestValue": 37.0,
+          "latestSampleAtUtc": "2026-11-26T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app"
+          },
+          "metricLabels": {
+            "method": "TestIamPermissions",
+            "response_code": "OK"
+          },
+          "points": 1,
+          "observedSum": 1.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-09T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app"
+          },
+          "metricLabels": {
+            "method": "UpdateObjectMetadata",
+            "response_code": "OK"
+          },
+          "points": 12,
+          "observedSum": 219.0,
+          "latestValue": 4.0,
+          "latestSampleAtUtc": "2026-11-22T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "method": "WriteObject",
+            "response_code": "OK"
+          },
+          "points": 17,
+          "observedSum": 660.0,
+          "latestValue": 89.0,
+          "latestSampleAtUtc": "2026-11-22T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "method": "GetBucketMetadata",
+            "response_code": "PERMISSION_DENIED"
+          },
+          "points": 1,
+          "observedSum": 2.0,
+          "latestValue": 2.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "autopromote-cc6d3.firebasestorage.app",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "method": "ReadObject",
+            "response_code": "PERMISSION_DENIED"
+          },
+          "points": 1,
+          "observedSum": 1.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-06T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us",
+            "bucket_name": "autopromote-cc6d3_cloudbuild"
+          },
+          "metricLabels": {
+            "method": "GetBucketMetadata",
+            "response_code": "OK"
+          },
+          "points": 2,
+          "observedSum": 8.0,
+          "latestValue": 5.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us",
+            "bucket_name": "autopromote-cc6d3_cloudbuild"
+          },
+          "metricLabels": {
+            "method": "GetObjectMetadata",
+            "response_code": "OK"
+          },
+          "points": 2,
+          "observedSum": 6.0,
+          "latestValue": 3.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us",
+            "bucket_name": "autopromote-cc6d3_cloudbuild"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "ReadObject"
+          },
+          "points": 2,
+          "observedSum": 5.0,
+          "latestValue": 2.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us",
+            "bucket_name": "autopromote-cc6d3_cloudbuild"
+          },
+          "metricLabels": {
+            "response_code": "OK",
+            "method": "WriteObject"
+          },
+          "points": 2,
+          "observedSum": 8.0,
+          "latestValue": 5.0,
+          "latestSampleAtUtc": "2026-11-20T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "location": "us-central1",
+            "bucket_name": "gcf-sources-341498038874-us-central1"
+          },
+          "metricLabels": {
+            "response_code": "PERMISSION_DENIED",
+            "method": "ListObjects"
+          },
+          "points": 1,
+          "observedSum": 1.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-21T18:39:20.221051Z"
+        },
+        {
+          "resource": {
+            "bucket_name": "gcf-sources-341498038874-us-central1",
+            "location": "us-central1"
+          },
+          "metricLabels": {
+            "method": "ListObjects",
+            "response_code": "UNAUTHENTICATED"
+          },
+          "points": 1,
+          "observedSum": 1.0,
+          "latestValue": 1.0,
+          "latestSampleAtUtc": "2026-11-21T18:39:20.221051Z"
+        }
+      ]
+    }
+  },
+  "runServices": [
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/services/media-worker-gpu",
+      "scaling": {
+        "maxInstanceCount": 3
+      },
+      "templateScaling": {
+        "maxInstanceCount": 1
+      },
+      "timeout": "3600s",
+      "concurrency": 1,
+      "resources": [
+        {
+          "limits": {
+            "cpu": "20",
+            "memory": "80Gi",
+            "nvidia.com/gpu": "1"
+          },
+          "startupCpuBoost": true
+        }
+      ]
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/services/cam-combiner-worker",
+      "scaling": {
+        "maxInstanceCount": 5
+      },
+      "templateScaling": {
+        "maxInstanceCount": 3
+      },
+      "timeout": "3600s",
+      "concurrency": 1,
+      "resources": [
+        {
+          "limits": {
+            "cpu": "4",
+            "memory": "8Gi"
+          },
+          "cpuIdle": true,
+          "startupCpuBoost": true
+        }
+      ]
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/services/thulani-worker",
+      "scaling": {
+        "maxInstanceCount": 20
+      },
+      "templateScaling": {
+        "maxInstanceCount": 20
+      },
+      "timeout": "300s",
+      "concurrency": 80,
+      "resources": [
+        {
+          "limits": {
+            "cpu": "1000m",
+            "memory": "512Mi"
+          },
+          "cpuIdle": true,
+          "startupCpuBoost": true
+        }
+      ]
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/services/thulani-frontend",
+      "scaling": {
+        "maxInstanceCount": 20
+      },
+      "templateScaling": {
+        "maxInstanceCount": 20
+      },
+      "timeout": "300s",
+      "concurrency": 80,
+      "resources": [
+        {
+          "limits": {
+            "cpu": "1",
+            "memory": "512Mi"
+          },
+          "cpuIdle": true,
+          "startupCpuBoost": true
+        }
+      ]
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/services/thulani-api",
+      "scaling": {
+        "maxInstanceCount": 20
+      },
+      "templateScaling": {
+        "maxInstanceCount": 20
+      },
+      "timeout": "300s",
+      "concurrency": 80,
+      "resources": [
+        {
+          "limits": {
+            "cpu": "1",
+            "memory": "512Mi"
+          },
+          "cpuIdle": true,
+          "startupCpuBoost": true
+        }
+      ]
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/services/media-worker-v1",
+      "scaling": {
+        "maxInstanceCount": 10
+      },
+      "templateScaling": {
+        "maxInstanceCount": 3
+      },
+      "timeout": "3600s",
+      "concurrency": 1,
+      "resources": [
+        {
+          "limits": {
+            "cpu": "4",
+            "memory": "8Gi"
+          },
+          "cpuIdle": true,
+          "startupCpuBoost": true
+        }
+      ]
+    }
+  ],
+  "runJobs": [],
+  "functions": [
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/getYouTubeAuthUrl",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/snapchatOAuthCallback",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/getFacebookAuthUrl",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/tiktokOAuthCallback",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/discordOAuthCallback",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/autoPromoteContent",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/logMonetizationEvent",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/twitterOAuthCallback",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/listPromotionTemplates",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/updateUserStatsOnPost",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "maxInstanceCount": 3000,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {
+        "eventType": "providers/cloud.firestore/eventTypes/document.create",
+        "retryPolicy": "RETRY_POLICY_DO_NOT_RETRY"
+      }
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/generateSmartLink",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/getLinkedInAuthUrl",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/getDiscordAuthUrl",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/handleLandingPageIntent",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "maxInstanceCount": 3000,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {
+        "eventType": "providers/cloud.firestore/eventTypes/document.update",
+        "retryPolicy": "RETRY_POLICY_DO_NOT_RETRY"
+      }
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/getRedditAuthUrl",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/autoRewardCreators",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "maxInstanceCount": 3000,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {
+        "eventType": "providers/cloud.firestore/eventTypes/document.update",
+        "retryPolicy": "RETRY_POLICY_DO_NOT_RETRY"
+      }
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/pinterestOAuthCallback",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/smartLinkRedirect",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/getTikTokAuthUrl",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/createPromotionTemplate",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/telegramWebhook",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/spotifyOAuthCallback",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/uploadVideoToYouTube",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/instagramOAuthCallback",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/updatePostEngagement",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "maxInstanceCount": 3000,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {
+        "eventType": "providers/cloud.firestore/eventTypes/document.update",
+        "retryPolicy": "RETRY_POLICY_DO_NOT_RETRY"
+      }
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/getSpotifyAuthUrl",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/getTwitterAuthUrl",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/createPromotionOnApproval",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "maxInstanceCount": 3000,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {
+        "eventType": "providers/cloud.firestore/eventTypes/document.update",
+        "retryPolicy": "RETRY_POLICY_DO_NOT_RETRY"
+      }
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/getSnapchatAuthUrl",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/attachTemplateToContent",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/linkedinOAuthCallback",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/getReferralStats",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/getInstagramAuthUrl",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/helloWorld",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/getRevenueSummary",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/createPromotionOnContentCreate",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "maxInstanceCount": 3000,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {
+        "eventType": "providers/cloud.firestore/eventTypes/document.create",
+        "retryPolicy": "RETRY_POLICY_DO_NOT_RETRY"
+      }
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/api",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/redditOAuthCallback",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/handleSmartLinkIntent",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "maxInstanceCount": 3000,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {
+        "eventType": "providers/cloud.firestore/eventTypes/document.update",
+        "retryPolicy": "RETRY_POLICY_DO_NOT_RETRY"
+      }
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/facebookOAuthCallback",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/notifyOnFollow",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "maxInstanceCount": 3000,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {
+        "eventType": "providers/cloud.firestore/eventTypes/document.create",
+        "retryPolicy": "RETRY_POLICY_DO_NOT_RETRY"
+      }
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/getPinterestAuthUrl",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/generateMonetizedLandingPage",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/addReferrerToContent",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/functions/youtubeOAuthCallback",
+      "environment": "GEN_1",
+      "state": "ACTIVE",
+      "runtime": "nodejs20",
+      "serviceConfig": {
+        "timeoutSeconds": 60,
+        "availableMemory": "256M",
+        "maxInstanceRequestConcurrency": 1
+      },
+      "eventTrigger": {}
+    }
+  ],
+  "firestoreDatabases": [
+    {
+      "name": "projects/autopromote-cc6d3/databases/(default)",
+      "locationId": "us-central1",
+      "type": "FIRESTORE_NATIVE",
+      "pointInTimeRecoveryEnablement": "POINT_IN_TIME_RECOVERY_DISABLED",
+      "deleteProtectionState": "DELETE_PROTECTION_DISABLED",
+      "databaseEdition": "STANDARD"
+    }
+  ],
+  "backupSchedules": [],
+  "backupCount": 0,
+  "schedulers": [],
+  "taskQueues": [
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/queues/media-worker-audio-extraction",
+      "rateLimits": {
+        "maxDispatchesPerSecond": 500,
+        "maxBurstSize": 100,
+        "maxConcurrentDispatches": 1000
+      },
+      "retryConfig": {
+        "maxAttempts": 100,
+        "minBackoff": "0.100s",
+        "maxBackoff": "3600s",
+        "maxDoublings": 16
+      },
+      "state": "PAUSED"
+    }
+  ],
+  "repositories": [],
+  "builds": [
+    {
+      "id": "b5343bd4-d205-4fbd-8cb2-07779bd5efe4",
+      "status": "CANCELLED",
+      "createTime": "2026-11-20T18:05:43.290370656Z",
+      "finishTime": "2026-11-20T18:10:27.756658675Z",
+      "machineType": "E2_HIGHCPU_8",
+      "diskSizeGb": null
+    },
+    {
+      "id": "6bc9d612-617c-4bc5-b452-69077c002985",
+      "status": "SUCCESS",
+      "createTime": "2026-11-20T15:50:17.551024602Z",
+      "startTime": "2026-11-20T15:51:10.521015843Z",
+      "finishTime": "2026-11-20T15:52:56.512842Z",
+      "timing": {
+        "FETCHSOURCE": {
+          "startTime": "2026-11-20T15:51:12.738896653Z",
+          "endTime": "2026-11-20T15:51:13.916738893Z"
+        },
+        "PUSH": {
+          "startTime": "2026-11-20T15:52:44.467633969Z",
+          "endTime": "2026-11-20T15:52:55.880858311Z"
+        },
+        "STORAGE_SOURCE": {
+          "startTime": "2026-11-20T15:51:12.738896653Z",
+          "endTime": "2026-11-20T15:51:13.916738893Z"
+        },
+        "BUILD": {
+          "startTime": "2026-11-20T15:51:13.916928703Z",
+          "endTime": "2026-11-20T15:52:44.467450239Z"
+        }
+      },
+      "machineType": "E2_HIGHCPU_8",
+      "diskSizeGb": null
+    },
+    {
+      "id": "43925984-cc2c-4e0c-b06b-c0317605d031",
+      "status": "SUCCESS",
+      "createTime": "2026-11-20T14:57:35.993551902Z",
+      "startTime": "2026-11-20T14:58:16.603032149Z",
+      "finishTime": "2026-11-20T14:59:50.875320Z",
+      "timing": {
+        "FETCHSOURCE": {
+          "startTime": "2026-11-20T14:58:18.423876187Z",
+          "endTime": "2026-11-20T14:58:19.550727533Z"
+        },
+        "PUSH": {
+          "startTime": "2026-11-20T14:59:40.717524169Z",
+          "endTime": "2026-11-20T14:59:50.772031131Z"
+        },
+        "STORAGE_SOURCE": {
+          "startTime": "2026-11-20T14:58:18.423876187Z",
+          "endTime": "2026-11-20T14:58:19.550727533Z"
+        },
+        "BUILD": {
+          "startTime": "2026-11-20T14:58:19.550945533Z",
+          "endTime": "2026-11-20T14:59:40.716631268Z"
+        }
+      },
+      "machineType": "E2_HIGHCPU_8",
+      "diskSizeGb": null
+    },
+    {
+      "id": "1305179b-b047-4918-9b2b-6ee4e2df1db5",
+      "status": "SUCCESS",
+      "createTime": "2026-11-19T01:20:16.615103980Z",
+      "startTime": "2026-11-19T01:20:17.428323900Z",
+      "finishTime": "2026-11-19T01:22:38.693839Z",
+      "timing": {
+        "FETCHSOURCE": {
+          "startTime": "2026-11-19T01:20:17.714873857Z",
+          "endTime": "2026-11-19T01:20:18.793042469Z"
+        },
+        "PUSH": {
+          "startTime": "2026-11-19T01:22:34.328949739Z",
+          "endTime": "2026-11-19T01:22:38.082110928Z"
+        },
+        "STORAGE_SOURCE": {
+          "startTime": "2026-11-19T01:20:17.714873857Z",
+          "endTime": "2026-11-19T01:20:18.793042469Z"
+        },
+        "BUILD": {
+          "startTime": "2026-11-19T01:20:18.793249854Z",
+          "endTime": "2026-11-19T01:22:34.328788366Z"
+        }
+      },
+      "machineType": null,
+      "diskSizeGb": null
+    },
+    {
+      "id": "904156c7-3e4e-4faa-831c-06ce984734c8",
+      "status": "SUCCESS",
+      "createTime": "2026-11-19T01:08:59.748363062Z",
+      "startTime": "2026-11-19T01:09:52.903144596Z",
+      "finishTime": "2026-11-19T01:12:31.430519Z",
+      "timing": {
+        "BUILD": {
+          "startTime": "2026-11-19T01:09:55.975794212Z",
+          "endTime": "2026-11-19T01:11:30.266080201Z"
+        },
+        "FETCHSOURCE": {
+          "startTime": "2026-11-19T01:09:54.998563246Z",
+          "endTime": "2026-11-19T01:09:55.975598942Z"
+        },
+        "PUSH": {
+          "startTime": "2026-11-19T01:11:30.266217876Z",
+          "endTime": "2026-11-19T01:12:30.672864584Z"
+        },
+        "STORAGE_SOURCE": {
+          "startTime": "2026-11-19T01:09:54.998563246Z",
+          "endTime": "2026-11-19T01:09:55.975598942Z"
+        }
+      },
+      "machineType": "E2_HIGHCPU_8",
+      "diskSizeGb": "100"
+    },
+    {
+      "id": "c12083f5-ebdf-4cb7-880a-6e2fb3e7d441",
+      "status": "SUCCESS",
+      "createTime": "2026-11-19T00:57:50.003959468Z",
+      "startTime": "2026-11-19T00:58:52.771650621Z",
+      "finishTime": "2026-11-19T01:03:17.998674Z",
+      "timing": {
+        "STORAGE_SOURCE": {
+          "startTime": "2026-11-19T00:58:55.209193995Z",
+          "endTime": "2026-11-19T00:58:56.431498025Z"
+        },
+        "BUILD": {
+          "startTime": "2026-11-19T00:58:56.431683318Z",
+          "endTime": "2026-11-19T01:01:15.041260376Z"
+        },
+        "FETCHSOURCE": {
+          "startTime": "2026-11-19T00:58:55.209193995Z",
+          "endTime": "2026-11-19T00:58:56.431498025Z"
+        },
+        "PUSH": {
+          "startTime": "2026-11-19T01:01:15.041436908Z",
+          "endTime": "2026-11-19T01:03:17.159029543Z"
+        }
+      },
+      "machineType": "E2_HIGHCPU_8",
+      "diskSizeGb": "100"
+    }
+  ],
+  "hostingSites": [],
+  "authConfig": {},
+  "authSignInMethods": {},
+  "loggingBuckets": [
+    {
+      "name": "projects/autopromote-cc6d3/locations/global/buckets/_Default",
+      "retentionDays": 30,
+      "lifecycleState": "ACTIVE"
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/global/buckets/_Required",
+      "locked": true,
+      "retentionDays": 400,
+      "lifecycleState": "ACTIVE"
+    }
+  ],
+  "loggingSinks": [
+    {
+      "name": "_Required",
+      "disabled": false,
+      "destinationType": "logging.googleapis.com"
+    },
+    {
+      "name": "_Default",
+      "disabled": false,
+      "destinationType": "logging.googleapis.com"
+    }
+  ],
+  "storageBuckets": [
+    {
+      "name": "341498038874-global-cloudbuild-logs",
+      "location": "US",
+      "storageClass": "STANDARD",
+      "versioning": {
+        "enabled": true
+      },
+      "lifecycle": {
+        "rule": [
+          {
+            "action": {
+              "type": "Delete"
+            },
+            "condition": {
+              "numNewerVersions": 1
+            }
+          }
+        ]
+      },
+      "softDeletePolicy": {
+        "retentionDurationSeconds": "604800",
+        "effectiveTime": "2026-11-19T00:57:51.352Z"
+      }
+    },
+    {
+      "name": "autopromote-cc6d3-viral-studio-3d",
+      "location": "US-CENTRAL1",
+      "storageClass": "STANDARD",
+      "lifecycle": {
+        "rule": [
+          {
+            "action": {
+              "type": "Delete"
+            },
+            "condition": {
+              "age": 1,
+              "matchesPrefix": [
+                "temp_studio_3d/"
+              ]
+            }
+          }
+        ]
+      },
+      "softDeletePolicy": {
+        "retentionDurationSeconds": "604800",
+        "effectiveTime": "2026-09-16T14:22:53.579Z"
+      }
+    },
+    {
+      "name": "autopromote-cc6d3.firebasestorage.app",
+      "location": "US-CENTRAL1",
+      "storageClass": "REGIONAL",
+      "lifecycle": {
+        "rule": [
+          {
+            "action": {
+              "type": "Delete"
+            },
+            "condition": {
+              "age": 1,
+              "matchesPrefix": [
+                "temp_uploads/",
+                "temp_sources/",
+                "temp_scans/",
+                "temp/multicam/",
+                "temp/multicam-checkpoints/",
+                "temp/multicam-clean-sync/",
+                "temp/multicam-clean-sync-audio/"
+              ]
+            }
+          },
+          {
+            "action": {
+              "type": "Delete"
+            },
+            "condition": {
+              "daysSinceCustomTime": 3,
+              "matchesPrefix": [
+                "temp/multicam-ingest/"
+              ]
+            }
+          },
+          {
+            "action": {
+              "type": "Delete"
+            },
+            "condition": {
+              "age": 7,
+              "matchesPrefix": [
+                "processed/multicam_",
+                "processed/thumbnails/multicam_",
+                "processed/manifests/multicam_"
+              ]
+            }
+          },
+          {
+            "action": {
+              "type": "Delete"
+            },
+            "condition": {
+              "age": 30,
+              "matchesPrefix": [
+                "edited_videos/"
+              ]
+            }
+          }
+        ]
+      },
+      "softDeletePolicy": {
+        "retentionDurationSeconds": "604800",
+        "effectiveTime": "2025-09-16T12:07:05.979Z"
+      }
+    },
+    {
+      "name": "autopromote-cc6d3_cloudbuild",
+      "location": "US",
+      "storageClass": "STANDARD",
+      "lifecycle": {
+        "rule": [
+          {
+            "action": {
+              "type": "Delete"
+            },
+            "condition": {
+              "age": 14,
+              "matchesPrefix": [
+                "source/"
+              ]
+            }
+          }
+        ]
+      },
+      "softDeletePolicy": {
+        "retentionDurationSeconds": "0"
+      }
+    },
+    {
+      "name": "gcf-sources-341498038874-us-central1",
+      "location": "US-CENTRAL1",
+      "storageClass": "STANDARD",
+      "softDeletePolicy": {
+        "retentionDurationSeconds": "604800",
+        "effectiveTime": "2025-09-17T09:07:49.832Z"
+      }
+    },
+    {
+      "name": "run-sources-autopromote-cc6d3-us-central1",
+      "location": "US-CENTRAL1",
+      "storageClass": "STANDARD",
+      "softDeletePolicy": {
+        "retentionDurationSeconds": "604800",
+        "effectiveTime": "2026-03-03T07:07:01.774Z"
+      }
+    }
+  ],
+  "computeInstanceCount": 0,
+  "enabledServices": [
+    "aiplatform.googleapis.com",
+    "analyticshub.googleapis.com",
+    "appengine.googleapis.com",
+    "apphub.googleapis.com",
+    "appoptimize.googleapis.com",
+    "apptopology.googleapis.com",
+    "artifactregistry.googleapis.com",
+    "bigquery.googleapis.com",
+    "bigqueryconnection.googleapis.com",
+    "bigquerydatapolicy.googleapis.com",
+    "bigquerymigration.googleapis.com",
+    "bigqueryreservation.googleapis.com",
+    "bigquerystorage.googleapis.com",
+    "billingbudgets.googleapis.com",
+    "cloudaicompanion.googleapis.com",
+    "cloudapis.googleapis.com",
+    "cloudasset.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "cloudfunctions.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "cloudscheduler.googleapis.com",
+    "cloudtasks.googleapis.com",
+    "cloudtrace.googleapis.com",
+    "compute.googleapis.com",
+    "containerregistry.googleapis.com",
+    "dataform.googleapis.com",
+    "dataplex.googleapis.com",
+    "datastore.googleapis.com",
+    "deploymentmanager.googleapis.com",
+    "designcenter.googleapis.com",
+    "fcm.googleapis.com",
+    "fcmregistrations.googleapis.com",
+    "firebase.googleapis.com",
+    "firebaseappcheck.googleapis.com",
+    "firebaseappdistribution.googleapis.com",
+    "firebasedataconnect.googleapis.com",
+    "firebaseextensions.googleapis.com",
+    "firebasehosting.googleapis.com",
+    "firebaseinstallations.googleapis.com",
+    "firebaseremoteconfig.googleapis.com",
+    "firebaseremoteconfigrealtime.googleapis.com",
+    "firebaserules.googleapis.com",
+    "firebasestorage.googleapis.com",
+    "firestore.googleapis.com",
+    "geminicloudassist.googleapis.com",
+    "iam.googleapis.com",
+    "iamcredentials.googleapis.com",
+    "identitytoolkit.googleapis.com",
+    "logging.googleapis.com",
+    "monitoring.googleapis.com",
+    "oslogin.googleapis.com",
+    "places-backend.googleapis.com",
+    "pubsub.googleapis.com",
+    "recaptchaenterprise.googleapis.com",
+    "recommender.googleapis.com",
+    "run.googleapis.com",
+    "runtimeconfig.googleapis.com",
+    "secretmanager.googleapis.com",
+    "securetoken.googleapis.com",
+    "servicemanagement.googleapis.com",
+    "serviceusage.googleapis.com",
+    "source.googleapis.com",
+    "sql-component.googleapis.com",
+    "sqladmin.googleapis.com",
+    "storage-api.googleapis.com",
+    "storage-component.googleapis.com",
+    "storage.googleapis.com",
+    "testing.googleapis.com",
+    "youtube.googleapis.com"
+  ],
+  "limitations": [
+    "Metadata and Monitoring are not invoices or SKU-attributed expenditure.",
+    "30-day monitoring totals may be partial or absent; absence is not verified zero.",
+    "Task queues and Scheduler inspected in us-central1 only; global lists bounded, nextPageToken recorded.",
+    "No authentication-user listing or customer-document collection scans.",
+    "Cloud Billing access and merchant invoices remain separate evidence."
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "scope": "actual local App and emulator identity; no production or provider publication",
+  "checks": [
+    {
+      "name": "real-public-pricing",
+      "width": 1440,
+      "twoPlans": true,
+      "noOverflow": true
+    },
+    {
+      "name": "real-public-pricing",
+      "width": 390,
+      "twoPlans": true,
+      "noOverflow": true
+    },
+    {
+      "name": "real-public-pricing",
+      "width": 360,
+      "twoPlans": true,
+      "noOverflow": true
+    },
+    {
+      "name": "free-native-local-edit",
+      "sourceUpload": true,
+      "titleEdit": true,
+      "undoRedo": true,
+      "projectSaved": true,
+      "noTokensDeducted": true
+    },
+    {
+      "name": "saved-project-reopened",
+      "savedProjectVisible": true
+    }
+  ],
+  "errors": [],
+  "dialogs": [
+    "This operation reserves up to 30 processing tokens. Unused capacity is restored after verified completion. Continue?"
+  ],
+  "before": {
+    "success": true,
+    "processing": {
+      "planId": "free",
+      "allowance": 100,
+      "remaining": 100,
+      "remainingPercent": 100,
+      "nextResetAt": "2026-12-02T17:43:27.035Z",
+      "rolling30DayLimit": 500,
+      "rollingSpentTokens": 30,
+      "reservedTokens": 0,
+      "storage": {
+        "usedBytes": 0,
+        "reservedBytes": 0,
+        "limitBytes": 1073741824,
+        "measured": false
+      },
+      "activeJobs": 0,
+      "localEditingAvailable": true,
+      "provisional": true,
+      "rollingAvailableAt": "2026-12-26T17:47:14.546Z",
+      "asOf": "2026-11-26T17:58:43.840Z"
+    },
+    "balances": {
+      "purchasedCredits": 20,
+      "promotionalCredits": null
+    }
+  },
+  "exportPanel": "Half · 50%\nQuarter · 25%\nView options\n↻ Preview synced\nLoading edited preview…\nCreate\nfor free\n❚❚\n0:0.00 / 1:00.0\n🔊\n100%\nExport controls\n\nSet resolution, frame rate, codec and quality. Render first, review the actual output, then download it. Studio exports have no AutoPromote watermark.\n\nPublish\nRender and export\n\nFinal export uses the hook treatment and B-roll layers you approved in Studio.\n\nRestore export receipt\nDownload\nTikTok\nReels\nShorts\nResolution\n720p\n1080p\n4K\nSource size\nFrame rate\nMatch first source\n24 fps\n25 fps\n30 fps\n50 fps\n60 fps\nCodec\nH.264 · compatible\nH.265 · smaller\nProRes 422 HQ · mezzanine (.mov)\nQuality\nDraft\nBalanced\nHigh\nMaster\nVideo bitrate\nAuto (Quality CRF)\n5 Mbps (5000 kbps)\n8 Mbps (8000 kbps)\n12 Mbps (12000 kbps)\n20 Mbps (20000 kbps)\n35 Mbps (35000 kbps)\nTarget size (MB)\nColor space\nRec.709 SDR\nRec.2020 Wide Gamut\nAudio bitrate\n128 kbps\n192 kbps\n256 kbps\n320 kbps\n\nMP4 · Rec.709 SDR · AAC 192k · Quality CRF.\n\nRender Final Clip\n\nOne render includes your hook, B-roll, audio rules, captions, and selected destination.\n\nDesktop NLE handoff (.otio / .edl) & caption sidecars\nTimeline\nComp & Rig\nSpeed / Value Graph\nSignal Node Flow\nSynced 1:1 with canonical Studio project & FFmpeg render compiler\nSplit\nTrim Start\nTrim End\nMore actions\nV\nSelect\nC\nRazor\nB\nRipple\nN\nRoll\nY\nSlip\nU\nSlide\nH\nHand\nSequence tracks\nComposition layers\nAt playhead\nShow empty tracks\n⌁ Snap\n⛓ Linked\n⇥ Ripple layers\n−\n+\nFit\n1×\n◆ Keyframes\n0:00\n0:10\n0:20\n0:30\n0:40\n0:50\n1:00\nFront → back · one row per layer · bars show clip timing · groups clip their children\nT\nCreate for free\n◆\n▏\nCreate for free\n▕\nV1\nSource video · base\n◉\n□\n▏\nartifact-0.mp4\n60.0s\n▕\nA2\nOriginal audio\n◉\n□\nM\nS\nL\nL50\nC\nR50\nR\nartifact-0.mp4 audio\nSelect Tool\nMagnetic Snapping\nAudio/Video Linked\n0:00\n00:00:00:00\n30 Fps\nGo",
+  "afterExportClick": "CREATE\nViral Clip Studio\n🔈\nExplain This Tab\nLocal Pilot\ndemo-pilot-alice@example.test\nOverview\n\nCREATE\n\nCam Combiner\nFind Viral Clips\nViral Clip Studio\n\nPUBLISH\n\nPublisher\nQueue\n\nSETTINGS\n\nConnections\nTeam\nBilling\nSecurity\nNeed help getting started?\nVisit the docs →\nSign out\nPersonal workspace\nCREATE\nViral Clip Studio\n\nEdit detected moments on the full timeline, refine hooks, and render short clips.\n\n⚠️ System status degraded: degraded\nVIRAL CLIP STUDIO\nFree creator minute optimized\nQuick\nCreator\nSignature\nFX Flow\n● Local edit active\n● Local editing uses no credits\n↶ Undo\n↷ Redo\n×\n✦\nDirector\n✦\nMoments\n✂\nCut\n⌁\nHook\n⌗\nReframe\nCC\nCaptions\nT\nGraphics\n◆\nMotion\n◫\nComposite\n☍\nNode Flow\n✦\nEffects FX\n✺\nCreator FX\n≋\nPacing\n▣\nB-roll\n◐\nColor\n♫\nSound\n⇧\nExport\nPreview\nBefore\nAfter\nCompare\nⅡ\nShow media\nHide timeline\nPreview quality\nFull detail · 100%\nAuto playback · full detail paused\nHalf · 50%\nQuarter · 25%\nView options\n↻ Preview synced\nLoading edited preview…\nCreate\nfor free\n❚❚\n0:0.00 / 1:00.0\n🔊\n100%\nExport controls\n\nSet resolution, frame rate, codec and quality. Render first, review the actual output, then download it. Studio exports have no AutoPromote watermark.\n\nPublish\nRender and export\n\nFinal export uses the hook treatment and B-roll layers you approved in Studio.\n\nDownload\nTikTok\nReels\nShorts\nResolution\n720p\n1080p\n4K\nSource size\nFrame rate\nMatch first source\n24 fps\n25 fps\n30 fps\n50 fps\n60 fps\nCodec\nH.264 · compatible\nH.265 · smaller\nProRes 422 HQ · mezzanine (.mov)\nQuality\nDraft\nBalanced\nHigh\nMaster\nVideo bitrate\nAuto (Quality CRF)\n5 Mbps (5000 kbps)\n8 Mbps (8000 kbps)\n12 Mbps (12000 kbps)\n20 Mbps (20000 kbps)\n35 Mbps (35000 kbps)\nTarget size (MB)\nColor space\nRec.709 SDR\nRec.2020 Wide Gamut\nAudio bitrate\n128 kbps\n192 kbps\n256 kbps\n320 kbps\n\nMP4 · Rec.709 SDR · AAC 192k · Quality CRF.\n\nRendering your viral clip with overlays...✕ Cancel Render\n\nOne render includes your hook, B-roll, audio rules, captions, and selected destination.\n\nDesktop NLE handoff (.otio / .edl) & caption sidecars\nTimeline\nComp & Rig\nSpeed / Value Graph\nSignal Node Flow\nSynced 1:1 with canonical Studio project & FFmpeg render compiler\nSplit\nTrim Start\nTrim End\nMore actions\nV\nSelect\nC\nRazor\nB\nRipple\nN\nRoll\nY\nSlip\nU\nSlide\nH\nHand\nSequence tracks\nComposition layers\nAt playhead\nShow empty tracks\n⌁ Snap\n⛓ Linked\n⇥ Ripple layers\n−\n+\nFit\n1×\n◆ Keyframes\n0:00\n0:10\n0:20\n0:30\n0:40\n0:50\n1:00\nFront → back · one row per layer · bars show clip timing · groups clip their children\nT\nCreate for free\n◆\n▏\nCreate for free\n▕\nV1\nSource video · base\n◉\n□\n▏\nartifact-0.mp4\n60.0s\n▕\nA2\nOriginal audio\n◉\n□\nM\nS\nL\nL50\nC\nR50\nR\nartifact-0.mp4 audio\nSelect Tool\nMagnetic Snapping\nAudio/Video Linked\n0:00\n00:00:00:00\n30 Fps\nGo",
+  "failure": "fetch failed"
+}

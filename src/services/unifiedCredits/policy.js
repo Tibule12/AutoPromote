@@ -1,5 +1,5 @@
 const crypto = require("crypto");
-const { SUBSCRIPTION_PLANS } = require("../../config/subscriptionPlans");
+const { LEGACY_SUBSCRIPTION_PLANS: SUBSCRIPTION_PLANS } = require("../../config/subscriptionPlans");
 
 const OPERATIONS = [
   "queue.dispatch",

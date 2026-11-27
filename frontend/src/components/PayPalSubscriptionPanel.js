@@ -1,1307 +1,284 @@
-import { getRuntimeE2EToken, isRuntimeE2EEnabled } from "../utils/mediaAuth";
-// PayPalSubscriptionPanel.js
-// PayPal subscription management component
-
 import React, { useEffect, useRef, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebaseClient";
-import { parseJsonSafe } from "../utils/parseJsonSafe";
-import { API_BASE_URL, API_ENDPOINTS } from "../config";
-import toast from "react-hot-toast";
+import { API_BASE_URL } from "../config";
+import ProcessingUsage from "./ProcessingUsage";
+import { startVisiblePoller } from "../utils/visiblePoller";
+import offers from "../config/subscriptionOffers.json";
 import "./PayPalSubscriptionPanel.css";
 import "./BillingContrast.css";
-
-function resolveApi(path) {
-  try {
-    const hostname = typeof window !== "undefined" ? window.location.hostname : "";
-    const isLocal =
-      /^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(hostname) || hostname.endsWith(".local");
-    const base = !isLocal && API_BASE_URL ? API_BASE_URL : "";
-    return `${base || ""}${path}`;
-  } catch (e) {
-    return `${API_BASE_URL || ""}${path}`;
-  }
-}
-
-function normalizeSuggestedPlanId(planId) {
-  if (!planId) return null;
-  const normalized = String(planId).trim().toLowerCase();
-  if (["starter", "free"].includes(normalized)) return "free";
-  if (["basic", "premium", "creator"].includes(normalized)) return "premium";
-  if (["pro", "studio"].includes(normalized)) return "pro";
-  if (["enterprise", "team"].includes(normalized)) return "enterprise";
-  return normalized;
-}
-
-const PAYPAL_SUBSCRIPTION_NAMESPACE = "paypalSubscriptionsSdk";
-const PAYPAL_SUBSCRIPTION_SCRIPT_ID = "paypal-sdk-subscriptions";
-const PAYPAL_TOPUP_NAMESPACE = "paypalTopupSdk";
-const PAYPAL_TOPUP_SCRIPT_ID = "paypal-sdk-topups";
-
-const PayPalSubscriptionPanel = ({
+const api = path => `${API_BASE_URL || ""}${path}`;
+export default function PayPalSubscriptionPanel({
   compact = false,
-  showPlanComparison = false,
-  highlightPlanId = null,
-  onUpgradeSuccess,
   onClose,
   closeLabel,
-  title,
-  subtitle,
-}) => {
-  const [plans, setPlans] = useState([]);
-  const [creditTopUpPacks, setCreditTopUpPacks] = useState([]);
-  const [currentSubscription, setCurrentSubscription] = useState(null);
+  onUpgradeSuccess,
+}) {
+  const [plans, setPlans] = useState(offers);
+  const [user, setUser] = useState(auth.currentUser);
+  const [subscription, setSubscription] = useState(null);
   const [usage, setUsage] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [processing, setProcessing] = useState(false);
-  const [paypalLoaded, setPaypalLoaded] = useState(false);
-  const [paypalSdkError, setPaypalSdkError] = useState("");
-  const [paypalConfig, setPaypalConfig] = useState(null);
-  const [topUpPaypalLoaded, setTopUpPaypalLoaded] = useState(false);
-  const [topUpPaypalError, setTopUpPaypalError] = useState("");
-  const [activatingPlanId, setActivatingPlanId] = useState(null);
-  const [authUser, setAuthUser] = useState(() => auth.currentUser);
-  const [authResolved, setAuthResolved] = useState(() => Boolean(auth.currentUser));
-  const buttonContainerRefs = useRef({});
-  const buttonInstancesRef = useRef({});
-  const topUpButtonContainerRefs = useRef({});
-  const topUpButtonInstancesRef = useRef({});
-  const handledReturnRef = useRef(false);
-
-  const normalizedHighlightPlanId = normalizeSuggestedPlanId(highlightPlanId);
-
-  const getCurrentUser = () => auth.currentUser || authUser;
-
-  const getAuthToken = async forceRefresh => {
-    const currentUser = getCurrentUser();
-    if (currentUser) {
-      try {
-        return await currentUser.getIdToken(Boolean(forceRefresh));
-      } catch (_) {
-        return null;
-      }
-    }
-
-    if (typeof window !== "undefined" && isRuntimeE2EEnabled() && window.__E2E_TEST_TOKEN) {
-      return getRuntimeE2EToken();
-    }
-
-    return null;
-  };
-
-  const fetchPlans = async () => {
-    try {
-      const url = resolveApi("/api/paypal-subscriptions/plans");
-      const res = await fetch(url);
-      const parsed = await parseJsonSafe(res);
-      if (parsed.ok && parsed.json && Array.isArray(parsed.json.plans)) {
-        setPlans(parsed.json.plans || []);
-        setCreditTopUpPacks(parsed.json.creditTopUpPacks || []);
-      }
-    } catch (error) {
-      console.error("Error fetching plans:", error);
-    }
-  };
-
-  const fetchCurrentSubscription = async () => {
-    try {
-      const currentUser = getCurrentUser();
-      const isE2E = typeof window !== "undefined" && isRuntimeE2EEnabled();
-      if (!currentUser && !isE2E && !authResolved) {
-        return;
-      }
-      if (!currentUser && !isE2E) {
-        setCurrentSubscription({
-          planId: "free",
-          planName: "Free",
-          status: "active",
-          features: {},
-        });
-        setLoading(false);
-        return;
-      }
-
-      let token = await getAuthToken(false);
-      const endpoint = resolveApi("/api/paypal-subscriptions/status");
-      let parsed = null;
-
-      try {
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await fetch(endpoint, { headers });
-        if (res.status === 401 && token) {
-          token = await getAuthToken(true);
-          const retryRes = await fetch(endpoint, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          });
-          parsed = await parseJsonSafe(retryRes);
-        } else {
-          parsed = await parseJsonSafe(res);
-        }
-
-        if (parsed && parsed.status === 404) {
-          setCurrentSubscription({
-            planId: "free",
-            planName: "Free",
-            status: "active",
-            features: {},
-          });
-          setLoading(false);
-          return;
-        }
-      } catch (e) {
-        console.error("Failed to fetch PayPal subscription status:", e);
-        parsed = { ok: false, status: "error", error: e.message };
-      }
-
-      if (parsed && parsed.ok && parsed.json) {
-        setCurrentSubscription(parsed.json.subscription);
-      } else {
-        if (parsed && parsed.status === 401) {
-          toast.error("Please sign in to view subscription status");
-        }
-        setCurrentSubscription({
-          planId: "free",
-          planName: "Free",
-          status: "active",
-          features: {},
-        });
-      }
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching subscription:", error);
-      setLoading(false);
-    }
-  };
-
-  const fetchUsage = async () => {
-    try {
-      const token = await getAuthToken(true);
-      if (!token) {
-        setUsage(null);
-        return;
-      }
-      const usageUrl = resolveApi("/api/paypal-subscriptions/usage");
-      const res = await fetch(usageUrl, {
-        headers: { Authorization: `Bearer ${token}` },
+  const [balances, setBalances] = useState({});
+  const [notice, setNotice] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [refreshRevision, setRefreshRevision] = useState(0);
+  const [verificationAttempt, setVerificationAttempt] = useState(0);
+  const [verificationPending, setVerificationPending] = useState(false);
+  const [checkingPayment, setCheckingPayment] = useState(false);
+  const verification = useRef(null);
+  const usageOwner = useRef(null);
+  const upgradeCallback = useRef(onUpgradeSuccess);
+  useEffect(() => { upgradeCallback.current = onUpgradeSuccess; }, [onUpgradeSuccess]);
+  useEffect(() => onAuthStateChanged(auth, setUser), []);
+  useEffect(() => {
+    let live = true;
+    fetch(api("/api/paypal-subscriptions/plans"))
+      .then(r => {
+        if (!r.ok) throw Error("Pricing unavailable");
+        return r.json();
+      })
+      .then(data => {
+        if (live && data.plans?.length === 2) setPlans(data.plans);
+      })
+      .catch(() => {
+        if (live) setNotice("Showing proposed allowances. Live billing is currently unavailable.");
       });
-      const parsed = await parseJsonSafe(res);
-      if (parsed.ok && parsed.json) {
-        setUsage(parsed.json.usage);
+    return () => {
+      live = false;
+    };
+  }, []);
+  useEffect(() => {
+    let live = true;
+    if (usageOwner.current !== user?.uid) {
+      usageOwner.current = user?.uid;
+      setSubscription(null);
+      setUsage(null);
+      setBalances({});
+    }
+    if (!user) {
+      setSubscription(null);
+      setUsage(null);
+      setBalances({});
+      return undefined;
+    }
+    const load = async signal => {
+      const headers = { Authorization: `Bearer ${await user.getIdToken()}` };
+      if (signal.aborted) return;
+      const [status, processing] = await Promise.all([
+        fetch(api("/api/paypal-subscriptions/status"), { headers, signal }),
+        fetch(api("/api/usage/processing"), { headers, signal }),
+      ]);
+      if (status.ok) {
+        const data = await status.json();
+        if (live && !signal.aborted) setSubscription(data.subscription);
       }
-    } catch (error) {
-      console.error("Error fetching usage:", error);
-    }
-  };
-
-  const activateSubscription = async (subscriptionId, planId) => {
-    if (!subscriptionId) return false;
-
-    const currentUser = getCurrentUser();
-    const isE2E = typeof window !== "undefined" && isRuntimeE2EEnabled();
-    if (!currentUser && !isE2E) {
-      toast.error("Please sign in to activate your subscription");
-      return false;
-    }
-
-    setProcessing(true);
-    setActivatingPlanId(planId || null);
+      if (processing.ok) {
+        const data = await processing.json();
+        if (live && !signal.aborted) {
+          setUsage(data.processing);
+          setBalances(data.balances || {});
+        }
+      } else if (live && !signal.aborted)
+        setNotice(
+          "Processing usage is temporarily unavailable. Your saved projects remain available."
+        );
+    };
+    const stop = startVisiblePoller(signal => load(signal).catch(error => {
+      if (live && error.name !== "AbortError") setNotice("Usage could not be loaded. Try again shortly.");
+    }), 60000);
+    return () => {
+      live = false;
+      stop();
+    };
+  }, [user, refreshRevision]);
+  const subscribe = async plan => {
+    if (!user || busy || !plan.purchaseEnabled) return;
+    setBusy(true);
+    setNotice("");
     try {
-      const token = await getAuthToken(true);
-      const res = await fetch(resolveApi("/api/paypal-subscriptions/activate"), {
+      const response = await fetch(api("/api/paypal-subscriptions/create-subscription"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          Authorization: `Bearer ${await user.getIdToken(true)}`,
         },
-        body: JSON.stringify({ subscriptionId, planId }),
-      });
-      const parsed = await parseJsonSafe(res);
-      if (res.ok && parsed.ok) {
-        await Promise.all([fetchCurrentSubscription(), fetchUsage()]);
-        toast.success(parsed.json?.message || "Subscription activated");
-        if (onUpgradeSuccess) {
-          onUpgradeSuccess({ subscriptionId, planId: normalizeSuggestedPlanId(planId) });
-        }
-        return true;
-      }
-
-      console.error("Activation failed:", parsed);
-      toast.error(
-        (parsed && parsed.json && parsed.json.error) || "Failed to activate subscription"
-      );
-      return false;
-    } catch (e) {
-      console.error("Activation error:", e);
-      toast.error("Failed to activate subscription");
-      return false;
-    } finally {
-      setProcessing(false);
-      setActivatingPlanId(null);
-    }
-  };
-
-  const handleLegacySubscribe = async planId => {
-    if (processing) return;
-
-    const currentUser = getCurrentUser();
-    const isE2E = typeof window !== "undefined" && isRuntimeE2EEnabled();
-    if (!currentUser && !isE2E) {
-      toast.error("Please sign in to upgrade");
-      return;
-    }
-
-    setProcessing(true);
-    try {
-      const token = await getAuthToken(true);
-      const headers = {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      };
-
-      const returnBase = compact
-        ? `${window.location.origin}${window.location.pathname}${window.location.hash || ""}`
-        : `${window.location.origin}/#/dashboard`;
-
-      const querySeparator = returnBase.includes("?") ? "&" : "?";
-      const res = await fetch(resolveApi("/api/paypal-subscriptions/create-subscription"), {
-        method: "POST",
-        headers,
         body: JSON.stringify({
-          planId,
-          returnUrl: `${returnBase}${querySeparator}payment=success`,
-          cancelUrl: `${returnBase}${querySeparator}payment=cancelled`,
+          planId: "plus",
+          returnUrl: `${window.location.origin}/pricing`,
+          cancelUrl: `${window.location.origin}/pricing`,
         }),
       });
-
-      const parsed = await parseJsonSafe(res);
-
-      if (!res.ok) {
-        if (res.status === 401 || res.status === 403) {
-          toast.error("Please sign in to upgrade");
-          return;
-        }
-        const errorMessage =
-          (parsed && parsed.json && parsed.json.error) ||
-          parsed?.error ||
-          parsed?.textPreview ||
-          "Failed to create subscription";
-        toast.error(errorMessage);
-        return;
-      }
-
-      const approvalUrl = parsed.json?.approvalUrl;
-      if (approvalUrl) {
-        toast.success("Opening PayPal...");
-        window.open(approvalUrl, "_blank", "noopener,noreferrer");
-      } else {
-        toast.error("Could not obtain an approval link; please try again.");
-      }
+      const data = await response.json();
+      if (!response.ok) throw Error(data.message || data.error || "Checkout unavailable");
+      const target = new URL(data.approvalUrl);
+      if (
+        target.protocol !== "https:" ||
+        !["www.paypal.com", "www.sandbox.paypal.com"].includes(target.hostname)
+      )
+        throw Error("Invalid checkout destination");
+      window.location.assign(target.href);
     } catch (error) {
-      console.error("Error subscribing:", error);
-      toast.error("Failed to process subscription");
+      setNotice(error.message);
     } finally {
-      setProcessing(false);
+      setBusy(false);
     }
   };
-
-  const handleCancelSubscription = async () => {
-    if (
-      !window.confirm(
-        "Are you sure you want to cancel your subscription? You'll retain access until the end of your billing period."
-      )
-    ) {
-      return;
-    }
-
-    const token = await getAuthToken(true);
-    if (!token) {
-      toast.error("Please sign in to cancel your subscription");
-      return;
-    }
-
-    setProcessing(true);
-    try {
-      const res = await fetch(resolveApi("/api/paypal-subscriptions/cancel"), {
+  useEffect(() => {
+    const subscriptionId = new URLSearchParams(window.location.search).get("subscription_id");
+    if (!user || !subscriptionId) return;
+    let live = true;
+    const key = `${user.uid}:${subscriptionId}:${verificationAttempt}`;
+    setCheckingPayment(true);
+    setVerificationPending(true);
+    if (verification.current?.key !== key) verification.current = { key, promise: (async () => {
+      const response = await fetch(api("/api/paypal-subscriptions/activate"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${await user.getIdToken(true)}`,
+        },
+        body: JSON.stringify({ subscriptionId }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw Error("PayPal has not confirmed a paid subscription for this account yet. Check payment status again shortly.");
+      return data;
+    })() };
+    verification.current.promise.then(data => {
+      if (live) {
+        setSubscription(data.subscription);
+        setNotice("Payment verified. Your increased allowance is ready.");
+        setVerificationPending(false);
+        setRefreshRevision(value => value + 1);
+        const location = new URL(window.location.href);
+        location.searchParams.delete("subscription_id");
+        window.history.replaceState(window.history.state, "", location.pathname + location.search + location.hash);
+        upgradeCallback.current?.();
+      }
+    }).catch(error => {
+      if (live) setNotice(error.message);
+    }).finally(() => {
+      if (live) setCheckingPayment(false);
+    });
+    return () => {
+      live = false;
+    };
+  }, [user, verificationAttempt]);
+  const cancel = async () => {
+    if (
+      !user ||
+      !window.confirm(
+        "Cancel future subscription renewals? Your existing payment history and credits will be preserved."
+      )
+    )
+      return;
+    setBusy(true);
+    try {
+      const response = await fetch(api("/api/paypal-subscriptions/cancel"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${await user.getIdToken(true)}`,
         },
         body: JSON.stringify({ reason: "User requested cancellation" }),
       });
-
-      if (res.ok) {
-        toast.success("Subscription cancelled successfully");
-        fetchCurrentSubscription();
-      } else {
-        const parsed = await parseJsonSafe(res);
-        toast.error(
-          (parsed && parsed.json && parsed.json.error) || "Failed to cancel subscription"
-        );
-      }
-    } catch (error) {
-      console.error("Error cancelling subscription:", error);
-      toast.error("Failed to cancel subscription");
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, user => {
-      setAuthUser(user);
-      setAuthResolved(true);
-    });
-
-    fetchPlans();
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!authResolved) return;
-
-    fetchCurrentSubscription();
-    fetchUsage();
-  }, [authResolved, authUser?.uid]);
-
-  useEffect(() => {
-    if (!authResolved || handledReturnRef.current) return;
-
-    try {
-      const params = new URLSearchParams(window.location.search);
-      if (window.location.hash && window.location.hash.includes("?")) {
-        const hashQs = window.location.hash.split("?")[1];
-        const hashParams = new URLSearchParams(hashQs);
-        for (const [key, value] of hashParams.entries()) params.set(key, value);
-      }
-      const payment = params.get("payment");
-      const subscriptionParam =
-        params.get("subscriptionId") ||
-        params.get("subscription_id") ||
-        params.get("token") ||
-        params.get("id");
-
-      if (payment === "success" || payment === "cancelled") {
-        handledReturnRef.current = true;
-        if (payment === "success") {
-          if (subscriptionParam) {
-            activateSubscription(subscriptionParam, normalizedHighlightPlanId);
-          } else {
-            fetchCurrentSubscription();
-          }
-        } else {
-          toast("Payment cancelled", { icon: "⚠️" });
-        }
-
-        const cleanedHash = window.location.hash ? window.location.hash.split("?")[0] : "";
-        const newUrl = window.location.pathname + (cleanedHash || window.location.hash);
-        window.history.replaceState({}, document.title, newUrl);
-      }
-    } catch (_) {
-      // ignore return parsing issues
-    }
-  }, [authResolved, normalizedHighlightPlanId]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const loadPayPalSdk = async () => {
-      const paidPlans = plans.filter(plan => plan.id !== "free" && plan.paypalPlanId);
-      if (paidPlans.length === 0) return;
-
-      try {
-        const res = await fetch(API_ENDPOINTS.PAYMENTS_PAYPAL_CONFIG);
-        const text = await res.text();
-        let data = {};
-        try {
-          data = text ? JSON.parse(text) : {};
-        } catch (e) {
-          console.warn("PayPal config endpoint returned invalid JSON", {
-            status: res.status,
-            text,
-          });
-        }
-
-        const clientId = data?.clientId || "";
-        const currency = data?.currency || "USD";
-        if (!clientId) {
-          setPaypalSdkError("PayPal is not configured yet.");
-          return;
-        }
-
-        setPaypalConfig({ clientId, currency });
-
-        if (window[PAYPAL_SUBSCRIPTION_NAMESPACE]?.Buttons) {
-          if (!cancelled) setPaypalLoaded(true);
-          return;
-        }
-
-        const existing = document.getElementById(PAYPAL_SUBSCRIPTION_SCRIPT_ID);
-        if (existing) {
-          existing.addEventListener("load", () => {
-            if (!cancelled) setPaypalLoaded(true);
-          });
-          existing.addEventListener("error", () => {
-            if (!cancelled) setPaypalSdkError("Unable to load PayPal checkout.");
-          });
-          return;
-        }
-
-        const script = document.createElement("script");
-        script.id = PAYPAL_SUBSCRIPTION_SCRIPT_ID;
-        script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(
-          clientId
-        )}&currency=${encodeURIComponent(currency)}&vault=true&intent=subscription&components=buttons`;
-        script.async = true;
-        script.setAttribute("data-namespace", PAYPAL_SUBSCRIPTION_NAMESPACE);
-        script.onload = () => {
-          if (!cancelled) setPaypalLoaded(true);
-        };
-        script.onerror = () => {
-          if (!cancelled) setPaypalSdkError("Unable to load PayPal checkout.");
-        };
-        document.body.appendChild(script);
-      } catch (error) {
-        console.warn("Failed to load PayPal SDK:", error);
-        if (!cancelled) setPaypalSdkError("Unable to load PayPal checkout.");
-      }
-    };
-
-    loadPayPalSdk();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [plans]);
-
-  useEffect(() => {
-    const paypalSdk = window[PAYPAL_SUBSCRIPTION_NAMESPACE];
-    if (!paypalLoaded || !paypalSdk?.Buttons) return undefined;
-
-    const cleanupInstances = [];
-    const paidPlans = plans.filter(plan => plan.id !== "free" && plan.paypalPlanId);
-    const normalizedCurrentPlan = normalizeSuggestedPlanId(currentSubscription?.planId);
-
-    paidPlans.forEach(plan => {
-      const normalizedPlanId = normalizeSuggestedPlanId(plan.id);
-      const container = buttonContainerRefs.current[normalizedPlanId];
-      if (!container) return;
-
-      if (buttonInstancesRef.current[normalizedPlanId]?.close) {
-        try {
-          buttonInstancesRef.current[normalizedPlanId].close();
-        } catch (_) {
-          // ignore SDK cleanup failures
-        }
-      }
-
-      container.innerHTML = "";
-
-      if (normalizedCurrentPlan === normalizedPlanId || processing || !authUser) {
-        return;
-      }
-
-      const buttons = paypalSdk.Buttons({
-        style: {
-          layout: "vertical",
-          shape: "rect",
-          color: "gold",
-          label: "subscribe",
-        },
-        createSubscription: (_, actions) => {
-          const currentUser = getCurrentUser();
-          if (!currentUser) {
-            toast.error("Please sign in to upgrade");
-            throw new Error("not_signed_in");
-          }
-          return actions.subscription.create({
-            plan_id: plan.paypalPlanId,
-            custom_id: currentUser.uid,
-            application_context: {
-              shipping_preference: "NO_SHIPPING",
-              user_action: "SUBSCRIBE_NOW",
-            },
-          });
-        },
-        onApprove: async data => {
-          const subscriptionId = data?.subscriptionID || data?.subscriptionId;
-          const activated = await activateSubscription(subscriptionId, normalizedPlanId);
-          if (activated && compact && onClose) {
-            onClose();
-          }
-        },
-        onCancel: () => {
-          toast("PayPal checkout cancelled", { icon: "⚠️" });
-        },
-        onError: err => {
-          console.error("PayPal subscription buttons error", err);
-          toast.error("PayPal checkout failed. You can use the fallback link instead.");
-        },
-      });
-
-      buttonInstancesRef.current[normalizedPlanId] = buttons;
-      cleanupInstances.push(buttons);
-      buttons.render(container).catch(err => {
-        console.error("Failed to render PayPal subscription buttons", err);
-      });
-    });
-
-    return () => {
-      cleanupInstances.forEach(instance => {
-        if (instance?.close) {
-          try {
-            instance.close();
-          } catch (_) {
-            // ignore SDK cleanup failures
-          }
-        }
-      });
-    };
-  }, [authUser, compact, currentSubscription?.planId, onClose, paypalLoaded, plans, processing]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const loadTopUpPaypalSdk = async () => {
-      if (!creditTopUpPacks.length) return;
-
-      try {
-        const res = await fetch(API_ENDPOINTS.PAYMENTS_PAYPAL_CONFIG);
-        const text = await res.text();
-        let data = {};
-        try {
-          data = text ? JSON.parse(text) : {};
-        } catch (e) {
-          console.warn("PayPal top-up config endpoint returned invalid JSON", {
-            status: res.status,
-            text,
-          });
-        }
-
-        const clientId = data?.clientId || "";
-        const currency = data?.currency || "USD";
-        if (!clientId) {
-          setTopUpPaypalError("PayPal credit top-ups are not configured yet.");
-          return;
-        }
-
-        setPaypalConfig(current => current || { clientId, currency });
-
-        if (window[PAYPAL_TOPUP_NAMESPACE]?.Buttons) {
-          if (!cancelled) setTopUpPaypalLoaded(true);
-          return;
-        }
-
-        const existing = document.getElementById(PAYPAL_TOPUP_SCRIPT_ID);
-        if (existing) {
-          existing.addEventListener("load", () => {
-            if (!cancelled) setTopUpPaypalLoaded(true);
-          });
-          existing.addEventListener("error", () => {
-            if (!cancelled) setTopUpPaypalError("Unable to load PayPal credit top-ups.");
-          });
-          return;
-        }
-
-        const script = document.createElement("script");
-        script.id = PAYPAL_TOPUP_SCRIPT_ID;
-        script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(
-          clientId
-        )}&currency=${encodeURIComponent(currency)}&intent=capture&components=buttons`;
-        script.async = true;
-        script.setAttribute("data-namespace", PAYPAL_TOPUP_NAMESPACE);
-        script.onload = () => {
-          if (!cancelled) setTopUpPaypalLoaded(true);
-        };
-        script.onerror = () => {
-          if (!cancelled) setTopUpPaypalError("Unable to load PayPal credit top-ups.");
-        };
-        document.body.appendChild(script);
-      } catch (error) {
-        console.warn("Failed to load PayPal top-up SDK:", error);
-        if (!cancelled) setTopUpPaypalError("Unable to load PayPal credit top-ups.");
-      }
-    };
-
-    loadTopUpPaypalSdk();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [creditTopUpPacks]);
-
-  useEffect(() => {
-    const paypalSdk = window[PAYPAL_TOPUP_NAMESPACE];
-    if (!topUpPaypalLoaded || !paypalSdk?.Buttons || !creditTopUpPacks.length) return undefined;
-
-    const cleanupInstances = [];
-
-    creditTopUpPacks.forEach(pack => {
-      const container = topUpButtonContainerRefs.current[pack.id];
-      if (!container) return;
-
-      if (topUpButtonInstancesRef.current[pack.id]?.close) {
-        try {
-          topUpButtonInstancesRef.current[pack.id].close();
-        } catch (_) {
-          // ignore SDK cleanup failures
-        }
-      }
-
-      container.innerHTML = "";
-
-      if (processing || !authUser) {
-        return;
-      }
-
-      const buttons = paypalSdk.Buttons({
-        style: {
-          layout: "vertical",
-          shape: "rect",
-          color: "gold",
-          label: "pay",
-          height: 36,
-        },
-        createOrder: async () => {
-          const token = await getAuthToken(true);
-          if (!token) {
-            toast.error("Please sign in to buy credits");
-            throw new Error("not_signed_in");
-          }
-
-          const res = await fetch(resolveApi("/api/payments/credits/create-order"), {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ packageId: pack.id }),
-          });
-          const parsed = await parseJsonSafe(res);
-          if (!res.ok) {
-            throw new Error(
-              parsed?.json?.error || parsed?.error || "Could not create PayPal order"
-            );
-          }
-          return parsed.json?.id || parsed.json?.orderID || parsed.json?.orderId;
-        },
-        onApprove: async data => {
-          const token = await getAuthToken(true);
-          const orderID = data?.orderID || data?.orderId;
-          const res = await fetch(resolveApi("/api/payments/credits/capture-order"), {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            body: JSON.stringify({ orderID, packageId: pack.id }),
-          });
-          const parsed = await parseJsonSafe(res);
-          if (!res.ok || !parsed?.json?.success) {
-            throw new Error(
-              parsed?.json?.error || parsed?.error || "Could not capture PayPal order"
-            );
-          }
-          await fetchUsage();
-          toast.success(`${pack.credits} credits added.`);
-        },
-        onCancel: () => {
-          toast("Credit top-up cancelled", { icon: "⚠️" });
-        },
-        onError: err => {
-          console.error("PayPal top-up button error", err);
-          toast.error("PayPal credit top-up failed. Please try again.");
-        },
-      });
-
-      topUpButtonInstancesRef.current[pack.id] = buttons;
-      cleanupInstances.push(buttons);
-      buttons.render(container).catch(err => {
-        console.error("Failed to render PayPal top-up buttons", err);
-      });
-    });
-
-    return () => {
-      cleanupInstances.forEach(instance => {
-        if (instance?.close) {
-          try {
-            instance.close();
-          } catch (_) {
-            // ignore SDK cleanup failures
-          }
-        }
-      });
-    };
-  }, [authUser, creditTopUpPacks, processing, topUpPaypalLoaded]);
-
-  const getFeatureIcon = feature => {
-    const icons = {
-      uploads: "📤",
-      communityPosts: "📝",
-      aiClips: "🤖",
-      support: "🎧",
-      watermark: "⭐",
-      viralBoost: "🚀",
-      priorityModeration: "⚡",
-      creatorTipping: "💰",
-      sponsoredPosts: "📢",
-      apiAccess: "🔌",
-      whiteLabel: "🎨",
-      monthlyCredits: "🎟️",
-      multicam: "🎬",
-    };
-    return icons[feature] || "✨";
-  };
-
-  const getFeatureLabel = key => {
-    const labels = {
-      uploads: "Monthly uploads",
-      platformLimit: "Connected platforms",
-      support: "Support",
-      communityPosts: "Community posts",
-      aiClips: "AI clip tools",
-      watermark: "Watermark removal",
-      viralBoost: "Priority promotion tools",
-      priorityModeration: "Priority review",
-      creatorTipping: "Creator tipping",
-      sponsoredPosts: "Sponsored posts",
-      apiAccess: "API access",
-      whiteLabel: "White-label",
-      monthlyCredits: "Monthly AI credits",
-      multicam: "Multi-camera editing",
-      teamSeats: "Team seats",
-    };
-
-    return (
-      labels[key] ||
-      key
-        .replace(/([A-Z])/g, " $1")
-        .trim()
-        .replace(/^./, str => str.toUpperCase())
-    );
-  };
-
-  const renderFeatureValue = (key, value) => {
-    if (typeof value === "boolean") return value ? "Included" : "Not included";
-    if (value === Infinity || value === "unlimited" || value === "Unlimited") return "Custom";
-    if (key === "platformLimit" && typeof value === "number") {
-      return `${value} platform${value === 1 ? "" : "s"}`;
-    }
-    if (key === "monthlyCredits" && typeof value === "number") {
-      return `${value} credits/mo`;
-    }
-    if (key === "teamSeats" && typeof value === "number") {
-      return `${value} seat${value === 1 ? "" : "s"}`;
-    }
-    if (typeof value === "number") {
-      return `${value} per month`;
-    }
-    return value;
-  };
-
-  const publishingUsage = usage?.publishing || null;
-  const creditUsage = usage?.credits || null;
-  const featureCostLabels = {
-    camCombinerRender: "Cam Combiner server MP4",
-    cleanAudioSync: "Clean-audio sync proof",
-    findViralClips: "Find Viral Clips",
-    finalClipRender: "Final clip render",
-    videoProcessing: "Video processing",
-    transcription: "Audio transcript",
-  };
-  const editingFeatureGroups = [
-    "multicam",
-    "autoDirector",
-    "flowEdit",
-    "thumbnailLab",
-    "viralClipStudio",
-    "findViralClips",
-  ];
-  const hiddenPlanFeatureKeys = new Set(["monthlyPromotions", "analytics", "smartPromoSummary", "ideaVideoPreview", "ideaVideoRender", "smartPromo"]);
-
-  const getPlanEditingSummary = plan => {
-    const editing = plan.capabilities?.editing;
-    const features = editing?.features || {};
-    const includedTools = editingFeatureGroups
-      .map(featureId => features[featureId])
-      .filter(feature => feature?.enabled && feature?.included)
-      .map(feature => feature.label);
-    const creditTools = editingFeatureGroups
-      .map(featureId => features[featureId])
-      .filter(feature => feature?.enabled && feature?.creditCost > 0)
-      .map(feature => `${feature.label} (${feature.creditCost} credits)`);
-
-    return {
-      includedTools,
-      creditTools,
-      monthlyCredits: editing?.monthlyCreditsIncluded || plan.features?.monthlyCredits || 0,
-      topUpsEnabled: Boolean(editing?.topUpsEnabled),
-      policy: editing?.policy || "",
-    };
-  };
-
-  const renderUsageBar = (used, limit, unlimited) => {
-    const safeUsed = Number.isFinite(Number(used)) ? Number(used) : 0;
-    const safeLimit = Number.isFinite(Number(limit)) ? Number(limit) : 0;
-    if (unlimited) {
-      return (
-        <div className="usage-bar">
-          <div className="usage-bar-fill unlimited" style={{ width: "100%" }} />
-          <span className="usage-text">Unlimited</span>
-        </div>
+      if (!response.ok) throw Error("Cancellation could not be confirmed.");
+      setNotice(
+        "Future renewal cancelled. Your subscription remains subject to its existing paid period."
       );
+      setRefreshRevision(value => value + 1);
+    } catch (error) {
+      setNotice(error.message);
+    } finally {
+      setBusy(false);
     }
-
-    const percentage = safeLimit > 0 ? Math.min((safeUsed / safeLimit) * 100, 100) : 0;
-    const isOverLimit = safeLimit > 0 && safeUsed > safeLimit;
-
-    return (
-      <div className="usage-bar">
-        <div
-          className={`usage-bar-fill ${isOverLimit ? "over-limit" : ""}`}
-          style={{ width: `${percentage}%` }}
-        />
-        <span className="usage-text">
-          {safeUsed} / {safeLimit} used
-        </span>
-      </div>
-    );
   };
-
-  const renderRemainingText = item => {
-    if (!item) return null;
-    if (item.unlimited) return "Unlimited";
-    if (Number.isFinite(Number(item.remaining))) return `${Number(item.remaining)} remaining`;
-    if (Number.isFinite(Number(item.limit)) && Number.isFinite(Number(item.used))) {
-      return `${Math.max(0, Number(item.limit) - Number(item.used))} remaining`;
-    }
-    return null;
-  };
-
-  if (loading) {
-    return <div className="loading">Loading subscription details...</div>;
-  }
-
-  const effectiveTitle =
-    title || (compact ? "Upgrade to keep publishing" : "Plans For Cross-Platform Publishing");
-  const effectiveSubtitle =
-    subtitle ||
-    (compact
-      ? "Finish the upgrade right here, then we will retry your blocked publish automatically."
-      : "Paid plans are billed as monthly PayPal subscriptions. Choose a plan, subscribe inside the app, and keep your workflow moving.");
-
   return (
     <div className={`paypal-subscription-panel${compact ? " compact" : ""}`}>
       <div className="paypal-subscription-panel-header">
         <div>
-          <h2>{effectiveTitle}</h2>
-          <p className="paypal-subscription-panel-subtitle">{effectiveSubtitle}</p>
+          <h2>Create for free. Upgrade when you need more.</h2>
+          <p>Same creativity. Same tools. More usage when you upgrade.</p>
         </div>
         {onClose && (
-          <button
-            type="button"
-            className={`subscription-panel-close${compact ? " is-compact" : " is-return"}`}
-            onClick={onClose}
-          >
-            {closeLabel || (compact ? "×" : "Back")}
+          <button className="subscription-panel-close" onClick={onClose}>
+            {closeLabel || "Close"}
           </button>
         )}
       </div>
-
-      {paypalSdkError && (
-        <div className="paypal-sdk-notice warning">
-          {paypalSdkError} You can still use the fallback checkout link below.
-        </div>
-      )}
-      {topUpPaypalError && (
-        <div className="paypal-sdk-notice warning">
-          {topUpPaypalError} Credit packs will appear again once PayPal is available.
-        </div>
-      )}
-
-      {!compact && (!showPlanComparison || Boolean(authUser)) && (
-        <div className="paypal-sdk-notice neutral">
-          {paypalConfig?.currency ? `Billing currency: ${paypalConfig.currency}. ` : ""}
-          Subscription activation happens immediately after PayPal approval.
-        </div>
-      )}
-
-      {!compact && (!showPlanComparison || Boolean(authUser)) && (
-        <section className="billing-overview-grid">
-          <div className="current-subscription-card">
-            {currentSubscription ? (
-              <>
-                <div className="subscription-header">
-                  <div>
-                    <span className="billing-card-kicker">Current plan</span>
-                    <h3>{currentSubscription.planName} Plan</h3>
-                    <span className={`status-badge ${currentSubscription.status}`}>
-                      {currentSubscription.status === "active"
-                        ? "Active"
-                        : currentSubscription.status === "cancelled"
-                          ? "Cancelled"
-                          : currentSubscription.status}
-                    </span>
-                  </div>
-                  {currentSubscription.amount > 0 && (
-                    <div className="subscription-price">
-                      <span className="price">${currentSubscription.amount}</span>
-                      <span className="period">/month</span>
-                    </div>
-                  )}
-                </div>
-
-                {currentSubscription.nextBillingDate && currentSubscription.status === "active" && (
-                  <p className="billing-date">
-                    Renews {new Date(currentSubscription.nextBillingDate).toLocaleDateString()}
-                  </p>
-                )}
-
-                {currentSubscription.expiresAt && currentSubscription.status === "cancelled" && (
-                  <p className="expiry-date">
-                    Access expires {new Date(currentSubscription.expiresAt).toLocaleDateString()}
-                  </p>
-                )}
-
-                {currentSubscription.status === "active" &&
-                  currentSubscription.planId !== "free" && (
-                    <button
-                      className="cancel-btn"
-                      onClick={handleCancelSubscription}
-                      disabled={processing}
-                    >
-                      Cancel Subscription
-                    </button>
-                  )}
-              </>
-            ) : (
-              <>
-                <span className="billing-card-kicker">Current plan</span>
-                <h3>No active paid plan</h3>
-                <p>Choose a plan below when you are ready to increase publishing capacity.</p>
-              </>
-            )}
-          </div>
-
-          <aside className="billing-payment-card">
-            <div className="billing-payment-icon">▤</div>
-            <div>
-              <span>Payment method</span>
-              <h3>PayPal secure checkout</h3>
-              <p>
-                AutoPromote does not store your card details. PayPal manages approval, renewal, and
-                cancellation securely.
+      {notice && <p role="status">{notice}</p>}
+      {verificationPending && <button type="button" disabled={checkingPayment} onClick={() => setVerificationAttempt(value => value + 1)}>
+        {checkingPayment ? "Checking payment…" : "Check payment status"}
+      </button>}
+      <div className="plans-grid free-first-plans">
+        {plans
+          .filter(p => ["free", "plus"].includes(p.id))
+          .map(plan => (
+            <article
+              key={plan.id}
+              className={`plan-card ${plan.id === "plus" ? "recommended" : ""}`}
+              data-plan-id={plan.id}
+            >
+              <h3>{plan.name}</h3>
+              <p className="plan-price">
+                ${Number(plan.price).toFixed(2)}{" "}
+                <span>
+                  USD / month{plan.provisional && plan.id === "plus" ? " · proposed" : ""}
+                </span>
               </p>
-            </div>
-            <dl>
-              <div>
-                <dt>Currency</dt>
-                <dd>{paypalConfig?.currency || "USD"}</dd>
-              </div>
-              <div>
-                <dt>Activation</dt>
-                <dd>After PayPal approval</dd>
-              </div>
-            </dl>
-          </aside>
-        </section>
-      )}
-
-      {!compact && usage && (
-        <div className="usage-section">
-          <h3>Usage This Period</h3>
-          <p className="period-info">
-            Period: {new Date(usage.periodStart).toLocaleDateString()} -
-            {usage.periodEnd ? new Date(usage.periodEnd).toLocaleDateString() : "Ongoing"}
-          </p>
-
-          <div className="usage-grid">
-            <div className="usage-item">
-              <label>Uploads</label>
-              {renderUsageBar(usage.uploads.used, usage.uploads.limit, usage.uploads.unlimited)}
-              {usage.storageRetention?.publishedVideoHours === 24 && <small>Published video copies are removed from app storage 24 hours after every selected destination confirms publication. Queued, paused and failed work keeps its file.</small>}
-            </div>
-
-            <div className="usage-item">
-              <label>Auto-publish Slots</label>
-              {publishingUsage &&
-                renderUsageBar(
-                  publishingUsage.used,
-                  publishingUsage.limit,
-                  publishingUsage.unlimited
-                )}
-              {publishingUsage && (
-                <div className="usage-detail">
-                  {renderRemainingText(publishingUsage)}
-                  {publishingUsage.byPlatform &&
-                    Object.keys(publishingUsage.byPlatform).length > 0 && (
-                      <div className="usage-pill-list">
-                        {Object.entries(publishingUsage.byPlatform).map(([platform, count]) => (
-                          <span className="usage-pill" key={platform}>
-                            {platform}: {count}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                </div>
-              )}
-            </div>
-
-            <div className="usage-item">
-              <label>Editing Credits</label>
-              {creditUsage &&
-                renderUsageBar(creditUsage.monthlyUsed, creditUsage.monthlyAllocation, false)}
-              {creditUsage && (
-                <div className="usage-detail">
-                  {creditUsage.monthlyRemaining || 0} monthly remaining
-                  {Number(creditUsage.topUpBalance || 0) > 0 &&
-                    ` + ${creditUsage.topUpBalance} top-up`}
-                  <span className="usage-subtext">
-                    {creditUsage.totalAvailable || 0} credits available now
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {usage.featureCosts && (
-            <div className="usage-cost-grid">
-              {Object.entries(featureCostLabels).map(([key, label]) => (
-                <div className="usage-cost-item" key={key}>
-                  <span>{label}</span>
-                  <strong>{usage.featureCosts[key] || 0} cr</strong>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      <details
-        className={`billing-plan-options${compact ? " is-compact" : ""}`}
-        open={compact || showPlanComparison ? true : undefined}
-      >
-        <summary>
-          <span>
-            <strong>Compare plans or change your subscription</strong>
-            <small>Open the complete plan comparison and secure checkout.</small>
-          </span>
-          <span>View plans</span>
-        </summary>
-        <div className="plans-section">
-          <h3>{compact ? "Choose your next plan" : "Available Plans"}</h3>
-          <div className="plans-grid">
-            {plans.map(plan => {
-              const normalizedPlanId = normalizeSuggestedPlanId(plan.id);
-              const isCurrent =
-                (!showPlanComparison || Boolean(authUser)) &&
-                normalizedPlanId === normalizeSuggestedPlanId(currentSubscription?.planId);
-              const isSuggested =
-                normalizedHighlightPlanId && normalizedPlanId === normalizedHighlightPlanId;
-              const canUseEmbeddedCheckout =
-                paypalLoaded &&
-                Boolean(plan.paypalPlanId) &&
-                plan.id !== "free" &&
-                auth.currentUser;
-
-              return (
-                <div
-                  key={plan.id}
-                  className={`plan-card ${isCurrent ? "current-plan" : ""} ${plan.id === "pro" ? "recommended" : ""} ${isSuggested ? "suggested-plan" : ""}`}
+              <ul>
+                <li>All existing production-ready creative tools</li>
+                <li>All six publishing destinations</li>
+                <li>No unnecessary watermarks</li>
+                <li>Supported local editing stays available after processing limits</li>
+                <li>
+                  {plan.processing.tokens} processing tokens every{" "}
+                  {plan.processing.resetHours === 144
+                    ? "six days"
+                    : `${plan.processing.resetHours} hours`}
+                </li>
+                <li>
+                  {plan.processing.rolling30DayTokens.toLocaleString()} maximum tokens per rolling
+                  30 days
+                </li>
+              </ul>
+              {plan.id === "free" ? (
+                <p>
+                  No subscription required. <a href="/signup">Start creating</a>
+                </p>
+              ) : (
+                <button
+                  className="subscribe-btn"
+                  disabled={busy || !user || !plan.purchaseEnabled}
+                  onClick={() => subscribe(plan)}
                 >
-                  {plan.id === "pro" && <span className="recommended-badge">Most Popular</span>}
-                  {isSuggested && (
-                    <span className="suggested-badge">Best fit for this publish</span>
-                  )}
-
-                  <h4>{plan.name}</h4>
-
-                  <div className="plan-price">
-                    {plan.price === 0 ? (
-                      <span className="free-label">Start Free</span>
-                    ) : (
-                      <>
-                        <span className="price">${plan.price}</span>
-                        <span className="period">/month</span>
-                      </>
-                    )}
-                  </div>
-
-                  <div className="plan-features">
-                    {Object.entries(plan.features || {})
-                      .filter(([key]) => !hiddenPlanFeatureKeys.has(key))
-                      .map(([key, value]) => (
-                        <div key={key} className="feature-item">
-                          <span className="feature-icon">{getFeatureIcon(key)}</span>
-                          <span className="feature-name">{getFeatureLabel(key)}:</span>
-                          <span className="feature-value">{renderFeatureValue(key, value)}</span>
-                        </div>
-                      ))}
-                  </div>
-
-                  {(() => {
-                    const editingSummary = getPlanEditingSummary(plan);
-                    return (
-                      <div className="plan-editing-summary">
-                        <div className="plan-editing-block">
-                          <div className="plan-editing-title">Editing Access</div>
-                          <p className="plan-editing-copy">
-                            {plan.id === "free"
-                              ? "Paid plans unlock the editing suite. Free users can explore the platform before moving into premium creative workflows."
-                              : `${editingSummary.monthlyCredits} editing credits are included every month. Top up anytime if you need more before renewal.`}
-                          </p>
-                          {plan.id !== "free" && (
-                            <div className="plan-editing-badges">
-                              <span className="plan-editing-badge included">
-                                Creative tools included
-                              </span>
-                              <span className="plan-editing-badge metered">
-                                Generations use credits
-                              </span>
-                              {editingSummary.topUpsEnabled && (
-                                <span className="plan-editing-badge topup">Top up anytime</span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-
-                        {editingSummary.includedTools.length > 0 && (
-                          <div className="plan-editing-block">
-                            <div className="plan-editing-title">Included tools</div>
-                            <div className="plan-editing-list">
-                              {editingSummary.includedTools.map(label => (
-                                <span key={label} className="plan-pill">
-                                  {label}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {editingSummary.creditTools.length > 0 && (
-                          <div className="plan-editing-block">
-                            <div className="plan-editing-title">Credit-based generations</div>
-                            <div className="plan-editing-list">
-                              {editingSummary.creditTools.map(label => (
-                                <span key={label} className="plan-pill accent">
-                                  {label}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-
-                  {!isCurrent && plan.id !== "free" && (
-                    <div className="plan-checkout-zone">
-                      {canUseEmbeddedCheckout ? (
-                        <>
-                          <div
-                            className={`paypal-subscription-button-shell ${activatingPlanId === normalizedPlanId ? "is-activating" : ""}`}
-                            ref={node => {
-                              buttonContainerRefs.current[normalizedPlanId] = node;
-                            }}
-                          />
-                          <button
-                            className="subscribe-btn secondary"
-                            onClick={() => handleLegacySubscribe(normalizedPlanId)}
-                            disabled={processing}
-                          >
-                            Open checkout in PayPal instead
-                          </button>
-                        </>
-                      ) : (
-                        <button
-                          className="subscribe-btn"
-                          onClick={() => handleLegacySubscribe(normalizedPlanId)}
-                          disabled={processing}
-                        >
-                          {processing ? "Processing..." : `Upgrade to ${plan.name}`}
-                        </button>
-                      )}
-
-                      {!auth.currentUser && (
-                        <p className="checkout-helper-text">
-                          Sign in first to use in-app checkout.
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {isCurrent && <div className="current-plan-badge">Your Current Plan</div>}
-
-                  {plan.id === "free" && currentSubscription?.planId !== "free" && (
-                    <div className="downgrade-note">
-                      Cancel your subscription to return to the free tier.
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </details>
-
-      {!compact && (
-        <>
-          {creditTopUpPacks.length > 0 && (
-            <div className="topup-section">
-              <h3>Top Up Anytime</h3>
-              <p className="topup-copy">
-                If you use up your monthly editing credits before renewal, you can add more and keep
-                going.
-              </p>
-              <div className="topup-grid">
-                {creditTopUpPacks.map(pack => (
-                  <div key={pack.id} className="topup-card">
-                    <div className="topup-credits">{pack.credits} credits</div>
-                    <div className="topup-price">${pack.price}</div>
-                    <div className="topup-name">{pack.name}</div>
-                    {pack.savings && <div className="topup-savings">Save {pack.savings}</div>}
-                    <div
-                      className="topup-paypal-button-shell"
-                      ref={node => {
-                        topUpButtonContainerRefs.current[pack.id] = node;
-                      }}
-                    />
-                    {!auth.currentUser && (
-                      <p className="checkout-helper-text">Sign in first to buy credits.</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="secure-payment-badge">
-            <p>Secure subscription billing powered by PayPal</p>
-          </div>
-
-          <div className="billing-legal-footer">
-            <p>
-              By subscribing, you agree to our{" "}
-              <a href="/terms" target="_blank" rel="noopener noreferrer">
-                Terms of Service
-              </a>{" "}
-              and{" "}
-              <a href="/privacy" target="_blank" rel="noopener noreferrer">
-                Privacy Policy
-              </a>
-              . Subscriptions auto-renew monthly through PayPal. You may cancel at any time to stop
-              future renewals. Cancellations take effect at the end of the current billing period.
-              For billing support or refund inquiries, please contact{" "}
-              <a href="mailto:thulani@autopromote.org">thulani@autopromote.org</a>.
-            </p>
-          </div>
-        </>
+                  {plan.purchaseEnabled ? "Choose Plus" : "Proposed · financial validation pending"}
+                </button>
+              )}
+            </article>
+          ))}
+      </div>
+      <p>
+        USD subscription pricing and numerical allowances are provisional until financial
+        validation. Publishing remains subject to each platform’s requirements.
+      </p>
+      {user && (
+        <ProcessingUsage
+          usage={usage}
+          purchasedCredits={balances.purchasedCredits}
+          promotionalCredits={balances.promotionalCredits}
+        />
+      )}
+      {subscription?.planId && !["free", "plus"].includes(subscription.planId) && (
+        <p>
+          Your existing subscription agreement and resource entitlements are retained. No automatic
+          plan conversion or cancellation.
+        </p>
+      )}
+      {subscription?.planId && subscription.planId !== "free" && (
+        <button className="subscribe-btn secondary" disabled={busy} onClick={cancel}>
+          Manage cancellation
+        </button>
       )}
     </div>
   );
-};
-
-export default PayPalSubscriptionPanel;
+}

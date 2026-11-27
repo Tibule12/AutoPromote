@@ -1,0 +1,33 @@
+// Real account login, owned native download and complete headless/muted playback.
+const fs=require('node:fs');const path=require('node:path');const crypto=require('node:crypto');
+const assert=require('node:assert/strict');const {chromium}=require('@playwright/test');
+const option=name=>process.argv[process.argv.indexOf(name)+1];
+(async()=>{const info=JSON.parse(fs.readFileSync(path.join(option('--demo'),'browser-private.json')));
+const folder=option('--folder'),jobId=option('--job');assert.match(jobId,/^viral_[a-f0-9]{64}$/);
+assert.equal(new URL(info.origin).hostname,'127.0.0.1');
+const browser=await chromium.launch({headless:true,args:['--mute-audio']});
+const context=await browser.newContext({viewport:{width:1280,height:900},recordVideo:{dir:folder+'/finished-playback',size:{width:1280,height:900}}});
+let token;const page=await context.newPage();
+await context.route('**/*',r=>{const u=new URL(r.request().url());return ['127.0.0.1','localhost'].includes(u.hostname)||['data:','blob:','about:'].includes(u.protocol)?r.continue():r.abort();});
+page.on('request',r=>{if(new URL(r.url()).pathname==='/api/users/profile')token=r.headers().authorization;});
+try{await page.goto(info.origin);const close=page.getByRole('button',{name:'Close video showcase',exact:true});if(await close.isVisible())await close.click();
+await page.getByText('Sign In',{exact:true}).first().click();await page.locator('input[type=email]').fill(info.email);
+await page.locator('input[type=password]').fill(info.password);await page.locator('#agreeTerms').check();
+await page.getByRole('button',{name:'Enter AutoPromote',exact:true}).click();
+await page.getByRole('button',{name:'Billing',exact:true}).waitFor();assert.ok(token);
+const status=await context.request.get(info.origin+'/api/media/status/'+jobId,{headers:{Authorization:token}});assert.equal(status.status(),200);
+const job=await status.json();assert.equal(job.status,'completed');
+const url=job.output_url||job.outputUrl||job.result?.output_url;assert.equal(new URL(url).origin,info.origin);
+const movie=await context.request.get(url);assert.equal(movie.status(),200);const bytes=await movie.body();assert.ok(bytes.length>1024);
+fs.writeFileSync(folder+'/studio-free-output.mp4',bytes);
+await page.setContent('<style>body{margin:0;background:#111}video{width:100vw;height:100vh;object-fit:contain}</style><video controls muted playsinline></video>');
+await page.locator('video').evaluate((video,url)=>{video.src=url;},url);
+await page.waitForFunction(()=>document.querySelector('video').readyState>=2);
+const before=await page.locator('video').evaluate(v=>({duration:v.duration,width:v.videoWidth,height:v.videoHeight}));
+await page.locator('video').evaluate(v=>v.play());await page.waitForTimeout(5000);await page.screenshot({path:folder+'/finished-frame.png'});
+await page.waitForFunction(()=>document.querySelector('video').ended,{},{timeout:100000});
+const after=await page.locator('video').evaluate(v=>({ended:v.ended,currentTime:v.currentTime,muted:v.muted}));
+const proof={nativeJobId:jobId,downloadSha256:crypto.createHash('sha256').update(bytes).digest('hex'),downloadBytes:bytes.length,...before,...after,
+scope:'Normal emulator login and owner-checked native output; complete finished movie playback, no external provider publication'};
+fs.writeFileSync(folder+'/finished-playback.json',JSON.stringify(proof,null,2)+'\n');console.log(proof);
+}finally{await context.close();await browser.close();}})().catch(e=>{console.error(e.message);process.exitCode=1;});
